@@ -1,0 +1,35 @@
+<script class="layout-template" type="text/mustache">
+{{#btoa}}{{{@partials.content}}}{{/btoa}}
+</script>
+<div class="main-content">
+    <div class="menu-overlay"></div>
+    <nav class="menu-global">
+        <a href="/" class="site-logo"></a>
+        <div class="main-menu-wrapper">
+            <ul id="main-menu" class="main-menu"></ul>
+        </div>
+    </nav>
+    <div class="post-edit-mode ee-html">
+        <div class="mdc-toolbar mdc-toolbar--fixed theme--custom-dark-bg">
+            <div class="top-progress-notification hidden">
+                <div class="loading-wrp">
+                    <div class="progress">
+                        <div class="indeterminate"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="edit-mode-header mdc-toolbar__row">
+                <div class="mdc-toolbar__section mdc-toolbar__section--align-start">
+                    <i class="material-icons mdc-toolbar__icon--menu menu-show"> menu</i>
+                    <div class="mdc-toolbar__title"></div>
+                </div>
+                <div class="mdc-toolbar__section mdc-toolbar__section--align-end publish-story"></div>
+            </div>
+        </div>
+        <div class="edit-mode-header--fake"></div>
+        <div class="edit-mode-content">
+            <div class="js-upload-media"></div>
+            <div id="change-story" class="change-story content-item">{{>content}}</div>
+        </div>
+    </div>
+</div>

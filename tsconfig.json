@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "moduleResolution": "node",
+        "module": "commonjs",
+        "target": "es5",
+        "noImplicitAny": false,
+        "sourceMap": true,
+        "jsx": "react",
+        "allowJs": true,
+        "allowUnreachableCode": true,
+        "baseUrl": "static/js",
+        "importHelpers": true
+    },
+//    "include": [ "**/*.ts" ],
+    "exclude": [ "**/node_modules/*", "**/server/*", "**/bundle/*" ],
+    "filesGlob": [
+        "./src/*.d.ts"
+    ]
+}

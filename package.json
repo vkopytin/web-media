@@ -1,0 +1,89 @@
+{
+  "name": "media-player",
+  "version": "1.0.0",
+  "description": "Web Media Player",
+  "main": "index.js",
+  "scripts": {
+    "dev": "NODE_OPTIONS=--max_old_space_size=16000 node webpack/webpack-dev-server -d --history-api-fallback--hot --inline --progress --colors",
+    "watch-dev": "cross-env NODE_OPTIONS=--max_old_space_size=16000 NODE_ENV=development webpack --watch --progress --color --config webpack/watch.webpack-back.config",
+    "test": "jarn test",
+    "make-ssl-sert": "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./selfsigned.key -out selfsigned.crt",
+    "make-ssl-pem": "cat selfsigned.crt selfsigned.key > selfsigned.pem",
+    "node-version": "node --version"
+  },
+  "keywords": [
+    "web",
+    "media",
+    "player",
+    "databind",
+    "js",
+    "mvc"
+  ],
+  "author": "Volodymyr Kopytin",
+  "license": "ISC",
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest",
+      "^.+\\.mustache$": "mustache-jest"
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "mustache",
+      "json"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/bundle"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "<rootDir>/server/tsconfig.json"
+      }
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/runtime": "^7.8.4",
+    "@types/helmet": "^0.0.45",
+    "@types/jest": "^25.1.2",
+    "@types/node": "^13.7.1",
+    "@types/react": "^16.9.19",
+    "@types/react-dom": "^16.9.5",
+    "@types/react-native": "^0.61.15",
+    "babel-loader": "^8.0.6",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.4",
+    "copy-webpack-plugin": "^5.1.1",
+    "cross-env": "^7.0.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "helmet": "^3.21.2",
+    "hogan.js": "^3.0.2",
+    "html-webpack-harddisk-plugin": "^1.0.1",
+    "html-webpack-plugin": "^3.2.0",
+    "http-proxy-middleware": "^0.20.0",
+    "json-stringify-safe": "^5.0.1",
+    "method-override": "^3.0.0",
+    "morgan": "^1.9.1",
+    "mustache-loader": "^1.4.3",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "superagent": "^5.2.1",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.5",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-middleware": "^3.7.2",
+    "webpack-dev-server": "^3.10.3",
+    "webpack-hot-middleware": "^2.25.0",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "dependencies": {
+    "react-native-web": "^0.12.1",
+    "underscore": "^1.9.2"
+  }
+}

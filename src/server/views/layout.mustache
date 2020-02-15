@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+        <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+        <title>{{headline}}</title>
+        <link href="{{versionInfo.cdn}}{{versionInfo.publicDir}}app.{{versionInfo.hash}}.css" rel="stylesheet"/>
+        <!--link href="/app.css?hash={{versionInfo.hash}}" rel="stylesheet"/-->
+    </head>
+    <body>
+        <div class="app-root"></div>
+        <script type="text/javascript" src="{{versionInfo.cdn}}{{versionInfo.publicDir}}vendor.{{versionInfo.hash}}.js"></script>
+        <script type="text/javascript" src="{{versionInfo.cdn}}{{versionInfo.publicDir}}app.{{versionInfo.hash}}.js"></script>
+    </body>
+</html>

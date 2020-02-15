@@ -1,0 +1,14 @@
+/build
+# misc
+.DS_Store
+.env
+.vscode
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/public/*
+/node_modules/*
+/bundle/*
+*.swp
+*.swo
+package-lock.json
