@@ -44,12 +44,12 @@ module.exports = (options, workingDir) => {
       alias: {
         app: path.resolve(workingDir, '..', 'src', 'app'),
         '~': path.resolve(workingDir),
-        '../img': 'src/img',
-        '../src/img': 'src/img',
-        './src/img': 'src/img',
-        'src/img': path.resolve(workingDir, '../src/img'),
-        '../fonts': 'src/fonts',
-        'src/fonts': path.resolve(workingDir, '../src/fonts'),
+        '../img': 'src/app/img',
+        '../src/app/img': 'src/app/img',
+        './src/app/img': 'src/app/img',
+        'src/app/img': path.resolve(workingDir, '../src/app/img'),
+        '../fonts': 'src/app/fonts',
+        'src/app/fonts': path.resolve(workingDir, '../src/app/fonts'),
       }
     },
     plugins: [
@@ -58,12 +58,12 @@ module.exports = (options, workingDir) => {
         'process.env.PESDK_LICENSE': `'${process.env.PESDK_LICENSE}'`
       }),
       // new HtmlWebpackPlugin({
-        //   filename: '../public/index.html',
-        //   template: path.resolve(workingDir, '..', 'src', 'html.mustache'),
-        //   inject: false,
-        //   alwaysWriteToDisk: true,
-        //   path: !DEBUG ? '/public' : ''
-        //   template: 'index.html'
+      //   filename: '../public/index.html',
+      //   template: path.resolve(workingDir, '..', 'src', 'html.mustache'),
+      //   inject: false,
+      //   alwaysWriteToDisk: true,
+      //   path: !DEBUG ? '/public' : ''
+      //   template: 'index.html'
       // }),
       // new HtmlWebpackHarddiskPlugin(),
       new (function VersionInfo() {
@@ -162,6 +162,16 @@ module.exports = (options, workingDir) => {
       }, {
         test: /libs\/jquery\/plugins\/jquery\.mobile\.custom/,
         loader: 'imports-loader?jQuery=jquery&jquery.migrate'
+      }, {
+        test: /\.s[ac]ss$/i,
+        use: [
+          // Creates `style` nodes from JS strings
+          'style-loader',
+          // Translates CSS into CommonJS
+          'css-loader',
+          // Compiles Sass to CSS
+          'sass-loader'
+        ]
       }, {
         test: /\.png$/,
         loader: 'file-loader',

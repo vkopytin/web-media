@@ -30,6 +30,30 @@ module.exports = {
         }, {
             test: /\.mustache$/, loader: 'mustache-loader'
         }, {
+            test: /\.css$/,
+            use: [{
+                loader: 'style-loader'
+              }, {
+                loader: 'css-loader',
+                options: {
+                    importLoaders: 1
+                }
+            }, {
+                loader: 'resolve-url-loader'
+            }, {
+                loader: 'postcss-loader'
+            }]
+        }, {
+            test: /\.s[ac]ss$/i,
+            use: [
+                // Creates `style` nodes from JS strings
+                'style-loader',
+                // Translates CSS into CommonJS
+                'css-loader',
+                // Compiles Sass to CSS
+                'sass-loader'
+            ]
+        }, {
             test: /\.js$/,
             loader: 'babel-loader',
             exclude: [/node_modules/]
