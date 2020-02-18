@@ -3,18 +3,26 @@ import { Service, SpotifyService } from '../service';
 
 
 
+const panels = ['home', 'profile'];
+
 class AppViewModel extends Events {
 
     settings = {
-        openLogin: false
+        openLogin: false,
+        currentPanel: 'home' as 'home' | 'profile'
     };
 
     constructor(private ss = new Service()) {
         super();
 
         (async function (this: AppViewModel) {
-            const isLoggedIn = await this.ss.isLoggedIn();
-            this.openLogin(!isLoggedIn);
+            const isLoggedInResult = await this.ss.isLoggedIn();
+
+            if (isLoggedInResult.error) {
+                this.openLogin(true);
+            }
+
+            this.openLogin(!isLoggedInResult.val);
         }).call(this);
     }
 
@@ -25,6 +33,15 @@ class AppViewModel extends Events {
         }
 
         return this.settings.openLogin;
+    }
+
+    currentPanel(val?) {
+        if (arguments.length) {
+            this.settings.currentPanel = val;
+            this.trigger('change:currentPanel');
+        }
+
+        return this.settings.currentPanel;
     }
 }
 

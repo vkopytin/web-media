@@ -1,20 +1,37 @@
 import { ServiceResult } from '../base/serviceResult';
 import { SpotifyService } from './spotify';
 import { SettingsService } from './settings';
+import { SpotifyPlayerService } from './spotifyPlayer';
 
 
 class Service {
+    settingsService: ServiceResult<SettingsService, Error> = null;
+    spotifyService: ServiceResult<SpotifyService, Error> = null;
+    spotifyPlayerService: ServiceResult<SpotifyPlayerService, Error> = null;
+
     async service<T extends {}, O extends {}>(
-        ctor: { prototype: Partial<T> },
+        ctor: { prototype: T },
         options = {} as O
-    ): Promise<ServiceResult<Partial<T>, Error>> {
+    ): Promise<ServiceResult<T, Error>> {
         switch (ctor) {
             case SpotifyService as any:
+                if (this.spotifyService) {
+                    return this.spotifyService as any;
+                }
 
-                return SpotifyService.create(this) as any;
+                return this.spotifyService = await SpotifyService.create(this) as any;
             case SettingsService as any:
+                if (this.settingsService) {
+                    return this.settingsService as any;
+                }
 
-                return SettingsService.create(this) as any;
+                return this.settingsService = await SettingsService.create(this) as any;
+            case SpotifyPlayerService as any:
+                if (this.spotifyPlayerService) {
+                    return this.spotifyPlayerService as any;
+                }
+
+                return this.spotifyPlayerService = await SpotifyPlayerService.create(this) as any;
             default:
                 throw new Error('Unexpected service request');
         }
@@ -23,19 +40,64 @@ class Service {
     async isLoggedIn() {
         const spotifyResult = await this.service(SpotifyService);
         if (spotifyResult.isError) {
-            return false;
+            return spotifyResult;
         }
 
-        return true;
+        return spotifyResult.val.isLoggedIn();
     }
 
-    async settings(key: string, val?) {
+    async settings<K extends keyof SettingsService['config']>(
+        propName: K, val?: SettingsService['config'][K]
+    ) {
         const settingsResult = await this.service(SettingsService);
         if (settingsResult.isError) {
+
             return settingsResult;
         }
 
-        return settingsResult.val.get(key);
+        return settingsResult.val.get(propName);
+    }
+
+    async spotifyPlayer() {
+        const player = await this.service(SpotifyPlayerService);
+
+        return player;
+    }
+
+    async playerResume() {
+        const player = await this.spotifyPlayer();
+        player.val.resume();
+    }
+
+    async playerPause() {
+        const player = await this.spotifyPlayer();
+        player.val.pause();
+    }
+    async playerNextTrack() {
+        const player = await this.spotifyPlayer();
+        player.val.nextTrack();
+    }
+    async playerPreviouseTrack() {
+        const player = await this.spotifyPlayer();
+        player.val.previouseTrack();
+    }
+    async playerVolumeUp() {
+        const player = await this.spotifyPlayer();
+        player.val.volumeUp();
+    }
+    async playerVolumeDown() {
+        const player = await this.spotifyPlayer();
+        player.val.volumeDown();
+    }
+
+    async recentlyPlayed() {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.recentlyPlayed();
+
+        return result;
     }
 }
 

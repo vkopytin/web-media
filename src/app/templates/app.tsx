@@ -2,7 +2,10 @@ import * as $ from 'jquery';
 import * as _ from 'underscore';
 import * as React from 'react';
 import { AppView } from '../views/app';
+import { HomeView } from '../views/homeView';
+import { ProfileView } from '../views/profileView';
 import { utils } from 'databindjs';
+import { SwitchView } from '../views/switchView';
 
 
 const cn = utils.className;
@@ -22,7 +25,7 @@ export const template = (view: AppView) => <main>
                     <a href={"https://accounts.spotify.com/authorize?" + $.param({
                         client_id: '963f916fa62c4186a4b8370e16eef658',
                         redirect_uri: 'https://localhost:4443/index',
-                        scope: 'user-read-private user-read-email',
+                        scope: ['streaming', 'user-read-email', 'user-read-private', 'user-modify-playback-state'].join(' '),
                         response_type: 'token',
                         state: 123
                     })}>
@@ -43,11 +46,15 @@ export const template = (view: AppView) => <main>
             </form>
         </section>
         <nav className="footer bar bar-tab bar-footer">
-            <a className="tab-item active" href="#">
+            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'home')} href="#"
+                onClick={evnt => view.prop('currentPanel', 'home')}
+            >
                 <span className="icon icon-home"></span>
                 <span className="tab-label">Home</span>
             </a>
-            <a className="tab-item" href="#">
+            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'profile')} href="#"
+                onClick={evnt => view.prop('currentPanel', 'profile')}
+            >
                 <span className="icon icon-person"></span>
                 <span className="tab-label">Profile</span>
             </a>
@@ -64,33 +71,13 @@ export const template = (view: AppView) => <main>
                 <span className="tab-label">Settings</span>
             </a>
         </nav>
-        <section className="content">
-            <div></div>
-            <ul className="todo-list table-view">
-                {_.map(_.range(0, 100), index => {
-                    return <li key={index} className="table-view-cell">
-                        <span className="media-object pull-left">
-                            <label className="toggle view">
-                                <div className="toggle-handle"></div>
-                            </label>
-                        </span>
-                        <div className="media-body">
-                            <div className="input-group">
-                                <label className="view input">title</label>
-                            </div>
-                        </div>
-                        <button className="destroy btn">
-                            <span className="icon icon-more"></span>
-                            <span className="badge">5</span>
-                        </button>
-                    </li>
-                })}
-            </ul>
-            <footer className="info content-padded">
-                <p>Double-click to edit a todo</p>
-                <p>Written by <a href="https://github.com/addyosmani">Addy Osmani</a></p>
-                <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
-            </footer>
-        </section>
+        <SwitchView currentView={view.prop('currentPanel')}>
+            <section key="home" className="content">
+                <HomeView />
+            </section>
+            <section key="profile" className="content">
+                <ProfileView />
+            </section>
+        </SwitchView>
     </section>
 </main>;

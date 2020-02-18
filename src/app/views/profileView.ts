@@ -1,23 +1,19 @@
 import * as React from 'react';
-import { template } from '../templates/app';
+import { template } from '../templates/profile';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import { AppViewModel } from '../viewModels/appViewModel';
+import { ProfileViewModel } from '../viewModels/profileViewModel';
 
 
-export interface IAppViewProps {
+export interface IProfileViewProps {
 
 }
 
-class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
+class ProfileView extends withEvents(React.Component)<IProfileViewProps, {}> {
     state = {
-        openLogin: false,
-        transition: ['', ''],
-        prevPanel: 'home',
-        currentPanel: 'home' as 'home' | 'profile'
+        openLogin: false
     };
-    binding = bindTo(this, () => new AppViewModel(), {
-        'prop(openLogin)': 'openLogin',
-        'prop(currentPanel)': 'currentPanel'
+    binding = bindTo(this, () => new ProfileViewModel(), {
+        'prop(test)': 'test'
     });
 
     constructor(props) {
@@ -37,7 +33,7 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
         unbindFrom(this.binding);
     }
 
-    prop<K extends keyof AppView['state']>(propName: K, val?: AppView['state'][K]): AppView['state'][K] {
+    prop<K extends keyof ProfileView['state']>(propName: K, val?: ProfileView['state'][K]): ProfileView['state'][K] {
         if (arguments.length > 1) {
             this.state[propName] = val;
             this.trigger('change:prop(' + propName + ')');
@@ -51,4 +47,4 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
     }
 }
 
-export { AppView };
+export { ProfileView };

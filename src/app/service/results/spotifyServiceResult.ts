@@ -13,7 +13,7 @@ class SpotifyServiceResult<T, E extends Error> extends ServiceResult<T, E> {
     }
 
     static error<Y extends Error>(val: Y) {
-        const error = new SpotifyServiceResult(null as SpotifyService, val);
+        const error = new SpotifyServiceResult(null, val);
         error.isError = true;
 
         return error;

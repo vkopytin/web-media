@@ -1,4 +1,5 @@
 import { SpotifyServiceResult } from '../results/spotifyServiceResult';
+import { SpotifyService } from '../spotify';
 
 
 class SpotifyServiceUnexpectedError extends Error {

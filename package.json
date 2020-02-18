@@ -88,6 +88,7 @@
     "webpack-node-externals": "^1.7.2"
   },
   "dependencies": {
+    "@types/underscore": "^1.9.4",
     "databindjs": "^1.0.16",
     "jquery": "^3.4.1",
     "react-native-web": "^0.12.1",
