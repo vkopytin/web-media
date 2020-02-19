@@ -6,6 +6,7 @@ import { HomeView } from '../views/homeView';
 import { ProfileView } from '../views/profileView';
 import { utils } from 'databindjs';
 import { SwitchView } from '../views/switchView';
+import { DevicesView } from '../views/devicesView';
 
 
 const cn = utils.className;
@@ -34,11 +35,22 @@ export const template = (view: AppView) => <main>
                 </p>
             </div>
         </div>
+        <div className={cn("popover ?visible", view.state.showSelectDevices === 'show')} style={{
+            display: view.state.showSelectDevices !== 'hide' ? 'block' : 'none'
+        }}>
+            <header className="bar bar-nav">
+                <h1 className="title">Devices</h1>
+            </header>
+            <DevicesView/>
+        </div>
         <header className="bar bar-nav">
             <a className="icon icon-compose pull-right"
                 onClick={evnt => view.prop('openLogin', true)}
             ></a>
-            <h1 className="title">Title</h1>
+            <h1 className="title" onClick={evnt => view.toggleSelectDevices()}>
+                {view.prop('profile').display_name || '<Please Login>'}
+                <span className="icon icon-caret"></span>
+            </h1>
         </header>
         <section className="bar bar-standard bar-header-secondary">
             <form onSubmit={e => e.preventDefault()}>
@@ -71,11 +83,11 @@ export const template = (view: AppView) => <main>
                 <span className="tab-label">Settings</span>
             </a>
         </nav>
-        <SwitchView currentView={view.prop('currentPanel')}>
-            <section key="home" className="content">
+        <SwitchView currentView={view.prop('currentPanel')} onClick={evnt => view.toggleSelectDevices('show')}>
+            <section key="home" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}>
                 <HomeView />
             </section>
-            <section key="profile" className="content">
+            <section key="profile" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}>
                 <ProfileView />
             </section>
         </SwitchView>

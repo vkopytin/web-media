@@ -99,6 +99,69 @@ class Service {
 
         return result;
     }
+
+    async listDevices() {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.listDevices();
+
+        return result;
+    }
+
+    async profile() {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.profile();
+
+        return result;
+    }
+
+    async recommendations() {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.listRecommendations();
+
+        return result;
+    }
+
+    async myPlaylists() {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.myPlaylists();
+
+        return result;
+    }
+
+    async listTracks(playlistId) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.listTracks(playlistId);
+
+        return result;
+    }
+
+    async playerPlayTrack(deviceId, playlistUri, trackUri) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.playTrack(deviceId, playlistUri, trackUri);
+
+        return result;
+    }
 }
 
 export { Service, SpotifyService };

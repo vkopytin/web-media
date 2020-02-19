@@ -1,32 +1,31 @@
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 import * as React from 'react';
-import { ProfileView } from '../views/profileView';
 import { TracksView } from '../views/tracksView';
 import { utils } from 'databindjs';
 
 
 const cn = utils.className;
 
-export const template = (view: ProfileView) => <>
+export const template = (view: TracksView) => <>
     <div></div>
     <ul className="todo-list table-view">
-        {_.map(view.prop('playlists'), (item, index) => {
+        {_.map(view.prop('tracks'), (item, index) => {
             return <li key={index} className="table-view-cell media">
                 <a className="navigate-right"
-                    onClick={evnt => { view.selectPlaylistCommand.exec(view.prop('currentPlaylist') === item ? null : item) }}
+                onClick={evnt => item.play(view.props.playlist.uri())}
                 >
-                    <img className="media-object pull-left" height="60" src={item.thumbnailUrl()} alt={item.name()} />
+                    <span className="media-object pull-left">
+                        <label className="toggle view">
+                            <div className="toggle-handle"></div>
+                        </label>
+                    </span>
                     <div className="media-body">
                         {item.name()}
-                        <p>{item.owner()}</p>
+                        <p>{item.album()}</p>
                     </div>
-                    <span className="badge">{item.tracksTotal()}</span>
+                    <span className="badge">{item.duration()}</span>
                 </a>
-                {view.prop('currentPlaylist') === item &&
-                    <div className="card">
-                        <TracksView playlist={item} />
-                    </div>}
             </li>
         })}
     </ul>

@@ -3,6 +3,7 @@ import { Service } from './index';
 import { ISettings } from './settings';
 import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult';
 import { SpotifyPlayerServiceUnexpectedError } from './errors/spotifyPlayerServiceUnexpectedError';
+import { withEvents } from 'databindjs';
 
 
 interface IWebPlaybackPlayer {
@@ -85,6 +86,7 @@ interface IPlayer {
     disconnect();
     _options: {
         getOAuthToken(fn: (access_token) => void);
+        id: string;
     };
 };
 
@@ -97,7 +99,7 @@ declare global {
 }
 
 
-class SpotifyPlayerService extends BaseService {
+class SpotifyPlayerService extends withEvents(BaseService) {
     static async create(connection: Service) {
         const settingsResult = await connection.settings('spotify');
         const name = 'Media Player for Spotify';
@@ -153,6 +155,28 @@ class SpotifyPlayerService extends BaseService {
     }
 
     deviceId: string = '';
+    onInitializationError = (error: IWebPlaybackError) => {
+        this.trigger('initializationErrpr', error);
+    };
+    onAuthenticationError = (error: IWebPlaybackError) => {
+        this.trigger('authenticationError', error);
+    };
+    onAccountError = (error: IWebPlaybackError) => {
+        this.trigger('accountError', error);
+    };
+    onPlaybackError = (error: IWebPlaybackError) => {
+        this.trigger('playbackError', error);
+    };
+    onPlayerStateChanged = (state: IWebPlaybackState) => {
+        this.trigger('playerStateChanged', state);
+    }
+    onReady = (player: IWebPlaybackPlayer) => {
+        this.deviceId = player.device_id;
+        this.trigger('ready', player);
+    }
+    onNotReady =  (player: IWebPlaybackPlayer) => {
+        this.trigger('notReady', player);
+    }
 
     constructor(public player: IPlayer) {
         super();
@@ -164,30 +188,25 @@ class SpotifyPlayerService extends BaseService {
 
     async connect() {
         // Error handling
-        this.player.addListener('initialization_error', ({ message }) => { console.error(message); });
-        this.player.addListener('authentication_error', ({ message }) => { console.error(message); });
-        this.player.addListener('account_error', ({ message }) => { console.error(message); });
-        this.player.addListener('playback_error', ({ message }) => { console.error(message); });
+        this.player.addListener('initialization_error', this.onInitializationError);
+        this.player.addListener('authentication_error', this.onAuthenticationError);
+        this.player.addListener('account_error', this.onAccountError);
+        this.player.addListener('playback_error', this.onPlaybackError);
         
         // Playback status updates
-        this.player.addListener('player_state_changed', state => { console.log(state); });
+        this.player.addListener('player_state_changed', this.onPlayerStateChanged);
         
         // Ready
-        this.player.addListener('ready', (res) => {
-            console.log('Ready with Device ID', res.device_id);
-            this.deviceId = res.device_id;
-        });
+        this.player.addListener('ready', this.onReady);
         
         // Not Ready
-        this.player.addListener('not_ready', (res) => {
-            console.log('Device ID has gone offline', res.device_id);
-        });
+        this.player.addListener('not_ready', this.onNotReady);
         
         // Connect to the player!
         const success = await this.player.connect();
         if (success) {
             console.log('The Web Playback SDK successfully connected to Spotify!');
-          }
+        }
     }
 
     resume() {

@@ -1,6 +1,8 @@
 import { Events } from 'databindjs';
 import { Service, SpotifyService } from '../service';
-
+import * as _ from 'underscore';
+import { IUserInfo } from '../service/adapter/spotify';
+import { DeviceViewModelItem } from './deviceViewModelItem';
 
 
 const panels = ['home', 'profile'];
@@ -9,8 +11,17 @@ class AppViewModel extends Events {
 
     settings = {
         openLogin: false,
-        currentPanel: 'home' as 'home' | 'profile'
+        currentPanel: 'home' as 'home' | 'profile',
+        currentDevice: null as DeviceViewModelItem
     };
+
+    currentDeviceCommand = {
+        exec: (device: DeviceViewModelItem) => this.currentDevice(device)
+    }
+    devicesArray = [] as any[];
+    userInfo = {} as IUserInfo;
+
+    isInit = _.delay(() => this.loadData());
 
     constructor(private ss = new Service()) {
         super();
@@ -23,7 +34,34 @@ class AppViewModel extends Events {
             }
 
             this.openLogin(!isLoggedInResult.val);
+
+            const playerResult = await this.ss.spotifyPlayer();
+            if (playerResult.isError) {
+                return;
+            }
+            playerResult.val.on('ready', () => this.updateDevices());
         }).call(this);
+    }
+
+    async loadData() {
+        const userInfoResult = await this.ss.profile();
+
+        if (!userInfoResult.isError) {
+            this.profile(userInfoResult.val);
+        }
+
+        await this.updateDevices();
+    }
+
+    async updateDevices() {
+        const devicesResult = await this.ss.listDevices();
+
+        if (!devicesResult.isError) {
+            this.devices(_.map(devicesResult.val, item => new DeviceViewModelItem(item as any)));
+        }
+
+        const currentDevice = _.find(this.devices(), d => d.isActive()) || _.last(this.devices());
+        this.currentDevice(currentDevice);
     }
 
     openLogin(val?) {
@@ -42,6 +80,33 @@ class AppViewModel extends Events {
         }
 
         return this.settings.currentPanel;
+    }
+
+    currentDevice(val?: DeviceViewModelItem) {
+        if (arguments.length) {
+            this.settings.currentDevice = val;
+            this.trigger('change:currentDevice');
+        }
+
+        return this.settings.currentDevice;
+    }
+
+    devices(val?) {
+        if (arguments.length && this.devicesArray !== val) {
+            this.devicesArray = val;
+            this.trigger('change:devices');
+        }
+
+        return this.devicesArray;
+    }
+
+    profile(val?) {
+        if (arguments.length && this.userInfo !== val) {
+            this.userInfo = val;
+            this.trigger('change:profile');
+        }
+
+        return this.userInfo;
     }
 }
 

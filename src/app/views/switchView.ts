@@ -5,6 +5,7 @@ import { withEvents } from 'databindjs';
 
 export interface ISwitchViewProps {
     currentView: 'home' | 'profile';
+    onClick?(evnt): void;
 }
 
 const panels = ['home', 'profile'];
@@ -73,7 +74,12 @@ class SwitchView extends withEvents(React.Component)<ISwitchViewProps, {}> {
             })];
         }
 
-        return _.findWhere(this.props.children as any[], { key: this.state.currentView });
+        const element = _.findWhere(this.props.children as any[], { key: this.state.currentView });
+
+        return React.cloneElement(element, {
+            ...element.props,
+            ...(this.props.onClick ? { onClick: this.props.onClick } : {})
+        });
     }
 }
 

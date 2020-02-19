@@ -1,29 +1,23 @@
 import * as React from 'react';
-import { template } from '../templates/profile';
+import { template } from '../templates/tracks';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import { ProfileViewModel } from '../viewModels/profileViewModel';
-import { PlaylistViewModelItem } from '../viewModels/playlistViewModelItem';
-import { current } from '../utils';
 import { TrackViewModelItem } from '../viewModels/trackViewModelItem';
+import { current } from '../utils';
+import { PlaylistViewModelItem } from '../viewModels/playlistViewModelItem';
 
 
-export interface IProfileViewProps {
-
+export interface ITracksViewProps {
+    playlist: PlaylistViewModelItem;
 }
 
-class ProfileView extends withEvents(React.Component)<IProfileViewProps, {}> {
+class TracksView extends withEvents(React.Component)<ITracksViewProps, {}> {
     state = {
         openLogin: false,
-        playlists: [] as PlaylistViewModelItem[],
-        tracks: [] as TrackViewModelItem[],
-        currentPlaylist: null as PlaylistViewModelItem
+        tracks: [] as TrackViewModelItem[]
     };
-    selectPlaylistCommand = { exec(playlist) { } };
     binding = bindTo(this, () => current(ProfileViewModel), {
-        'prop(playlists)': 'playlists',
-        'prop(tracks)': 'tracks',
-        'selectPlaylistCommand': 'selectPlaylistCommand',
-        'prop(currentPlaylist)': 'currentPlaylist'
+        'prop(tracks)': 'tracks'
     });
 
     constructor(props) {
@@ -43,7 +37,7 @@ class ProfileView extends withEvents(React.Component)<IProfileViewProps, {}> {
         unbindFrom(this.binding);
     }
 
-    prop<K extends keyof ProfileView['state']>(propName: K, val?: ProfileView['state'][K]): ProfileView['state'][K] {
+    prop<K extends keyof TracksView['state']>(propName: K, val?: TracksView['state'][K]): TracksView['state'][K] {
         if (arguments.length > 1) {
             this.state[propName] = val;
             this.trigger('change:prop(' + propName + ')');
@@ -57,4 +51,4 @@ class ProfileView extends withEvents(React.Component)<IProfileViewProps, {}> {
     }
 }
 
-export { ProfileView };
+export { TracksView };

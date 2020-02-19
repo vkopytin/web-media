@@ -3,7 +3,6 @@ import * as _ from 'underscore';
 import * as React from 'react';
 import { HomeView } from '../views/homeView';
 import { utils } from 'databindjs';
-import { formatTime } from '../utils';
 
 
 const cn = utils.className;
@@ -49,8 +48,8 @@ export const template = (view: HomeView) => <>
         })}
     </ul>
     <footer className="info content-padded">
-        <p>Double-click to edit a todo</p>
-        <p>Written by <a href="https://github.com/addyosmani">Addy Osmani</a></p>
-        <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+        <p>Media Player</p>
+        <p>Written by <a href="https://github.com/vkopytin">Volodymyr Kopytin</a></p>
+        <p>Part of <a href="https://www.npmjs.com/package/databindjs">DataBind JS</a></p>
     </footer>
 </>;

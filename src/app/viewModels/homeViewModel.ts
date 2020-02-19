@@ -2,7 +2,7 @@ import { Events } from 'databindjs';
 import { Service } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
-import { ISpotifySong } from '../service/adapter/spotify';
+import { ISpotifySong, IRecommendationsResult } from '../service/adapter/spotify';
 
 
 class HomeViewModel extends Events {
@@ -58,12 +58,17 @@ class HomeViewModel extends Events {
     }
 
     async fetchData() {
-        const res = await this.ss.recentlyPlayed();
+        const res = await this.ss.recommendations();
         if (res.isError) {
             return;
         }
+        const recomendations = res.val as IRecommendationsResult;
 
-        this.tracks(res.val as any);
+        this.tracks(_.map(recomendations.tracks, track => {
+            return {
+                track
+            };
+        }));
     }
 
     tracks(value?: any[]) {

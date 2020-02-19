@@ -3,6 +3,7 @@ import { template } from '../templates/home';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import { HomeViewModel } from '../viewModels/homeViewModel';
 import { TrackViewModelItem } from '../viewModels/trackViewModelItem';
+import { current } from '../utils';
 
 
 export interface IHomeViewProps {
@@ -26,7 +27,7 @@ class HomeView extends withEvents(React.Component)<IHomeViewProps, {}> {
 
     volumeDownCommand = { exec() { } }
     
-    binding = bindTo(this, () => new HomeViewModel(), {
+    binding = bindTo(this, () => current(HomeViewModel), {
         'resumeCommand': 'resumeCommand',
         'pauseCommand': 'pauseCommand',
         'prevCommand': 'prevCommand',
