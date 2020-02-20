@@ -1,19 +1,19 @@
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 import * as React from 'react';
-import { HomeView } from '../views/homeView';
+import { MyTracksView } from '../views';
 import { utils } from 'databindjs';
 
 
 const cn = utils.className;
 
-export const template = (view: HomeView) => <>
-    <div style={{height: '46px'}}></div>
+export const template = (view: MyTracksView) => <>
+    <div></div>
     <ul className="todo-list table-view">
         {_.map(view.prop('items'), (item, index) => {
-            return <li key={index} className="table-view-cell">
+            return <li key={index} className="table-view-cell media">
                 <span className="media-object pull-left"
-                    onClick={evnt => { item.playTracks(view.prop('items'), item) }}
+                    onClick={evnt => item.playTracks(view.prop('items'), item)}
                 >
                     <label className="toggle view">
                         <div className="toggle-handle"></div>
@@ -27,9 +27,4 @@ export const template = (view: HomeView) => <>
             </li>
         })}
     </ul>
-    <footer className="info content-padded">
-        <p>Media Player</p>
-        <p>Written by <a href="https://github.com/vkopytin">Volodymyr Kopytin</a></p>
-        <p>Part of <a href="https://www.npmjs.com/package/databindjs">DataBind JS</a></p>
-    </footer>
 </>;

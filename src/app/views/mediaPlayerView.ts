@@ -5,7 +5,7 @@ import {
     MediaPlayerViewModel,
     TrackViewModelItem
 } from '../viewModels';
-import { current } from '../utils';
+import { current, formatTime } from '../utils';
 import * as _ from 'underscore';
 
 
@@ -15,20 +15,21 @@ export interface IMediaPlayerViewProps {
 
 class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps, {}> {
     state = {
-        queue: [] as TrackViewModelItem[]
+        queue: [] as TrackViewModelItem[],
+        duration: 1,
+        timePlayed: 100,
+        isPlaying: false,
+        trackName: '',
+        albumName: ''
     };
 
     resumeCommand = { exec() { } };
-
-    pauseCommand = { exec() { } }
-
-    prevCommand = { exec() { } }
-
-    nextCommand = { exec() { } }
-
-    volumeUpCommand = { exec() { } }
-
-    volumeDownCommand = { exec() { } }
+    pauseCommand = { exec() { } };
+    prevCommand = { exec() { } };
+    nextCommand = { exec() { } };
+    volumeUpCommand = { exec() { } };
+    volumeDownCommand = { exec() { } };
+    refreshPlayback = { exec() { } };
     
     binding = bindTo(this, () => current(MediaPlayerViewModel), {
         'resumeCommand': 'resumeCommand',
@@ -37,7 +38,14 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
         'nextCommand': 'nextCommand',
         'volumeUpCommand': 'volumeUpCommand',
         'volumeDownCommand': 'volumeDownCommand',
-        'prop(queue)': 'queue'
+        'refreshPlayback': 'refreshPlayback',
+        'prop(queue)': 'queue',
+        'prop(currentPlayback)': 'playbackInfo',
+        'prop(timePlayed)': 'timePlayed',
+        'prop(duration)': 'duration',
+        'prop(isPlaying)': 'isPlaying',
+        'prop(trackName)': 'trackName',
+        'prop(albumName)': 'albumName'
     });
 
     constructor(props) {
@@ -64,6 +72,21 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
         }
 
         return this.state[propName];
+    }
+
+    timePlayed() {
+        const played = this.prop('timePlayed'),
+            duration = this.prop('duration');
+
+        return played / duration * 100;
+    }
+
+    titlePlayed() {
+        return formatTime(this.prop('timePlayed'));
+    }
+
+    titleLeft() {
+        return formatTime(this.prop('duration') - this.prop('timePlayed'));
     }
 
     render() {

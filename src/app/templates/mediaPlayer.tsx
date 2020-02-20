@@ -20,10 +20,10 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
             <div className="playback-info">
                 <a className="track-info">
                     <div className="album-title">
-                        <span>album title</span>
+                        <span>{view.prop('albumName')}</span>
                     </div>
                     <div className="song-title">
-                        <span>Song title</span>
+                        <span>{view.prop('trackName')}</span>
                     </div>
                 </a>
                 <div className="playback-controls">
@@ -32,14 +32,14 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
                     ></button>
                     <div className="playback">
                         <div className="progress-max">
-                            <div className="progress"></div>
+                            <div className="progress" style={{width: `${view.timePlayed()}%`}}></div>
                         </div>
-                        <div className="time-played">1:00</div>
+                        <div className="time-played">{view.titlePlayed()}</div>
                     </div>
                     <button className="button-next icon icon-forward"
                         onClick={evnt => view.nextCommand.exec()}
                     ></button>
-                    <div className="time-next">-1:00</div>
+                    <div className="time-next">-{view.titleLeft()}</div>
                     <button className="button-previous icon icon-sound4"
                         onClick={evnt => view.volumeUpCommand.exec()}
                     ></button>
@@ -57,7 +57,9 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
                 </div>
             </div>
             <div className="extra-controls">
-                <button className="track-more icon icon-more-vertical"></button>
+                <button className="track-more icon icon-more-vertical"
+                    onClick={evnt => view.refreshPlayback.exec()}
+                ></button>
                 <button className="track-more icon icon-refresh"></button>
             </div>
         </div>

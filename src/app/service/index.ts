@@ -233,6 +233,39 @@ class Service {
 
         return result;
     }
+
+    async player() {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.player();
+
+        return result;
+    }
+
+    async currentlyPlaying() {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.currentlyPlaying();
+
+        return result;
+    }
+
+    async tracks() {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.tracks();
+
+        return result;
+    }
 }
 
 export { Service, SpotifyService };

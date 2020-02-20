@@ -8,3 +8,4 @@ export { DeviceViewModelItem } from './deviceViewModelItem';
 export { PlaylistsViewModelItem } from './playlistsViewModelItem';
 export { TrackViewModelItem } from './trackViewModelItem';
 export { MediaPlayerViewModel } from './mediaPlayerViewModel';
+export { MyTracksViewModel } from './myTracksViewModel';

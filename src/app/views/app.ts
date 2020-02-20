@@ -16,7 +16,7 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
         openLogin: false,
         transition: ['', ''],
         prevPanel: 'home',
-        currentPanel: 'home' as 'home' | 'profile' | 'releases' | 'search',
+        currentPanel: 'home' as 'home' | 'profile' | 'releases' | 'search' | 'tracks',
         showSelectDevices: 'hide' as 'show' | 'hide' | '',
         devices: [] as IDevice[],
         profile: {} as IUserInfo

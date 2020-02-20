@@ -9,7 +9,8 @@ import {
     DevicesView,
     NewReleasesView,
     SearchView,
-    MediaPlayerView
+    MediaPlayerView,
+    MyTracksView
 } from '../views';
 import { utils } from 'databindjs';
 
@@ -57,7 +58,7 @@ export const template = (view: AppView) => <main>
                 <span className="icon icon-caret"></span>
             </h1>
         </header>
-        <div className="bar bar-standard bar-header-secondary" style={{ height: '100px' }}>
+        <div className="bar bar-standard bar-header-secondary" style={{ height: '92px' }}>
             <div className="region">
                 <MediaPlayerView />
             </div>
@@ -87,7 +88,9 @@ export const template = (view: AppView) => <main>
                 <span className="icon icon-search"></span>
                 <span className="tab-label">Search</span>
             </a>
-            <a className="tab-item" href="#">
+            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'tracks')} href="#"
+                onClick={evnt => view.prop('currentPanel', 'tracks')}
+            >
                 <span className="icon icon-gear"></span>
                 <span className="tab-label">Settings</span>
             </a>
@@ -104,6 +107,9 @@ export const template = (view: AppView) => <main>
             </section>
             <section key="search" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}>
                 <SearchView />
+            </section>
+            <section key="tracks" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}>
+                <MyTracksView />
             </section>
         </SwitchView>
     </section>

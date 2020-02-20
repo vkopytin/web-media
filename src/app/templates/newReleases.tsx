@@ -8,7 +8,7 @@ import { utils } from 'databindjs';
 const cn = utils.className;
 
 export const template = (view: NewReleasesView) => <>
-    <div style={{height: '55px'}}></div>
+    <div style={{height: '46px'}}></div>
     <ul className="todo-list table-view">
         {_.map(view.prop('releases'), (item, index) => {
             return <li key={index} className="table-view-cell media">

@@ -104,6 +104,37 @@ export interface IUserPlaylistsResult {
     total: number;
 }
 
+export interface IPlayerResult {
+    device: IDevice;
+    shuffle_state: boolean;
+    repeat_state: 'off' | string;
+    timestamp: number;
+    context: {};
+    progress_ms: number;
+    item: ITrack;
+    currently_playing_type: 'track' | string;
+    actions: {
+        disallows: {
+            resuming: boolean;
+        }
+    };
+    is_playing: boolean;
+}
+
+export interface ICurrentlyPlayingResult {
+    timestamp: number;
+    context: {};
+    progress_ms: number;
+    item: ITrack;
+    currently_playing_type: 'track' | string;
+    actions: {
+        disallows: {
+            resuming: boolean;
+        }
+    };
+    is_playing: boolean;
+}
+
 class SoptifyAdapter {
 
     constructor(public token: string) {
@@ -330,6 +361,79 @@ class SoptifyAdapter {
                 data: {
                     q: term,
                     type: 'track'
+                },
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(new Error(`${textStatus}:${errorThrown}`));
+                }
+            });
+        });
+    }
+
+    player() {
+        return new Promise<IPlayerResult>((resolve, reject) => {
+            $.ajax({
+                url: 'https://api.spotify.com/v1/me/player',
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(new Error(`${textStatus}:${errorThrown}`));
+                }
+            });
+        });
+    }
+
+    currentlyPlaying() {
+        return new Promise<ICurrentlyPlayingResult>((resolve, reject) => {
+            $.ajax({
+                url: 'https://api.spotify.com/v1/me/player/currently-playing',
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(new Error(`${textStatus}:${errorThrown}`));
+                }
+            });
+        });
+    }
+
+    tracks() {
+        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
+            $.ajax({
+                url: 'https://api.spotify.com/v1/me/tracks',
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(new Error(`${textStatus}:${errorThrown}`));
+                }
+            });
+        });
+    }
+
+    volume(precent, deviceId?) {
+        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
+            $.ajax({
+                method: 'PUT',
+                url: 'https://api.spotify.com/v1/me/player/volume',
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                data: {
+                    volume_percent: precent,
+                    ...deviceId ? { device_id: deviceId } : {}
                 },
                 success(response) {
                     resolve(response);

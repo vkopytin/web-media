@@ -165,6 +165,36 @@ class SpotifyService extends BaseService {
             return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
         }
     }
+
+    async player() {
+        try {
+            const res = await this.adapter.player();
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async currentlyPlaying() {
+        try {
+            const res = await this.adapter.currentlyPlaying();
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async tracks() {
+        try {
+            const res = await this.adapter.tracks();
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
 }
 
 export { SpotifyService };
