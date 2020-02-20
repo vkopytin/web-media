@@ -1,12 +1,17 @@
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 import * as React from 'react';
-import { AppView } from '../views/app';
-import { HomeView } from '../views/homeView';
-import { ProfileView } from '../views/profileView';
+import {
+    AppView,
+    HomeView,
+    PlaylistsView,
+    SwitchView,
+    DevicesView,
+    NewReleasesView,
+    SearchView,
+    MediaPlayerView
+} from '../views';
 import { utils } from 'databindjs';
-import { SwitchView } from '../views/switchView';
-import { DevicesView } from '../views/devicesView';
 
 
 const cn = utils.className;
@@ -41,7 +46,7 @@ export const template = (view: AppView) => <main>
             <header className="bar bar-nav">
                 <h1 className="title">Devices</h1>
             </header>
-            <DevicesView/>
+            <DevicesView />
         </div>
         <header className="bar bar-nav">
             <a className="icon icon-compose pull-right"
@@ -52,11 +57,11 @@ export const template = (view: AppView) => <main>
                 <span className="icon icon-caret"></span>
             </h1>
         </header>
-        <section className="bar bar-standard bar-header-secondary">
-            <form onSubmit={e => e.preventDefault()}>
-                <input className="new-todo" type="search" placeholder="Enter search title..." />
-            </form>
-        </section>
+        <div className="bar bar-standard bar-header-secondary" style={{ height: '100px' }}>
+            <div className="region">
+                <MediaPlayerView />
+            </div>
+        </div>
         <nav className="footer bar bar-tab bar-footer">
             <a className={cn('tab-item ?active', view.prop('currentPanel') === 'home')} href="#"
                 onClick={evnt => view.prop('currentPanel', 'home')}
@@ -70,11 +75,15 @@ export const template = (view: AppView) => <main>
                 <span className="icon icon-person"></span>
                 <span className="tab-label">Profile</span>
             </a>
-            <a className="tab-item" href="#">
+            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'releases')} href="#"
+                onClick={evnt => view.prop('currentPanel', 'releases')}
+            >
                 <span className="icon icon-star-filled"></span>
                 <span className="tab-label">Favorites</span>
             </a>
-            <a className="tab-item" href="#">
+            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'search')} href="#"
+                onClick={evnt => view.prop('currentPanel', 'search')}
+            >
                 <span className="icon icon-search"></span>
                 <span className="tab-label">Search</span>
             </a>
@@ -88,7 +97,13 @@ export const template = (view: AppView) => <main>
                 <HomeView />
             </section>
             <section key="profile" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}>
-                <ProfileView />
+                <PlaylistsView />
+            </section>
+            <section key="releases" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}>
+                <NewReleasesView />
+            </section>
+            <section key="search" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}>
+                <SearchView />
             </section>
         </SwitchView>
     </section>

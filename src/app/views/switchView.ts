@@ -4,11 +4,11 @@ import { withEvents } from 'databindjs';
 
 
 export interface ISwitchViewProps {
-    currentView: 'home' | 'profile';
+    currentView: 'home' | 'profile' | 'releases' | 'search';
     onClick?(evnt): void;
 }
 
-const panels = ['home', 'profile'];
+const panels = ['home', 'profile', 'releases', 'search'];
 
 class SwitchView extends withEvents(React.Component)<ISwitchViewProps, {}> {
     state = {

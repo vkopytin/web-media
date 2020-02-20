@@ -1,15 +1,15 @@
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 import * as React from 'react';
-import { ProfileView } from '../views/profileView';
+import { PlaylistsView } from '../views/playlistsView';
 import { TracksView } from '../views/tracksView';
 import { utils } from 'databindjs';
 
 
 const cn = utils.className;
 
-export const template = (view: ProfileView) => <>
-    <div></div>
+export const template = (view: PlaylistsView) => <>
+    <div style={{height: '55px'}}></div>
     <ul className="todo-list table-view">
         {_.map(view.prop('playlists'), (item, index) => {
             return <li key={index} className="table-view-cell media">
@@ -23,10 +23,7 @@ export const template = (view: ProfileView) => <>
                     </div>
                     <span className="badge">{item.tracksTotal()}</span>
                 </a>
-                {view.prop('currentPlaylist') === item &&
-                    <div className="card">
-                        <TracksView playlist={item} />
-                    </div>}
+                {view.prop('currentPlaylist') === item && <TracksView playlist={item} />}
             </li>
         })}
     </ul>

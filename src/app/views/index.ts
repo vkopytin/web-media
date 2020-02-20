@@ -1,0 +1,10 @@
+export { NewReleasesView } from './newReleasesView';
+export { AppView } from './app';
+export { DevicesView } from './devicesView';
+export { PlaylistsView } from './playlistsView';
+export { HomeView } from './homeView';
+export { SwitchView } from './switchView';
+export { TracksView } from './tracksView';
+export { AlbumsView } from './albumsView';
+export { SearchView } from './searchView';
+export { MediaPlayerView } from './mediaPlayerView';

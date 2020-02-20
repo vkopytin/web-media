@@ -1,31 +1,43 @@
 import * as React from 'react';
-import { template } from '../templates/home';
+import { template } from '../templates/mediaPlayer';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
-    HomeViewModel,
+    MediaPlayerViewModel,
     TrackViewModelItem
 } from '../viewModels';
 import { current } from '../utils';
+import * as _ from 'underscore';
 
 
-export interface IHomeViewProps {
+export interface IMediaPlayerViewProps {
 
 }
 
-class HomeView extends withEvents(React.Component)<IHomeViewProps, {}> {
+class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps, {}> {
     state = {
-        openLogin: false,
-        items: [] as TrackViewModelItem[]
+        queue: [] as TrackViewModelItem[]
     };
+
+    resumeCommand = { exec() { } };
+
+    pauseCommand = { exec() { } }
+
+    prevCommand = { exec() { } }
+
+    nextCommand = { exec() { } }
+
+    volumeUpCommand = { exec() { } }
+
+    volumeDownCommand = { exec() { } }
     
-    binding = bindTo(this, () => current(HomeViewModel), {
+    binding = bindTo(this, () => current(MediaPlayerViewModel), {
         'resumeCommand': 'resumeCommand',
         'pauseCommand': 'pauseCommand',
         'prevCommand': 'prevCommand',
         'nextCommand': 'nextCommand',
         'volumeUpCommand': 'volumeUpCommand',
         'volumeDownCommand': 'volumeDownCommand',
-        'prop(items)': 'tracks'
+        'prop(queue)': 'queue'
     });
 
     constructor(props) {
@@ -45,7 +57,7 @@ class HomeView extends withEvents(React.Component)<IHomeViewProps, {}> {
         unbindFrom(this.binding);
     }
 
-    prop<K extends keyof HomeView['state']>(propName: K, val?: HomeView['state'][K]): HomeView['state'][K] {
+    prop<K extends keyof MediaPlayerView['state']>(propName: K, val?: MediaPlayerView['state'][K]): MediaPlayerView['state'][K] {
         if (arguments.length > 1) {
             this.state[propName] = val;
             this.trigger('change:prop(' + propName + ')');
@@ -59,4 +71,4 @@ class HomeView extends withEvents(React.Component)<IHomeViewProps, {}> {
     }
 }
 
-export { HomeView };
+export { MediaPlayerView };

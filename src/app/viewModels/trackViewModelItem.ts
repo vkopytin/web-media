@@ -10,7 +10,7 @@ import { AppViewModel } from './appViewModel';
 class TrackViewModelItem extends Events {
     appViewModel = current(AppViewModel);
 
-    constructor(public song: ISpotifySong, private ss = new Service()) {
+    constructor(public song: ISpotifySong, private index: number, private ss = current(Service)) {
         super();
     }
 
@@ -30,10 +30,19 @@ class TrackViewModelItem extends Events {
         return formatTime(this.song.track.duration_ms);
     }
 
+    uri() {
+        return this.song.track.uri;
+    }
+
     async play(playlistUri) {
         const device = this.appViewModel.currentDevice();
 
-        this.ss.playerPlayTrack(device.id(), playlistUri, this.song.track.uri);
+        this.ss.playTrack(device.id(), playlistUri, this.index);
+    }
+
+    async playTracks(tracks: TrackViewModelItem[], item: TrackViewModelItem) {
+        const device = this.appViewModel.currentDevice();
+        this.ss.playTracks(device.id(), _.map(tracks, item => item.uri()), this.index);
     }
 }
 

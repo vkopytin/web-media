@@ -1,31 +1,25 @@
 import * as React from 'react';
-import { template } from '../templates/devices';
+import { template } from '../templates/albums';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
-    AppViewModel,
-    DeviceViewModelItem
+    TrackViewModelItem,
+    AlbumViewModelItem,
+    NewReleasesViewModel
 } from '../viewModels';
 import { current } from '../utils';
 
 
-export interface IDevicesViewProps {
-
+export interface IAlbumsViewProps {
+    album: AlbumViewModelItem;
 }
 
-class DevicesView extends withEvents(React.Component)<IDevicesViewProps, {}> {
+class AlbumsView extends withEvents(React.Component)<IAlbumsViewProps, {}> {
     state = {
-        devices: [] as DeviceViewModelItem[],
-        currentDevice: null as DeviceViewModelItem
+        openLogin: false,
+        tracks: [] as TrackViewModelItem[],
     };
-
-    currentDeviceCommand = {
-        exec(device: DeviceViewModelItem) { }
-    };
-
-    binding = bindTo(this, () => current(AppViewModel), {
-        'prop(devices)': 'devices',
-        'currentDeviceCommand': 'currentDeviceCommand',
-        'prop(currentDevice)': 'currentDevice'
+    binding = bindTo(this, () => current(NewReleasesViewModel), {
+        'prop(tracks)': 'tracks'
     });
 
     constructor(props) {
@@ -45,7 +39,7 @@ class DevicesView extends withEvents(React.Component)<IDevicesViewProps, {}> {
         unbindFrom(this.binding);
     }
 
-    prop<K extends keyof DevicesView['state']>(propName: K, val?: DevicesView['state'][K]): DevicesView['state'][K] {
+    prop<K extends keyof AlbumsView['state']>(propName: K, val?: AlbumsView['state'][K]): AlbumsView['state'][K] {
         if (arguments.length > 1) {
             this.state[propName] = val;
             this.trigger('change:prop(' + propName + ')');
@@ -54,9 +48,13 @@ class DevicesView extends withEvents(React.Component)<IDevicesViewProps, {}> {
         return this.state[propName];
     }
 
+    uri() {
+        return this.props.album.uri();
+    }
+
     render() {
         return template(this);
     }
 }
 
-export { DevicesView };
+export { AlbumsView };

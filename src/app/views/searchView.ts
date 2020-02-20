@@ -1,32 +1,32 @@
 import * as React from 'react';
-import { template } from '../templates/devices';
+import { template } from '../templates/search';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
-    AppViewModel,
-    DeviceViewModelItem
+    SearchViewModel,
+    TrackViewModelItem
 } from '../viewModels';
 import { current } from '../utils';
+import * as _ from 'underscore';
 
 
-export interface IDevicesViewProps {
+export interface ISearchViewProps {
 
 }
 
-class DevicesView extends withEvents(React.Component)<IDevicesViewProps, {}> {
+class SearchView extends withEvents(React.Component)<ISearchViewProps, {}> {
     state = {
-        devices: [] as DeviceViewModelItem[],
-        currentDevice: null as DeviceViewModelItem
+        term: '',
+        items: [] as TrackViewModelItem[]
     };
-
-    currentDeviceCommand = {
-        exec(device: DeviceViewModelItem) { }
-    };
-
-    binding = bindTo(this, () => current(AppViewModel), {
-        'prop(devices)': 'devices',
-        'currentDeviceCommand': 'currentDeviceCommand',
-        'prop(currentDevice)': 'currentDevice'
+    
+    binding = bindTo(this, () => current(SearchViewModel), {
+        'prop(term)': 'term',
+        'prop(items)': 'tracks'
     });
+
+    searchTracks = _.debounce(term => {
+        this.prop('term', term);
+    }, 500);
 
     constructor(props) {
         super(props);
@@ -45,7 +45,7 @@ class DevicesView extends withEvents(React.Component)<IDevicesViewProps, {}> {
         unbindFrom(this.binding);
     }
 
-    prop<K extends keyof DevicesView['state']>(propName: K, val?: DevicesView['state'][K]): DevicesView['state'][K] {
+    prop<K extends keyof SearchView['state']>(propName: K, val?: SearchView['state'][K]): SearchView['state'][K] {
         if (arguments.length > 1) {
             this.state[propName] = val;
             this.trigger('change:prop(' + propName + ')');
@@ -59,4 +59,4 @@ class DevicesView extends withEvents(React.Component)<IDevicesViewProps, {}> {
     }
 }
 
-export { DevicesView };
+export { SearchView };

@@ -1,25 +1,27 @@
 import * as React from 'react';
-import { template } from '../templates/profile';
+import { template } from '../templates/playlists';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import { ProfileViewModel } from '../viewModels/profileViewModel';
-import { PlaylistViewModelItem } from '../viewModels/playlistViewModelItem';
+import {
+    PlaylistsViewModel,
+    PlaylistsViewModelItem,
+    TrackViewModelItem
+} from '../viewModels';
 import { current } from '../utils';
-import { TrackViewModelItem } from '../viewModels/trackViewModelItem';
 
 
-export interface IProfileViewProps {
+export interface IPlaylistsViewProps {
 
 }
 
-class ProfileView extends withEvents(React.Component)<IProfileViewProps, {}> {
+class PlaylistsView extends withEvents(React.Component)<IPlaylistsViewProps, {}> {
     state = {
         openLogin: false,
-        playlists: [] as PlaylistViewModelItem[],
+        playlists: [] as PlaylistsViewModelItem[],
         tracks: [] as TrackViewModelItem[],
-        currentPlaylist: null as PlaylistViewModelItem
+        currentPlaylist: null as PlaylistsViewModelItem
     };
     selectPlaylistCommand = { exec(playlist) { } };
-    binding = bindTo(this, () => current(ProfileViewModel), {
+    binding = bindTo(this, () => current(PlaylistsViewModel), {
         'prop(playlists)': 'playlists',
         'prop(tracks)': 'tracks',
         'selectPlaylistCommand': 'selectPlaylistCommand',
@@ -43,7 +45,7 @@ class ProfileView extends withEvents(React.Component)<IProfileViewProps, {}> {
         unbindFrom(this.binding);
     }
 
-    prop<K extends keyof ProfileView['state']>(propName: K, val?: ProfileView['state'][K]): ProfileView['state'][K] {
+    prop<K extends keyof PlaylistsView['state']>(propName: K, val?: PlaylistsView['state'][K]): PlaylistsView['state'][K] {
         if (arguments.length > 1) {
             this.state[propName] = val;
             this.trigger('change:prop(' + propName + ')');
@@ -57,4 +59,4 @@ class ProfileView extends withEvents(React.Component)<IProfileViewProps, {}> {
     }
 }
 
-export { ProfileView };
+export { PlaylistsView };

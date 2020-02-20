@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { template } from '../templates/app';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import { AppViewModel } from '../viewModels/appViewModel';
+import { AppViewModel } from '../viewModels';
 import * as _ from 'underscore';
 import { IDevice, IUserInfo } from '../service/adapter/spotify';
 import { current } from '../utils';
@@ -16,7 +16,7 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
         openLogin: false,
         transition: ['', ''],
         prevPanel: 'home',
-        currentPanel: 'home' as 'home' | 'profile',
+        currentPanel: 'home' as 'home' | 'profile' | 'releases' | 'search',
         showSelectDevices: 'hide' as 'show' | 'hide' | '',
         devices: [] as IDevice[],
         profile: {} as IUserInfo

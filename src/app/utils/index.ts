@@ -1,3 +1,6 @@
+import * as _ from 'underscore';
+
+
 export function formatTime(ms: number) {
     const minutes = '' + Math.floor(ms / 60000),
         seconds = Math.floor(ms % 60000 / 1000);
@@ -18,4 +21,31 @@ export function current<T extends {}, O extends {}>(
     instances.set(ctor, inst);
 
     return inst;
+}
+
+export function asyncQueue(concurrency = 1) {
+    let running = 0;
+    const taskQueue = [];
+
+    const runTask = (task) => {
+        const done = () => {
+            running--;
+            if (taskQueue.length > 0) {
+                runTask(taskQueue.shift());
+            }
+        };
+        running++;
+        try {
+            task(done);
+        } catch (ex) {
+            _.delay(() => { throw ex; });
+            done();
+        }
+    };
+
+    const enqueueTask = task => taskQueue.push(task);
+
+    return {
+        push: task => running < concurrency ? runTask(task) : enqueueTask(task)
+    };
 }

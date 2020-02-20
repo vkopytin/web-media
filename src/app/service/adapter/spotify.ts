@@ -1,6 +1,12 @@
 import * as $ from 'jquery';
 
 
+export interface IImageInfo {
+    width: number;
+    height: number;
+    url: string;
+};
+
 export interface IDevice {
     id: string;
     is_active: boolean;
@@ -38,11 +44,10 @@ export interface IUserInfo {
 export interface ITrack {
     id: string;
     name: string;
-    album: {
-        name: string;
-    };
+    album: IAlbum;
     uri: string;
     duration_ms: number;
+    track_number: number;
 }
 
 export interface IUserPlaylist {
@@ -52,21 +57,13 @@ export interface IUserPlaylist {
     tracks: {
         total: number;
     };
-    images: Array<{
-        width: number;
-        height: number;
-        url: string;
-    }>;
+    images: Array<IImageInfo>;
     owner: IUserInfo;
 }
 
 export interface ISpotifySong {
     track: ITrack;
     played_at: string;
-}
-
-export interface IRecentryPlayedResponse {
-    items: Array<ISpotifySong>;
 }
 
 export interface IDevicesResponse {
@@ -76,6 +73,25 @@ export interface IDevicesResponse {
 export interface IRecommendationsResult {
     tracks: ITrack[];
     seeds: Array<{}>;
+}
+
+export interface IAlbum {
+    id: string;
+    name: string;
+    uri: string;
+    images: Array<IImageInfo>;
+    total_tracks: number;
+    release_date: string;
+}
+
+export interface IResponseResult<T> {
+    href: string;
+    items: T[];
+    limit: number;
+    next: string;
+    offset: number;
+    previous: string;
+    total: number;
 }
 
 export interface IUserPlaylistsResult {
@@ -112,13 +128,13 @@ class SoptifyAdapter {
     }
 
     recentlyPlayed() {
-        return new Promise<IRecentryPlayedResponse>((resolve, reject) => {
+        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
                 url: 'https://api.spotify.com/v1/me/player/recently-played',
                 headers: {
                     'Authorization': 'Bearer ' + this.token
                 },
-                success(response:IRecentryPlayedResponse) {
+                success(response) {
                     resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
@@ -203,8 +219,8 @@ class SoptifyAdapter {
         });
     }
 
-    listTracks(playlistId) {
-        return new Promise<IRecentryPlayedResponse>((resolve, reject) => {
+    listPlaylistTracks(playlistId) {
+        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
                 url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
                 headers: {
@@ -220,8 +236,25 @@ class SoptifyAdapter {
         });
     }
 
-    playTrack(deviceId, playlistUri, trackUri) {
-        return new Promise<IRecentryPlayedResponse>((resolve, reject) => {
+    listAlbumTracks(albumId) {
+        return new Promise<IResponseResult<ITrack>>((resolve, reject) => {
+            $.ajax({
+                url: `https://api.spotify.com/v1/albums/${albumId}/tracks`,
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(new Error(`${textStatus}:${errorThrown}`));
+                }
+            });
+        });
+    }
+
+    playTrack(deviceId: string, playlistUri: string, index: number) {
+        return new Promise<any>((resolve, reject) => {
             $.ajax({
                 method: 'PUT',
                 url: `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
@@ -231,10 +264,73 @@ class SoptifyAdapter {
                 contentType: 'application/json',
                 data: JSON.stringify({
                     context_uri: playlistUri,
-                    offeset: {
-                        uri: trackUri
+                    offset: {
+                        position: index
                     }
                 }),
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(new Error(`${textStatus}:${errorThrown}`));
+                }
+            });
+        });
+    }
+
+    playTracks(deviceId: string, tracksUriList: string[], index: number) {
+        return new Promise<any>((resolve, reject) => {
+            $.ajax({
+                method: 'PUT',
+                url: `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    uris: tracksUriList,
+                    offset: {
+                        position: index
+                    }
+                }),
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(new Error(`${textStatus}:${errorThrown}`));
+                }
+            });
+        });
+    }
+
+    newReleases() {
+        return new Promise<IResponseResult<IAlbum>>((resolve, reject) => {
+            $.ajax({
+                url: 'https://api.spotify.com/v1/browse/new-releases',
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                success(response) {
+                    resolve(response.albums);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(new Error(`${textStatus}:${errorThrown}`));
+                }
+            });
+        });
+    }
+
+    search(term) {
+        return new Promise<IResponseResult<IAlbum>>((resolve, reject) => {
+            $.ajax({
+                url: 'https://api.spotify.com/v1/search',
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                data: {
+                    q: term,
+                    type: 'track'
+                },
                 success(response) {
                     resolve(response);
                 },

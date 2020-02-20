@@ -3,7 +3,7 @@ import * as _ from 'underscore';
 import { IUserPlaylist } from '../service/adapter/spotify';
 
 
-class PlaylistViewModelItem extends Events {
+class PlaylistsViewModelItem extends Events {
     constructor(public playlist: IUserPlaylist) {
         super();
     }
@@ -33,4 +33,4 @@ class PlaylistViewModelItem extends Events {
     }
 }
 
-export { PlaylistViewModelItem };
+export { PlaylistsViewModelItem };

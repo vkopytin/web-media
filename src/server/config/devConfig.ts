@@ -22,8 +22,7 @@ const devConfig = (app: express.Application) => {
             ...webpackConfig,
             entry: {
                 ...webpackConfig.entry,
-                app: [
-                    'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000&overlay=false',
+                app: ['webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000&overlay=false',
                     ...webpackConfig.entry.app
                 ]
             }

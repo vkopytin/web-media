@@ -8,3 +8,216 @@
     content: '';
     background-color: rgba(0,0,0,.3);
 }
+
+.region {
+    margin: 4px 0;
+}
+
+.hidden {
+    display: none;
+}
+
+.player-playback .icon {
+    font-size: 16px;
+}
+
+.player-playback {
+    text-shadow: rgba(0, 0, 0, 0.4) 0px 0px 2px;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    flex-direction: row;
+    display: flex;
+    position: relative;
+}
+
+.player-right {
+    min-width: 66.6666vw;
+    flex: 2 1 0%;
+    position: relative;
+}
+
+.player-left {
+    width: 80px;
+    height: 80px;
+    position: relative;
+}
+
+.player-left .region {
+    min-height: 80px;
+    min-width: 80px;
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+
+.album-media {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-image: url(https://mosaic.scdn.co/640/ab67616d0000b27326a3ebdb4e994b45773488edab67616d0000b2734cd2daf399c4b20bbb1af2a0ab67616d0000b2736c81650e70bf2679e1fa03f7ab67616d0000b27389c3692370b29d8fd4bab431);
+    height: 100%;
+    position: relative;
+}
+
+.track-playback {
+    display: flex;
+}
+
+.album-media .button-play {
+    font-size: 24px;
+}
+
+.button-play {
+    color: white;
+    cursor: pointer;
+    transition: transform 0.1s ease 0s;
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 0px 10px;
+    outline: none;
+    width: 50%;
+    height: 50%;
+    left: 25%;
+    top: 25%;
+    border-radius: 50%;
+    border-width: 1px;
+    border-style: solid;
+    border-color: white;
+    border-image: initial;
+    background: rgba(0, 0, 0, 0.5);
+    position: absolute;
+}
+
+.playback-info {
+    min-width: 0px;
+    flex: 100 1 0%;
+    min-height: 80px;
+    position: relative;
+}
+
+.track-info {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-decoration: none;
+    margin: 8px;
+    display: block;
+    cursor: pointer;
+    font-weight: 200;
+}
+
+.album-title {
+    line-height: 19px;
+    font-size: 14px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.playback-controls {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    flex-direction: row;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    margin: 0;
+}
+
+.extra-controls {
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    flex-direction: column;
+    display: flex;
+}
+
+.track-more {
+    padding: 10px 4px 10px 4px;
+    box-sizing: content-box;
+    height: 16px;
+    width: 16px;
+    background: transparent;
+    border-width: initial;
+    border-style: none;
+    border-color: initial;
+    border-image: initial;
+    cursor: pointer;
+    outline: none;
+}
+
+.button-next,
+.button-previous {
+    padding: 2px 0;
+    width: 22px;
+    height: 22px;
+    box-sizing: content-box;
+    background: transparent;
+    border-width: initial;
+    border-style: none;
+    border-color: initial;
+    border-image: initial;
+    outline: none;
+    cursor: pointer;
+}
+
+.playback {
+    padding: 16px 0px;
+    position: relative;
+    -webkit-box-flex: 1;
+    flex-grow: 4;
+    margin: 0px;
+}
+
+.playback-volume {
+    padding: 16px 0px;
+    position: relative;
+    -webkit-box-flex: 1;
+    flex-grow: 1;
+    margin: 0px;
+}
+
+.progress-max {
+    flex: 4 1 0%;
+    height: 4px;
+    background-color: silver;
+    cursor: pointer;
+}
+
+.progress {
+    width: 47%;
+    height: 4px;
+    background-color: grey;
+}
+
+.volume-marker,
+.time-played {
+    position: absolute;
+    left: calc(50% - 8px);
+    bottom: 25px;
+    display: block;
+    padding: 2px 5px;
+    text-align: center;
+    font-size: 10px;
+}
+
+.time-next {
+    display: inline-block;
+    font-feature-settings: "tnum";
+    font-size: 10px;
+    vertical-align: top;
+    margin: 0px 4px;
+    white-space: nowrap;
+}

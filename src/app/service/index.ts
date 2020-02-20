@@ -2,7 +2,13 @@ import { ServiceResult } from '../base/serviceResult';
 import { SpotifyService } from './spotify';
 import { SettingsService } from './settings';
 import { SpotifyPlayerService } from './spotifyPlayer';
+import { asyncQueue } from '../utils';
+import * as _ from 'underscore';
 
+
+const lockSpotifyService = asyncQueue();
+const lockSettingsService = asyncQueue();
+const lockSpotifyPlayerService = asyncQueue();
 
 class Service {
     settingsService: ServiceResult<SettingsService, Error> = null;
@@ -15,23 +21,44 @@ class Service {
     ): Promise<ServiceResult<T, Error>> {
         switch (ctor) {
             case SpotifyService as any:
-                if (this.spotifyService) {
-                    return this.spotifyService as any;
-                }
+                return new Promise((resolve, reject) => {
+                    lockSpotifyService.push(_.bind(async function (this: Service, next) {
+                        if (this.spotifyService) {
+                            resolve(this.spotifyService as any);
+                            next();
+                            return;
+                        }
 
-                return this.spotifyService = await SpotifyService.create(this) as any;
+                        resolve(this.spotifyService = await SpotifyService.create(this) as any)
+                        next();
+                    }, this));
+                });
             case SettingsService as any:
-                if (this.settingsService) {
-                    return this.settingsService as any;
-                }
+                return new Promise((resolve, reject) => {
+                    lockSettingsService.push(_.bind(async function (this: Service, next) {
+                        if (this.settingsService) {
+                            resolve(this.settingsService as any);
+                            next();
+                            return;
+                        }
 
-                return this.settingsService = await SettingsService.create(this) as any;
+                        resolve(this.settingsService = await SettingsService.create(this) as any);
+                        next();
+                    }, this));
+                });
             case SpotifyPlayerService as any:
-                if (this.spotifyPlayerService) {
-                    return this.spotifyPlayerService as any;
-                }
+                return new Promise((resolve, reject) => {
+                    lockSpotifyPlayerService.push(_.bind(async function (this: Service, next) {
+                        if (this.spotifyPlayerService) {
+                            resolve(this.spotifyPlayerService as any);
+                            next();
+                            return;
+                        }
 
-                return this.spotifyPlayerService = await SpotifyPlayerService.create(this) as any;
+                        resolve(this.spotifyPlayerService = await SpotifyPlayerService.create(this) as any);
+                        next();
+                    }, this));
+                });
             default:
                 throw new Error('Unexpected service request');
         }
@@ -141,24 +168,68 @@ class Service {
         return result;
     }
 
-    async listTracks(playlistId) {
+    async listPlaylistTracks(playlistId) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
 
-        const result = spotify.val.listTracks(playlistId);
+        const result = spotify.val.listPlaylistTracks(playlistId);
 
         return result;
     }
 
-    async playerPlayTrack(deviceId, playlistUri, trackUri) {
+    async listAlbumTracks(albumId) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
 
-        const result = spotify.val.playTrack(deviceId, playlistUri, trackUri);
+        const result = spotify.val.listAlbumTracks(albumId);
+
+        return result;
+    }
+
+    async playTrack(deviceId: string, playlistUri: string, index: number) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.playTrack(deviceId, playlistUri, index);
+
+        return result;
+    }
+
+    async playTracks(deviceId: string, trackUriList: string[], index: number) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.playTracks(deviceId, trackUriList, index);
+
+        return result;
+    }
+
+    async newReleases() {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.newReleases();
+
+        return result;
+    }
+
+    async search(term) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.search(term);
 
         return result;
     }

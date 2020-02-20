@@ -1,22 +1,25 @@
 import * as React from 'react';
 import { template } from '../templates/tracks';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import { ProfileViewModel } from '../viewModels/profileViewModel';
-import { TrackViewModelItem } from '../viewModels/trackViewModelItem';
+import {
+    PlaylistsViewModel,
+    TrackViewModelItem,
+    PlaylistsViewModelItem,
+    AlbumViewModelItem
+} from '../viewModels';
 import { current } from '../utils';
-import { PlaylistViewModelItem } from '../viewModels/playlistViewModelItem';
 
 
 export interface ITracksViewProps {
-    playlist: PlaylistViewModelItem;
+    playlist: PlaylistsViewModelItem;
 }
 
 class TracksView extends withEvents(React.Component)<ITracksViewProps, {}> {
     state = {
         openLogin: false,
-        tracks: [] as TrackViewModelItem[]
+        tracks: [] as TrackViewModelItem[],
     };
-    binding = bindTo(this, () => current(ProfileViewModel), {
+    binding = bindTo(this, () => current(PlaylistsViewModel), {
         'prop(tracks)': 'tracks'
     });
 
@@ -44,6 +47,10 @@ class TracksView extends withEvents(React.Component)<ITracksViewProps, {}> {
         }
 
         return this.state[propName];
+    }
+
+    uri() {
+        return this.props.playlist.uri();
     }
 
     render() {

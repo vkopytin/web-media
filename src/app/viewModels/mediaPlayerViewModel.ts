@@ -6,7 +6,7 @@ import { ISpotifySong, IRecommendationsResult } from '../service/adapter/spotify
 import { current } from '../utils';
 
 
-class HomeViewModel extends Events {
+class MediaPlayerViewModel extends Events {
 
     settings = {
         openLogin: false
@@ -65,20 +65,20 @@ class HomeViewModel extends Events {
         }
         const recomendations = res.val as IRecommendationsResult;
 
-        this.tracks(_.map(recomendations.tracks, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index)));
+        this.queue(_.map(recomendations.tracks, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index)));
     }
 
-    tracks(value?: any[]) {
+    queue(value?: any[]) {
         if (arguments.length && value !== this.trackArray) {
             this.trackArray = value;
-            this.trigger('change:tracks');
+            this.trigger('change:queue');
         }
 
         return this.trackArray;
     }
 
     playInTracks(item: TrackViewModelItem) {
-        item.playTracks(this.tracks(), item);
+        item.playTracks(this.queue(), item);
     }
 
     async resume() {
@@ -87,4 +87,4 @@ class HomeViewModel extends Events {
     }
 }
 
-export { HomeViewModel };
+export { MediaPlayerViewModel };

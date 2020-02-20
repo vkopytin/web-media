@@ -16,14 +16,14 @@ let httpServer = null;
 let httpsServer = null;
 const options = {
     NODE_ENV: process.env.NODE_ENV,
-    PORT: process.env.SERVER_PORT || 8080,
-    SPORT: process.env.SERVER_SPORT || 8081
+    PORT: process.env.SERVER_PORT || 8081,
+    PPORT: process.env.SERVER_PPORT || 8080
 };
 
 try {
     httpServer = http.createServer(app);
-    httpServer.listen(options.PORT, () => {
-        warn('The server is running in port localhost: ', options.PORT);
+    httpServer.listen(options.PPORT, () => {
+        warn('The server is running in port localhost: ', options.PPORT);
     });
 
 } catch (ex) {
@@ -32,8 +32,8 @@ try {
 
 try {
     httpsServer = https.createServer(credentials, app);
-    httpsServer.listen(options.SPORT, () => {
-        warn('The server is running in port localhost: ', options.SPORT);
+    httpsServer.listen(options.PORT, () => {
+        warn('The server is running in port localhost: ', options.PORT);
     });
 } catch (ex) {
     setTimeout(() => { throw ex; });

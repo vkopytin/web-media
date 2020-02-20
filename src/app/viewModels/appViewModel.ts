@@ -3,6 +3,7 @@ import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
 import { IUserInfo } from '../service/adapter/spotify';
 import { DeviceViewModelItem } from './deviceViewModelItem';
+import { current } from '../utils';
 
 
 const panels = ['home', 'profile'];
@@ -23,7 +24,7 @@ class AppViewModel extends Events {
 
     isInit = _.delay(() => this.loadData());
 
-    constructor(private ss = new Service()) {
+    constructor(private ss = current(Service)) {
         super();
 
         (async function (this: AppViewModel) {

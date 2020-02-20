@@ -1,31 +1,33 @@
 import * as React from 'react';
-import { template } from '../templates/home';
+import { template } from '../templates/newReleases';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
-    HomeViewModel,
-    TrackViewModelItem
+    NewReleasesViewModel,
+    AlbumViewModelItem
 } from '../viewModels';
 import { current } from '../utils';
 
 
-export interface IHomeViewProps {
+export interface INewReleasesViewProps {
 
 }
 
-class HomeView extends withEvents(React.Component)<IHomeViewProps, {}> {
+class NewReleasesView extends withEvents(React.Component)<INewReleasesViewProps, {}> {
     state = {
         openLogin: false,
-        items: [] as TrackViewModelItem[]
+        releases: [] as AlbumViewModelItem[],
+        currentAlbum: null as AlbumViewModelItem
     };
     
-    binding = bindTo(this, () => current(HomeViewModel), {
-        'resumeCommand': 'resumeCommand',
-        'pauseCommand': 'pauseCommand',
-        'prevCommand': 'prevCommand',
-        'nextCommand': 'nextCommand',
-        'volumeUpCommand': 'volumeUpCommand',
-        'volumeDownCommand': 'volumeDownCommand',
-        'prop(items)': 'tracks'
+    selectAlbumCommand = {
+        exec(album: AlbumViewModelItem) { }
+    };
+
+    binding = bindTo(this, () => current(NewReleasesViewModel), {
+        'prop(releases)': 'newReleases',
+        'prop(currentAlbum)': 'currentAlbum',
+        'selectAlbumCommand': 'selectAlbumCommand',
+        'prop(tracks)': 'tracks'
     });
 
     constructor(props) {
@@ -45,7 +47,7 @@ class HomeView extends withEvents(React.Component)<IHomeViewProps, {}> {
         unbindFrom(this.binding);
     }
 
-    prop<K extends keyof HomeView['state']>(propName: K, val?: HomeView['state'][K]): HomeView['state'][K] {
+    prop<K extends keyof NewReleasesView['state']>(propName: K, val?: NewReleasesView['state'][K]): NewReleasesView['state'][K] {
         if (arguments.length > 1) {
             this.state[propName] = val;
             this.trigger('change:prop(' + propName + ')');
@@ -59,4 +61,4 @@ class HomeView extends withEvents(React.Component)<IHomeViewProps, {}> {
     }
 }
 
-export { HomeView };
+export { NewReleasesView };
