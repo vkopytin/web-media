@@ -13,6 +13,7 @@ export const template = (view: SearchView) => <>
         <form onSubmit={e => e.preventDefault()}>
             <input className="new-todo" type="search" placeholder="Enter search title..."
                 onChange={evnt => view.searchTracks(evnt.target.value)}
+                defaultValue={view.prop('term')}
             />
         </form>
     </section>

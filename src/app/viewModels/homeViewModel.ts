@@ -48,6 +48,12 @@ class HomeViewModel extends Events {
         }
     }
 
+    refreshCommand = {
+        exec: () => {
+            this.fetchData();
+        }
+    }
+
     trackArray = [] as Array<TrackViewModelItem>;
 
     isInit = _.delay(() => this.fetchData(), 100);
@@ -75,6 +81,10 @@ class HomeViewModel extends Events {
         }
 
         return this.trackArray;
+    }
+
+    loadMore() {
+
     }
 
     playInTracks(item: TrackViewModelItem) {

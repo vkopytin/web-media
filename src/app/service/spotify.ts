@@ -136,9 +136,29 @@ class SpotifyService extends BaseService {
         }
     }
 
+    async seek(positionMs, deviceId) {
+        try {
+            const res = await this.adapter.seek(Math.round(positionMs), deviceId);
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
     async playTracks(deviceId: string, trackUriList: string[], index: number) {
         try {
             const res = await this.adapter.playTracks(deviceId, trackUriList, index);
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async volume(percent: number) {
+        try {
+            const res = await this.adapter.volume(Math.round(percent));
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
@@ -156,9 +176,9 @@ class SpotifyService extends BaseService {
         }
     }
 
-    async search(term) {
+    async search(term, offset, limit) {
         try {
-            const res = await this.adapter.search(term);
+            const res = await this.adapter.search(term, offset, limit);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
@@ -186,9 +206,9 @@ class SpotifyService extends BaseService {
         }
     }
 
-    async tracks() {
+    async tracks(offset, limit) {
         try {
-            const res = await this.adapter.tracks();
+            const res = await this.adapter.tracks(offset, limit);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {

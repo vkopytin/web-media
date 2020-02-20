@@ -17,15 +17,12 @@ class HomeView extends withEvents(React.Component)<IHomeViewProps, {}> {
         openLogin: false,
         items: [] as TrackViewModelItem[]
     };
+
+    refreshCommand = { exec() { } };
     
     binding = bindTo(this, () => current(HomeViewModel), {
-        'resumeCommand': 'resumeCommand',
-        'pauseCommand': 'pauseCommand',
-        'prevCommand': 'prevCommand',
-        'nextCommand': 'nextCommand',
-        'volumeUpCommand': 'volumeUpCommand',
-        'volumeDownCommand': 'volumeDownCommand',
-        'prop(items)': 'tracks'
+        'prop(items)': 'tracks',
+        'refreshCommand': 'refreshCommand'
     });
 
     constructor(props) {

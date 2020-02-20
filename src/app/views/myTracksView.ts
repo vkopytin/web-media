@@ -1,3 +1,4 @@
+import * as $ from 'jquery';
 import * as React from 'react';
 import { template } from '../templates/myTracks';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
@@ -9,19 +10,24 @@ import { current } from '../utils';
 import * as _ from 'underscore';
 
 
-export interface ISearchViewProps {
-
+export interface IMyTracksViewProps {
+    loadMore?: boolean;
 }
 
-class MyTracksView extends withEvents(React.Component)<ISearchViewProps, {}> {
+class MyTracksView extends withEvents(React.Component)<IMyTracksViewProps, {}> {
     state = {
         term: '',
-        items: [] as TrackViewModelItem[]
+        items: [] as TrackViewModelItem[],
+        isLoading: false
     };
     
     binding = bindTo(this, () => current(MyTracksViewModel), {
-        'prop(items)': 'tracks'
+        'loadMoreCommand': 'loadMoreCommand',
+        'prop(items)': 'tracks',
+        'prop(isLoading)': 'isLoading'
     });
+
+    loadMoreCommand = { exec() { } };
 
     searchTracks = _.debounce(term => {
         this.prop('term', term);
@@ -42,6 +48,12 @@ class MyTracksView extends withEvents(React.Component)<ISearchViewProps, {}> {
 
     componentWillUnmount() {
         unbindFrom(this.binding);
+    }
+
+    componentDidUpdate(prevProps: IMyTracksViewProps, prevState, snapshot) {
+        if (this.props.loadMore) {
+            this.loadMoreCommand.exec();
+        }
     }
 
     prop<K extends keyof MyTracksView['state']>(propName: K, val?: MyTracksView['state'][K]): MyTracksView['state'][K] {

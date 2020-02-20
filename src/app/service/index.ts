@@ -137,6 +137,16 @@ class Service {
         return result;
     }
 
+    async volume(percent) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.volume(percent);
+
+        return result;
+    }
+
     async profile() {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
@@ -201,6 +211,17 @@ class Service {
         return result;
     }
 
+    async seek(positionMs: number, deviceId = '') {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.seek(positionMs, deviceId);
+
+        return result;
+    }
+
     async playTracks(deviceId: string, trackUriList: string[], index: number) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
@@ -223,13 +244,13 @@ class Service {
         return result;
     }
 
-    async search(term) {
+    async search(term, offset, limit) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
 
-        const result = spotify.val.search(term);
+        const result = spotify.val.search(term, offset, limit);
 
         return result;
     }
@@ -256,13 +277,13 @@ class Service {
         return result;
     }
 
-    async tracks() {
+    async tracks(offset?, limit?) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
 
-        const result = spotify.val.tracks();
+        const result = spotify.val.tracks(offset, limit);
 
         return result;
     }

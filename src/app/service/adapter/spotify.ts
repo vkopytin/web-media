@@ -351,7 +351,7 @@ class SoptifyAdapter {
         });
     }
 
-    search(term) {
+    search(term, offset = 0, limit = 20) {
         return new Promise<IResponseResult<IAlbum>>((resolve, reject) => {
             $.ajax({
                 url: 'https://api.spotify.com/v1/search',
@@ -360,7 +360,9 @@ class SoptifyAdapter {
                 },
                 data: {
                     q: term,
-                    type: 'track'
+                    type: 'track',
+                    ...offset ? { offset: offset } : {},
+                    limit: limit
                 },
                 success(response) {
                     resolve(response);
@@ -389,6 +391,29 @@ class SoptifyAdapter {
         });
     }
 
+    seek(positionMs, deviceId='') {
+        return new Promise<IPlayerResult>((resolve, reject) => {
+            $.ajax({
+                method: 'PUT',
+                url: 'https://api.spotify.com/v1/me/player/seek?' + $.param({
+                    position_ms: positionMs,
+                    ...deviceId ? { device_id: deviceId } : {}
+                }),
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({}),
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(new Error(`${textStatus}:${errorThrown}`));
+                }
+            });
+        });
+    }
+
     currentlyPlaying() {
         return new Promise<ICurrentlyPlayingResult>((resolve, reject) => {
             $.ajax({
@@ -406,12 +431,16 @@ class SoptifyAdapter {
         });
     }
 
-    tracks() {
+    tracks(offset = 0, limit = 20) {
         return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
                 url: 'https://api.spotify.com/v1/me/tracks',
                 headers: {
                     'Authorization': 'Bearer ' + this.token
+                },
+                data: {
+                    offset: offset,
+                    limit: limit
                 },
                 success(response) {
                     resolve(response);
@@ -427,14 +456,15 @@ class SoptifyAdapter {
         return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
                 method: 'PUT',
-                url: 'https://api.spotify.com/v1/me/player/volume',
+                url: 'https://api.spotify.com/v1/me/player/volume?' + $.param({
+                    volume_percent: precent,
+                    ...deviceId ? { device_id: deviceId } : {}
+                }),
                 headers: {
                     'Authorization': 'Bearer ' + this.token
                 },
-                data: {
-                    volume_percent: precent,
-                    ...deviceId ? { device_id: deviceId } : {}
-                },
+                contentType: 'application/json',
+                data: JSON.stringify({}),
                 success(response) {
                     resolve(response);
                 },

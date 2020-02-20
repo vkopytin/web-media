@@ -16,11 +16,15 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
         openLogin: false,
         transition: ['', ''],
         prevPanel: 'home',
-        currentPanel: 'home' as 'home' | 'profile' | 'releases' | 'search' | 'tracks',
+        currentPanel: 'home' as 'home' | 'playlists' | 'releases' | 'search' | 'tracks',
         showSelectDevices: 'hide' as 'show' | 'hide' | '',
         devices: [] as IDevice[],
-        profile: {} as IUserInfo
+        profile: {} as IUserInfo,
+        scrolledToBottom: false
     };
+    elScroller = null as HTMLElement;
+    onPageScroll = _.debounce(evnt => this.onPageScrollInternal(evnt), 500);
+
     binding = bindTo(this, () => current(AppViewModel), {
         'prop(openLogin)': 'openLogin',
         'prop(currentPanel)': 'currentPanel',
@@ -73,6 +77,36 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
                 showSelectDevices: lastValue === 'show' ? 'hide' : 'show'
             });
         }, 500);
+    }
+
+    onPageScrollInternal(evnt) {
+        const scrollThreshold = 15,
+            distance = this.getBottomDistance();
+        if (distance <= scrollThreshold) {
+            this.state.scrolledToBottom || this.setState({
+                ...this.state,
+                scrolledToBottom: true
+            }, () => {
+                this.setState({
+                    ...this.state,
+                    scrolledToBottom: false
+                });   
+            });
+        }
+    }
+
+    getBottomDistance() {
+        const elementScroll = this.elScroller;
+        if (elementScroll) {
+            return this.getElementBottomDistance();
+        }
+    }
+
+    getElementBottomDistance() {
+        const scroller = this.elScroller,
+            bottom = scroller.scrollHeight,
+            scrollY = scroller.scrollTop + scroller.clientHeight;
+        return bottom - scrollY;
     }
 
     render() {

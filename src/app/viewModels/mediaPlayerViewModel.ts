@@ -2,9 +2,11 @@ import { Events } from 'databindjs';
 import { Service } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
-import { ICurrentlyPlayingResult } from '../service/adapter/spotify';
-import { current } from '../utils';
+import { ICurrentlyPlayingResult, IPlayerResult } from '../service/adapter/spotify';
+import { current, asyncQueue } from '../utils';
 
+
+const lockSection = asyncQueue();
 
 class MediaPlayerViewModel extends Events {
 
@@ -57,6 +59,10 @@ class MediaPlayerViewModel extends Events {
         }
     }
 
+    volumeCommand = {
+        exec: (percent) => this.setVolume(percent)
+    }
+
     volumeDownCommand = {
         exec: () => {
             this.ss.playerVolumeDown();
@@ -67,6 +73,10 @@ class MediaPlayerViewModel extends Events {
         exec: () => {
             this.fetchData();
         }
+    }
+
+    seekPlaybackCommand = {
+        exec: (percent) => this.manualSeek(percent)
     }
 
     trackArray = [] as Array<TrackViewModelItem>;
@@ -80,14 +90,15 @@ class MediaPlayerViewModel extends Events {
     }
 
     async fetchData() {
-        const res = await this.ss.currentlyPlaying();
+        const res = await this.ss.player();
         if (res.isError) {
             return;
         }
-        const currentlyPlaying = res.val as ICurrentlyPlayingResult;
+        const currentlyPlaying = res.val as IPlayerResult;
 
         this.lastTime = +new Date();
         if (currentlyPlaying && currentlyPlaying.item) {
+            this.volume(currentlyPlaying.device.volume_percent);
             this.duration(currentlyPlaying.item.duration_ms);
             this.timePlayed(currentlyPlaying.progress_ms);
             this.isPlaying(currentlyPlaying.is_playing);
@@ -121,6 +132,31 @@ class MediaPlayerViewModel extends Events {
         } else {
             this.monitorPlyback();
         }
+    }
+
+    manualSeek(percent) {
+        const max = this.duration(),
+            timePlayed = max * percent / 100;
+            
+        lockSection.push(_.bind(async function (next) {
+            this.timePlayed(timePlayed);
+            await this.ss.seek(timePlayed);
+            _.delay(() => {
+                this.fetchData();
+                next();
+            }, 2000);
+        }, this));
+    }
+
+    async setVolume(percent) {
+        lockSection.push(_.bind(async function (next) {
+            this.volume(percent);
+            await this.ss.volume(percent);
+            _.delay(() => {
+                this.fetchData();
+                next();
+            }, 2000);
+        }, this));
     }
 
     playbackInfo(val?) {

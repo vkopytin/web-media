@@ -8,7 +8,12 @@ import { utils } from 'databindjs';
 const cn = utils.className;
 
 export const template = (view: HomeView) => <>
-    <div style={{height: '46px'}}></div>
+    <div style={{ height: '46px' }}></div>
+    <div className="center">
+        <button className=" button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
+            onClick={evnt => view.refreshCommand.exec()}
+        ></button>
+    </div>
     <ul className="todo-list table-view">
         {_.map(view.prop('items'), (item, index) => {
             return <li key={index} className="table-view-cell">

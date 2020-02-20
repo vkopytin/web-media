@@ -10,7 +10,7 @@ import * as _ from 'underscore';
 
 
 export interface ISearchViewProps {
-
+    loadMore?: boolean;
 }
 
 class SearchView extends withEvents(React.Component)<ISearchViewProps, {}> {
@@ -18,10 +18,13 @@ class SearchView extends withEvents(React.Component)<ISearchViewProps, {}> {
         term: '',
         items: [] as TrackViewModelItem[]
     };
+
+    loadMoreCommand = { exec() { } };
     
     binding = bindTo(this, () => current(SearchViewModel), {
         'prop(term)': 'term',
-        'prop(items)': 'tracks'
+        'prop(items)': 'tracks',
+        'loadMoreCommand': 'loadMoreCommand'
     });
 
     searchTracks = _.debounce(term => {
@@ -43,6 +46,12 @@ class SearchView extends withEvents(React.Component)<ISearchViewProps, {}> {
 
     componentWillUnmount() {
         unbindFrom(this.binding);
+    }
+
+    componentDidUpdate(prevProps: ISearchViewProps, prevState, snapshot) {
+        if (this.props.loadMore) {
+            this.loadMoreCommand.exec();
+        }
     }
 
     prop<K extends keyof SearchView['state']>(propName: K, val?: SearchView['state'][K]): SearchView['state'][K] {

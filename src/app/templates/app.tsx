@@ -50,7 +50,7 @@ export const template = (view: AppView) => <main>
             <DevicesView />
         </div>
         <header className="bar bar-nav">
-            <a className="icon icon-compose pull-right"
+            <a className="icon icon-person pull-right"
                 onClick={evnt => view.prop('openLogin', true)}
             ></a>
             <h1 className="title" onClick={evnt => view.toggleSelectDevices()}>
@@ -70,14 +70,14 @@ export const template = (view: AppView) => <main>
                 <span className="icon icon-home"></span>
                 <span className="tab-label">Home</span>
             </a>
-            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'profile')} href="#"
-                onClick={evnt => view.prop('currentPanel', 'profile')}
+            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'playlists')} href="#"
+                onClick={evnt => view.prop('currentPanel', 'playlists')}
             >
-                <span className="icon icon-person"></span>
-                <span className="tab-label">Profile</span>
+                <span className="icon icon icon-list"></span>
+                <span className="tab-label">Playlists</span>
             </a>
-            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'releases')} href="#"
-                onClick={evnt => view.prop('currentPanel', 'releases')}
+            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'tracks')} href="#"
+                onClick={evnt => view.prop('currentPanel', 'tracks')}
             >
                 <span className="icon icon-star-filled"></span>
                 <span className="tab-label">Favorites</span>
@@ -88,28 +88,37 @@ export const template = (view: AppView) => <main>
                 <span className="icon icon-search"></span>
                 <span className="tab-label">Search</span>
             </a>
-            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'tracks')} href="#"
-                onClick={evnt => view.prop('currentPanel', 'tracks')}
+            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'releases')} href="#"
+                onClick={evnt => view.prop('currentPanel', 'releases')}
             >
-                <span className="icon icon-gear"></span>
-                <span className="tab-label">Settings</span>
+                <span className="icon icon icon-info"></span>
+                <span className="tab-label">Releases</span>
             </a>
         </nav>
         <SwitchView currentView={view.prop('currentPanel')} onClick={evnt => view.toggleSelectDevices('show')}>
-            <section key="home" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}>
+            <section key="home" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
+                ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}
+            >
                 <HomeView />
             </section>
-            <section key="profile" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}>
+            <section key="playlists" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
+                ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}
+            >
                 <PlaylistsView />
             </section>
-            <section key="releases" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}>
+            <section key="tracks" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
+                ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}
+            >
+                <MyTracksView loadMore={view.prop('scrolledToBottom')} />
+            </section>
+            <section key="search" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
+                ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}
+            >
+                <SearchView loadMore={view.prop('scrolledToBottom')} />
+            </section>
+            <section key="releases" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
+                ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}>
                 <NewReleasesView />
-            </section>
-            <section key="search" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}>
-                <SearchView />
-            </section>
-            <section key="tracks" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}>
-                <MyTracksView />
             </section>
         </SwitchView>
     </section>

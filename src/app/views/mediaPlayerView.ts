@@ -19,6 +19,7 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
         duration: 1,
         timePlayed: 100,
         isPlaying: false,
+        volume: 80,
         trackName: '',
         albumName: ''
     };
@@ -30,22 +31,27 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
     volumeUpCommand = { exec() { } };
     volumeDownCommand = { exec() { } };
     refreshPlayback = { exec() { } };
+    seekPlaybackCommand = { exec(percent) { } };
+    volumeCommand = { exec(percent) { } };
     
     binding = bindTo(this, () => current(MediaPlayerViewModel), {
         'resumeCommand': 'resumeCommand',
         'pauseCommand': 'pauseCommand',
         'prevCommand': 'prevCommand',
         'nextCommand': 'nextCommand',
+        'volumeCommand': 'volumeCommand',
         'volumeUpCommand': 'volumeUpCommand',
         'volumeDownCommand': 'volumeDownCommand',
         'refreshPlayback': 'refreshPlayback',
+        'seekPlaybackCommand': 'seekPlaybackCommand',
         'prop(queue)': 'queue',
         'prop(currentPlayback)': 'playbackInfo',
         'prop(timePlayed)': 'timePlayed',
         'prop(duration)': 'duration',
         'prop(isPlaying)': 'isPlaying',
         'prop(trackName)': 'trackName',
-        'prop(albumName)': 'albumName'
+        'prop(albumName)': 'albumName',
+        'prop(volume)': 'volume'
     });
 
     constructor(props) {
@@ -72,6 +78,24 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
         }
 
         return this.state[propName];
+    }
+
+    seekTrack(evnt: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+        const rect = (evnt.currentTarget as HTMLDivElement).getBoundingClientRect();
+        const x = evnt.clientX - rect.left; //x position within the element.
+        const y = evnt.clientY - rect.top;  //y position within the element.
+        const progressPercent = x / rect.width * 100;
+
+        this.seekPlaybackCommand.exec(Math.round(progressPercent));
+    }
+
+    updateVolume(evnt: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+        const rect = (evnt.currentTarget as HTMLDivElement).getBoundingClientRect();
+        const x = evnt.clientX - rect.left; //x position within the element.
+        const y = evnt.clientY - rect.top;  //y position within the element.
+        const progressPercent = x / rect.width * 100;
+
+        this.volumeCommand.exec(Math.round(progressPercent));
     }
 
     timePlayed() {
