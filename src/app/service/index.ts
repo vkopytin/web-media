@@ -200,17 +200,6 @@ class Service {
         return result;
     }
 
-    async playTrack(deviceId: string, playlistUri: string, index: number) {
-        const spotify = await this.service(SpotifyService);
-        if (spotify.isError) {
-            return spotify;
-        }
-
-        const result = spotify.val.playTrack(deviceId, playlistUri, index);
-
-        return result;
-    }
-
     async seek(positionMs: number, deviceId = '') {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
@@ -222,13 +211,46 @@ class Service {
         return result;
     }
 
-    async playTracks(deviceId: string, trackUriList: string[], index: number) {
+    async play(deviceId: string = null, tracksUriList: string | string[] = null, indexOrUri: number | string = null) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
 
-        const result = spotify.val.playTracks(deviceId, trackUriList, index);
+        const result = spotify.val.play(deviceId, tracksUriList, indexOrUri);
+
+        return result;
+    }
+
+    async pause(deviceId: string = null) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.pause(deviceId);
+
+        return result;
+    }
+
+    async next(deviceId: string = null) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.next(deviceId);
+
+        return result;
+    }
+
+    async previous(deviceId: string = null) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.previous(deviceId);
 
         return result;
     }

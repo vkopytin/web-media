@@ -1,7 +1,7 @@
 import { Events } from 'databindjs';
 import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
-import { IUserInfo } from '../service/adapter/spotify';
+import { IDevice, IUserInfo } from '../service/adapter/spotify';
 import { DeviceViewModelItem } from './deviceViewModelItem';
 import { current } from '../utils';
 
@@ -58,7 +58,8 @@ class AppViewModel extends Events {
         const devicesResult = await this.ss.listDevices();
 
         if (!devicesResult.isError) {
-            this.devices(_.map(devicesResult.val, item => new DeviceViewModelItem(item as any)));
+            const devices = devicesResult.val as IDevice[];
+            this.devices(_.map(devices, item => new DeviceViewModelItem(item)));
         }
 
         const currentDevice = _.find(this.devices(), d => d.isActive()) || _.last(this.devices());

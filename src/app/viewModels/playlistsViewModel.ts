@@ -1,7 +1,7 @@
 import { Events } from 'databindjs';
 import { Service } from '../service';
 import * as _ from 'underscore';
-import { IUserPlaylistsResult } from '../service/adapter/spotify';
+import { IUserPlaylistsResult, IResponseResult, ISpotifySong } from '../service/adapter/spotify';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { current } from '../utils';
@@ -48,9 +48,9 @@ class PlaylistsViewModel extends Events {
                 return;
             }
 
-            const tracks = result.val;
+            const tracks = result.val as IResponseResult<ISpotifySong>;
         
-            this.tracks(_.map(tracks.items, (item, index) => new TrackViewModelItem(item as any, index)));
+            this.tracks(_.map(tracks.items, (item, index) => new TrackViewModelItem(item, index)));
         } else {
             this.tracks([]);
         }

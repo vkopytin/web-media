@@ -284,21 +284,30 @@ class SoptifyAdapter {
         });
     }
 
-    playTrack(deviceId: string, playlistUri: string, index: number) {
+    play(deviceId: string = null, tracksUriList: string | string[] = null, indexOrUri: number | string = null) {
+        const urlParts = ['https://api.spotify.com/v1/me/player/play'];
+        deviceId && urlParts.push($.param({
+            device_id: deviceId
+        }));
+        const numberRx = /^\d+$/i;
+        const position = numberRx.test('' + indexOrUri) ? +indexOrUri : -1;
+        const uri = (!numberRx.test('' + indexOrUri)) ? indexOrUri : '';
+        const uris = [].concat(tracksUriList);
+        const contextUri = uris.length === 1 ? uris[0] : '';
         return new Promise<any>((resolve, reject) => {
             $.ajax({
                 method: 'PUT',
-                url: `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+                url: urlParts.join('?'),
                 headers: {
                     'Authorization': 'Bearer ' + this.token
                 },
                 contentType: 'application/json',
-                data: JSON.stringify({
-                    context_uri: playlistUri,
+                data: JSON.stringify((tracksUriList && tracksUriList.length) ? {
+                    ...contextUri ? { context_uri: contextUri } : { uris },
                     offset: {
-                        position: index
+                        ...uri ? { uri } : { position }
                     }
-                }),
+                } : {}),
                 success(response) {
                     resolve(response);
                 },
@@ -309,23 +318,64 @@ class SoptifyAdapter {
         });
     }
 
-    playTracks(deviceId: string, tracksUriList: string[], index: number) {
-        return new Promise<any>((resolve, reject) => {
+    next(deviceId: string = '') {
+        const urlParts = ['https://api.spotify.com/v1/me/player/next'];
+        deviceId && urlParts.push($.param({
+            device_id: deviceId
+        }));
+        return new Promise<IResponseResult<IAlbum>>((resolve, reject) => {
             $.ajax({
-                method: 'PUT',
-                url: `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+                method: 'POST',
+                url: urlParts.join('?'),
                 headers: {
                     'Authorization': 'Bearer ' + this.token
                 },
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    uris: tracksUriList,
-                    offset: {
-                        position: index
-                    }
-                }),
                 success(response) {
-                    resolve(response);
+                    resolve(response.albums);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(new Error(`${textStatus}:${errorThrown}`));
+                }
+            });
+        });
+    }
+
+    previous(deviceId: string = '') {
+        const urlParts = ['https://api.spotify.com/v1/me/player/previous'];
+        deviceId && urlParts.push($.param({
+            device_id: deviceId
+        }));
+        return new Promise<IResponseResult<IAlbum>>((resolve, reject) => {
+            $.ajax({
+                method: 'POST',
+                url: urlParts.join('?'),
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                success(response) {
+                    resolve(response.albums);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(new Error(`${textStatus}:${errorThrown}`));
+                }
+            });
+        });
+    }
+
+    pause(deviceId: string = '') {
+        const urlParts = ['https://api.spotify.com/v1/me/player/pause'];
+        deviceId && urlParts.push($.param({
+            device_id: deviceId
+        }));
+        return new Promise<IResponseResult<IAlbum>>((resolve, reject) => {
+            $.ajax({
+                method: 'PUT',
+                url: urlParts.join('?'),
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                success(response) {
+                    resolve(response.albums);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
                     reject(new Error(`${textStatus}:${errorThrown}`));

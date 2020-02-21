@@ -4,8 +4,8 @@ import { SpotifyService } from '../spotify';
 
 class SpotifyServiceUnexpectedError extends Error {
 
-    static create(message: string, details = {}) {
-        return SpotifyServiceResult.error(new SpotifyServiceUnexpectedError(message, details));
+    static create<T>(message: string, details = {}) {
+        return SpotifyServiceResult.error<T, SpotifyServiceUnexpectedError>(new SpotifyServiceUnexpectedError(message, details));
     }
 
     constructor(public msg, public details) {

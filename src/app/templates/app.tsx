@@ -39,6 +39,12 @@ export const template = (view: AppView) => <main>
                         Login on Spotify
                     </a>
                 </p>
+                <p className="content-padded">
+                    <input type="text" placeholder="Full name" onChange={evnt => {
+                        window.location.replace('/index#access_token=' + evnt.target.value);
+                        window.location.reload(true);
+                    }}/>
+                </p>
             </div>
         </div>
         <div className={cn("popover ?visible", view.state.showSelectDevices === 'show')} style={{
@@ -60,7 +66,7 @@ export const template = (view: AppView) => <main>
         </header>
         <div className="bar bar-standard bar-header-secondary" style={{ height: '92px' }}>
             <div className="region">
-                <MediaPlayerView />
+                <MediaPlayerView addErrors={errors => view.addErrors(errors)} />
             </div>
         </div>
         <nav className="footer bar bar-tab bar-footer">

@@ -7,10 +7,11 @@ import {
 } from '../viewModels';
 import { current, formatTime } from '../utils';
 import * as _ from 'underscore';
+import { ServiceResult } from '../base/serviceResult';
 
 
 export interface IMediaPlayerViewProps {
-
+    addErrors(errors: ServiceResult<any, Error>[]);
 }
 
 class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps, {}> {
@@ -21,7 +22,8 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
         isPlaying: false,
         volume: 80,
         trackName: '',
-        albumName: ''
+        albumName: '',
+        errors: [] as ServiceResult<any, Error>[]
     };
 
     resumeCommand = { exec() { } };
@@ -51,7 +53,8 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
         'prop(isPlaying)': 'isPlaying',
         'prop(trackName)': 'trackName',
         'prop(albumName)': 'albumName',
-        'prop(volume)': 'volume'
+        'prop(volume)': 'volume',
+        'errors': 'errors'
     });
 
     constructor(props) {
@@ -111,6 +114,15 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
 
     titleLeft() {
         return formatTime(this.prop('duration') - this.prop('timePlayed'));
+    }
+
+    errors(val?: ServiceResult<any, Error>[]) {
+        if (arguments.length && val !== this.prop('errors')) {
+            this.prop('errors', val);
+            this.props.addErrors(val);
+        }
+
+        return this.prop('errors');
     }
 
     render() {

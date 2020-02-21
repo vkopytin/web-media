@@ -34,15 +34,15 @@ class TrackViewModelItem extends Events {
         return this.song.track.uri;
     }
 
-    async play(playlistUri) {
+    async play(playlistUri: string) {
         const device = this.appViewModel.currentDevice();
 
-        this.ss.playTrack(device.id(), playlistUri, this.index);
+        this.ss.play(device.id(), playlistUri, this.uri());
     }
 
     async playTracks(tracks: TrackViewModelItem[], item: TrackViewModelItem) {
         const device = this.appViewModel.currentDevice();
-        this.ss.playTracks(device.id(), _.map(tracks, item => item.uri()), this.index);
+        this.ss.play(device.id(), _.map(tracks, item => item.uri()), this.uri());
     }
 }
 

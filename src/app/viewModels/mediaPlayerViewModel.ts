@@ -4,6 +4,7 @@ import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
 import { ICurrentlyPlayingResult, IPlayerResult } from '../service/adapter/spotify';
 import { current, asyncQueue } from '../utils';
+import { ServiceResult } from '../base/serviceResult';
 
 
 const lockSection = asyncQueue();
@@ -26,31 +27,36 @@ class MediaPlayerViewModel extends Events {
             timeLeft() { return ''; },
             timePlayed() { return ''; },
             duration() { return ''; }
-        }
+        },
+        errors: [] as ServiceResult<any, Error>[]
     };
 
     resumeCommand = {
-        exec: () => {
-            this.ss.playerResume();
-        }
+        exec: _.bind(async function (this: MediaPlayerViewModel) {
+            await this.ss.play();
+            this.fetchData();
+        }, this)
     };
 
     pauseCommand = {
-        exec: () => {
-            this.ss.playerPause();
-        }
+        exec: _.bind(async function (this: MediaPlayerViewModel) {
+            await this.ss.pause();
+            this.fetchData();
+        }, this)
     }
 
     prevCommand = {
-        exec: () => {
-            this.ss.playerPreviouseTrack();
-        }
+        exec: _.bind(async function (this: MediaPlayerViewModel) {
+            await this.ss.previous();
+            this.fetchData();
+        }, this)
     }
 
     nextCommand = {
-        exec: () => {
-            this.ss.playerNextTrack();
-        }
+        exec: _.bind(async function (this: MediaPlayerViewModel) {
+            await this.ss.next();
+            this.fetchData();
+        }, this)
     }
 
     volumeUpCommand = {
@@ -80,6 +86,8 @@ class MediaPlayerViewModel extends Events {
     }
 
     trackArray = [] as Array<TrackViewModelItem>;
+    monitorPlyback = _.debounce(this.monitorPlybackInternal, 500);
+    autoSeek = _.debounce(this.autoSeekInternal, 500);
 
     isInit = _.delay(() => this.fetchData(), 100);
 
@@ -87,12 +95,15 @@ class MediaPlayerViewModel extends Events {
         super();
 
         this.ss.spotifyPlayer();
+        
     }
 
     async fetchData() {
         const res = await this.ss.player();
         if (res.isError) {
-            return;
+            this.errors([res]);
+
+            return res;
         }
         const currentlyPlaying = res.val as IPlayerResult;
 
@@ -106,19 +117,33 @@ class MediaPlayerViewModel extends Events {
             this.albumName(currentlyPlaying.item.album.name)
             this.autoSeek();
         } else {
-            this.isPlaying(currentlyPlaying.is_playing || false);
+            this.isPlaying(currentlyPlaying?.is_playing || false);
         }
     }
 
-    monitorPlyback() {
-        if (!this.isPlaying()) {
-            this.fetchData();
-            _.delay(() => this.monitorPlyback(), 30 * 1000);
+    errors(val: ServiceResult<any, Error>[]) {
+        if (arguments.length && val !== this.settings.errors) {
+            this.settings.errors = val;
+            this.trigger('change:errors');
         }
+
+        return this.settings.errors;
+    }
+
+    monitorPlybackInternal() {
+        _.delay(_.bind(async function (this: MediaPlayerViewModel) {
+            if (!this.isPlaying()) {
+                const res = await this.fetchData();
+                if (res.isError) {
+                    return;
+                }
+                this.monitorPlyback();
+            }
+        }, this), 5 * 1000);
     }
 
     lastTime = +new Date();
-    autoSeek() {
+    autoSeekInternal() {
         if (this.isPlaying()) {
             const newTime = +new Date();
             const lastPlayed = this.timePlayed() + newTime - this.lastTime;

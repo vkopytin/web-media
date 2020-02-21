@@ -8,12 +8,12 @@ class SpotifyServiceResult<T, E extends Error> extends ServiceResult<T, E> {
         super(result, error);
     }
 
-    static success<T>(val: T) {
-        return new SpotifyServiceResult(val, null as Error);
+    static success<T, Y extends Error = Error>(val: T) {
+        return new SpotifyServiceResult(val, null as Y);
     }
 
-    static error<Y extends Error>(val: Y) {
-        const error = new SpotifyServiceResult(null, val);
+    static error<T, Y extends Error = Error>(val: Y) {
+        const error = new SpotifyServiceResult(null as T, val);
         error.isError = true;
 
         return error;
