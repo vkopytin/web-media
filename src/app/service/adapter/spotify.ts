@@ -1,5 +1,6 @@
 import * as $ from 'jquery';
 import { ErrorWithStatus } from './errors/errorWithStatus';
+import { resolve } from 'dns';
 
 export interface IImageInfo {
     width: number;
@@ -151,6 +152,10 @@ export interface ICurrentlyPlayingResult {
     is_playing: boolean;
 }
 
+const delayWithin = (ms = 800) => new Promise((resolve) => {
+    setTimeout(() => resolve(true), ms);
+});
+
 class SoptifyAdapter {
 
     constructor(public token: string) {
@@ -168,7 +173,7 @@ class SoptifyAdapter {
                     resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
@@ -185,13 +190,14 @@ class SoptifyAdapter {
                     resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
     }
 
     devices() {
+        const ready = delayWithin();
         return new Promise<IDevicesResponse>((resolve, reject) => {
             $.ajax({
                 url: 'https://api.spotify.com/v1/me/player/devices',
@@ -199,10 +205,10 @@ class SoptifyAdapter {
                     'Authorization': 'Bearer ' + this.token
                 },
                 success(response: IDevicesResponse) {
-                    resolve(response);
+                    ready.then(() => resolve(response));
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
@@ -226,7 +232,7 @@ class SoptifyAdapter {
                     resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
@@ -243,7 +249,7 @@ class SoptifyAdapter {
                     resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
@@ -260,7 +266,7 @@ class SoptifyAdapter {
                     resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
@@ -277,7 +283,7 @@ class SoptifyAdapter {
                     resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
@@ -311,13 +317,14 @@ class SoptifyAdapter {
                     resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
     }
 
     play(deviceId: string = null, tracksUriList: string | string[] = null, indexOrUri: number | string = null) {
+        const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/player/play'];
         deviceId && urlParts.push($.param({
             device_id: deviceId
@@ -342,16 +349,17 @@ class SoptifyAdapter {
                     }
                 } : {}),
                 success(response) {
-                    resolve(response);
+                    ready.then(() => resolve(response));
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
     }
 
     next(deviceId: string = '') {
+        const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/player/next'];
         deviceId && urlParts.push($.param({
             device_id: deviceId
@@ -364,16 +372,17 @@ class SoptifyAdapter {
                     'Authorization': 'Bearer ' + this.token
                 },
                 success(response) {
-                    resolve(response);
+                    ready.then(() => resolve(response));
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
     }
 
     previous(deviceId: string = '') {
+        const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/player/previous'];
         deviceId && urlParts.push($.param({
             device_id: deviceId
@@ -386,16 +395,17 @@ class SoptifyAdapter {
                     'Authorization': 'Bearer ' + this.token
                 },
                 success(response) {
-                    resolve(response);
+                    ready.then(() => resolve(response));
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
     }
 
     pause(deviceId: string = '') {
+        const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/player/pause'];
         deviceId && urlParts.push($.param({
             device_id: deviceId
@@ -408,10 +418,10 @@ class SoptifyAdapter {
                     'Authorization': 'Bearer ' + this.token
                 },
                 success(response) {
-                    resolve(response);
+                    ready.then(() => resolve(response));
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
@@ -428,7 +438,7 @@ class SoptifyAdapter {
                     resolve(response.albums);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
@@ -451,13 +461,14 @@ class SoptifyAdapter {
                     resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
     }
 
-    player(deviceId='', play=null as boolean) {
+    player(deviceId = '', play = null as boolean) {
+        const ready = delayWithin();
         return new Promise<IPlayerResult>((resolve, reject) => {
             $.ajax({
                 method: play===null ? 'GET': 'PUT',
@@ -473,16 +484,17 @@ class SoptifyAdapter {
                     })
                 },
                 success(response) {
-                    resolve(response);
+                    ready.then(() => resolve(response));
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
     }
 
-    seek(positionMs, deviceId='') {
+    seek(positionMs, deviceId = '') {
+        const ready = delayWithin();
         return new Promise<IPlayerResult>((resolve, reject) => {
             $.ajax({
                 method: 'PUT',
@@ -496,16 +508,17 @@ class SoptifyAdapter {
                 contentType: 'application/json',
                 data: JSON.stringify({}),
                 success(response) {
-                    resolve(response);
+                    ready.then(() => resolve(response));
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
     }
 
     currentlyPlaying() {
+        const ready = delayWithin();
         return new Promise<ICurrentlyPlayingResult>((resolve, reject) => {
             $.ajax({
                 url: 'https://api.spotify.com/v1/me/player/currently-playing',
@@ -513,10 +526,10 @@ class SoptifyAdapter {
                     'Authorization': 'Bearer ' + this.token
                 },
                 success(response) {
-                    resolve(response);
+                    ready.then(() => resolve(response));
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
@@ -537,13 +550,107 @@ class SoptifyAdapter {
                     resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
+                }
+            });
+        });
+    }
+
+    albums(offset = 0, limit = 20) {
+        return new Promise<IResponseResult<IAlbum>>((resolve, reject) => {
+            $.ajax({
+                url: 'https://api.spotify.com/v1/me/albums',
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                data: {
+                    offset: offset,
+                    limit: limit
+                },
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
+                }
+            });
+        });
+    }
+
+    addTrack(trackId) {
+        const ready = delayWithin();
+        const urlParts = ['https://api.spotify.com/v1/me/tracks'];
+        urlParts.push($.param({
+            ids: [].concat(trackId).join(',')
+        }));
+        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
+            $.ajax({
+                method: 'PUT',
+                url: urlParts.join('?'),
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({}),
+                success(response) {
+                    ready.then(() => resolve(response));
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
+                }
+            });
+        });
+    }
+
+    removeTrack(trackId) {
+        const ready = delayWithin();
+        const urlParts = ['https://api.spotify.com/v1/me/tracks'];
+        urlParts.push($.param({
+            ids: [].concat(trackId).join(',')
+        }));
+        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
+            $.ajax({
+                method: 'DELETE',
+                url: urlParts.join('?'),
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({}),
+                success(response) {
+                    ready.then(() => resolve(response));
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
+                }
+            });
+        });
+    }
+
+    hasTrack(trackId) {
+        const ready = delayWithin();
+        const urlParts = ['https://api.spotify.com/v1/me/tracks/contains'];
+        urlParts.push($.param({
+            ids: [].concat(trackId).join(',')
+        }));
+        return new Promise<boolean[]>((resolve, reject) => {
+            $.ajax({
+                url: urlParts.join('?'),
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                success(response: boolean[]) {
+                    ready.then(() => resolve(response));
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
     }
 
     volume(precent, deviceId?) {
+        const ready = delayWithin();
         return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
                 method: 'PUT',
@@ -557,10 +664,82 @@ class SoptifyAdapter {
                 contentType: 'application/json',
                 data: JSON.stringify({}),
                 success(response) {
-                    resolve(response);
+                    ready.then(() => resolve(response));
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(new Error(`${textStatus}:${errorThrown}`));
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
+                }
+            });
+        });
+    }
+
+    addAlbums(albumIds: string | string[]) {
+        const ready = delayWithin();
+        const urlParts = ['https://api.spotify.com/v1/me/albums'];
+        urlParts.push($.param({
+            ids: [].concat(albumIds).join(',')
+        }));
+        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
+            $.ajax({
+                method: 'PUT',
+                url: urlParts.join('?'),
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({}),
+                success(response) {
+                    ready.then(() => resolve(response));
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
+                }
+            });
+        });
+    }
+
+    removeAlbums(albumIds: string | string[]) {
+        const ready = delayWithin();
+        const urlParts = ['https://api.spotify.com/v1/me/albums'];
+        urlParts.push($.param({
+            ids: [].concat(albumIds).join(',')
+        }));
+        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
+            $.ajax({
+                method: 'DELETE',
+                url: urlParts.join('?'),
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({}),
+                success(response) {
+                    ready.then(() => resolve(response));
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
+                }
+            });
+        });
+    }
+
+    hasAlbums(albumIds: string | string[]) {
+        const ready = delayWithin();
+        const urlParts = ['https://api.spotify.com/v1/me/albums/contains'];
+        urlParts.push($.param({
+            ids: [].concat(albumIds).join(',')
+        }));
+        return new Promise<boolean[]>((resolve, reject) => {
+            $.ajax({
+                url: urlParts.join('?'),
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                success(response: boolean[]) {
+                    ready.then(() => resolve(response));
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });

@@ -25,7 +25,8 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
         trackName: '',
         albumName: '',
         errors: [] as ServiceResult<any, Error>[],
-        thumbnailUrl: ''
+        thumbnailUrl: '',
+        isLiked: false
     };
 
     resumeCommand = { exec() { } };
@@ -34,7 +35,9 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
     nextCommand = { exec() { } };
     volumeUpCommand = { exec() { } };
     volumeDownCommand = { exec() { } };
-    refreshPlayback = { exec() { } };
+    refreshPlaybackCommand = { exec() { } };
+    likeSongCommand = { exec() { } };
+    unlikeSongCommand = { exec() { } };
     seekPlaybackCommand = { exec(percent) { } };
     volumeCommand = { exec(percent) { } };
     
@@ -46,7 +49,9 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
         'volumeCommand': 'volumeCommand',
         'volumeUpCommand': 'volumeUpCommand',
         'volumeDownCommand': 'volumeDownCommand',
-        'refreshPlayback': 'refreshPlayback',
+        'refreshPlaybackCommand': 'refreshPlaybackCommand',
+        'likeSongCommand': 'likeSongCommand',
+        'unlikeSongCommand': 'unlikeSongCommand',
         'seekPlaybackCommand': 'seekPlaybackCommand',
         'prop(queue)': 'queue',
         'prop(currentPlayback)': 'playbackInfo',
@@ -56,8 +61,9 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
         'prop(trackName)': 'trackName',
         'prop(albumName)': 'albumName',
         'prop(volume)': 'volume',
-        'errors': 'errors',
         'prop(thumbnailUrl)': 'thumbnailUrl',
+        'prop(isLiked)': 'isLiked',
+        'errors': 'errors',
         'props.currentTrackId': 'currentTrackId'
     });
 

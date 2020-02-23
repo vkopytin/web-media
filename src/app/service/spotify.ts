@@ -216,6 +216,40 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
+    async addTrack(trackId: string) {
+        try {
+            const res = await this.adapter.addTrack(trackId);
+
+            this.onStateChanged();
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async removeTrack(trackId: string) {
+        try {
+            const res = await this.adapter.removeTrack(trackId);
+
+            this.onStateChanged();
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async hasTrack(trackId: string) {
+        try {
+            const res = await this.adapter.hasTrack(trackId);
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
     async listAlbumTracks(albumId) {
         try {
             const res = await this.adapter.listAlbumTracks(albumId);
@@ -270,6 +304,50 @@ class SpotifyService extends withEvents(BaseService) {
     async tracks(offset, limit) {
         try {
             const res = await this.adapter.tracks(offset, limit);
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async albums(offset, limit) {
+        try {
+            const res = await this.adapter.albums(offset, limit);
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async addAlbums(albumIds: string | string[]) {
+        try {
+            const res = await this.adapter.addAlbums(albumIds);
+
+            this.onStateChanged();
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async removeAlbums(albumIds: string | string[]) {
+        try {
+            const res = await this.adapter.removeAlbums(albumIds);
+
+            this.onStateChanged();
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async hasAlbums(albumIds: string | string[]) {
+        try {
+            const res = await this.adapter.hasAlbums(albumIds);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {

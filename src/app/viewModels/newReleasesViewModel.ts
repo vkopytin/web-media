@@ -1,20 +1,23 @@
 import { Events } from 'databindjs';
-import { Service } from '../service';
+import { Service, SpotifyService } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
 import { IResponseResult, IAlbum, ITrack } from '../service/adapter/spotify';
 import { AlbumViewModelItem } from './albumViewModelItem';
-import { current } from '../utils';
+import { current, assertNoErrors } from '../utils';
+import { ServiceResult } from '../base/serviceResult';
 
 
 class NewReleasesViewModel extends Events {
 
     settings = {
-        currentAlbum: null as AlbumViewModelItem
+        currentAlbum: null as AlbumViewModelItem,
+        errors: [] as ServiceResult<any, Error>[]
     };
 
-    releasesArray = [] as Array<AlbumViewModelItem>;
+    releasesArray = [] as AlbumViewModelItem[];
     tracksArray = [] as TrackViewModelItem[];
+    myAlbumsArray = [] as AlbumViewModelItem[];
 
     selectAlbumCommand = {
         exec: (album: AlbumViewModelItem) => {
@@ -22,29 +25,51 @@ class NewReleasesViewModel extends Events {
         }
     };
 
+    likeAlbumCommand = {
+        exec: (album: AlbumViewModelItem) => this.likeAlbum(album)
+    };
+
+    unlikeAlbumCommand = {
+        exec: (album: AlbumViewModelItem) => this.unlikeAlbum(album)
+    };
+
     isInit = _.delay(() => this.fetchData(), 100);
 
     constructor(private ss = current(Service)) {
         super();
 
-        this.ss.spotifyPlayer();
+        _.delay(() => this.connect());
     }
+
+    async connect() {
+        const spotifyResult = await this.ss.service(SpotifyService);
+        if (spotifyResult.isError) {
+            this.errors([spotifyResult]);
+        }
+        if (assertNoErrors(spotifyResult, e => this.errors(e))) {
+            return;
+        }
+        spotifyResult.val.on('change:state', state => this.checkAlbums());
+    }
+
 
     async fetchData() {
         const res = await this.ss.newReleases();
-        if (res.isError) {
+        if (assertNoErrors(res, e => this.errors(e))) {
             return;
         }
         const recomendations = res.val as IResponseResult<IAlbum>;
 
         this.newReleases(_.map(recomendations.items, album => new AlbumViewModelItem(album)));
+
+        this.checkAlbums();
     }
 
     async loadTracks() {
         const currentAlbum = this.currentAlbum();
         if (currentAlbum) {
             const result = await this.ss.listAlbumTracks(currentAlbum.id());
-            if (result.isError) {
+            if (assertNoErrors(result, e => this.errors(e))) {
                 return;
             }
 
@@ -60,6 +85,21 @@ class NewReleasesViewModel extends Events {
         } else {
             this.tracks([]);
         }
+    }
+
+    async checkAlbums() {
+        const albums = this.newReleases();
+        const ids = _.map(albums, album => album.id());
+        const likedResult = await this.ss.hasAlbums(ids);
+        if (assertNoErrors(likedResult, e => this.errors(e))) {
+            return;
+        }
+        const likedAlbums = [];
+        _.each(likedResult.val as boolean[], (liked, index) => {
+            albums[index].isLiked(liked);
+            liked && likedAlbums.push(albums[index]);
+        });
+        this.likedAlbums(likedAlbums);
     }
 
     newReleases(value?: AlbumViewModelItem[]) {
@@ -90,6 +130,37 @@ class NewReleasesViewModel extends Events {
         return this.tracksArray;
     }
 
+    likedAlbums(val?: AlbumViewModelItem[]) {
+        if (arguments.length && this.myAlbumsArray !== val) {
+            this.myAlbumsArray = val;
+            this.trigger('change:likedAlbums');
+        }
+
+        return this.myAlbumsArray;
+    }
+
+    errors(val?: ServiceResult<any, Error>[]) {
+        if (arguments.length && val !== this.settings.errors) {
+            this.settings.errors = val;
+            this.trigger('change:errors');
+        }
+
+        return this.settings.errors;
+    }
+
+    async likeAlbum(album: AlbumViewModelItem) {
+        const likedResult = await this.ss.addAlbums(album.id());
+        if (assertNoErrors(likedResult, e => this.errors(e))) {
+            return;
+        }
+    }
+
+    async unlikeAlbum(album: AlbumViewModelItem) {
+        const likedResult = await this.ss.removeAlbums(album.id());
+        if (assertNoErrors(likedResult, e => this.errors(e))) {
+            return;
+        }
+    }
 }
 
 export { NewReleasesViewModel };

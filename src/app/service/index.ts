@@ -150,6 +150,36 @@ class Service {
         return result;
     }
 
+    async addTrack(trackId: string) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.addTrack(trackId);
+
+        return result;
+    }
+
+    async removeTrack(trackId: string) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.removeTrack(trackId);
+
+        return result;
+    }
+
+    async hasTrack(trackId: string) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.hasTrack(trackId);
+
+        return result;
+    }
+
     async volume(percent) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
@@ -319,6 +349,48 @@ class Service {
         }
 
         const result = spotify.val.tracks(offset, limit);
+
+        return result;
+    }
+
+    async albums(offset?, limit?) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.albums(offset, limit);
+
+        return result;
+    }
+
+
+    async addAlbums(albumIds: string | string[]) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.addAlbums(albumIds);
+
+        return result;
+    }
+
+    async removeAlbums(albumIds: string | string[]) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.removeAlbums(albumIds);
+
+        return result;
+    }
+
+    async hasAlbums(albumIds: string | string[]) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.hasAlbums(albumIds);
 
         return result;
     }

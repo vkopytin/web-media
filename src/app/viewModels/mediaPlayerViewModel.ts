@@ -21,7 +21,9 @@ class MediaPlayerViewModel extends Events {
         volume: 0,
         thumbnailUrl: '',
         errors: [] as ServiceResult<any, Error>[],
-        currentTrackId: ''
+        currentTrackId: '',
+        currentTrackUri: '',
+        isLiked: false
     };
 
     resumeCommand = {
@@ -52,10 +54,18 @@ class MediaPlayerViewModel extends Events {
         exec: () => this.volumeDown()
     }
 
-    refreshPlayback = {
+    refreshPlaybackCommand = {
         exec: () => {
             this.fetchData();
         }
+    }
+
+    likeSongCommand = {
+        exec: () => this.likeTrack()
+    }
+
+    unlikeSongCommand = {
+        exec: () => this.unlikeTrack()
     }
 
     seekPlaybackCommand = {
@@ -63,7 +73,7 @@ class MediaPlayerViewModel extends Events {
     }
 
     trackArray = [] as Array<TrackViewModelItem>;
-    monitorPlyback = _.debounce(this.monitorPlybackInternal, 500);
+    monitorPlyback = _.debounce(this.monitorPlybackInternal, 5 * 1000);
     autoSeek = _.debounce(this.autoSeekInternal, 500);
     fetchData = _.debounce(this.fetchDataInternal, 500);
 
@@ -100,13 +110,14 @@ class MediaPlayerViewModel extends Events {
     }
 
     updateState(res?) {
-        _.delay(() => this.fetchData(), 1000);
+        this.fetchData();
     }
 
     async updateFromPlayerState(state: IWebPlaybackState) {
         if (!state) {
             return;
         }
+        this.currentTrackUri(state.track_window.current_track.uri);
         this.currentTrackId(state.track_window.current_track.id);
         this.duration(state.duration);
         this.timePlayed(state.position);
@@ -115,6 +126,7 @@ class MediaPlayerViewModel extends Events {
         this.albumName(state.track_window.current_track.album.name);
         this.thumbnailUrl(_.last(state.track_window.current_track.album.images).url);
         this.autoSeek();
+        this.checkTrackExists();
         const playerResult = await this.ss.spotifyPlayer();
         if (assertNoErrors(playerResult, e => this.errors(e))) {
             return;
@@ -131,6 +143,7 @@ class MediaPlayerViewModel extends Events {
 
         this.lastTime = +new Date();
         if (currentlyPlaying && currentlyPlaying.item) {
+            this.currentTrackUri(currentlyPlaying.item.uri);
             this.currentTrackId(currentlyPlaying.item.id);
             this.volume(currentlyPlaying.device.volume_percent);
             this.duration(currentlyPlaying.item.duration_ms);
@@ -140,9 +153,19 @@ class MediaPlayerViewModel extends Events {
             this.albumName(currentlyPlaying.item.album.name)
             this.thumbnailUrl(_.last(currentlyPlaying.item.album.images).url)
             this.autoSeek();
+            this.checkTrackExists();
         } else {
             this.isPlaying(currentlyPlaying?.is_playing || false);
         }
+    }
+
+    async checkTrackExists() {
+        const trackExistsResult = await this.ss.hasTrack(this.currentTrackId());
+        if (assertNoErrors(trackExistsResult, e => this.errors(e))) {
+            return;
+        }
+        const likedResult = trackExistsResult.val as boolean[];
+        this.isLiked(_.first(likedResult));
     }
 
     errors(val?: ServiceResult<any, Error>[]) {
@@ -154,13 +177,11 @@ class MediaPlayerViewModel extends Events {
         return this.settings.errors;
     }
 
-    monitorPlybackInternal() {
-        _.delay(_.bind(async function (this: MediaPlayerViewModel) {
-            if (!this.isPlaying()) {
-                await this.fetchData();
-                this.monitorPlyback();
-            }
-        }, this), 5 * 1000);
+    async monitorPlybackInternal() {
+        if (!this.isPlaying()) {
+            await this.fetchData();
+            this.monitorPlyback();
+        }
     }
 
     lastTime = +new Date();
@@ -338,6 +359,24 @@ class MediaPlayerViewModel extends Events {
         }, this));
     }
 
+    async likeTrack() {
+        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+            const stateResult = await this.ss.addTrack(this.currentTrackId());
+            assertNoErrors(stateResult, e => this.errors(e));
+
+            next();
+        }, this));
+    }
+
+    async unlikeTrack() {
+        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+            const stateResult = await this.ss.removeTrack(this.currentTrackId());
+            assertNoErrors(stateResult, e => this.errors(e));
+
+            next();
+        }, this));
+    }
+
     queue(value?: any[]) {
         if (arguments.length && value !== this.trackArray) {
             this.trackArray = value;
@@ -426,6 +465,24 @@ class MediaPlayerViewModel extends Events {
         }
 
         return this.settings.currentTrackId;
+    }
+
+    currentTrackUri(val?) {
+        if (arguments.length && val !== this.settings.currentTrackUri) {
+            this.settings.currentTrackUri = val;
+            this.trigger('change:currentTrackUri');
+        }
+
+        return this.settings.currentTrackUri;
+    }
+
+    isLiked(val?) {
+        if (arguments.length && val !== this.settings.isLiked) {
+            this.settings.isLiked = !!val;
+            this.trigger('change:isLiked');
+        }
+
+        return this.settings.isLiked;
     }
 }
 

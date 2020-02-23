@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as _ from 'underscore';
 import { template } from '../templates/newReleases';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
@@ -16,10 +17,19 @@ class NewReleasesView extends withEvents(React.Component)<INewReleasesViewProps,
     state = {
         openLogin: false,
         releases: [] as AlbumViewModelItem[],
-        currentAlbum: null as AlbumViewModelItem
+        currentAlbum: null as AlbumViewModelItem,
+        likedAlbums: [] as AlbumViewModelItem[]
     };
     
     selectAlbumCommand = {
+        exec(album: AlbumViewModelItem) { }
+    };
+
+    likeAlbumCommand = {
+        exec(album: AlbumViewModelItem) { }
+    };
+
+    unlikeAlbumCommand = {
         exec(album: AlbumViewModelItem) { }
     };
 
@@ -27,7 +37,10 @@ class NewReleasesView extends withEvents(React.Component)<INewReleasesViewProps,
         'prop(releases)': 'newReleases',
         'prop(currentAlbum)': 'currentAlbum',
         'selectAlbumCommand': 'selectAlbumCommand',
-        'prop(tracks)': 'tracks'
+        'unlikeAlbumCommand': 'unlikeAlbumCommand',
+        'likeAlbumCommand': 'likeAlbumCommand',
+        'prop(tracks)': 'tracks',
+        'prop(likedAlbums)': 'likedAlbums'
     });
 
     constructor(props) {
@@ -54,6 +67,10 @@ class NewReleasesView extends withEvents(React.Component)<INewReleasesViewProps,
         }
 
         return this.state[propName];
+    }
+
+    isLiked(album: AlbumViewModelItem) {
+        return !!_.find(this.prop('likedAlbums'), item => item.id() === album.id());
     }
 
     render() {

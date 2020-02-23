@@ -4,6 +4,11 @@ import { IAlbum } from '../service/adapter/spotify';
 
 
 class AlbumViewModelItem extends Events {
+
+    settings = {
+        isLiked: false
+    };
+
     constructor(public album: IAlbum) {
         super();
     }
@@ -43,6 +48,15 @@ class AlbumViewModelItem extends Events {
 
     totalTracks() {
         return this.album.total_tracks;
+    }
+
+    isLiked(val?) {
+        if (arguments.length && val !== this.settings.isLiked) {
+            this.settings.isLiked = val;
+            this.trigger('change:isLiked');
+        }
+
+        return this.settings.isLiked;
     }
 }
 

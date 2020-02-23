@@ -64,10 +64,15 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
                 </div>
             </div>
             <div className="extra-controls">
-                <button className="track-more icon icon-more-vertical"
-                    onClick={evnt => view.refreshPlayback.exec()}
+                {view.prop('isLiked') && <button className="track-more icon icon-star-filled"
+                    onClick={evnt => view.unlikeSongCommand.exec()}
+                ></button>}
+                {view.prop('isLiked') || <button className="track-more icon icon-star"
+                    onClick={evnt => view.likeSongCommand.exec()}
+                ></button>}
+                <button className="track-more icon icon-refresh"
+                    onClick={evnt => view.refreshPlaybackCommand.exec()}
                 ></button>
-                <button className="track-more icon icon-refresh"></button>
             </div>
         </div>
     </div>
