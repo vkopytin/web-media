@@ -163,6 +163,16 @@ module.exports = (options, workingDir) => {
         test: /libs\/jquery\/plugins\/jquery\.mobile\.custom/,
         loader: 'imports-loader?jQuery=jquery&jquery.migrate'
       }, {
+        test: /\.less$/,
+        use: [
+          // Creates `style` nodes from JS strings
+          'style-loader',
+          // Translates CSS into CommonJS
+          'css-loader',
+          // compiles Less to CSS
+          'less-loader'
+        ],
+      }, {
         test: /\.s[ac]ss$/i,
         use: [
           // Creates `style` nodes from JS strings

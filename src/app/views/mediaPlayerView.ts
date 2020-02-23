@@ -11,7 +11,7 @@ import { ServiceResult } from '../base/serviceResult';
 
 
 export interface IMediaPlayerViewProps {
-    addErrors(errors: ServiceResult<any, Error>[]);
+    showErrors(errors: ServiceResult<any, Error>[]);
 }
 
 class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps, {}> {
@@ -23,7 +23,8 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
         volume: 80,
         trackName: '',
         albumName: '',
-        errors: [] as ServiceResult<any, Error>[]
+        errors: [] as ServiceResult<any, Error>[],
+        thumbnailUrl: ''
     };
 
     resumeCommand = { exec() { } };
@@ -54,7 +55,8 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
         'prop(trackName)': 'trackName',
         'prop(albumName)': 'albumName',
         'prop(volume)': 'volume',
-        'errors': 'errors'
+        'errors': 'errors',
+        'prop(thumbnailUrl)': 'thumbnailUrl'
     });
 
     constructor(props) {
@@ -119,7 +121,7 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
     errors(val?: ServiceResult<any, Error>[]) {
         if (arguments.length && val !== this.prop('errors')) {
             this.prop('errors', val);
-            this.props.addErrors(val);
+            this.props.showErrors(val);
         }
 
         return this.prop('errors');

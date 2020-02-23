@@ -4,6 +4,7 @@ import { SettingsService } from './settings';
 import { SpotifyPlayerService } from './spotifyPlayer';
 import { asyncQueue } from '../utils';
 import * as _ from 'underscore';
+import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult';
 
 
 const lockSpotifyService = asyncQueue();
@@ -86,9 +87,19 @@ class Service {
     }
 
     async spotifyPlayer() {
-        const player = await this.service(SpotifyPlayerService);
+        const playerResult = await this.service(SpotifyPlayerService);
 
-        return player;
+        return playerResult;
+    }
+
+    async spotifyPlayerState() {
+        const playerResult = await this.service(SpotifyPlayerService);
+
+        if (playerResult.isError) {
+            return playerResult;
+        }
+
+        return SpotifyPlayerServiceResult.success(await playerResult.val.getCurrentState());
     }
 
     async playerResume() {
@@ -107,14 +118,6 @@ class Service {
     async playerPreviouseTrack() {
         const player = await this.spotifyPlayer();
         player.val.previouseTrack();
-    }
-    async playerVolumeUp() {
-        const player = await this.spotifyPlayer();
-        player.val.volumeUp();
-    }
-    async playerVolumeDown() {
-        const player = await this.spotifyPlayer();
-        player.val.volumeDown();
     }
 
     async recentlyPlayed() {
@@ -277,13 +280,13 @@ class Service {
         return result;
     }
 
-    async player() {
+    async player(deviceId='', play=null) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
 
-        const result = spotify.val.player();
+        const result = spotify.val.player(deviceId, play);
 
         return result;
     }

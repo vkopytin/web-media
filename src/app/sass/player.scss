@@ -1,3 +1,7 @@
+/*
+   Player CSS
+*/
+
 .content.shadow::before {
     position: absolute;
     top: 0;
@@ -7,6 +11,17 @@
     z-index: 11;
     content: '';
     background-color: rgba(0,0,0,.3);
+}
+
+.content {
+    height: 100vh;
+}
+.bar-header-playback ~ .content {
+    padding-top: 135px;
+}
+
+footer:before {
+    background-color: white;
 }
 
 @keyframes rotate {
@@ -270,4 +285,174 @@
     vertical-align: top;
     margin: 0px 4px;
     white-space: nowrap;
+}
+
+.stack {
+    margin: 8px 0px 0px 8px;
+    padding: 0px;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+
+.stack .stack__card {
+    border: 1px solid silver;
+    display: inline-block;
+    width: 44vw;
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
+    background-color: white;
+    margin: 8px 0 0 8px;
+    transition: all .4s cubic-bezier(0.175, 0.885, 0, 1);
+    border-radius: 12px;
+    box-shadow: 0px 13px 10px -7px rgba(0, 0, 0,0.1);  
+}
+
+.card__like {
+    width: 18px;
+}
+
+.card__clock {
+    width: 15px;
+  vertical-align: middle;
+    fill: #AD7D52;
+}
+.card__time {
+    font-size: 12px;
+    color: #AD7D52;
+    vertical-align: middle;
+    margin-left: 5px;
+}
+
+.card__clock-info {
+    float: right;
+}
+
+.card__img {
+  visibility: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 235px;
+  border-top-left-radius: 12px;
+border-top-right-radius: 12px;
+  
+}
+
+.card__info-hover {
+    position: absolute;
+    padding: 16px;
+  width: 100%;
+  opacity: 0;
+  top: 0;
+}
+
+.card__img--hover {
+  transition: 0.2s all ease-out;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+  position: absolute;
+    height: 100%;
+  border-top-left-radius: 12px;
+border-top-right-radius: 12px;
+top: 0;
+border-bottom-left-radius: 12px;
+border-bottom-right-radius: 12px;
+}
+
+.stack__card:hover {
+  box-shadow: 0px 30px 18px -8px rgba(0, 0, 0,0.1);
+    transform: scale(1.01, 1.01);
+}
+
+.card__info {
+    position: relative;
+    z-index: 2;
+    background-color: #bbbc;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    padding: 12px 8px 12px 8px;
+}
+
+.card__category {
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 2px;
+    font-weight: 500;
+  color: #868686;
+}
+
+.card__title {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.stack__card h3,
+.stack__card .h3 {
+    font-size: 12px;
+}
+
+.card__by {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.card__author {
+    font-weight: 600;
+    text-decoration: none;
+    color: #AD7D52;
+}
+
+.stack__card:hover .card__img--hover {
+    height: 235px;
+    opacity: 0.3;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.stack__card:hover .card__info {
+    background-color: transparent;
+    position: relative;
+}
+
+.stack__card:hover .card__info-hover {
+    opacity: 1;
+}
+
+.stack__card .table-view {
+    margin-bottom: 0px;
+    overflow: auto;
+}
+
+.stack__card .table-view-cell {
+    padding: 2px;
+    font-size: 10px;
+}
+
+.stack__card .table-view .media-object.pull-left {
+    margin-right: 5px;
+}
+
+.stack__card .table-view-cell p {
+    font-size: 10px;
+}
+
+.stack__card .table-view-cell .badge {
+    font-size: 9px;
+}
+
+.stack__card .toggle {
+    width: 30px;
+    height: 16px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+.stack__card .toggle .toggle-handle {
+    width: 16px;
+    height: 16px;
 }

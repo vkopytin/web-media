@@ -53,7 +53,7 @@ export const template = (view: AppView) => <main>
             <header className="bar bar-nav">
                 <h1 className="title">Devices</h1>
             </header>
-            <DevicesView />
+            <DevicesView openShowDevices={showHide => view.openDevices(showHide)} />
         </div>
         <header className="bar bar-nav">
             <a className="icon icon-person pull-right"
@@ -64,9 +64,9 @@ export const template = (view: AppView) => <main>
                 <span className="icon icon-caret"></span>
             </h1>
         </header>
-        <div className="bar bar-standard bar-header-secondary" style={{ height: '92px' }}>
+        <div className="bar bar-standard bar-header-secondary bar-header-playback" style={{ height: '92px' }}>
             <div className="region">
-                <MediaPlayerView addErrors={errors => view.addErrors(errors)} />
+                <MediaPlayerView showErrors={errors => view.showErrors(errors)} />
             </div>
         </div>
         <nav className="footer bar bar-tab bar-footer">

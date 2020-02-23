@@ -1,7 +1,7 @@
 import { Events } from 'databindjs';
 import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
-import { IDevice, IUserInfo } from '../service/adapter/spotify';
+import { IDevice, IUserInfo, IDevicesResponse } from '../service/adapter/spotify';
 import { DeviceViewModelItem } from './deviceViewModelItem';
 import { current } from '../utils';
 
@@ -16,8 +16,8 @@ class AppViewModel extends Events {
         currentDevice: null as DeviceViewModelItem
     };
 
-    currentDeviceCommand = {
-        exec: (device: DeviceViewModelItem) => this.currentDevice(device)
+    switchDeviceCommand = {
+        exec: (device: DeviceViewModelItem) => this.switchDevice(device)
     }
     devicesArray = [] as any[];
     userInfo = {} as IUserInfo;
@@ -40,7 +40,14 @@ class AppViewModel extends Events {
             if (playerResult.isError) {
                 return;
             }
-            playerResult.val.on('ready', () => this.updateDevices());
+            const updateDevicesHandler = (eventName: string, device: { device_id: string;}) => {
+                if (!this.currentDevice()) {
+                    this.ss.player(device.device_id, false);
+                }
+                this.updateDevices();
+                playerResult.val.off('ready', updateDevicesHandler);
+            };
+            playerResult.val.on('ready', updateDevicesHandler);
         }).call(this);
     }
 
@@ -62,7 +69,7 @@ class AppViewModel extends Events {
             this.devices(_.map(devices, item => new DeviceViewModelItem(item)));
         }
 
-        const currentDevice = _.find(this.devices(), d => d.isActive()) || _.last(this.devices());
+        const currentDevice = _.find(this.devices(), d => d.isActive()) || null;
         this.currentDevice(currentDevice);
     }
 
@@ -109,6 +116,13 @@ class AppViewModel extends Events {
         }
 
         return this.userInfo;
+    }
+
+    switchDevice(device: DeviceViewModelItem) {
+        this.ss.player(device.id(), true);
+        _.delay(() => {
+            this.updateDevices();
+        }, 1000);
     }
 }
 

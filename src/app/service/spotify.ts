@@ -6,9 +6,10 @@ import * as _ from 'underscore';
 import * as $ from 'jquery';
 import { SoptifyAdapter, IUserInfo, IDevice } from './adapter/spotify';
 import { ISettings } from './settings';
+import { withEvents } from 'databindjs';
 
 
-class SpotifyService extends BaseService {
+class SpotifyService extends withEvents(BaseService) {
     static async create(connection: Service) {
         try {
             const settingsResult = await connection.settings('spotify');
@@ -31,6 +32,79 @@ class SpotifyService extends BaseService {
 
     constructor(public adapter: SoptifyAdapter) {
         super();
+    }
+
+    onStateChanged(...args) {
+        _.delay(() => {
+            this.trigger('change:state', ...args);
+        });
+    }
+
+
+    async seek(positionMs, deviceId) {
+        try {
+            const res = await this.adapter.seek(Math.round(positionMs), deviceId);
+
+            this.onStateChanged(res);
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async play(deviceId: string = null, tracksUriList: string | string[] = null, indexOrUri: number | string = null) {
+        try {
+            const res = await this.adapter.play(deviceId, tracksUriList, indexOrUri);
+
+            this.onStateChanged(res);
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async pause(deviceId: string = null) {
+        try {
+            const res = await this.adapter.pause(deviceId);
+
+            this.onStateChanged(res);
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async next(deviceId: string = null) {
+        try {
+            const res = await this.adapter.next(deviceId);
+
+            this.onStateChanged(res);
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async previous(deviceId: string = null) {
+        try {
+            const res = await this.adapter.previous(deviceId);
+
+            this.onStateChanged(res);
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async volume(percent: number) {
+        try {
+            const res = await this.adapter.volume(Math.round(percent));
+
+            this.onStateChanged(res);
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
+        }
     }
 
     async profile() {
@@ -126,66 +200,6 @@ class SpotifyService extends BaseService {
         }
     }
 
-    async seek(positionMs, deviceId) {
-        try {
-            const res = await this.adapter.seek(Math.round(positionMs), deviceId);
-
-            return SpotifyServiceResult.success(res);
-        } catch (ex) {
-            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
-        }
-    }
-
-    async play(deviceId: string = null, tracksUriList: string | string[] = null, indexOrUri: number | string = null) {
-        try {
-            const res = await this.adapter.play(deviceId, tracksUriList, indexOrUri);
-
-            return SpotifyServiceResult.success(res);
-        } catch (ex) {
-            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
-        }
-    }
-
-    async pause(deviceId: string = null) {
-        try {
-            const res = await this.adapter.pause(deviceId);
-
-            return SpotifyServiceResult.success(res);
-        } catch (ex) {
-            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
-        }
-    }
-
-    async next(deviceId: string = null) {
-        try {
-            const res = await this.adapter.next(deviceId);
-
-            return SpotifyServiceResult.success(res);
-        } catch (ex) {
-            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
-        }
-    }
-
-    async previous(deviceId: string = null) {
-        try {
-            const res = await this.adapter.previous(deviceId);
-
-            return SpotifyServiceResult.success(res);
-        } catch (ex) {
-            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
-        }
-    }
-
-    async volume(percent: number) {
-        try {
-            const res = await this.adapter.volume(Math.round(percent));
-
-            return SpotifyServiceResult.success(res);
-        } catch (ex) {
-            return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);
-        }
-    }
-
     async newReleases() {
         try {
             const res = await this.adapter.newReleases();
@@ -206,10 +220,11 @@ class SpotifyService extends BaseService {
         }
     }
 
-    async player() {
+    async player(deviceId='', play=null) {
         try {
-            const res = await this.adapter.player();
+            const res = await this.adapter.player(deviceId, play);
 
+            play !== null && this.onStateChanged(res);
             return SpotifyServiceResult.success(res);
         } catch (ex) {
             return SpotifyServiceUnexpectedError.create('Unexpected error on requesting sptify recently played', ex);

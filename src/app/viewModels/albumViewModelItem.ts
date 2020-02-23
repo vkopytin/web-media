@@ -17,6 +17,18 @@ class AlbumViewModelItem extends Events {
         return this.album.name;
     }
 
+    firstArtist() {
+        return _.first(this.album.artists);
+    }
+
+    firstArtistUrl() {
+        const artist = _.first(this.album.artists);
+        if (!artist) {
+            return '#';
+        }
+        return artist?.external_urls?.spotify || '';
+    }
+
     uri() {
         return this.album.uri;
     }

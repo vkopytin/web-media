@@ -1,10 +1,11 @@
 import { Events } from 'databindjs';
-import { Service } from '../service';
+import { Service, SpotifyService } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
 import { ICurrentlyPlayingResult, IPlayerResult } from '../service/adapter/spotify';
-import { current, asyncQueue } from '../utils';
+import { current, asyncQueue, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
+import { IWebPlaybackState } from '../service/spotifyPlayer';
 
 
 const lockSection = asyncQueue();
@@ -18,51 +19,28 @@ class MediaPlayerViewModel extends Events {
         trackName: '',
         albumName: '',
         volume: 0,
-        playbackInfo: {
-            duration_ms: 1,
-            progress_ms: 100,
-            is_playing: false,
-            trackName: '',
-            albumName: '',
-            timeLeft() { return ''; },
-            timePlayed() { return ''; },
-            duration() { return ''; }
-        },
+        thumbnailUrl: '',
         errors: [] as ServiceResult<any, Error>[]
     };
 
     resumeCommand = {
-        exec: _.bind(async function (this: MediaPlayerViewModel) {
-            await this.ss.play();
-            this.fetchData();
-        }, this)
+        exec: () => this.play()
     };
 
     pauseCommand = {
-        exec: _.bind(async function (this: MediaPlayerViewModel) {
-            await this.ss.pause();
-            this.fetchData();
-        }, this)
+        exec: () => this.pause()
     }
 
     prevCommand = {
-        exec: _.bind(async function (this: MediaPlayerViewModel) {
-            await this.ss.previous();
-            this.fetchData();
-        }, this)
+        exec: () => this.previous()
     }
 
     nextCommand = {
-        exec: _.bind(async function (this: MediaPlayerViewModel) {
-            await this.ss.next();
-            this.fetchData();
-        }, this)
+        exec: () => this.next()
     }
 
     volumeUpCommand = {
-        exec: () => {
-            this.ss.playerVolumeUp();
-        }
+        exec: () => this.volumeUp()
     }
 
     volumeCommand = {
@@ -70,9 +48,7 @@ class MediaPlayerViewModel extends Events {
     }
 
     volumeDownCommand = {
-        exec: () => {
-            this.ss.playerVolumeDown();
-        }
+        exec: () => this.volumeDown()
     }
 
     refreshPlayback = {
@@ -88,21 +64,65 @@ class MediaPlayerViewModel extends Events {
     trackArray = [] as Array<TrackViewModelItem>;
     monitorPlyback = _.debounce(this.monitorPlybackInternal, 500);
     autoSeek = _.debounce(this.autoSeekInternal, 500);
+    fetchData = _.debounce(this.fetchDataInternal, 500);
 
     isInit = _.delay(() => this.fetchData(), 100);
 
     constructor(private ss = current(Service)) {
         super();
 
-        this.ss.spotifyPlayer();
-        
+        _.delay(() => this.connect());
     }
 
-    async fetchData() {
-        const res = await this.ss.player();
-        if (res.isError) {
-            this.errors([res]);
+    async connect() {
+        const playerResult = await this.ss.spotifyPlayer();
+        const spotifyResult = await this.ss.service(SpotifyService);
+        if (spotifyResult.isError) {
+            this.errors([spotifyResult]);
+        }
+        if (assertNoErrors(spotifyResult, playerResult, e => this.errors(e))) {
+            return;
+        }
+        playerResult.val.on('playerStateChanged', (en, state) => this.updateFromPlayerState(state));
+        spotifyResult.val.on('change:state', state => this.updateState(state));
+        this.updateState();
+    }
 
+    async currentPlayerState() {
+        const stateResult = await this.ss.spotifyPlayerState();
+        if (assertNoErrors(stateResult, e => this.errors(e))) {
+            return;
+        }
+        const state = stateResult.val as IWebPlaybackState;
+
+        return state;
+    }
+
+    updateState(res?) {
+        _.delay(() => this.fetchData(), 1000);
+    }
+
+    async updateFromPlayerState(state: IWebPlaybackState) {
+        if (!state) {
+            return;
+        }
+        this.duration(state.duration);
+        this.timePlayed(state.position);
+        this.isPlaying(!state.paused);
+        this.trackName(state.track_window.current_track.name);
+        this.albumName(state.track_window.current_track.album.name);
+        this.thumbnailUrl(_.last(state.track_window.current_track.album.images).url);
+        this.autoSeek();
+        const playerResult = await this.ss.spotifyPlayer();
+        if (assertNoErrors(playerResult, e => this.errors(e))) {
+            return;
+        }
+        this.volume(playerResult.val.getVolume());
+    }
+
+    async fetchDataInternal() {
+        const res = await this.ss.player();
+        if (assertNoErrors(res, e => this.errors(e))) {
             return res;
         }
         const currentlyPlaying = res.val as IPlayerResult;
@@ -115,13 +135,14 @@ class MediaPlayerViewModel extends Events {
             this.isPlaying(currentlyPlaying.is_playing);
             this.trackName(currentlyPlaying.item.name)
             this.albumName(currentlyPlaying.item.album.name)
+            this.thumbnailUrl(_.last(currentlyPlaying.item.album.images).url)
             this.autoSeek();
         } else {
             this.isPlaying(currentlyPlaying?.is_playing || false);
         }
     }
 
-    errors(val: ServiceResult<any, Error>[]) {
+    errors(val?: ServiceResult<any, Error>[]) {
         if (arguments.length && val !== this.settings.errors) {
             this.settings.errors = val;
             this.trigger('change:errors');
@@ -133,10 +154,7 @@ class MediaPlayerViewModel extends Events {
     monitorPlybackInternal() {
         _.delay(_.bind(async function (this: MediaPlayerViewModel) {
             if (!this.isPlaying()) {
-                const res = await this.fetchData();
-                if (res.isError) {
-                    return;
-                }
+                await this.fetchData();
                 this.monitorPlyback();
             }
         }, this), 5 * 1000);
@@ -149,11 +167,11 @@ class MediaPlayerViewModel extends Events {
             const lastPlayed = this.timePlayed() + newTime - this.lastTime;
             if (this.duration() > lastPlayed) {
                 this.timePlayed(lastPlayed);
+                this.lastTime = newTime;
+                this.autoSeek();
             } else {
                 this.fetchData();
             }
-            this.lastTime = newTime;
-            _.delay(() => this.autoSeek(), 800);
         } else {
             this.monitorPlyback();
         }
@@ -166,31 +184,155 @@ class MediaPlayerViewModel extends Events {
         lockSection.push(_.bind(async function (next) {
             this.timePlayed(timePlayed);
             await this.ss.seek(timePlayed);
-            _.delay(() => {
-                this.fetchData();
-                next();
-            }, 2000);
+
+            next();
         }, this));
     }
 
     async setVolume(percent) {
-        lockSection.push(_.bind(async function (next) {
-            this.volume(percent);
-            await this.ss.volume(percent);
-            _.delay(() => {
-                this.fetchData();
-                next();
-            }, 2000);
+        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+            const stateResult = await this.ss.spotifyPlayerState();
+            if (assertNoErrors(stateResult, e => this.errors(e))) {
+                return;
+            }
+            if (_.isEmpty(stateResult.val)) {
+                this.volume(percent);
+                await this.ss.volume(percent);
+            } else {
+                const playerResult = await this.ss.spotifyPlayer();
+                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                    return;
+                }
+                this.volume(percent);
+                playerResult.val.setVolume(percent);
+            }
+
+            next();
         }, this));
     }
 
-    playbackInfo(val?) {
-        if (arguments.length && this.settings.playbackInfo !== val) {
-            this.settings.playbackInfo = val;
-            this.trigger('change:playbackInfo');
-        }
+    async play() {
+        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+            const stateResult = await this.ss.spotifyPlayerState();
+            if (assertNoErrors(stateResult, e => this.errors(e))) {
+                return;
+            }
+            if (_.isEmpty(stateResult.val)) {
+                await this.ss.play();
+            } else {
+                const playerResult = await this.ss.spotifyPlayer();
+                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                    return;
+                }
+                playerResult.val.resume();
+            }
 
-        return this.settings.playbackInfo;
+            next();
+        }, this));
+    }
+
+    async pause() {
+        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+            const stateResult = await this.ss.spotifyPlayerState();
+            if (assertNoErrors(stateResult, e => this.errors(e))) {
+                return;
+            }
+            if (_.isEmpty(stateResult.val)) {
+                await this.ss.pause();
+            } else {
+                const playerResult = await this.ss.spotifyPlayer();
+                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                    return;
+                }
+                playerResult.val.pause();
+            }
+
+            next();
+        }, this));
+    }
+
+    async previous() {
+        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+            const stateResult = await this.ss.spotifyPlayerState();
+            if (assertNoErrors(stateResult, e => this.errors(e))) {
+                return;
+            }
+            if (_.isEmpty(stateResult.val)) {
+                await this.ss.previous();
+            } else {
+                const playerResult = await this.ss.spotifyPlayer();
+                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                    return;
+                }
+                playerResult.val.previouseTrack();
+            }
+
+            next();
+        }, this));
+    }
+
+    async next() {
+        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+            const stateResult = await this.ss.spotifyPlayerState();
+            if (assertNoErrors(stateResult, e => this.errors(e))) {
+                return;
+            }
+            if (_.isEmpty(stateResult.val)) {
+                await this.ss.next();
+            } else {
+                const playerResult = await this.ss.spotifyPlayer();
+                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                    return;
+                }
+                playerResult.val.nextTrack();
+            }
+
+            next();
+        }, this));
+    }
+
+    async volumeUp() {
+        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+            const stateResult = await this.ss.spotifyPlayerState();
+            if (assertNoErrors(stateResult, e => this.errors(e))) {
+                return;
+            }
+            if (_.isEmpty(stateResult.val)) {
+                const volume = this.volume();
+                await this.ss.volume(volume * 1.1);
+            } else {
+                const playerResult = await this.ss.spotifyPlayer();
+                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                    return;
+                }
+                const volume = await playerResult.val.getVolume() * 100;
+                this.volume(volume * 1.1);
+            }
+
+            next();
+        }, this));
+    }
+
+    async volumeDown() {
+        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+            const stateResult = await this.ss.spotifyPlayerState();
+            if (assertNoErrors(stateResult, e => this.errors(e))) {
+                return;
+            }
+            if (_.isEmpty(stateResult.val)) {
+                const volume = this.volume();
+                await this.ss.volume(volume * 0.9);
+            } else {
+                const playerResult = await this.ss.spotifyPlayer();
+                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                    return;
+                }
+                const volume = await playerResult.val.getVolume() * 100;
+                this.volume(volume * 0.9);
+            }
+
+            next();
+        }, this));
     }
 
     queue(value?: any[]) {
@@ -263,6 +405,15 @@ class MediaPlayerViewModel extends Events {
         }
 
         return this.settings.volume;
+    }
+
+    thumbnailUrl(val?) {
+        if (arguments.length && val !== this.settings.thumbnailUrl) {
+            this.settings.thumbnailUrl = val;
+            this.trigger('change:thumbnailUrl');
+        }
+
+        return this.settings.thumbnailUrl;
     }
 }
 

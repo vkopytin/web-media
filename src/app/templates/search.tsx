@@ -8,7 +8,6 @@ import { SearchView } from '../views';
 const cn = utils.className;
 
 export const template = (view: SearchView) => <>
-    <div style={{ height: '46px' }}></div>
     <section className="bar bar-standard">
         <form onSubmit={e => e.preventDefault()}>
             <input className="new-todo" type="search" placeholder="Enter search title..."

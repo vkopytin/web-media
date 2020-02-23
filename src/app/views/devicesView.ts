@@ -9,7 +9,7 @@ import { current } from '../utils';
 
 
 export interface IDevicesViewProps {
-
+    openShowDevices(showHide);
 }
 
 class DevicesView extends withEvents(React.Component)<IDevicesViewProps, {}> {
@@ -18,13 +18,13 @@ class DevicesView extends withEvents(React.Component)<IDevicesViewProps, {}> {
         currentDevice: null as DeviceViewModelItem
     };
 
-    currentDeviceCommand = {
+    switchDeviceCommand = {
         exec(device: DeviceViewModelItem) { }
     };
 
     binding = bindTo(this, () => current(AppViewModel), {
         'prop(devices)': 'devices',
-        'currentDeviceCommand': 'currentDeviceCommand',
+        'switchDeviceCommand': 'switchDeviceCommand',
         'prop(currentDevice)': 'currentDevice'
     });
 
@@ -52,6 +52,11 @@ class DevicesView extends withEvents(React.Component)<IDevicesViewProps, {}> {
         }
 
         return this.state[propName];
+    }
+
+    async switchDevice(device) {
+        await this.switchDeviceCommand.exec(device);
+        this.props.openShowDevices(false);
     }
 
     render() {

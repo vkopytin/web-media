@@ -6,15 +6,15 @@ import { SpotifyPlayerServiceUnexpectedError } from './errors/spotifyPlayerServi
 import { withEvents } from 'databindjs';
 
 
-interface IWebPlaybackPlayer {
+export interface IWebPlaybackPlayer {
     device_id: string;
 }
 
-interface IWebPlaybackError {
+export interface IWebPlaybackError {
     message: string;
 }
 
-interface IWebPlaybackTrack {
+export interface IWebPlaybackTrack {
     uri: string; // Spotify URI
     id: string;               // Spotify ID from URI (can be null)
     type: string;             // Content type: can be "track", "episode" or "ad"
@@ -34,7 +34,7 @@ interface IWebPlaybackTrack {
     }>;
 }
 
-interface IWebPlaybackState {
+export interface IWebPlaybackState {
     context: {
         uri: string; // The URI of the context (can be null)
         metadata: {
@@ -51,9 +51,12 @@ interface IWebPlaybackState {
         skipping_prev: boolean;      // `seeking` will be set to `true` when playing an
         // ad track.
     };
+    bitrate: number;
     paused: boolean;  // Whether the current track is paused.
     position: number;    // The position_ms of the current track.
+    duration: number;
     repeat_mode: number; // The repeat mode. No repeat mode is 0,
+    timestamp: number;
     // once-repeat is 1 and full repeat is 2.
     shuffle: boolean; // True if shuffled, false otherwise.
     track_window: {
@@ -82,7 +85,7 @@ interface IPlayer {
     previousTrack(): Promise<void>;
     nextTrack(): Promise<void>;
     connect(): Promise<(success) => void>;
-    getCurrentState(): Promise<any>;
+    getCurrentState(): Promise<IWebPlaybackState>;
     disconnect();
     _options: {
         getOAuthToken(fn: (access_token) => void);
@@ -173,7 +176,8 @@ class SpotifyPlayerService extends withEvents(BaseService) {
         this.deviceId = player.device_id;
         this.trigger('ready', player);
     }
-    onNotReady =  (player: IWebPlaybackPlayer) => {
+    onNotReady = (player: IWebPlaybackPlayer) => {
+        this.deviceId = null;
         this.trigger('notReady', player);
     }
 
@@ -228,15 +232,18 @@ class SpotifyPlayerService extends withEvents(BaseService) {
         this.player.previousTrack();
     }
 
-    async volumeUp() {
-        const volume = await this.player.getVolume();
-        this.player.setVolume(volume * 1.1);
+    async getCurrentState() {
+        const state = await this.player.getCurrentState();
+        return state;
     }
 
-    async volumeDown() {
+    async getVolume() {
         const volume = await this.player.getVolume();
+        return volume;
+    }
 
-        this.player.setVolume(volume * 0.9);
+    setVolume(percent: number) {
+        return this.player.setVolume(percent);
     }
 }
 

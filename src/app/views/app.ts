@@ -61,6 +61,10 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
         return this.state[propName];
     }
 
+    openDevices(show) {
+        this.toggleSelectDevices(show ? 'hide' : 'show');
+    }
+
     toggleSelectDevices(fromState?: 'show' | 'hide') {
         const lastValue = fromState || this.state.showSelectDevices;
         if (fromState && (fromState !== this.state.showSelectDevices)) {
@@ -111,9 +115,9 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
         return bottom - scrollY;
     }
 
-    addErrors(errors: ServiceResult<any, Error>[]) {
+    showErrors(errors: ServiceResult<any, Error>[]) {
         const tokenExpired = _.filter(errors, err => err.is(TokenExpiredError));
-        if (tokenExpired) {
+        if (!_.isEmpty(tokenExpired)) {
             this.prop('openLogin', true);
         }
     }

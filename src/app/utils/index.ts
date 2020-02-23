@@ -49,3 +49,13 @@ export function asyncQueue(concurrency = 1) {
         push: task => running < concurrency ? runTask(task) : enqueueTask(task)
     };
 }
+
+export function assertNoErrors(...args) {
+    const fillErrors: (errors: any[]) => void = _.last(args);
+    const results = _.flatten(_.initial(args)) as any[];
+    const errors = _.filter(results, r => r.isError);
+
+    fillErrors(errors);
+
+    return errors.length > 0;
+}

@@ -12,48 +12,6 @@ class HomeViewModel extends Events {
         openLogin: false
     };
 
-    resumeCommand = {
-        exec: () => {
-            this.ss.playerResume();
-        }
-    };
-
-    pauseCommand = {
-        exec: () => {
-            this.ss.playerPause();
-        }
-    }
-
-    prevCommand = {
-        exec: () => {
-            this.ss.playerPreviouseTrack();
-        }
-    }
-
-    nextCommand = {
-        exec: () => {
-            this.ss.playerNextTrack();
-        }
-    }
-
-    volumeUpCommand = {
-        exec: () => {
-            this.ss.playerVolumeUp();
-        }
-    }
-
-    volumeDownCommand = {
-        exec: () => {
-            this.ss.playerVolumeDown();
-        }
-    }
-
-    refreshCommand = {
-        exec: () => {
-            this.fetchData();
-        }
-    }
-
     trackArray = [] as Array<TrackViewModelItem>;
 
     isInit = _.delay(() => this.fetchData(), 100);

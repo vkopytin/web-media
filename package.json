@@ -69,6 +69,8 @@
     "html-webpack-plugin": "^3.2.0",
     "http-proxy-middleware": "^0.20.0",
     "json-stringify-safe": "^5.0.1",
+    "less": "^3.11.1",
+    "less-loader": "^5.0.0",
     "method-override": "^3.0.0",
     "morgan": "^1.9.1",
     "mustache-loader": "^1.4.3",
@@ -89,7 +91,7 @@
   },
   "dependencies": {
     "@types/underscore": "^1.9.4",
-    "databindjs": "^1.0.16",
+    "databindjs": "^1.0.17",
     "jquery": "^3.4.1",
     "react-native-web": "^0.12.1",
     "underscore": "^1.9.2"

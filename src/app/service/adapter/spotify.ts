@@ -50,6 +50,18 @@ export interface ITrack {
     track_number: number;
 }
 
+export interface IArtist {
+    external_urls: {
+        spotify: string;
+    };
+    spotify: string;
+    href: string;
+    id: string;
+    name: string;
+    type: string;
+    uri: string;
+}
+
 export interface IUserPlaylist {
     id: string;
     name: string;
@@ -79,9 +91,13 @@ export interface IAlbum {
     id: string;
     name: string;
     uri: string;
+    artists: IArtist[];
     images: Array<IImageInfo>;
     total_tracks: number;
     release_date: string;
+    external_urls: {
+        spotify: string;
+    };
 }
 
 export interface IResponseResult<T> {
@@ -323,7 +339,7 @@ class SoptifyAdapter {
         deviceId && urlParts.push($.param({
             device_id: deviceId
         }));
-        return new Promise<IResponseResult<IAlbum>>((resolve, reject) => {
+        return new Promise<any>((resolve, reject) => {
             $.ajax({
                 method: 'POST',
                 url: urlParts.join('?'),
@@ -331,7 +347,7 @@ class SoptifyAdapter {
                     'Authorization': 'Bearer ' + this.token
                 },
                 success(response) {
-                    resolve(response.albums);
+                    resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
                     reject(new Error(`${textStatus}:${errorThrown}`));
@@ -345,7 +361,7 @@ class SoptifyAdapter {
         deviceId && urlParts.push($.param({
             device_id: deviceId
         }));
-        return new Promise<IResponseResult<IAlbum>>((resolve, reject) => {
+        return new Promise<any>((resolve, reject) => {
             $.ajax({
                 method: 'POST',
                 url: urlParts.join('?'),
@@ -353,7 +369,7 @@ class SoptifyAdapter {
                     'Authorization': 'Bearer ' + this.token
                 },
                 success(response) {
-                    resolve(response.albums);
+                    resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
                     reject(new Error(`${textStatus}:${errorThrown}`));
@@ -367,7 +383,7 @@ class SoptifyAdapter {
         deviceId && urlParts.push($.param({
             device_id: deviceId
         }));
-        return new Promise<IResponseResult<IAlbum>>((resolve, reject) => {
+        return new Promise<any>((resolve, reject) => {
             $.ajax({
                 method: 'PUT',
                 url: urlParts.join('?'),
@@ -375,7 +391,7 @@ class SoptifyAdapter {
                     'Authorization': 'Bearer ' + this.token
                 },
                 success(response) {
-                    resolve(response.albums);
+                    resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
                     reject(new Error(`${textStatus}:${errorThrown}`));
@@ -424,12 +440,20 @@ class SoptifyAdapter {
         });
     }
 
-    player() {
+    player(deviceId='', play=null as boolean) {
         return new Promise<IPlayerResult>((resolve, reject) => {
             $.ajax({
+                method: play===null ? 'GET': 'PUT',
                 url: 'https://api.spotify.com/v1/me/player',
                 headers: {
                     'Authorization': 'Bearer ' + this.token
+                },
+                ...play === null ? {} : {
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        device_ids: [].concat(deviceId),
+                        play: play
+                    })
                 },
                 success(response) {
                     resolve(response);
