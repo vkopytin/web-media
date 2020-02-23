@@ -140,6 +140,16 @@ class Service {
         return result;
     }
 
+    async listTopTracks() {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.listTopTracks();
+
+        return result;
+    }
+
     async volume(percent) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {

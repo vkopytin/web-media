@@ -1,11 +1,11 @@
 import { Events } from 'databindjs';
 import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
-import { IDevice, IUserInfo, IDevicesResponse } from '../service/adapter/spotify';
+import { IDevice, IUserInfo, IDevicesResponse, IResponseResult, ISpotifySong, ITrack } from '../service/adapter/spotify';
 import { DeviceViewModelItem } from './deviceViewModelItem';
 import { current, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
-import { MediaPlayerViewModel } from './mediaPlayerViewModel';
+import { TrackViewModelItem } from './trackViewModelItem';
 
 
 const panels = ['home', 'profile'];
@@ -17,7 +17,8 @@ class AppViewModel extends Events {
         currentPanel: 'home' as 'home' | 'profile',
         currentDevice: null as DeviceViewModelItem,
         errors: [] as ServiceResult<any, Error>[],
-        currentTrackId: ''
+        currentTrackId: '',
+        topTracks: [] as TrackViewModelItem[]
     };
 
     switchDeviceCommand = {
@@ -64,6 +65,12 @@ class AppViewModel extends Events {
         this.profile(userInfoResult.val);
 
         await this.updateDevices();
+        const topTracksResult = await this.ss.listTopTracks();
+        if (assertNoErrors(topTracksResult, e => this.errors(e))) {
+            return;
+        }
+        const topTracks = topTracksResult.val as IResponseResult<ITrack>;
+        this.topTracks(_.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index)));
     }
 
     errors(val?: ServiceResult<any, Error>[]) {
@@ -146,6 +153,15 @@ class AppViewModel extends Events {
         }
 
         return this.settings.currentTrackId;
+    }
+
+    topTracks(val?) {
+        if (arguments.length && val !== this.settings.topTracks) {
+            this.settings.topTracks = val;
+            this.trigger('change:topTracks');
+        }
+
+        return this.settings.topTracks;
     }
 }
 

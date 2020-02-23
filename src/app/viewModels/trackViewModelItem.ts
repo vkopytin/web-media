@@ -39,6 +39,11 @@ class TrackViewModelItem extends Events {
         return this.song.track.uri;
     }
 
+    thumbnailUrl() {
+        const image = _.last(this.song.track.album.images);
+        return image.url;
+    }
+
     errors(val?: ServiceResult<any, Error>[]) {
         if (arguments.length && val !== this.settings.errors) {
             this.settings.errors = val;

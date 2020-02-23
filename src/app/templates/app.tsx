@@ -33,7 +33,7 @@ export const template = (view: AppView) => <main>
                     <a className="btn btn-block btn-outlined" href={"https://accounts.spotify.com/authorize?" + $.param({
                         client_id: '963f916fa62c4186a4b8370e16eef658',
                         redirect_uri: redirectUri,
-                        scope: ['streaming', 'user-read-email', 'user-read-private', 'user-modify-playback-state'].join(' '),
+                        scope: ['streaming', 'user-read-email', 'user-read-private', 'user-modify-playback-state', 'user-top-read'].join(' '),
                         response_type: 'token',
                         state: 123
                     })}>
@@ -45,7 +45,7 @@ export const template = (view: AppView) => <main>
                         <label>Full name</label>
                         <input type="text" placeholder="Enter your Fulll name"
                             defaultValue={view.prop('profile').display_name}
-                         />
+                        />
                     </div>
                     <div className="input-row">
                         <label>Email</label>
@@ -66,6 +66,28 @@ export const template = (view: AppView) => <main>
                         />
                     </div>
                 </form>
+                <ul className="todo-list table-view">
+                    {_.map(view.prop('topTracks'), (item, index) => {
+                        return <li key={index} className="table-view-cell media">
+                            <span className="media-object pull-left player-left--32"
+                                onClick={evnt => item.playTracks(view.prop('topTracks'), item)}
+                            >
+                                <div className="region">
+                                    <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
+                                        {view.isPlaying(item) || <button className="button-play icon icon-play"
+                                        ></button>}
+                                        {view.isPlaying(item) && <button className="button-play icon icon-pause"></button>}
+                                    </div>
+                                </div>
+                            </span>
+                            <div className="media-body">
+                                {item.name()}
+                                <p>{item.album()}</p>
+                            </div>
+                            <span className="badge">{item.duration()}</span>
+                        </li>
+                    })}
+                </ul>
             </div>
         </div>
         <div className={cn("popover ?visible", view.state.showSelectDevices === 'show')} style={{

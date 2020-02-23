@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { template } from '../templates/app';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import { AppViewModel } from '../viewModels';
+import { AppViewModel, TrackViewModelItem } from '../viewModels';
 import * as _ from 'underscore';
 import { IDevice, IUserInfo } from '../service/adapter/spotify';
 import { current } from '../utils';
@@ -24,7 +24,8 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
         profile: {} as IUserInfo,
         scrolledToBottom: false,
         errors: [] as ServiceResult<any, Error>[],
-        currentTrackId: ''
+        currentTrackId: '',
+        topTracks: [] as TrackViewModelItem[]
     };
     elScroller = null as HTMLElement;
     onPageScroll = _.debounce(evnt => this.onPageScrollInternal(evnt), 500);
@@ -35,7 +36,8 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
         'prop(devices)': 'devices',
         'prop(profile)': 'profile',
         'errors': 'errors',
-        'prop(currentTrackId)': 'currentTrackId'
+        'prop(currentTrackId)': 'currentTrackId',
+        'prop(topTracks)': 'topTracks'
     });
 
     constructor(props) {
@@ -133,6 +135,10 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
         if (!_.isEmpty(tokenExpired)) {
             this.prop('openLogin', true);
         }
+    }
+
+    isPlaying(track: TrackViewModelItem) {
+        return this.prop('currentTrackId') === track.id();
     }
 
     render() {

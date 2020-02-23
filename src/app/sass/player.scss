@@ -117,6 +117,31 @@ footer:before {
     position: relative;
 }
 
+.player-left--32 {
+    width: 40px;
+    height: 40px;
+    position: relative;
+}
+
+.player-left--32 .region {
+    min-height: 40px;
+    min-width: 40px;
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+
+.player-left--32 .button-play {
+    width: 80%;
+    height: 80%;
+    left: 10%;
+    top: 10%;
+}
+
+.player-left--32 .album-media .button-play {
+    font-size: 18px;
+}
+
 .album-media {
     background-position: center center;
     background-repeat: no-repeat;

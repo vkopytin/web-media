@@ -1,5 +1,5 @@
 import * as $ from 'jquery';
-
+import { ErrorWithStatus } from './errors/errorWithStatus';
 
 export interface IImageInfo {
     width: number;
@@ -278,6 +278,23 @@ class SoptifyAdapter {
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
                     reject(new Error(`${textStatus}:${errorThrown}`));
+                }
+            });
+        });
+    }
+
+    myTopTracks() {
+        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
+            $.ajax({
+                url: `https://api.spotify.com/v1/me/top/tracks`,
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });
         });
