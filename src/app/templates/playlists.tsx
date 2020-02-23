@@ -22,7 +22,11 @@ export const template = (view: PlaylistsView) => <>
                     </div>
                     <span className="badge">{item.tracksTotal()}</span>
                 </a>
-                {view.prop('currentPlaylist') === item && <TracksView playlist={item} />}
+                {view.prop('currentPlaylist') === item && <TracksView
+                    showErrors={e => view.props.showErrors(e)}
+                    playlist={item}
+                    currentTrackId={view.props.currentTrackId}
+                />}
             </li>
         })}
     </ul>

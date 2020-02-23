@@ -22,7 +22,9 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
         showSelectDevices: 'hide' as 'show' | 'hide' | '',
         devices: [] as IDevice[],
         profile: {} as IUserInfo,
-        scrolledToBottom: false
+        scrolledToBottom: false,
+        errors: [] as ServiceResult<any, Error>[],
+        currentTrackId: ''
     };
     elScroller = null as HTMLElement;
     onPageScroll = _.debounce(evnt => this.onPageScrollInternal(evnt), 500);
@@ -31,7 +33,9 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
         'prop(openLogin)': 'openLogin',
         'prop(currentPanel)': 'currentPanel',
         'prop(devices)': 'devices',
-        'prop(profile)': 'profile'
+        'prop(profile)': 'profile',
+        'errors': 'errors',
+        'prop(currentTrackId)': 'currentTrackId'
     });
 
     constructor(props) {
@@ -59,6 +63,15 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
         }
 
         return this.state[propName];
+    }
+
+    errors(val?: ServiceResult<any, Error>[]) {
+        if (arguments.length && val !== this.prop('errors')) {
+            this.prop('errors', val);
+            this.showErrors(val);
+        }
+
+        return this.prop('errors');
     }
 
     openDevices(show) {

@@ -12,6 +12,7 @@ import { ServiceResult } from '../base/serviceResult';
 
 export interface IMediaPlayerViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
+    currentTrackId(val?: string);
 }
 
 class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps, {}> {
@@ -56,7 +57,8 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
         'prop(albumName)': 'albumName',
         'prop(volume)': 'volume',
         'errors': 'errors',
-        'prop(thumbnailUrl)': 'thumbnailUrl'
+        'prop(thumbnailUrl)': 'thumbnailUrl',
+        'props.currentTrackId': 'currentTrackId'
     });
 
     constructor(props) {

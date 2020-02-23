@@ -6,16 +6,19 @@ import {
     TrackViewModelItem
 } from '../viewModels';
 import { current } from '../utils';
+import { ServiceResult } from '../base/serviceResult';
 
 
 export interface IHomeViewProps {
-
+    currentTrackId: string;
+    showErrors(errors: ServiceResult<any, Error>[]);
 }
 
 class HomeView extends withEvents(React.Component)<IHomeViewProps, {}> {
     state = {
         openLogin: false,
-        items: [] as TrackViewModelItem[]
+        items: [] as TrackViewModelItem[],
+        errors: [] as ServiceResult<any, Error>[]
     };
 
     refreshCommand = { exec() { } };
@@ -49,6 +52,19 @@ class HomeView extends withEvents(React.Component)<IHomeViewProps, {}> {
         }
 
         return this.state[propName];
+    }
+
+    errors(val?: ServiceResult<any, Error>[]) {
+        if (arguments.length && val !== this.prop('errors')) {
+            this.prop('errors', val);
+            this.props.showErrors(val);
+        }
+
+        return this.prop('errors');
+    }
+
+    isPlaying(track: TrackViewModelItem) {
+        return this.props.currentTrackId === track.id();
     }
 
     render() {

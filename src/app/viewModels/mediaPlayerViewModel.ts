@@ -20,7 +20,8 @@ class MediaPlayerViewModel extends Events {
         albumName: '',
         volume: 0,
         thumbnailUrl: '',
-        errors: [] as ServiceResult<any, Error>[]
+        errors: [] as ServiceResult<any, Error>[],
+        currentTrackId: ''
     };
 
     resumeCommand = {
@@ -106,6 +107,7 @@ class MediaPlayerViewModel extends Events {
         if (!state) {
             return;
         }
+        this.currentTrackId(state.track_window.current_track.id);
         this.duration(state.duration);
         this.timePlayed(state.position);
         this.isPlaying(!state.paused);
@@ -129,6 +131,7 @@ class MediaPlayerViewModel extends Events {
 
         this.lastTime = +new Date();
         if (currentlyPlaying && currentlyPlaying.item) {
+            this.currentTrackId(currentlyPlaying.item.id);
             this.volume(currentlyPlaying.device.volume_percent);
             this.duration(currentlyPlaying.item.duration_ms);
             this.timePlayed(currentlyPlaying.progress_ms);
@@ -204,7 +207,7 @@ class MediaPlayerViewModel extends Events {
                     return;
                 }
                 this.volume(percent);
-                playerResult.val.setVolume(percent);
+                playerResult.val.setVolume(percent * 0.01);
             }
 
             next();
@@ -414,6 +417,15 @@ class MediaPlayerViewModel extends Events {
         }
 
         return this.settings.thumbnailUrl;
+    }
+
+    currentTrackId(val?) {
+        if (arguments.length && val !== this.settings.currentTrackId) {
+            this.settings.currentTrackId = val;
+            this.trigger('change:currentTrackId');
+        }
+
+        return this.settings.currentTrackId;
     }
 }
 

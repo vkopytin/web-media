@@ -8,16 +8,20 @@ import {
     AlbumViewModelItem
 } from '../viewModels';
 import { current } from '../utils';
+import { ServiceResult } from '../base/serviceResult';
 
 
 export interface ITracksViewProps {
     playlist: PlaylistsViewModelItem;
+    currentTrackId: string;
+    showErrors(errors: ServiceResult<any, Error>[]);
 }
 
 class TracksView extends withEvents(React.Component)<ITracksViewProps, {}> {
     state = {
         openLogin: false,
         tracks: [] as TrackViewModelItem[],
+        errors: [] as ServiceResult<any, Error>[]
     };
     binding = bindTo(this, () => current(PlaylistsViewModel), {
         'prop(tracks)': 'tracks'
@@ -51,6 +55,19 @@ class TracksView extends withEvents(React.Component)<ITracksViewProps, {}> {
 
     uri() {
         return this.props.playlist.uri();
+    }
+
+    errors(val?: ServiceResult<any, Error>[]) {
+        if (arguments.length && val !== this.prop('errors')) {
+            this.prop('errors', val);
+            this.props.showErrors(val);
+        }
+
+        return this.prop('errors');
+    }
+
+    isPlaying(track: TrackViewModelItem) {
+        return track.id() === this.props.currentTrackId;
     }
 
     render() {

@@ -1,14 +1,19 @@
 import { Events } from 'databindjs';
-import { formatTime } from '../utils';
+import { formatTime, assertNoErrors } from '../utils';
 import { Service } from '../service';
 import * as _ from 'underscore';
 import { IDevice, ISpotifySong } from '../service/adapter/spotify';
 import { current } from '../utils';
 import { AppViewModel } from './appViewModel';
+import { MediaPlayerViewModel } from './mediaPlayerViewModel';
+import { ServiceResult } from '../base/serviceResult';
 
 
 class TrackViewModelItem extends Events {
     appViewModel = current(AppViewModel);
+    settings = {
+        errors: [] as ServiceResult<any, Error>[]
+    };
 
     constructor(public song: ISpotifySong, private index: number, private ss = current(Service)) {
         super();
@@ -34,6 +39,15 @@ class TrackViewModelItem extends Events {
         return this.song.track.uri;
     }
 
+    errors(val?: ServiceResult<any, Error>[]) {
+        if (arguments.length && val !== this.settings.errors) {
+            this.settings.errors = val;
+            this.trigger('change:errors');
+        }
+
+        return this.settings.errors;
+    }
+
     async play(playlistUri: string) {
         const device = this.appViewModel.currentDevice();
 
@@ -42,7 +56,8 @@ class TrackViewModelItem extends Events {
 
     async playTracks(tracks: TrackViewModelItem[], item: TrackViewModelItem) {
         const device = this.appViewModel.currentDevice();
-        this.ss.play(device?.id(), _.map(tracks, item => item.uri()), this.uri());
+        const playResult = this.ss.play(device?.id(), _.map(tracks, item => item.uri()), this.uri());
+        assertNoErrors(playResult, e => this.errors(e));
     }
 }
 

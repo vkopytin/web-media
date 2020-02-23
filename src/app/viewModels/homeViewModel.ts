@@ -4,13 +4,21 @@ import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
 import { ISpotifySong, IRecommendationsResult } from '../service/adapter/spotify';
 import { current } from '../utils';
+import { ServiceResult } from '../base/serviceResult';
 
 
 class HomeViewModel extends Events {
 
     settings = {
-        openLogin: false
+        openLogin: false,
+        errors: [] as ServiceResult<any, Error>[]
     };
+
+    refreshCommand = {
+        exec: () => {
+            this.fetchData();
+        }
+    }
 
     trackArray = [] as Array<TrackViewModelItem>;
 
@@ -30,6 +38,15 @@ class HomeViewModel extends Events {
         const recomendations = res.val as IRecommendationsResult;
 
         this.tracks(_.map(recomendations.tracks, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index)));
+    }
+
+    errors(val?: ServiceResult<any, Error>[]) {
+        if (arguments.length && val !== this.settings.errors) {
+            this.settings.errors = val;
+            this.trigger('change:errors');
+        }
+
+        return this.settings.errors;
     }
 
     tracks(value?: any[]) {

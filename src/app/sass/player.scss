@@ -20,6 +20,10 @@
     padding-top: 135px;
 }
 
+.bar-header-playback ~ .content .bar + * {
+    padding-top: 50px;
+}
+
 footer:before {
     background-color: white;
 }
@@ -259,6 +263,15 @@ footer:before {
     height: 4px;
     background-color: silver;
     cursor: pointer;
+    outline: none;
+
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .progress {
@@ -302,6 +315,7 @@ footer:before {
     position: -webkit-sticky;
     position: sticky;
     left: 0;
+    right: 0;
     background-color: white;
     margin: 8px 0 0 8px;
     transition: all .4s cubic-bezier(0.175, 0.885, 0, 1);

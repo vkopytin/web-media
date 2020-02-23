@@ -9,7 +9,7 @@ import { current } from '../utils';
 
 
 export interface INewReleasesViewProps {
-
+    currentTrackId: string;
 }
 
 class NewReleasesView extends withEvents(React.Component)<INewReleasesViewProps, {}> {

@@ -12,13 +12,15 @@ import * as _ from 'underscore';
 
 export interface IMyTracksViewProps {
     loadMore?: boolean;
+    currentTrackId: string;
 }
 
 class MyTracksView extends withEvents(React.Component)<IMyTracksViewProps, {}> {
     state = {
         term: '',
         items: [] as TrackViewModelItem[],
-        isLoading: false
+        isLoading: false,
+        currentTrackId: ''
     };
     
     binding = bindTo(this, () => current(MyTracksViewModel), {
@@ -54,6 +56,7 @@ class MyTracksView extends withEvents(React.Component)<IMyTracksViewProps, {}> {
         if (this.props.loadMore) {
             this.loadMoreCommand.exec();
         }
+        this.prop('currentTrackId', this.props.currentTrackId);
     }
 
     prop<K extends keyof MyTracksView['state']>(propName: K, val?: MyTracksView['state'][K]): MyTracksView['state'][K] {
@@ -63,6 +66,10 @@ class MyTracksView extends withEvents(React.Component)<IMyTracksViewProps, {}> {
         }
 
         return this.state[propName];
+    }
+
+    isPlaying(track: TrackViewModelItem) {
+        return this.props.currentTrackId === track.id();
     }
 
     render() {

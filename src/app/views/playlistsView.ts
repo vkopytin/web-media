@@ -7,10 +7,12 @@ import {
     TrackViewModelItem
 } from '../viewModels';
 import { current } from '../utils';
+import { ServiceResult } from '../base/serviceResult';
 
 
 export interface IPlaylistsViewProps {
-
+    currentTrackId: string;
+    showErrors(errors: ServiceResult<any, Error>[]);
 }
 
 class PlaylistsView extends withEvents(React.Component)<IPlaylistsViewProps, {}> {

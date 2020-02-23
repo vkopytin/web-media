@@ -11,6 +11,7 @@ import { current } from '../utils';
 
 export interface IAlbumsViewProps {
     album: AlbumViewModelItem;
+    currentTrackId: string;
 }
 
 class AlbumsView extends withEvents(React.Component)<IAlbumsViewProps, {}> {
@@ -50,6 +51,10 @@ class AlbumsView extends withEvents(React.Component)<IAlbumsViewProps, {}> {
 
     uri() {
         return this.props.album.uri();
+    }
+
+    isPlaying(track: TrackViewModelItem) {
+        return this.props.currentTrackId === track.id();
     }
 
     render() {

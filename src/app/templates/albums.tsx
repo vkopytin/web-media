@@ -14,7 +14,7 @@ export const template = (view: AlbumsView) => <>
                 <span className="media-object pull-left"
                     onClick={evnt => item.play(view.uri())}
                 >
-                    <label className="toggle view">
+                    <label className={cn("toggle view ?active", view.isPlaying(item))}>
                         <div className="toggle-handle"></div>
                     </label>
                 </span>

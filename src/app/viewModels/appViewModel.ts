@@ -3,7 +3,9 @@ import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
 import { IDevice, IUserInfo, IDevicesResponse } from '../service/adapter/spotify';
 import { DeviceViewModelItem } from './deviceViewModelItem';
-import { current } from '../utils';
+import { current, assertNoErrors } from '../utils';
+import { ServiceResult } from '../base/serviceResult';
+import { MediaPlayerViewModel } from './mediaPlayerViewModel';
 
 
 const panels = ['home', 'profile'];
@@ -13,7 +15,9 @@ class AppViewModel extends Events {
     settings = {
         openLogin: false,
         currentPanel: 'home' as 'home' | 'profile',
-        currentDevice: null as DeviceViewModelItem
+        currentDevice: null as DeviceViewModelItem,
+        errors: [] as ServiceResult<any, Error>[],
+        currentTrackId: ''
     };
 
     switchDeviceCommand = {
@@ -30,14 +34,14 @@ class AppViewModel extends Events {
         (async function (this: AppViewModel) {
             const isLoggedInResult = await this.ss.isLoggedIn();
 
-            if (isLoggedInResult.error) {
-                this.openLogin(true);
+            if (assertNoErrors(isLoggedInResult, e => this.errors(e))) {
+                return;
             }
 
             this.openLogin(!isLoggedInResult.val);
 
             const playerResult = await this.ss.spotifyPlayer();
-            if (playerResult.isError) {
+            if (assertNoErrors(playerResult, e => this.errors(e))) {
                 return;
             }
             const updateDevicesHandler = (eventName: string, device: { device_id: string;}) => {
@@ -54,11 +58,21 @@ class AppViewModel extends Events {
     async loadData() {
         const userInfoResult = await this.ss.profile();
 
-        if (!userInfoResult.isError) {
-            this.profile(userInfoResult.val);
+        if (assertNoErrors(userInfoResult, e => this.errors(e))) {
+            return;
         }
+        this.profile(userInfoResult.val);
 
         await this.updateDevices();
+    }
+
+    errors(val?: ServiceResult<any, Error>[]) {
+        if (arguments.length && val !== this.settings.errors) {
+            this.settings.errors = val;
+            this.trigger('change:errors');
+        }
+
+        return this.settings.errors;
     }
 
     async updateDevices() {
@@ -123,6 +137,15 @@ class AppViewModel extends Events {
         _.delay(() => {
             this.updateDevices();
         }, 1000);
+    }
+
+    currentTrackId(val?) {
+        if (arguments.length && val !== this.settings.currentTrackId) {
+            this.settings.currentTrackId = val;
+            this.trigger('change:currentTrackId');
+        }
+
+        return this.settings.currentTrackId;
     }
 }
 

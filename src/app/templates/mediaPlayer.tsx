@@ -48,7 +48,7 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
                     ></button>
                     <div className="time-next">-{view.titleLeft()}</div>
                     <button className="button-previous icon icon-sound4"
-                        onClick={evnt => view.volumeUpCommand.exec()}
+                        onClick={evnt => view.volumeDownCommand.exec()}
                     ></button>
                     <div className="playback-volume">
                         <div className="progress-max" onClick={evnt => view.updateVolume(evnt)}>
@@ -59,7 +59,7 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
                         </div>
                     </div>
                     <button className="button-next icon icon-sound"
-                        onClick={evnt => view.volumeDownCommand.exec()}
+                        onClick={evnt => view.volumeUpCommand.exec()}
                     ></button>
                 </div>
             </div>

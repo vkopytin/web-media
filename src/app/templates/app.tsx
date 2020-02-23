@@ -66,7 +66,10 @@ export const template = (view: AppView) => <main>
         </header>
         <div className="bar bar-standard bar-header-secondary bar-header-playback" style={{ height: '92px' }}>
             <div className="region">
-                <MediaPlayerView showErrors={errors => view.showErrors(errors)} />
+                <MediaPlayerView
+                    showErrors={errors => view.showErrors(errors)}
+                    currentTrackId={(...args) => view.prop.apply(view, ['currentTrackId', ...args])}
+                />
             </div>
         </div>
         <nav className="footer bar bar-tab bar-footer">
@@ -103,28 +106,42 @@ export const template = (view: AppView) => <main>
         </nav>
         <SwitchView currentView={view.prop('currentPanel')} onClick={evnt => view.toggleSelectDevices('show')}>
             <section key="home" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
-                ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}
+                ref={el => el && (view.elScroller = el)}
+                onScroll={evnt => view.onPageScroll(evnt)}
             >
-                <HomeView />
+                <HomeView
+                    showErrors={errors => view.showErrors(errors)}
+                    currentTrackId={view.prop('currentTrackId')}
+                />
             </section>
             <section key="playlists" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
-                ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}
+                ref={el => el && (view.elScroller = el)}
+                onScroll={evnt => view.onPageScroll(evnt)}
             >
-                <PlaylistsView />
+                <PlaylistsView
+                    showErrors={errors => view.showErrors(errors)}
+                    currentTrackId={view.prop('currentTrackId')}
+                />
             </section>
             <section key="tracks" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
                 ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}
             >
-                <MyTracksView loadMore={view.prop('scrolledToBottom')} />
+                <MyTracksView
+                    loadMore={view.prop('scrolledToBottom')}
+                    currentTrackId={view.prop('currentTrackId')}
+                />
             </section>
             <section key="search" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
                 ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}
             >
-                <SearchView loadMore={view.prop('scrolledToBottom')} />
+                <SearchView
+                    loadMore={view.prop('scrolledToBottom')}
+                    currentTrackId={view.prop('currentTrackId')}
+                />
             </section>
             <section key="releases" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
                 ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}>
-                <NewReleasesView />
+                <NewReleasesView currentTrackId={view.prop('currentTrackId')} />
             </section>
         </SwitchView>
     </section>

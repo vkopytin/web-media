@@ -11,6 +11,7 @@ import * as _ from 'underscore';
 
 export interface ISearchViewProps {
     loadMore?: boolean;
+    currentTrackId: string;
 }
 
 class SearchView extends withEvents(React.Component)<ISearchViewProps, {}> {
@@ -61,6 +62,10 @@ class SearchView extends withEvents(React.Component)<ISearchViewProps, {}> {
         }
 
         return this.state[propName];
+    }
+
+    isPlaying(track: TrackViewModelItem) {
+        return track.id() === this.props.currentTrackId;
     }
 
     render() {
