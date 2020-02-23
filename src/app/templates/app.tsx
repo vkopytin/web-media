@@ -16,6 +16,7 @@ import { utils } from 'databindjs';
 
 
 const cn = utils.className;
+const redirectUri = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
 
 export const template = (view: AppView) => <main>
     <section className="todoapp device-content">
@@ -29,9 +30,9 @@ export const template = (view: AppView) => <main>
 
             <div className="content">
                 <p className="content-padded">
-                    <a href={"https://accounts.spotify.com/authorize?" + $.param({
+                    <a className="btn btn-block btn-outlined" href={"https://accounts.spotify.com/authorize?" + $.param({
                         client_id: '963f916fa62c4186a4b8370e16eef658',
-                        redirect_uri: 'https://localhost:4443/index',
+                        redirect_uri: redirectUri,
                         scope: ['streaming', 'user-read-email', 'user-read-private', 'user-modify-playback-state'].join(' '),
                         response_type: 'token',
                         state: 123
@@ -39,12 +40,32 @@ export const template = (view: AppView) => <main>
                         Login on Spotify
                     </a>
                 </p>
-                <p className="content-padded">
-                    <input type="text" placeholder="Full name" onChange={evnt => {
-                        window.location.replace('/index#access_token=' + evnt.target.value);
-                        window.location.reload(true);
-                    }}/>
-                </p>
+                <form className="input-group">
+                    <div className="input-row">
+                        <label>Full name</label>
+                        <input type="text" placeholder="Enter your Fulll name"
+                            defaultValue={view.prop('profile').display_name}
+                         />
+                    </div>
+                    <div className="input-row">
+                        <label>Email</label>
+                        <input type="email" placeholder="<example>@<mail>.<com>"
+                            defaultValue={view.prop('profile').email}
+                        />
+                    </div>
+                    <div className="input-row">
+                        <label>Birthday</label>
+                        <input type="text" placeholder="Product name"
+                            defaultValue={view.prop('profile').birthdate}
+                        />
+                    </div>
+                    <div className="input-row">
+                        <label>Product</label>
+                        <input type="text" placeholder="Product name"
+                            defaultValue={view.prop('profile').product}
+                        />
+                    </div>
+                </form>
             </div>
         </div>
         <div className={cn("popover ?visible", view.state.showSelectDevices === 'show')} style={{

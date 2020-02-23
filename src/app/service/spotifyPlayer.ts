@@ -104,7 +104,7 @@ declare global {
 class SpotifyPlayerService extends withEvents(BaseService) {
     static async create(connection: Service) {
         const settingsResult = await connection.settings('spotify');
-        const name = 'Media Player for Spotify';
+        const name = 'WEB - Media Player for Spotify';
         if (settingsResult.isError) {
 
             return settingsResult;
