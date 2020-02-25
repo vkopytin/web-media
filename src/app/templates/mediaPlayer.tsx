@@ -7,7 +7,7 @@ import { utils } from 'databindjs';
 const cn = utils.className;
 
 export const template = (view: MediaPlayerView) => <div className="player-playback">
-    <div>{_.map(view.errors(), error => <div>error.val</div>)}</div>
+    <div>{_.map(view.errors(), (error, index) => <div key={index}>error.val</div>)}</div>
     <div className="player-left">
         <div className="region">
             <div className="album-media" style={{backgroundImage: `url(${view.prop('thumbnailUrl')})`}}>

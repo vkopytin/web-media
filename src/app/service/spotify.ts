@@ -10,6 +10,9 @@ import * as $ from 'jquery';
 import { SoptifyAdapter, IUserInfo, IDevice } from './adapter/spotify';
 import { ISettings } from './settings';
 import { withEvents } from 'databindjs';
+import { importFromSpotifyTracksResult } from '../data';
+import { importFromSpotifyPlaylistTracksResult } from '../data/useCases/importFromSpotifyPlaylistTracksResult';
+import { importFromSpotifyPlaylistsResult } from '../data/useCases/importFromSpotifyPlaylistsResult';
 
 
 function returnErrorResult<T>(message: string, ex: Error) {
@@ -163,12 +166,15 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async listRecommendations() {
+    async listRecommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50) {
         try {
-            const res = await this.adapter.recommendations('US',
-                '07vycW8ICLf5hKb22PFWXw,4w90cLrCPXk5Z5x7d8tetY',
-                '4SFcuHDFVPjBFSJwi2YcIr,2TIjrhkXVtl9m0v5BRLy2M',
-                0.4, 50);
+            const res = await this.adapter.recommendations(
+                market,
+                seedArtists,
+                seedTracks,
+                minEnergy,
+                minPopularity
+            );
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
@@ -190,6 +196,8 @@ class SpotifyService extends withEvents(BaseService) {
         try {
             const res = await this.adapter.myPlaylists();
 
+            await importFromSpotifyPlaylistsResult(res, 0);
+
             return SpotifyServiceResult.success(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
@@ -199,6 +207,8 @@ class SpotifyService extends withEvents(BaseService) {
     async listPlaylistTracks(playlistId) {
         try {
             const res = await this.adapter.listPlaylistTracks(playlistId);
+
+            await importFromSpotifyPlaylistTracksResult(playlistId, res, 0);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
@@ -216,9 +226,9 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async addTrack(trackId: string) {
+    async addTrack(trackIds: string | string[]) {
         try {
-            const res = await this.adapter.addTrack(trackId);
+            const res = await this.adapter.addTracks(trackIds);
 
             this.onStateChanged();
 
@@ -228,9 +238,9 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async removeTrack(trackId: string) {
+    async removeTracks(trackIds: string | string[]) {
         try {
-            const res = await this.adapter.removeTrack(trackId);
+            const res = await this.adapter.removeTracks(trackIds);
 
             this.onStateChanged();
 
@@ -240,9 +250,9 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async hasTrack(trackId: string) {
+    async hasTracks(trackIds: string | string[]) {
         try {
-            const res = await this.adapter.hasTrack(trackId);
+            const res = await this.adapter.hasTracks(trackIds);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
@@ -304,6 +314,8 @@ class SpotifyService extends withEvents(BaseService) {
     async tracks(offset, limit) {
         try {
             const res = await this.adapter.tracks(offset, limit);
+
+            await importFromSpotifyTracksResult(res, offset);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {

@@ -46,6 +46,7 @@ export interface ITrack {
     id: string;
     name: string;
     album: IAlbum;
+    artists: IArtist[];
     uri: string;
     duration_ms: number;
     track_number: number;
@@ -89,6 +90,7 @@ export interface IRecommendationsResult {
 }
 
 export interface IAlbum {
+    album_type: string;
     id: string;
     name: string;
     uri: string;
@@ -214,7 +216,7 @@ class SoptifyAdapter {
         });
     }
 
-    recommendations(market, seedArtists, seedTracks, minEnergy, minPopularity) {
+    recommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50) {
         return new Promise<IRecommendationsResult>((resolve, reject) => {
             $.ajax({
                 url: 'https://api.spotify.com/v1/recommendations',
@@ -223,8 +225,8 @@ class SoptifyAdapter {
                 },
                 data: {
                     market,
-                    seed_artists: seedArtists,
-                    seed_tracks: seedTracks,
+                    seed_artists: [].concat(seedArtists).join(','),
+                    seed_tracks: [].concat(seedTracks).join(','),
                     min_energy: minEnergy,
                     min_popularity: minPopularity
                 },
@@ -577,11 +579,11 @@ class SoptifyAdapter {
         });
     }
 
-    addTrack(trackId) {
+    addTracks(trackIds: string | string[]) {
         const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/tracks'];
         urlParts.push($.param({
-            ids: [].concat(trackId).join(',')
+            ids: [].concat(trackIds).join(',')
         }));
         return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
@@ -602,11 +604,11 @@ class SoptifyAdapter {
         });
     }
 
-    removeTrack(trackId) {
+    removeTracks(trackIds: string | string[]) {
         const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/tracks'];
         urlParts.push($.param({
-            ids: [].concat(trackId).join(',')
+            ids: [].concat(trackIds).join(',')
         }));
         return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
@@ -627,11 +629,11 @@ class SoptifyAdapter {
         });
     }
 
-    hasTrack(trackId) {
+    hasTracks(trackIds: string | string[]) {
         const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/tracks/contains'];
         urlParts.push($.param({
-            ids: [].concat(trackId).join(',')
+            ids: [].concat(trackIds).join(',')
         }));
         return new Promise<boolean[]>((resolve, reject) => {
             $.ajax({

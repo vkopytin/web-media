@@ -33,7 +33,11 @@ export const template = (view: AppView) => <main>
                     <a className="btn btn-block btn-outlined" href={"https://accounts.spotify.com/authorize?" + $.param({
                         client_id: '963f916fa62c4186a4b8370e16eef658',
                         redirect_uri: redirectUri,
-                        scope: ['streaming', 'user-read-email', 'user-read-private', 'user-modify-playback-state', 'user-top-read'].join(' '),
+                        scope: [
+                            'streaming', 'user-read-email', 'user-read-private',
+                            'user-modify-playback-state', 'user-top-read', 'user-library-read',
+                            'playlist-read-private'
+                        ].join(' '),
                         response_type: 'token',
                         state: 123
                     })}>

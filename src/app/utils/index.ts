@@ -59,3 +59,19 @@ export function assertNoErrors(...args) {
 
     return errors.length > 0;
 }
+
+function asAsync<T1, T2, T3, T4, Y>(c, fn: { (a: T1, a1: T2, a2: T3, a3: T4, cb: { (err, res: Y): void }): void }, a: T1, a1: T2, a2: T3, a3: T4): Promise<Y>
+function asAsync<T1, T2, T3, Y>(c, fn: { (a: T1, a1: T2, a2: T3, cb: { (err, res: Y): void }): void }, a: T1, a1: T2, a3: T3): Promise<Y>
+function asAsync<T1, T2, Y>(c, fn: { (a: T1, a1: T2, cb: {(err, res: Y): void}): void}, a: T1, a1: T2): Promise<Y>
+function asAsync<T, Y>(c, fn: { (a: T, cb: {(err, res: Y): void}): void}, a: T): Promise<Y>
+function asAsync(c, fn, ...args) {
+    return new Promise((resolve, reject) => {
+        fn.apply(c, [...args, (err, res) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(res);
+        }]);
+    });
+}
+export { asAsync };

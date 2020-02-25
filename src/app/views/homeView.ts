@@ -18,13 +18,15 @@ class HomeView extends withEvents(React.Component)<IHomeViewProps, {}> {
     state = {
         openLogin: false,
         items: [] as TrackViewModelItem[],
-        errors: [] as ServiceResult<any, Error>[]
+        errors: [] as ServiceResult<any, Error>[],
+        likedTracks: [] as TrackViewModelItem[]
     };
 
     refreshCommand = { exec() { } };
     
     binding = bindTo(this, () => current(HomeViewModel), {
         'prop(items)': 'tracks',
+        'prop(likedTracks)': 'likedTracks',
         'refreshCommand': 'refreshCommand'
     });
 

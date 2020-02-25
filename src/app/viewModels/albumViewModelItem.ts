@@ -22,6 +22,10 @@ class AlbumViewModelItem extends Events {
         return this.album.name;
     }
 
+    albumType() {
+        return this.album.album_type;
+    }
+
     firstArtist() {
         return _.first(this.album.artists);
     }

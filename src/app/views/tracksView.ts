@@ -21,10 +21,12 @@ class TracksView extends withEvents(React.Component)<ITracksViewProps, {}> {
     state = {
         openLogin: false,
         tracks: [] as TrackViewModelItem[],
+        likedTracks: [] as TrackViewModelItem[],
         errors: [] as ServiceResult<any, Error>[]
     };
     binding = bindTo(this, () => current(PlaylistsViewModel), {
-        'prop(tracks)': 'tracks'
+        'prop(tracks)': 'tracks',
+        'prop(likedTracks)': 'likedTracks'
     });
 
     constructor(props) {

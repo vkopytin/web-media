@@ -22,7 +22,8 @@ export const template = (view: TracksView) => <>
                     {item.name()}
                     <p>{item.album()}</p>
                 </div>
-                <span className="badge">{item.duration()}</span>
+                {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
+                {item.isLiked() || <span className="badge">{item.duration()}</span>}
             </li>
         })}
     </ul>

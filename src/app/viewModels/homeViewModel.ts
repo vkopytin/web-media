@@ -2,8 +2,8 @@ import { Events } from 'databindjs';
 import { Service } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
-import { ISpotifySong, IRecommendationsResult } from '../service/adapter/spotify';
-import { current } from '../utils';
+import { ISpotifySong, IRecommendationsResult, IResponseResult } from '../service/adapter/spotify';
+import { current, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
 
 
@@ -11,7 +11,8 @@ class HomeViewModel extends Events {
 
     settings = {
         openLogin: false,
-        errors: [] as ServiceResult<any, Error>[]
+        errors: [] as ServiceResult<any, Error>[],
+        likedTracks: [] as TrackViewModelItem[]
     };
 
     refreshCommand = {
@@ -31,13 +32,33 @@ class HomeViewModel extends Events {
     }
 
     async fetchData() {
-        const res = await this.ss.recommendations();
+        const tracksResult = await this.ss.tracks(0, 20);
+        if (assertNoErrors(tracksResult, e => this.errors(e))) {
+            return;
+        }
+        const tracks = tracksResult.val as IResponseResult<ISpotifySong>;
+        const artistIds = []; ///_.first(_.uniq(_.flatten(_.map(tracks.items, (song) => _.pluck(song.track.artists, 'id')))), 5);
+        const trackIds = _.first(_.uniq(_.map(tracks.items, (song) => song.track.id)), 5);
+        const res = await this.ss.recommendations('US', artistIds, trackIds);
         if (res.isError) {
             return;
         }
         const recomendations = res.val as IRecommendationsResult;
+        const newTracks = _.map(recomendations.tracks, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
 
-        this.tracks(_.map(recomendations.tracks, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index)));
+        this.tracks(newTracks);
+        this.checkTracks(newTracks);
+    }
+
+    async checkTracks(tracks: TrackViewModelItem[]) {
+        const ids = _.map(tracks, track => track.id());
+        const likedResult = await this.ss.hasTracks(ids);
+        if (assertNoErrors(likedResult, e => this.errors(e))) {
+            return;
+        }
+        _.each(likedResult.val as boolean[], (liked, index) => {
+            tracks[index].isLiked(liked);
+        });
     }
 
     errors(val?: ServiceResult<any, Error>[]) {
@@ -56,6 +77,15 @@ class HomeViewModel extends Events {
         }
 
         return this.trackArray;
+    }
+
+    likedTracks(val?: TrackViewModelItem[]) {
+        if (arguments.length && this.settings.likedTracks !== val) {
+            this.settings.likedTracks = val;
+            this.trigger('change:likedTracks');
+        }
+
+        return this.settings.likedTracks;
     }
 
     loadMore() {

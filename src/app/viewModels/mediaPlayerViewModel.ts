@@ -160,7 +160,7 @@ class MediaPlayerViewModel extends Events {
     }
 
     async checkTrackExists() {
-        const trackExistsResult = await this.ss.hasTrack(this.currentTrackId());
+        const trackExistsResult = await this.ss.hasTracks(this.currentTrackId());
         if (assertNoErrors(trackExistsResult, e => this.errors(e))) {
             return;
         }
@@ -370,7 +370,7 @@ class MediaPlayerViewModel extends Events {
 
     async unlikeTrack() {
         lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
-            const stateResult = await this.ss.removeTrack(this.currentTrackId());
+            const stateResult = await this.ss.removeTracks(this.currentTrackId());
             assertNoErrors(stateResult, e => this.errors(e));
 
             next();

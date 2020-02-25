@@ -12,7 +12,8 @@ import { ServiceResult } from '../base/serviceResult';
 class TrackViewModelItem extends Events {
     appViewModel = current(AppViewModel);
     settings = {
-        errors: [] as ServiceResult<any, Error>[]
+        errors: [] as ServiceResult<any, Error>[],
+        isLiked: false
     };
 
     constructor(public song: ISpotifySong, private index: number, private ss = current(Service)) {
@@ -63,6 +64,15 @@ class TrackViewModelItem extends Events {
         const device = this.appViewModel.currentDevice();
         const playResult = this.ss.play(device?.id(), _.map(tracks, item => item.uri()), this.uri());
         assertNoErrors(playResult, e => this.errors(e));
+    }
+
+    isLiked(val?) {
+        if (arguments.length && val !== this.settings.isLiked) {
+            this.settings.isLiked = val;
+            this.trigger('change:isLiked');
+        }
+
+        return this.settings.isLiked;
     }
 }
 

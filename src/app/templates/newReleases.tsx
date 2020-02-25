@@ -31,7 +31,7 @@ export const template = (view: NewReleasesView) => <>
                     </div>
                 </div>
                 <div className="card__info">
-                    <span className="card__category">{item.releaseDate()}</span>
+                    <span className="card__category">{item.albumType()}</span>
                     <h3 className="card__title">{item.name()}</h3>
                     <span className="card__by">
                         by<span>&nbsp;</span>

@@ -160,22 +160,22 @@ class Service {
         return result;
     }
 
-    async removeTrack(trackId: string) {
+    async removeTracks(trackIds: string | string[]) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
-        const result = await spotify.val.removeTrack(trackId);
+        const result = await spotify.val.removeTracks(trackIds);
 
         return result;
     }
 
-    async hasTrack(trackId: string) {
+    async hasTracks(trackIds: string | string[]) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
-        const result = await spotify.val.hasTrack(trackId);
+        const result = await spotify.val.hasTracks(trackIds);
 
         return result;
     }
@@ -200,12 +200,18 @@ class Service {
         return result;
     }
 
-    async recommendations() {
+    async recommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
-        const result = await spotify.val.listRecommendations();
+        const result = await spotify.val.listRecommendations(
+            market,
+            seedArtists,
+            seedTracks,
+            minEnergy,
+            minPopularity
+        );
 
         return result;
     }
