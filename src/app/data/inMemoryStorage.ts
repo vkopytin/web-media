@@ -8,17 +8,25 @@ class InMemoryStorage {
     }
 
     createTable(tableName, cb: { (err, res?): void }) {
-        if (!this.db[tableName]) {
-            this.db[tableName] = {};
+        try {
+            if (!this.db[tableName]) {
+                this.db[tableName] = {};
+            }
+
+            cb(null, true);
+        } catch (ex) {
+            cb(ex);
         }
-        cb(null, true);
     }
     
     create(tableName: string, data: { id; }, cb: { (err, res?): void }) {
-        this.db[tableName][data.id] = data;
-        cb(null, data.id);
+        try {
+            this.db[tableName][data.id] = data;
 
-        return true;
+            cb(null, data.id);
+        } catch (ex) {
+            cb(ex);
+        }
     }
 
     update(tableName: string, id, data, cb: { (err, res?): void }) {
@@ -33,29 +41,40 @@ class InMemoryStorage {
                 ...data
             };
 
+            cb(null, true);
         } catch (ex) {
             cb(ex, null);
         }
-        cb(null, true);
 
         return true;
     }
 
     delete(tableName: string, id, cb: { (err, result?): void }) {
-        delete this.db[tableName][id];
-        cb(null, true);
-        return true;
+        try {
+            delete this.db[tableName][id];
+            cb(null, true);
+        } catch (ex) {
+            cb(ex);
+        }
     }
 
     getById(tableName: string, id, cb: { (err, id?): void }) {
-        cb(null, this.db[tableName][id] || null);
+        try {
+            cb(null, this.db[tableName][id] || null);
+        } catch (ex) {
+            cb(ex);
+        }
     }
 
-    list(tableName: string, cb: { (err, record?): void }) {
-        for (const key in this.db) {
+    each(tableName: string, cb: { (err, record?, index?: number): boolean }) {
+        let index = 0;
+        for (const key in this.db[tableName]) {
             if (Object.prototype.hasOwnProperty.call(this.db[tableName], key)) {
                 try {
-                    cb(null, this.db[tableName][key]);
+                    const stop = cb(null, this.db[tableName][key], index++);
+                    if (stop) {
+                        return;
+                    }
                 } catch (ex) {
                     cb(ex, null);
                 }
@@ -66,22 +85,25 @@ class InMemoryStorage {
     }
 
     getCount(tableName, cb: { (err, res?): void }) {
-        let count = 0;
-        for (const k in db[tableName]) {
-            if (db[tableName].hasOwnProperty(k)) {
-                ++count;
+        try {
+            let count = 0;
+            for (const k in db[tableName]) {
+                if (db[tableName].hasOwnProperty(k)) {
+                    ++count;
+                }
             }
-        }
 
-        cb(null, count);
+            cb(null, count);
+        } catch (ex) {
+            cb(ex);
+        }
     }
 
     query(query, params, callback) {
         return callback(false);
     }
 
-    complete = _.debounce(this.completeInternal, 500)
-
+    complete = _.debounce(this.completeInternal, 500);
     completeInternal() {
         console.log(db);
     }

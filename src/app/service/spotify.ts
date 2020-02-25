@@ -13,6 +13,11 @@ import { withEvents } from 'databindjs';
 import { importFromSpotifyTracksResult } from '../data';
 import { importFromSpotifyPlaylistTracksResult } from '../data/useCases/importFromSpotifyPlaylistTracksResult';
 import { importFromSpotifyPlaylistsResult } from '../data/useCases/importFromSpotifyPlaylistsResult';
+import { importFromSpotifyRecommendationsResult } from '../data/useCases/importFromSpotifyRecommendationsResult';
+import { DataStorage } from '../data/dataStorage';
+import { asAsync } from '../utils';
+import { RecommendationsData } from '../data/entities/recommendationsData';
+import { listRecommendations } from '../data/useCases/listRecommendations';
 
 
 function returnErrorResult<T>(message: string, ex: Error) {
@@ -48,15 +53,14 @@ class SpotifyService extends withEvents(BaseService) {
     }
 
     currentProfile: IUserInfo = null;
+    onStateChanged = _.debounce(this.onStateChangedInternal, 500);
 
     constructor(public adapter: SoptifyAdapter) {
         super();
     }
 
-    onStateChanged(...args) {
-        _.delay(() => {
-            this.trigger('change:state', ...args);
-        });
+    onStateChangedInternal(...args) {
+        this.trigger('change:state', ...args);
     }
 
 
@@ -166,15 +170,21 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async listRecommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50) {
+    async listRecommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50, limit = 20) {
         try {
             const res = await this.adapter.recommendations(
                 market,
                 seedArtists,
                 seedTracks,
                 minEnergy,
-                minPopularity
+                minPopularity,
+                limit
             );
+
+            await importFromSpotifyRecommendationsResult(res, +new Date());
+
+            const res1 = await listRecommendations(limit);
+            console.log(res1);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
@@ -192,9 +202,9 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async myPlaylists() {
+    async myPlaylists(offset = 0, limit = 20) {
         try {
-            const res = await this.adapter.myPlaylists();
+            const res = await this.adapter.myPlaylists(offset, limit);
 
             await importFromSpotifyPlaylistsResult(res, 0);
 
@@ -204,9 +214,9 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async listPlaylistTracks(playlistId) {
+    async listPlaylistTracks(playlistId, offset=0, limit=20) {
         try {
-            const res = await this.adapter.listPlaylistTracks(playlistId);
+            const res = await this.adapter.listPlaylistTracks(playlistId, offset, limit);
 
             await importFromSpotifyPlaylistTracksResult(playlistId, res, 0);
 

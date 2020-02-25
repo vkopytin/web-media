@@ -7,7 +7,7 @@ class ArtistData {
         this.uow.createTable(this.tableName, () => { });
 	}
 
-	getAll(callback: { (err, result?): void }) {
+	each(callback: { (err, result?): void }) {
         this.uow.list(this.tableName, callback);
 	}
 
@@ -32,7 +32,7 @@ class ArtistData {
     }
     
     refresh(artistId: string, artist, callback: { (err, result?): void }) {
-        this.getById(artistId, (err, record) => {
+        this.uow.getById(this.tableName, artistId, (err, record) => {
             if (err) {
                 return callback(err);
             }

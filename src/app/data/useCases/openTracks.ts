@@ -3,7 +3,7 @@ import { TrackData } from '../entities/trackData';
 
 
 export function openTracks(cb: { (tracks: TrackData): void }) {
-    DataStorage.create(connection => {
+    DataStorage.create((err, connection) => {
             
         cb(new TrackData(connection));
 

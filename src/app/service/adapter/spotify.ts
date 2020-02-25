@@ -216,7 +216,7 @@ class SoptifyAdapter {
         });
     }
 
-    recommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50) {
+    recommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50, limit = 0) {
         return new Promise<IRecommendationsResult>((resolve, reject) => {
             $.ajax({
                 url: 'https://api.spotify.com/v1/recommendations',
@@ -228,7 +228,8 @@ class SoptifyAdapter {
                     seed_artists: [].concat(seedArtists).join(','),
                     seed_tracks: [].concat(seedTracks).join(','),
                     min_energy: minEnergy,
-                    min_popularity: minPopularity
+                    min_popularity: minPopularity,
+                    limit
                 },
                 success(response) {
                     resolve(response);
@@ -257,12 +258,16 @@ class SoptifyAdapter {
         });
     }
 
-    myPlaylists() {
+    myPlaylists(offset=0, limit=20) {
         return new Promise<IUserPlaylistsResult>((resolve, reject) => {
             $.ajax({
                 url: 'https://api.spotify.com/v1/me/playlists',
                 headers: {
                     'Authorization': 'Bearer ' + this.token
+                },
+                data: {
+                    offset: offset,
+                    limit: limit
                 },
                 success(response) {
                     resolve(response);
@@ -274,12 +279,16 @@ class SoptifyAdapter {
         });
     }
 
-    listPlaylistTracks(playlistId) {
+    listPlaylistTracks(playlistId, offset=0, limit=20) {
         return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
                 url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
                 headers: {
                     'Authorization': 'Bearer ' + this.token
+                },
+                data: {
+                    offset: offset,
+                    limit: limit
                 },
                 success(response) {
                     resolve(response);

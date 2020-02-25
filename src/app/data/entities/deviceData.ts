@@ -7,7 +7,7 @@ class DeviceData {
         this.uow.createTable(this.tableName, () => { });
 	}
 
-	getAll(callback: { (err, result?): void }) {
+	each(callback: { (err, result?): void }) {
         this.uow.list(this.tableName, callback);
 	}
 
@@ -32,7 +32,7 @@ class DeviceData {
     }
 
     refresh(deviceId, device, callback: { (err, result?): void }) {
-        this.getById(deviceId, (err, record) => {
+        this.uow.getById(this.tableName, deviceId, (err, record) => {
             if (err) {
                 return callback(err);
             }

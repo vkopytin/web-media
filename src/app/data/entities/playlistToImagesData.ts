@@ -7,7 +7,7 @@ class PlaylistToImagesData {
         this.uow.createTable(this.tableName, () => { });
     }
 
-	getAll(callback: { (err, result?): void }) {
+	each(callback: { (err, result?): void }) {
         this.uow.list(this.tableName, callback);
 	}
 
@@ -38,7 +38,7 @@ class PlaylistToImagesData {
     }
     
     refresh(imageUrl: string, playlistId: string, callback: { (err, result?): void }) {
-        this.getById(imageUrl, (err, record) => {
+        this.uow.getById(this.tableName, imageUrl, (err, record) => {
             if (err) {
                 return callback(err);
             }

@@ -11,7 +11,7 @@ class TracksPlaylistsData {
         return `${trackId}-${playlistId}`;
     }
 
-	getAll(callback: { (err, result?): void }) {
+	each(callback: { (err, result?): void }) {
         this.uow.list(this.tableName, callback);
 	}
 
@@ -47,7 +47,7 @@ class TracksPlaylistsData {
 
     refresh(trackId: string, playlistId: string, callback: { (err, result?): void }) {
         const id = this.getId(trackId, playlistId);
-        this.getById(id, (err, record) => {
+        this.uow.getById(this.tableName, id, (err, record) => {
             if (err) {
                 return callback(err);
             }

@@ -216,24 +216,24 @@ class Service {
         return result;
     }
 
-    async myPlaylists() {
+    async myPlaylists(offset = 0, limit = 20) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
 
-        const result = spotify.val.myPlaylists();
+        const result = spotify.val.myPlaylists(offset, limit);
 
         return result;
     }
 
-    async listPlaylistTracks(playlistId) {
+    async listPlaylistTracks(playlistId, offset=0, limit=20) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
 
-        const result = spotify.val.listPlaylistTracks(playlistId);
+        const result = spotify.val.listPlaylistTracks(playlistId, offset, limit);
 
         return result;
     }

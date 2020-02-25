@@ -11,7 +11,7 @@ class ArtistsToAlbumsData {
         return `${artistId}-${albumId}`;
     }
 
-	getAll(callback: { (err, result?): void }) {
+	each(callback: { (err, result?): void }) {
         this.uow.list(this.tableName, callback);
 	}
 
@@ -47,7 +47,7 @@ class ArtistsToAlbumsData {
     
     refresh(artistId: string, albumId: string, callback: { (err, result?): void }) {
         const id = this.getId(artistId, albumId);
-        this.getById(id, (err, record) => {
+        this.uow.getById(this.tableName, id, (err, record) => {
             if (err) {
                 return callback(err);
             }

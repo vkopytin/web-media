@@ -7,7 +7,7 @@ class MyLibraryData {
         this.uow.createTable(this.tableName, () => { });
     }
 
-	getAll(callback: { (err, result?): void }) {
+	each(callback: { (err, result?): void }) {
         this.uow.list(this.tableName, callback);
 	}
 
@@ -38,7 +38,7 @@ class MyLibraryData {
     }
 
     refresh(id: string, library, callback: { (err, result?): void }) {
-        this.getById(id, (err, record) => {
+        this.uow.getById(this.tableName, id, (err, record) => {
             if (err) {
                 return callback(err);
             }
