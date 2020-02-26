@@ -15,15 +15,13 @@ import { MyLibraryData } from '../entities/myLibraryData';
 export function importFromSpotifyTracksResult(result: IResponseResult<ISpotifySong>, offset: number) {
     const queue = [];
     DataStorage.create((err, connection) => {
-        const tracks = new TrackData(connection);
         const myLibrary = new MyLibraryData(connection);
 
         _.each(result.items, (item, index) => {
             const trackId = item.track.id;
 
-            queue.push(asAsync(tracks, tracks.refresh, trackId, item.track));
             queue.push(asAsync(myLibrary, myLibrary.refresh, `track:${trackId}`, {
-                trackId,
+                track: item.track,
                 isLiked: true,
                 position: offset + index
             }));

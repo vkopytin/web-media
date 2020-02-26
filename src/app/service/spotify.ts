@@ -19,6 +19,7 @@ import { asAsync } from '../utils';
 import { RecommendationsData } from '../data/entities/recommendationsData';
 import { listRecommendations } from '../data/useCases/listRecommendations';
 import { listPlaylists } from '../data/useCases/listPlaylists';
+import { listPlaylistsTracks } from '../data/useCases/listPlaylistsTracks';
 
 
 function returnErrorResult<T>(message: string, ex: Error) {
@@ -234,11 +235,25 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
+    async fetchPlaylistTracks(playlistId, offset=0, limit=20) {
+        try {
+            const res = await this.adapter.listPlaylistTracks(playlistId, offset, limit);
+
+            await importFromSpotifyPlaylistTracksResult(playlistId, res, 0);
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
     async listPlaylistTracks(playlistId, offset=0, limit=20) {
         try {
             const res = await this.adapter.listPlaylistTracks(playlistId, offset, limit);
 
             await importFromSpotifyPlaylistTracksResult(playlistId, res, 0);
+            const res1 = await listPlaylistsTracks(playlistId, offset, limit);
+            console.log(res1);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {

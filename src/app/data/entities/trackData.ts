@@ -14,11 +14,11 @@ class TrackData {
         this.uow.createTable(this.tableName, () => { });
 	}
 
-	each(callback: { (err, result?): void }) {
+	each(callback: { (err, result?: ITrack): void }) {
         this.uow.each(this.tableName, callback);
-	}
+    }
 
-    getById(trackId: string, callback: { (err, result?): void }) {
+    getById(trackId: string, callback: { (err, result?: ITrack): void }) {
         const albums = new AlbumData(this.uow);
         const artists = new ArtistData(this.uow);
 
@@ -43,11 +43,11 @@ class TrackData {
         });
     }
 
-	getCount(callback: { (err, result?): void }) {
+	getCount(callback: { (err, result?: ITrack): void }) {
         this.uow.getCount(this.tableName, callback);
 	}
 
-    create(track: ITrack, callback: { (err, result?): void }) {
+    create(track: ITrack, callback: { (err, result?: string): void }) {
         const albums = new AlbumData(this.uow);
         const artists = new ArtistData(this.uow);
         const artistsToTracks = new ArtistsToTracksData(this.uow);

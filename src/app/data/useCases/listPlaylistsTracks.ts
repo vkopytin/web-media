@@ -1,21 +1,21 @@
-import { PlaylistData } from '../entities/playlistData';
 import { DataStorage } from '../dataStorage';
 import { asAsync } from '../../utils';
 import * as _ from 'underscore';
 import { utils } from 'databindjs';
-import { IUserPlaylist } from '../../service/adapter/spotify';
+import { ITrack } from '../../service/adapter/spotify';
+import { MyLibraryData } from '../entities/myLibraryData';
 
 
-export function listPlaylists(offset = 0, limit = 0) {
-    return asAsync<IUserPlaylist[]>(null, (cb: { (a, b): void }) => {
+export function listPlaylistsTracks(playlistId: string, offset = 0, limit = 20) {
+    return asAsync<ITrack[]>(null, (cb: { (a, b): void }) => {
         DataStorage.create(async (err, connection) => {
-            const playlists = new PlaylistData(connection);
+            const myLibrary = new MyLibraryData(connection);
             const queue = utils.asyncQueue();
             const subQueue = utils.asyncQueue(30);
-            const items = [] as IUserPlaylist[];
+            const items = [] as ITrack[];
 
             queue.push(next => {
-                playlists.each((err, result, index) => {
+                myLibrary.eachByPlaylist(playlistId, (err, result, index) => {
                     if (_.isUndefined(result)) {
                         next();
                         return true;
@@ -27,7 +27,7 @@ export function listPlaylists(offset = 0, limit = 0) {
                         return;
                     }
                     subQueue.push(next => {
-                        items.push(result);
+                        items.push(result.track);
                         next();
                     });
                 });

@@ -3,8 +3,6 @@ import { IUserPlaylistsResult } from '../../service/adapter/spotify';
 import { DataStorage } from '../dataStorage';
 import { PlaylistData } from '../entities/playlistData';
 import { asAsync } from '../../utils';
-import { ImageData } from '../entities/imageData';
-import { PlaylistToImagesData } from '../entities/playlistToImagesData';
 
 
 export function importFromSpotifyPlaylistsResult(result: IUserPlaylistsResult, offset = 0) {
@@ -16,7 +14,7 @@ export function importFromSpotifyPlaylistsResult(result: IUserPlaylistsResult, o
             const playlistId = item.id;
 
             queue.push(asAsync(playlists, playlists.refresh, playlistId, {
-                index: offset + index,
+                position: offset + index,
                 ...item
             }));
 
