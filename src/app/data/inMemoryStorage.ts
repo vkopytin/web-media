@@ -66,12 +66,12 @@ class InMemoryStorage {
         }
     }
 
-    each(tableName: string, cb: { (err, record?, index?: number): boolean }) {
+    each(tableName: string, cb: { (err?, record?, index?: number): boolean }) {
         let index = 0;
         for (const key in this.db[tableName]) {
             if (Object.prototype.hasOwnProperty.call(this.db[tableName], key)) {
                 try {
-                    const stop = cb(null, this.db[tableName][key], index++);
+                    const stop = cb(null, this.db[tableName][key] || null, index++);
                     if (stop) {
                         return;
                     }
@@ -80,6 +80,8 @@ class InMemoryStorage {
                 }
             }
         }
+
+        cb();
 
         return true;
     }

@@ -19,9 +19,10 @@ class RecommendationsData {
         this.uow.createTable(this.tableName, () => { });
 	}
 
-    each(callback: { (err, result?: IRecomendation, index?: number): void }) {
+    each(callback: { (err?, result?: IRecomendation, index?: number): void }) {
         const tracks = new TrackData(this.uow);
         this.uow.each(this.tableName, (err, record, index) => {
+            if (_.isUndefined(record)) return callback();
             if (err) {
                 return callback(err);
             }

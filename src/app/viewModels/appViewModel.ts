@@ -27,36 +27,39 @@ class AppViewModel extends Events {
     devicesArray = [] as any[];
     userInfo = {} as IUserInfo;
 
-    isInit = _.delay(() => this.loadData());
+    isInit = _.delay(() => {
+        this.connect();
+        this.fetchData();
+    });
 
     constructor(private ss = current(Service)) {
         super();
-
-        (async function (this: AppViewModel) {
-            const isLoggedInResult = await this.ss.isLoggedIn();
-
-            if (assertNoErrors(isLoggedInResult, e => this.errors(e))) {
-                return;
-            }
-
-            this.openLogin(!isLoggedInResult.val);
-
-            const playerResult = await this.ss.spotifyPlayer();
-            if (assertNoErrors(playerResult, e => this.errors(e))) {
-                return;
-            }
-            const updateDevicesHandler = (eventName: string, device: { device_id: string;}) => {
-                if (!this.currentDevice()) {
-                    this.ss.player(device.device_id, false);
-                }
-                this.updateDevices();
-                playerResult.val.off('ready', updateDevicesHandler);
-            };
-            playerResult.val.on('ready', updateDevicesHandler);
-        }).call(this);
     }
 
-    async loadData() {
+    async connect() {
+        const isLoggedInResult = await this.ss.isLoggedIn();
+
+        if (assertNoErrors(isLoggedInResult, e => this.errors(e))) {
+            return;
+        }
+
+        this.openLogin(!isLoggedInResult.val);
+
+        const playerResult = await this.ss.spotifyPlayer();
+        if (assertNoErrors(playerResult, e => this.errors(e))) {
+            return;
+        }
+        const updateDevicesHandler = (eventName: string, device: { device_id: string; }) => {
+            if (!this.currentDevice()) {
+                this.ss.player(device.device_id, false);
+            }
+            this.updateDevices();
+            playerResult.val.off('ready', updateDevicesHandler);
+        };
+        playerResult.val.on('ready', updateDevicesHandler);
+    }
+
+    async fetchData() {
         const userInfoResult = await this.ss.profile();
 
         if (assertNoErrors(userInfoResult, e => this.errors(e))) {

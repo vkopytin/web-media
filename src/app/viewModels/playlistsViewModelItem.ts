@@ -31,6 +31,22 @@ class PlaylistsViewModelItem extends Events {
     thumbnailUrl() {
         return _.first(this.playlist.images).url;
     }
+
+    equals(inst: PlaylistsViewModelItem) {
+        if (inst == null || inst == undefined) {
+            return false;
+        }
+
+        if (this === inst) {
+            return true;
+        }
+
+        if (!(inst instanceof PlaylistsViewModelItem)) {
+            return false;
+        }
+
+        return this.playlist.id === inst.playlist.id;
+    }
 }
 
 export { PlaylistsViewModelItem };

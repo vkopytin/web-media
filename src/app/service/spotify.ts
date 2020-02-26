@@ -18,6 +18,7 @@ import { DataStorage } from '../data/dataStorage';
 import { asAsync } from '../utils';
 import { RecommendationsData } from '../data/entities/recommendationsData';
 import { listRecommendations } from '../data/useCases/listRecommendations';
+import { listPlaylists } from '../data/useCases/listPlaylists';
 
 
 function returnErrorResult<T>(message: string, ex: Error) {
@@ -170,7 +171,7 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async listRecommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50, limit = 20) {
+    async fetchRecommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50, limit = 20) {
         try {
             const res = await this.adapter.recommendations(
                 market,
@@ -182,9 +183,17 @@ class SpotifyService extends withEvents(BaseService) {
             );
 
             await importFromSpotifyRecommendationsResult(res, +new Date());
+            this.onStateChanged();
 
-            const res1 = await listRecommendations(limit);
-            console.log(res1);
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async listRecommendations() {
+        try {
+            const res = await listRecommendations();
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
@@ -202,11 +211,22 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async myPlaylists(offset = 0, limit = 20) {
+    async fetchMyPlaylists(offset = 0, limit = 20) {
         try {
             const res = await this.adapter.myPlaylists(offset, limit);
 
             await importFromSpotifyPlaylistsResult(res, 0);
+            this.onStateChanged();
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async myPlaylists(offset = 0, limit = 20) {
+        try {
+            const res = await listPlaylists(offset, limit);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {

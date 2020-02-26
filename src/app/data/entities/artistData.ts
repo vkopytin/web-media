@@ -1,3 +1,7 @@
+import { ArtistsToTracksData } from './artistsToTracksData';
+import * as _ from 'underscore';
+
+
 class ArtistData {
     uow = null;
     tableName = 'artists';
@@ -8,8 +12,22 @@ class ArtistData {
 	}
 
 	each(callback: { (err, result?): void }) {
-        this.uow.list(this.tableName, callback);
-	}
+        this.uow.each(this.tableName, callback);
+    }
+    
+    eachByTrack(trackId: string, callback: { (err?, result?): void }) {
+        const artistsToTracks = new ArtistsToTracksData(this.uow);
+        artistsToTracks.each((err, atot) => {
+            if (_.isUndefined(atot)) return callback();
+            if (err) {
+                callback(err);
+            }
+            if (atot.trackId !== trackId) {
+                return;
+            }
+            this.getById(atot.artistId, callback);
+        });
+    }
 
 	getById(artistId: string, callback: { (err, result?): void }) {
         this.uow.getById(this.tableName, artistId, callback);

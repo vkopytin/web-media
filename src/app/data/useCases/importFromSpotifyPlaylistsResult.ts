@@ -7,7 +7,7 @@ import { ImageData } from '../entities/imageData';
 import { PlaylistToImagesData } from '../entities/playlistToImagesData';
 
 
-export function importFromSpotifyPlaylistsResult(result: IUserPlaylistsResult, offset: number) {
+export function importFromSpotifyPlaylistsResult(result: IUserPlaylistsResult, offset = 0) {
     const queue = [];
     DataStorage.create((err, connection) => {
         const playlists = new PlaylistData(connection);
@@ -15,7 +15,10 @@ export function importFromSpotifyPlaylistsResult(result: IUserPlaylistsResult, o
         _.each(result.items, (item, index) => {
             const playlistId = item.id;
 
-            queue.push(asAsync(playlists, playlists.refresh, playlistId, item));
+            queue.push(asAsync(playlists, playlists.refresh, playlistId, {
+                index: offset + index,
+                ...item
+            }));
 
             connection.complete();
         });

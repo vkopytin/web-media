@@ -14,12 +14,40 @@ class PlaylistData {
         this.uow.createTable(this.tableName, () => { });
 	}
 
-	each(callback: { (err, result?): void }) {
-        this.uow.list(this.tableName, callback);
+	each(callback: { (err?, result?: IUserPlaylist, index?: number): void }) {
+        const images = new ImageData(this.uow);
+
+        this.uow.each(this.tableName, (err, record: IUserPlaylist, index: number) => {
+            if (_.isUndefined(record)) return callback();
+            if (err) {
+                callback(err);
+            }
+            const imagesArr = [];
+            const playlistId = record.id;
+            images.eachByPlaylistId(playlistId, (err, image) => {
+                imagesArr.push(image);
+            });
+            callback(err, {
+                ...record,
+                images: imagesArr
+            }, index);
+        });
 	}
 
-	getById(playlistId: string, callback: { (err, result?): void }) {
-        this.uow.getById(this.tableName, playlistId, callback);
+    getById(playlistId: string, callback: { (err?, result?): void }) {
+        const images = new ImageData(this.uow);
+
+        this.uow.getById(this.tableName, playlistId, (err, record) => {
+            const imagesArr = [];
+            images.eachByPlaylistId(playlistId, (err, image) => {
+                if (_.isUndefined(image)) return callback();
+                imagesArr.push(image);
+            });
+            callback(err, {
+                ...record,
+                images: imagesArr
+            });
+        });
     }
 
 	getCount(callback: { (err, result?): void }) {

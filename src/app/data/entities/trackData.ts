@@ -15,13 +15,12 @@ class TrackData {
 	}
 
 	each(callback: { (err, result?): void }) {
-        this.uow.list(this.tableName, callback);
+        this.uow.each(this.tableName, callback);
 	}
 
     getById(trackId: string, callback: { (err, result?): void }) {
         const albums = new AlbumData(this.uow);
         const artists = new ArtistData(this.uow);
-        const artistsToTracks = new ArtistsToTracksData(this.uow);
 
         this.uow.getById(this.tableName, trackId, (err, track) => {
             if (err) {
@@ -31,9 +30,14 @@ class TrackData {
                 if (err) {
                     return callback(err);
                 }
+                const artistsArr = [];
+                artists.eachByTrack(trackId, (err, artist) => {
+                    artistsArr.push(artist);
+                });
                 callback(err, {
                     ...track,
-                    album
+                    album,
+                    artists: artistsArr
                 });
             });
         });

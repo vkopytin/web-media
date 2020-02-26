@@ -1,8 +1,8 @@
 import { Events } from 'databindjs';
-import { Service } from '../service';
+import { Service, SpotifyService } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
-import { ISpotifySong, IRecommendationsResult, IResponseResult } from '../service/adapter/spotify';
+import { ISpotifySong, IRecommendationsResult, IResponseResult, ITrack } from '../service/adapter/spotify';
 import { current, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
 
@@ -23,12 +23,24 @@ class HomeViewModel extends Events {
 
     trackArray = [] as Array<TrackViewModelItem>;
 
-    isInit = _.delay(() => this.fetchData(), 100);
+    isInit = _.delay(() => {
+        this.connect();
+        this.fetchData();
+    }, 100);
 
     constructor(private ss = current(Service)) {
         super();
 
         this.ss.spotifyPlayer();
+    }
+
+    async connect() {
+        const spotifyResult = await this.ss.service(SpotifyService);
+        if (assertNoErrors(spotifyResult, e => this.errors(e))) {
+            return;
+        }
+        const spotify = spotifyResult.val;
+        spotify.on('change:state', () => this.loadData());
     }
 
     async fetchData() {
@@ -39,12 +51,16 @@ class HomeViewModel extends Events {
         const tracks = tracksResult.val as IResponseResult<ISpotifySong>;
         const artistIds = []; ///_.first(_.uniq(_.flatten(_.map(tracks.items, (song) => _.pluck(song.track.artists, 'id')))), 5);
         const trackIds = _.first(_.uniq(_.map(tracks.items, (song) => song.track.id)), 5);
-        const res = await this.ss.recommendations('US', artistIds, trackIds);
+        const res = await this.ss.fetchRecommendations('US', artistIds, trackIds);
+    }
+
+    async loadData() {
+        const res = await this.ss.recommendations();
         if (res.isError) {
             return;
         }
-        const recomendations = res.val as IRecommendationsResult;
-        const newTracks = _.map(recomendations.tracks, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
+        const recomendations = res.val as ITrack[];
+        const newTracks = _.map(recomendations, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
 
         this.tracks(newTracks);
         this.checkTracks(newTracks);

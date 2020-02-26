@@ -8,7 +8,7 @@ class DeviceData {
 	}
 
 	each(callback: { (err, result?): void }) {
-        this.uow.list(this.tableName, callback);
+        this.uow.each(this.tableName, callback);
 	}
 
 	getById(deviceId, callback: { (err, result?): void }) {

@@ -200,18 +200,39 @@ class Service {
         return result;
     }
 
-    async recommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50) {
+    async fetchRecommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
-        const result = await spotify.val.listRecommendations(
+        const result = await spotify.val.fetchRecommendations(
             market,
             seedArtists,
             seedTracks,
             minEnergy,
             minPopularity
         );
+
+        return result;
+    }
+
+    async recommendations() {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.listRecommendations();
+
+        return result;
+    }
+
+    async fetchMyPlaylists(offset = 0, limit = 20) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.fetchMyPlaylists(offset, limit);
 
         return result;
     }

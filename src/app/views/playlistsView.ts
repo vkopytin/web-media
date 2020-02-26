@@ -20,14 +20,14 @@ class PlaylistsView extends withEvents(React.Component)<IPlaylistsViewProps, {}>
         openLogin: false,
         playlists: [] as PlaylistsViewModelItem[],
         tracks: [] as TrackViewModelItem[],
-        currentPlaylist: null as PlaylistsViewModelItem
+        currentPlaylistId: ''
     };
     selectPlaylistCommand = { exec(playlist) { } };
     binding = bindTo(this, () => current(PlaylistsViewModel), {
         'prop(playlists)': 'playlists',
         'prop(tracks)': 'tracks',
         'selectPlaylistCommand': 'selectPlaylistCommand',
-        'prop(currentPlaylist)': 'currentPlaylist'
+        'prop(currentPlaylistId)': 'currentPlaylistId'
     });
 
     constructor(props) {

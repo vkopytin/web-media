@@ -1,29 +1,21 @@
 import { DataStorage } from '../dataStorage';
 import { RecommendationsData } from '../entities/recommendationsData';
 import { asAsync } from '../../utils';
+import { ITrack } from '../../service/adapter/spotify';
+import * as _ from 'underscore';
 
 
 export function listRecommendations(limit = 20) {
-    const tasks = [];
+    const tasks = [] as ITrack[];
 
     DataStorage.create((err, connection) => {
         const recommendations = new RecommendationsData(connection);
-        let maxDate = 0;
 
         recommendations.each((err, result) => {
-            if (err) {
-                tasks.push(Promise.reject(err));
+            if (_.isUndefined(result)) {
+                return true;
             }
-            maxDate = Math.max(maxDate, result.date);
-        });
-
-        recommendations.each((err, result) => {
-            if (err) {
-                tasks.push(Promise.reject(err));
-            }
-            if (result.date >= maxDate) {
-                tasks.push(result);
-            }
+            tasks.push(result.track);
         })
     });
 

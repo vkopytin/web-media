@@ -16,6 +16,12 @@ export async function importFromSpotifyRecommendationsResult(result: IRecommenda
     const queue = [];
     DataStorage.create(async (err, connection) => {
         const recommendations = new RecommendationsData(connection);
+        recommendations.each((err, record) => {
+            if (_.isUndefined(record)) return;
+            if (record.date < (+new Date() - 1000 * 5)) {
+                recommendations.delete(record.id, () => { });
+            }
+        });
 
         _.each(result.tracks, (track, index) => {
             const trackId = track.id;
