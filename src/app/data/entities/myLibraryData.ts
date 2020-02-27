@@ -21,13 +21,13 @@ class MyLibraryData {
         this.uow.createTable(this.tableName, () => { });
     }
 
-    each(callback: { (err?, result?, index?: number): void }) {
+    each(callback: { (err?, result?: IMyLibrary, index?: number): void }) {
         const tracks = new TrackData(this.uow);
         this.uow.each(this.tableName, (err, result, index) => {
             if (_.isUndefined(result)) return callback();
             tracks.getById(result.trackId, (err, track) => {
                 callback(err, {
-                    result,
+                    ...result,
                     track
                 }, index);
             });

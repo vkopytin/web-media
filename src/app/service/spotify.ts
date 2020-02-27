@@ -20,6 +20,7 @@ import { RecommendationsData } from '../data/entities/recommendationsData';
 import { listRecommendations } from '../data/useCases/listRecommendations';
 import { listPlaylists } from '../data/useCases/listPlaylists';
 import { listPlaylistsTracks } from '../data/useCases/listPlaylistsTracks';
+import { listTracks } from '../data/useCases/listTracks';
 
 
 function returnErrorResult<T>(message: string, ex: Error) {
@@ -240,6 +241,7 @@ class SpotifyService extends withEvents(BaseService) {
             const res = await this.adapter.listPlaylistTracks(playlistId, offset, limit);
 
             await importFromSpotifyPlaylistTracksResult(playlistId, res, 0);
+            this.onStateChanged();
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
@@ -249,11 +251,7 @@ class SpotifyService extends withEvents(BaseService) {
 
     async listPlaylistTracks(playlistId, offset=0, limit=20) {
         try {
-            const res = await this.adapter.listPlaylistTracks(playlistId, offset, limit);
-
-            await importFromSpotifyPlaylistTracksResult(playlistId, res, 0);
-            const res1 = await listPlaylistsTracks(playlistId, offset, limit);
-            console.log(res1);
+            const res = await listPlaylistsTracks(playlistId, offset, limit);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
@@ -356,11 +354,22 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async tracks(offset, limit) {
+    async fetchTracks(offset = 0, limit = 20) {
         try {
             const res = await this.adapter.tracks(offset, limit);
 
             await importFromSpotifyTracksResult(res, offset);
+            this.onStateChanged();
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async listTracks(offset = 0, limit = 20) {
+        try {
+            const res = await listTracks(offset, limit);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {

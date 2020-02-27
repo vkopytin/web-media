@@ -20,12 +20,17 @@ class PlaylistsView extends withEvents(React.Component)<IPlaylistsViewProps, {}>
         openLogin: false,
         playlists: [] as PlaylistsViewModelItem[],
         tracks: [] as TrackViewModelItem[],
-        currentPlaylistId: ''
+        currentPlaylistId: '',
+        isLoading: false,
     };
     selectPlaylistCommand = { exec(playlist) { } };
+    loadMoreCommand = { exec() { } };
+
     binding = bindTo(this, () => current(PlaylistsViewModel), {
         'prop(playlists)': 'playlists',
         'prop(tracks)': 'tracks',
+        'prop(isLoading)': 'isLoading',
+        'loadMoreCommand': 'loadMoreCommand',
         'selectPlaylistCommand': 'selectPlaylistCommand',
         'prop(currentPlaylistId)': 'currentPlaylistId'
     });

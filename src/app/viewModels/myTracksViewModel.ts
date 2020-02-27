@@ -1,14 +1,16 @@
 import { Events } from 'databindjs';
-import { Service } from '../service';
+import { Service, SpotifyService } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
-import { ISpotifySong, IResponseResult } from '../service/adapter/spotify';
-import { current } from '../utils';
+import { ISpotifySong, IResponseResult, ITrack } from '../service/adapter/spotify';
+import { current, assertNoErrors } from '../utils';
+import { ServiceResult } from '../base/serviceResult';
 
 
 class MyTracksViewModel extends Events {
 
     settings = {
+        errors: [] as ServiceResult<any, Error>[],
         total: 0,
         limit: 20,
         offset: 0,
@@ -20,18 +22,28 @@ class MyTracksViewModel extends Events {
     }
     trackArray = [] as Array<TrackViewModelItem>;
 
-    isInit = _.delay(() => this.fetchData(), 100);
+    isInit = _.delay(() => {
+        this.connect();
+        this.fetchData();
+    }, 100);
 
     constructor(private ss = current(Service)) {
         super();
+    }
 
-        this.ss.spotifyPlayer();
+    async connect() {
+        const spotifyResult = await this.ss.service(SpotifyService);
+        if (assertNoErrors(spotifyResult, e => this.errors(e))) {
+            return;
+        }
+        const spotify = spotifyResult.val;
+        spotify.on('change:state', () => this.loadData());
     }
 
     async fetchData() {
         this.isLoading(true);
         this.settings.offset = 0;
-        const res = await this.ss.tracks(this.settings.offset, this.settings.limit);
+        const res = await this.ss.fetchTracks(this.settings.offset, this.settings.limit);
         if (res.isError) {
             this.isLoading(false);
             return;
@@ -40,7 +52,6 @@ class MyTracksViewModel extends Events {
         this.settings.total = tracks.total;
         this.settings.offset = tracks.offset + Math.min(this.settings.limit, tracks.items.length);
 
-        this.tracks(_.map(tracks.items, (track, index) => new TrackViewModelItem(track, index)));
         this.isLoading(false);
     }
 
@@ -49,16 +60,25 @@ class MyTracksViewModel extends Events {
             return;
         }
         this.isLoading(true);
-        const res = await this.ss.tracks(this.settings.offset, this.settings.limit);
-        if (res.isError) {
+        const res = await this.ss.fetchTracks(this.settings.offset, this.settings.limit);
+        if (assertNoErrors(res, e => this.errors(e))) {
             this.isLoading(false);
             return;
         }
         const tracks = res.val as IResponseResult<ISpotifySong>;
-        this.tracksAddRange(_.map(tracks.items, (track, index) => new TrackViewModelItem(track, this.settings.offset + index)));
         this.settings.total = tracks.total;
         this.settings.offset = tracks.offset + Math.min(this.settings.limit, tracks.items.length);
         this.isLoading(false);
+    }
+
+    async loadData() {
+        const tracksResult = await this.ss.listTracks(0, this.settings.offset);
+        if (assertNoErrors(tracksResult, e => this.errors(e))) {
+            this.isLoading(false);
+            return;
+        }
+        const tracks = tracksResult.val as ITrack[];
+        this.tracks(_.map(tracks, (track, index) => new TrackViewModelItem({ track } as any, index)));
     }
 
     isLoading(val?) {
@@ -88,6 +108,14 @@ class MyTracksViewModel extends Events {
         item.playTracks(this.tracks(), item);
     }
 
+    errors(val?: ServiceResult<any, Error>[]) {
+        if (arguments.length && val !== this.settings.errors) {
+            this.settings.errors = val;
+            this.trigger('change:errors');
+        }
+
+        return this.settings.errors;
+    }
 }
 
 export { MyTracksViewModel };

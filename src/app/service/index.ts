@@ -248,6 +248,17 @@ class Service {
         return result;
     }
 
+    async fetchPlaylistTracks(playlistId, offset=0, limit=20) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.fetchPlaylistTracks(playlistId, offset, limit);
+
+        return result;
+    }
+
     async listPlaylistTracks(playlistId, offset=0, limit=20) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
@@ -369,13 +380,24 @@ class Service {
         return result;
     }
 
-    async tracks(offset?, limit?) {
+    async fetchTracks(offset = 0, limit = 20) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
 
-        const result = spotify.val.tracks(offset, limit);
+        const result = spotify.val.fetchTracks(offset, limit);
+
+        return result;
+    }
+
+    async listTracks(offset = 0, limit = 20) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+
+        const result = spotify.val.listTracks(offset, limit);
 
         return result;
     }

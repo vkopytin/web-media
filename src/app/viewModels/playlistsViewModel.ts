@@ -1,7 +1,7 @@
 import { Events } from 'databindjs';
 import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
-import { IUserPlaylistsResult, IResponseResult, ISpotifySong, IUserPlaylist } from '../service/adapter/spotify';
+import { IUserPlaylistsResult, IResponseResult, ISpotifySong, IUserPlaylist, ITrack } from '../service/adapter/spotify';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { current, assertNoErrors } from '../utils';
@@ -13,14 +13,21 @@ class PlaylistsViewModel extends Events {
     settings = {
         errors: [] as ServiceResult<any, Error>[],
         openLogin: false,
-        currentPlaylistId: ''
+        currentPlaylistId: '',
+        offset: 0,
+        limit: 20,
+        total: 0,
+        isLoading: false
     };
 
     selectPlaylistCommand = {
         exec: (playlistId: string) => {
             this.currentPlaylistId(playlistId);
         }
-    }
+    };
+    loadMoreCommand = {
+        exec: () => this.loadMore()
+    };
 
     playlistsArray = [] as PlaylistsViewModelItem[];
     tracksArray = [] as TrackViewModelItem[];
@@ -44,21 +51,48 @@ class PlaylistsViewModel extends Events {
     }
 
     async fetchData() {
-        const result = await this.ss.fetchMyPlaylists();
-        if (result.isError) {
+        const result = await this.ss.fetchMyPlaylists(this.settings.offset, this.settings.limit);
+        if (assertNoErrors(result, e => this.errors(e))) {
             return result;
         }
+        const playlists = (result.val as IUserPlaylistsResult).items;
+        this.settings.total = this.settings.offset + Math.min(this.settings.limit - 1, playlists.length - 1) + 1;
+        this.settings.offset = this.settings.offset + Math.min(this.settings.limit, playlists.length);
     }
 
     async loadData() {
         const result = await this.ss.myPlaylists();
-        if (result.isError) {
+        if (assertNoErrors(result, e => this.errors(e))) {
             return result;
         }
 
         const playlists = result.val as IUserPlaylist[];
 
         this.playlists(_.map(playlists, item => new PlaylistsViewModelItem(item)));
+        this.loadTracks();
+    }
+
+    async loadMore() {
+        this.isLoading(true);
+        const result = await this.ss.fetchMyPlaylists(this.settings.offset, this.settings.limit);
+        if (assertNoErrors(result, e => this.errors(e))) {
+            this.isLoading(false);
+            return result;
+        }
+        const playlists = (result.val as IUserPlaylistsResult).items;
+        this.settings.total = this.settings.offset + Math.min(this.settings.limit - 1, playlists.length - 1) + 1;
+        this.settings.offset = this.settings.offset + Math.min(this.settings.limit, playlists.length);
+        this.isLoading(false);
+    }
+
+    async fetchTracks() {
+        const currentPlaylistId = this.currentPlaylistId();
+        if (currentPlaylistId) {
+            const result = await this.ss.fetchPlaylistTracks(currentPlaylistId);
+            if (assertNoErrors(result, e => this.errors(e))) {
+                return;
+            }
+        }
     }
 
     async loadTracks() {
@@ -69,12 +103,26 @@ class PlaylistsViewModel extends Events {
                 return;
             }
 
-            const tracks = result.val as IResponseResult<ISpotifySong>;
+            const tracks = result.val as ITrack[];
         
-            this.tracks(_.map(tracks.items, (item, index) => new TrackViewModelItem(item, index)));
+            this.tracks(_.map(tracks, (item, index) => new TrackViewModelItem({ track: item } as any, index)));
         } else {
             this.tracks([]);
         }
+    }
+
+    playlistsAddRange(value: PlaylistsViewModelItem[]) {
+        const array = [...this.playlistsArray, ...value];
+        this.playlists(array);
+    }
+
+    isLoading(val?) {
+        if (arguments.length && val !== this.settings.isLoading) {
+            this.settings.isLoading = val;
+            this.trigger('change:isLoading');
+        }
+
+        return this.settings.isLoading;
     }
 
     playlists(val?: PlaylistsViewModelItem[]) {
@@ -99,7 +147,7 @@ class PlaylistsViewModel extends Events {
         if (arguments.length && this.settings.currentPlaylistId !== val) {
             this.settings.currentPlaylistId = val;
             this.trigger('change:currentPlaylistId');
-            _.delay(() => this.loadTracks());
+            _.delay(() => this.fetchTracks());
         }
 
         return this.settings.currentPlaylistId;

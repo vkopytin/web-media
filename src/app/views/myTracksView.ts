@@ -22,14 +22,14 @@ class MyTracksView extends withEvents(React.Component)<IMyTracksViewProps, {}> {
         isLoading: false,
         currentTrackId: ''
     };
+
+    loadMoreCommand = { exec() { } };
     
     binding = bindTo(this, () => current(MyTracksViewModel), {
         'loadMoreCommand': 'loadMoreCommand',
         'prop(items)': 'tracks',
         'prop(isLoading)': 'isLoading'
     });
-
-    loadMoreCommand = { exec() { } };
 
     searchTracks = _.debounce(term => {
         this.prop('term', term);

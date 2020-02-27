@@ -30,6 +30,12 @@ export const template = (view: PlaylistsView) => <>
             </li>
         })}
     </ul>
+    <div className="center">
+        {view.prop('isLoading') || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
+            onClick={evnt => view.loadMoreCommand.exec()}
+        ></button>}
+        {view.prop('isLoading') && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
+    </div>
     <footer className="info content-padded">
         <p>Media Player</p>
         <p>Written by <a href="https://github.com/vkopytin">Volodymyr Kopytin</a></p>

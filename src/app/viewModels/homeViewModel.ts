@@ -44,7 +44,7 @@ class HomeViewModel extends Events {
     }
 
     async fetchData() {
-        const tracksResult = await this.ss.tracks(0, 20);
+        const tracksResult = await this.ss.fetchTracks(0, 20);
         if (assertNoErrors(tracksResult, e => this.errors(e))) {
             return;
         }

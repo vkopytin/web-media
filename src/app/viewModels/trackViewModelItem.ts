@@ -57,7 +57,7 @@ class TrackViewModelItem extends Events {
     async play(playlistUri: string) {
         const device = this.appViewModel.currentDevice();
 
-        this.ss.play(device.id(), playlistUri, this.uri());
+        this.ss.play(device?.id(), playlistUri, this.uri());
     }
 
     async playTracks(tracks: TrackViewModelItem[], item: TrackViewModelItem) {
