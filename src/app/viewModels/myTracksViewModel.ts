@@ -37,7 +37,7 @@ class MyTracksViewModel extends Events {
             return;
         }
         const spotify = spotifyResult.val;
-        spotify.on('change:state', () => this.loadData());
+        spotify.on('change:state', (...args) => this.loadData(...args));
     }
 
     async fetchData() {
@@ -71,7 +71,10 @@ class MyTracksViewModel extends Events {
         this.isLoading(false);
     }
 
-    async loadData() {
+    async loadData(...args) {
+        if (!~args.indexOf('myTracks')) {
+            return;
+        }
         const tracksResult = await this.ss.listTracks(0, this.settings.offset);
         if (assertNoErrors(tracksResult, e => this.errors(e))) {
             this.isLoading(false);

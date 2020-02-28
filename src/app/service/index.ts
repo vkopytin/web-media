@@ -216,7 +216,7 @@ class Service {
         return result;
     }
 
-    async recommendations() {
+    async listRecommendations() {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;

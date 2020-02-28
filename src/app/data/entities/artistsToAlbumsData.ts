@@ -2,6 +2,8 @@ export interface IArtistsToAlbumsData {
     id: string;
     artistId: string;
     albumId: string;
+    updatedTs: number;
+    syncTs: number;
 }
 
 class ArtistsToAlbumsData {

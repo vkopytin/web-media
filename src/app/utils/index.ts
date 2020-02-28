@@ -76,3 +76,41 @@ function asAsync(c, fn, ...args) {
     });
 }
 export { asAsync };
+
+export function debounce(func, wait = 0, cancelObj = 'canceled') {
+    let timerId, latestResolve, shouldCancel;
+    let allArgs = [];
+    return function (...args) {
+        allArgs = [...allArgs, ...args];
+        if (!latestResolve) {
+            return new Promise((resolve, reject) => {
+                latestResolve = resolve;
+                timerId = setTimeout(invoke.bind(this, allArgs, resolve, reject), wait);
+            });
+        }
+  
+        shouldCancel = true;
+        return new Promise((resolve, reject) => {
+            latestResolve = resolve;
+            timerId = setTimeout(invoke.bind(this, allArgs, resolve, reject), wait);
+        });
+    }
+
+    async function invoke(args, resolve, reject) {
+        if (shouldCancel && resolve !== latestResolve) {
+            resolve(cancelObj)
+        } else {
+            allArgs = [];
+            try {
+                const res = await func.apply(this, args);
+                resolve(res);
+            } catch (ex) {
+                reject(ex);
+            }
+            shouldCancel = false;
+            clearTimeout(timerId);
+            timerId = latestResolve = null;
+        }
+    }
+}
+  

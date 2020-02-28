@@ -40,7 +40,7 @@ class HomeViewModel extends Events {
             return;
         }
         const spotify = spotifyResult.val;
-        spotify.on('change:state', () => this.loadData());
+        spotify.on('change:state', (...args) => this.loadData(...args));
     }
 
     async fetchData() {
@@ -54,8 +54,11 @@ class HomeViewModel extends Events {
         const res = await this.ss.fetchRecommendations('US', artistIds, trackIds);
     }
 
-    async loadData() {
-        const res = await this.ss.recommendations();
+    async loadData(...args) {
+        if (!~args.indexOf('recommendations')) {
+            return;
+        }
+        const res = await this.ss.listRecommendations();
         if (res.isError) {
             return;
         }

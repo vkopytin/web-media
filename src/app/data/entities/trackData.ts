@@ -7,7 +7,8 @@ import { ArtistsToTracksData } from './artistsToTracksData';
 
 
 export interface ITrackData extends ITrack {
-
+    updatedTs: number;
+    syncTs: number;
 }
 
 class TrackData {
@@ -62,7 +63,11 @@ class TrackData {
 
         _.forEach(track.artists, (artist) => {
             const artistId = artist.id;
-            tasks.push(asAsync(artists, artists.refresh, artist.id, artist));
+            tasks.push(asAsync(artists, artists.refresh, artist.id, {
+                ...artist,
+                updatedTs: track.updatedTs,
+                syncTs: track.syncTs
+            }));
             tasks.push(asAsync(artistsToTracks, artistsToTracks.refresh, artistId, trackId));
         });
 
@@ -85,7 +90,11 @@ class TrackData {
 
         _.forEach(track.artists, (artist) => {
             const artistId = artist.id;
-            tasks.push(asAsync(artists, artists.refresh, artist.id, artist));
+            tasks.push(asAsync(artists, artists.refresh, artist.id, {
+                ...artist,
+                updatedTs: track.updatedTs,
+                syncTs: track.syncTs
+            }));
             tasks.push(asAsync(artistsToTracks, artistsToTracks.refresh, artistId, trackId));
         });
 

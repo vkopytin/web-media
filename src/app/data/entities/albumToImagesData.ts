@@ -1,6 +1,8 @@
 export interface IAlbumToImagesData {
     id: string;
     albumId: string;
+    updatedTs: number;
+    syncTs: number;
 }
 
 

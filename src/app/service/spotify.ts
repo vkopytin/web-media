@@ -15,7 +15,7 @@ import { importFromSpotifyPlaylistTracksResult } from '../data/useCases/importFr
 import { importFromSpotifyPlaylistsResult } from '../data/useCases/importFromSpotifyPlaylistsResult';
 import { importFromSpotifyRecommendationsResult } from '../data/useCases/importFromSpotifyRecommendationsResult';
 import { DataStorage } from '../data/dataStorage';
-import { asAsync } from '../utils';
+import { asAsync, debounce } from '../utils';
 import { RecommendationsData } from '../data/entities/recommendationsData';
 import { listRecommendations } from '../data/useCases/listRecommendations';
 import { listPlaylists } from '../data/useCases/listPlaylists';
@@ -56,7 +56,7 @@ class SpotifyService extends withEvents(BaseService) {
     }
 
     currentProfile: IUserInfo = null;
-    onStateChanged = _.debounce(this.onStateChangedInternal, 500);
+    onStateChanged = debounce(this.onStateChangedInternal, 500);
 
     constructor(public adapter: SoptifyAdapter) {
         super();
@@ -185,7 +185,7 @@ class SpotifyService extends withEvents(BaseService) {
             );
 
             await importFromSpotifyRecommendationsResult(res, +new Date());
-            this.onStateChanged();
+            this.onStateChanged('recommendations');
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
@@ -218,7 +218,7 @@ class SpotifyService extends withEvents(BaseService) {
             const res = await this.adapter.myPlaylists(offset, limit);
 
             await importFromSpotifyPlaylistsResult(res, 0);
-            this.onStateChanged();
+            this.onStateChanged('myPlaylists');
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
@@ -241,7 +241,7 @@ class SpotifyService extends withEvents(BaseService) {
             const res = await this.adapter.listPlaylistTracks(playlistId, offset, limit);
 
             await importFromSpotifyPlaylistTracksResult(playlistId, res, 0);
-            this.onStateChanged();
+            this.onStateChanged('playlistTracks');
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
@@ -359,7 +359,7 @@ class SpotifyService extends withEvents(BaseService) {
             const res = await this.adapter.tracks(offset, limit);
 
             await importFromSpotifyTracksResult(res, offset);
-            this.onStateChanged();
+            this.onStateChanged('myTracks');
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {

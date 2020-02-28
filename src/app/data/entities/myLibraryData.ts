@@ -68,9 +68,13 @@ class MyLibraryData {
         this.uow.getCount(this.tableName, callback);
 	}
 
-    create(id: string, library, callback: { (err, result?): void }) {
+    create(id: string, library: IMyLibrary, callback: { (err, result?): void }) {
         const tracks = new TrackData(this.uow);
-        tracks.refresh(library.track.id, library.track, (err, result) => {
+        tracks.refresh(library.track.id, {
+            ...library.track,
+            updatedTs: library.updatedTs,
+            syncTs: library.syncTs
+        }, (err, result) => {
             this.uow.create(this.tableName, {
                 id,
                 trackId: library.track.id,
@@ -79,9 +83,13 @@ class MyLibraryData {
         });
 	}
 
-    update(id: string, library, callback: { (err, result?): void }) {
+    update(id: string, library: IMyLibrary, callback: { (err, result?): void }) {
         const tracks = new TrackData(this.uow);
-        tracks.refresh(library.track.id, library.track, (err, result) => {
+        tracks.refresh(library.track.id, {
+            ...library.track,
+            updatedTs: library.updatedTs,
+            syncTs: library.syncTs
+        }, (err, result) => {
             this.uow.update(this.tableName, id, {
                 id,
                 trackId: library.track.id,

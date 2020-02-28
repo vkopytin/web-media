@@ -47,7 +47,7 @@ class PlaylistsViewModel extends Events {
             return;
         }
         const spotify = spotifyResult.val;
-        spotify.on('change:state', () => this.loadData());
+        spotify.on('change:state', (...args) => this.loadData(...args));
     }
 
     async fetchData() {
@@ -60,7 +60,11 @@ class PlaylistsViewModel extends Events {
         this.settings.offset = this.settings.offset + Math.min(this.settings.limit, playlists.length);
     }
 
-    async loadData() {
+    async loadData(...args) {
+        this.loadTracks(...args);
+        if (!~args.indexOf('myPlaylists')) {
+            return;
+        }
         const result = await this.ss.myPlaylists();
         if (assertNoErrors(result, e => this.errors(e))) {
             return result;
@@ -69,7 +73,6 @@ class PlaylistsViewModel extends Events {
         const playlists = result.val as IUserPlaylist[];
 
         this.playlists(_.map(playlists, item => new PlaylistsViewModelItem(item)));
-        this.loadTracks();
     }
 
     async loadMore() {
@@ -95,7 +98,10 @@ class PlaylistsViewModel extends Events {
         }
     }
 
-    async loadTracks() {
+    async loadTracks(...args) {
+        if (!~args.indexOf('playlistTracks')) {
+            return;
+        }
         const currentPlaylistId = this.currentPlaylistId();
         if (currentPlaylistId) {
             const result = await this.ss.listPlaylistTracks(currentPlaylistId);

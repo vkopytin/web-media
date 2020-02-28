@@ -2,12 +2,14 @@ export interface ITracksPlaylistsData {
     id: string;
     trackId: string;
     playlistId: string;
+    updatedTs: number;
+    syncTs: number;
 }
 
 
 class TracksPlaylistsData {
     uow = null;
-    tableName = 'tracksToplaylists';
+    tableName = 'tracksToPlaylists';
 
 	constructor(uow) {
         this.uow = uow;

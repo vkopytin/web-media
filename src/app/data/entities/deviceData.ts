@@ -1,5 +1,6 @@
 export interface IDeviceData {
-
+    updatedTs: number;
+    syncTs: number;
 }
 
 class DeviceData {

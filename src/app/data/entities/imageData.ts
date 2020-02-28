@@ -4,7 +4,8 @@ import { IImageInfo } from '../../service/adapter/spotify';
 
 
 export interface IImageData extends IImageInfo {
-
+    updatedTs: number;
+    syncTs: number;
 }
 
 class ImageData {

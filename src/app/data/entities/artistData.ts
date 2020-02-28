@@ -4,7 +4,8 @@ import { IArtist } from '../../service/adapter/spotify';
 
 
 export interface IArtistRecord extends IArtist {
-
+    updatedTs: number;
+    syncTs: number;
 }
 
 class ArtistData {

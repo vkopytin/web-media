@@ -1,6 +1,8 @@
 export interface IPlaylistToImagesData {
     id: string;
     playlistId: string;
+    updatedTs: number;
+    syncTs: number;
 }
 
 class PlaylistToImagesData {
