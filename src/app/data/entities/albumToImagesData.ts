@@ -1,3 +1,9 @@
+export interface IAlbumToImagesData {
+    id: string;
+    albumId: string;
+}
+
+
 class AlbumToImagesData {
     uow = null;
     tableName = 'albumsToImages';
@@ -7,15 +13,15 @@ class AlbumToImagesData {
         this.uow.createTable(this.tableName, () => { });
     }
 
-	each(callback: { (err, result?): void }) {
+	each(callback: { (err, result?: IAlbumToImagesData): void }) {
         this.uow.each(this.tableName, callback);
 	}
 
-    getById(imageUrl: string, callback: { (err, result?): void }) {
+    getById(imageUrl: string, callback: { (err, result?: IAlbumToImagesData): void }) {
         this.uow.getById(this.tableName, imageUrl, callback);
     }
 
-	getCount(callback: { (err, result?): void }) {
+	getCount(callback: { (err, result?: number): void }) {
         this.uow.getCount(this.tableName, callback);
 	}
 

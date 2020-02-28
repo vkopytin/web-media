@@ -1,6 +1,11 @@
 import { ArtistsToTracksData } from './artistsToTracksData';
 import * as _ from 'underscore';
+import { IArtist } from '../../service/adapter/spotify';
 
+
+export interface IArtistRecord extends IArtist {
+
+}
 
 class ArtistData {
     uow = null;
@@ -11,11 +16,11 @@ class ArtistData {
         this.uow.createTable(this.tableName, () => { });
 	}
 
-	each(callback: { (err, result?): void }) {
+	each(callback: { (err, result?: IArtistRecord): void }) {
         this.uow.each(this.tableName, callback);
     }
     
-    eachByTrack(trackId: string, callback: { (err?, result?): void }) {
+    eachByTrack(trackId: string, callback: { (err?, result?: IArtistRecord): void }) {
         const artistsToTracks = new ArtistsToTracksData(this.uow);
         artistsToTracks.each((err, atot) => {
             if (_.isUndefined(atot)) return callback();
@@ -29,19 +34,19 @@ class ArtistData {
         });
     }
 
-	getById(artistId: string, callback: { (err, result?): void }) {
+	getById(artistId: string, callback: { (err, result?: IArtistRecord): void }) {
         this.uow.getById(this.tableName, artistId, callback);
     }
 
-	getCount(callback: { (err, result?): void }) {
+	getCount(callback: { (err, result?: number): void }) {
         this.uow.getCount(this.tableName, callback);
 	}
 
-	create(artist, callback: { (err, result?): void }) {
+	create(artist: IArtistRecord, callback: { (err, result?): void }) {
         this.uow.create(this.tableName, artist, callback);
 	}
 
-	update(artistId: string, artist, callback: { (err, result?): void }) {
+	update(artistId: string, artist: IArtistRecord, callback: { (err, result?): void }) {
 		this.uow.update(this.tableName, artistId, artist, callback);
 	}
 
@@ -49,7 +54,7 @@ class ArtistData {
         this.uow.delete(this.tableName, artistId, callback);
     }
     
-    refresh(artistId: string, artist, callback: { (err, result?): void }) {
+    refresh(artistId: string, artist: IArtistRecord, callback: { (err, result?): void }) {
         this.uow.getById(this.tableName, artistId, (err, record) => {
             if (err) {
                 return callback(err);

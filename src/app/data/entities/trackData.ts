@@ -5,6 +5,11 @@ import { AlbumData } from './albumData';
 import { ArtistData } from './artistData';
 import { ArtistsToTracksData } from './artistsToTracksData';
 
+
+export interface ITrackData extends ITrack {
+
+}
+
 class TrackData {
     uow = null;
     tableName = 'tracks';
@@ -14,11 +19,11 @@ class TrackData {
         this.uow.createTable(this.tableName, () => { });
 	}
 
-	each(callback: { (err, result?: ITrack): void }) {
+	each(callback: { (err, result?: ITrackData): void }) {
         this.uow.each(this.tableName, callback);
     }
 
-    getById(trackId: string, callback: { (err, result?: ITrack): void }) {
+    getById(trackId: string, callback: { (err, result?: ITrackData): void }) {
         const albums = new AlbumData(this.uow);
         const artists = new ArtistData(this.uow);
 
@@ -43,11 +48,11 @@ class TrackData {
         });
     }
 
-	getCount(callback: { (err, result?: ITrack): void }) {
+	getCount(callback: { (err, result?: ITrackData): void }) {
         this.uow.getCount(this.tableName, callback);
 	}
 
-    create(track: ITrack, callback: { (err, result?: string): void }) {
+    create(track: ITrackData, callback: { (err, result?: string): void }) {
         const albums = new AlbumData(this.uow);
         const artists = new ArtistData(this.uow);
         const artistsToTracks = new ArtistsToTracksData(this.uow);
@@ -71,7 +76,7 @@ class TrackData {
         Promise.all(tasks).then(() => callback(null, trackId));
 	}
 
-	update(trackId: string, track: ITrack, callback: { (err, result?): void }) {
+	update(trackId: string, track: ITrackData, callback: { (err, result?): void }) {
         const tasks = [];
         const albums = new AlbumData(this.uow);
         const artists = new ArtistData(this.uow);
@@ -98,7 +103,7 @@ class TrackData {
         this.uow.delete(this.tableName, trackId, callback);
     }
     
-    refresh(trackId: string, track, callback: { (err, result?): void }) {
+    refresh(trackId: string, track: ITrackData, callback: { (err, result?): void }) {
         this.uow.getById(this.tableName, trackId, (err, record) => {
             if (err) {
                 return callback(err);

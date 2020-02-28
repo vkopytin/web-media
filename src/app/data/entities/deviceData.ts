@@ -1,3 +1,7 @@
+export interface IDeviceData {
+
+}
+
 class DeviceData {
     uow = null;
     tableName = 'devices';
@@ -7,23 +11,23 @@ class DeviceData {
         this.uow.createTable(this.tableName, () => { });
 	}
 
-	each(callback: { (err, result?): void }) {
+	each(callback: { (err, result?: IDeviceData): void }) {
         this.uow.each(this.tableName, callback);
 	}
 
-	getById(deviceId, callback: { (err, result?): void }) {
+	getById(deviceId, callback: { (err, result?: IDeviceData): void }) {
         this.uow.getById(this.tableName, deviceId, callback);
     }
 
-	getCount(callback: { (err, result?): void }) {
+	getCount(callback: { (err, result?: number): void }) {
         this.uow.getCount(this.tableName, callback);
 	}
 
-	create(device, callback: { (err, result?): void }) {
+	create(device: IDeviceData, callback: { (err, result?): void }) {
         this.uow.create(this.tableName, device, callback);
 	}
 
-	update(deviceId, device, callback: { (err, result?): void }) {
+	update(deviceId, device: IDeviceData, callback: { (err, result?): void }) {
 		this.uow.update(this.tableName, deviceId, device, callback);
 	}
 
@@ -31,7 +35,7 @@ class DeviceData {
         this.uow.delete(this.tableName, deviceId, callback);
     }
 
-    refresh(deviceId, device, callback: { (err, result?): void }) {
+    refresh(deviceId, device: IDeviceData, callback: { (err, result?): void }) {
         this.uow.getById(this.tableName, deviceId, (err, record) => {
             if (err) {
                 return callback(err);

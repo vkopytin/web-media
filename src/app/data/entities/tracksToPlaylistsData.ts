@@ -1,3 +1,10 @@
+export interface ITracksPlaylistsData {
+    id: string;
+    trackId: string;
+    playlistId: string;
+}
+
+
 class TracksPlaylistsData {
     uow = null;
     tableName = 'tracksToplaylists';
@@ -11,15 +18,15 @@ class TracksPlaylistsData {
         return `${trackId}-${playlistId}`;
     }
 
-	each(callback: { (err, result?): void }) {
+	each(callback: { (err, result?: ITracksPlaylistsData): void }) {
         this.uow.each(this.tableName, callback);
 	}
 
-    getById(id: string, callback: { (err, result?): void }) {
+    getById(id: string, callback: { (err, result?: ITracksPlaylistsData): void }) {
         this.uow.getById(this.tableName, id, callback);
     }
 
-	getCount(callback: { (err, result?): void }) {
+	getCount(callback: { (err, result?: number): void }) {
         this.uow.getCount(this.tableName, callback);
 	}
 

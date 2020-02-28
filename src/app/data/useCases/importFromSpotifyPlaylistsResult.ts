@@ -7,6 +7,7 @@ import { asAsync } from '../../utils';
 
 export function importFromSpotifyPlaylistsResult(result: IUserPlaylistsResult, offset = 0) {
     const queue = [];
+    const syncTs = +new Date();
     DataStorage.create((err, connection) => {
         const playlists = new PlaylistData(connection);
 
@@ -14,8 +15,9 @@ export function importFromSpotifyPlaylistsResult(result: IUserPlaylistsResult, o
             const playlistId = item.id;
 
             queue.push(asAsync(playlists, playlists.refresh, playlistId, {
-                position: offset + index,
-                ...item
+                ...item,
+                updatedTs: syncTs,
+                syncTs
             }));
 
             connection.complete();

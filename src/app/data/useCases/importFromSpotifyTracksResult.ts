@@ -16,6 +16,7 @@ export function importFromSpotifyTracksResult(result: IResponseResult<ISpotifySo
     const queue = [];
     DataStorage.create((err, connection) => {
         const myLibrary = new MyLibraryData(connection);
+        const syncTs = +new Date();
 
         _.each(result.items, (item, index) => {
             const trackId = item.track.id;
@@ -23,7 +24,9 @@ export function importFromSpotifyTracksResult(result: IResponseResult<ISpotifySo
             queue.push(asAsync(myLibrary, myLibrary.refresh, `track:${trackId}`, {
                 track: item.track,
                 isLiked: true,
-                position: offset + index
+                position: offset + index,
+                updatedTs: syncTs,
+                syncTs
             }));
 
             connection.complete();

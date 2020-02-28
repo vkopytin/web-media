@@ -1,3 +1,9 @@
+export interface IArtistsToAlbumsData {
+    id: string;
+    artistId: string;
+    albumId: string;
+}
+
 class ArtistsToAlbumsData {
     uow = null;
     tableName = 'artistsToAlbums';
@@ -15,11 +21,11 @@ class ArtistsToAlbumsData {
         this.uow.each(this.tableName, callback);
 	}
 
-    getById(id: string, callback: { (err, result?): void }) {
+    getById(id: string, callback: { (err, result?: IArtistsToAlbumsData): void }) {
         this.uow.getById(this.tableName, id, callback);
     }
 
-	getCount(callback: { (err, result?): void }) {
+	getCount(callback: { (err, result?: number): void }) {
         this.uow.getCount(this.tableName, callback);
 	}
 

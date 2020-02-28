@@ -1,3 +1,9 @@
+export interface IArtistsToTracksData {
+    id: string;
+    trackId: string;
+    artistId: string;
+}
+
 class ArtistsToTracksData {
     uow = null;
     tableName = 'artistsToTracks';
@@ -11,11 +17,11 @@ class ArtistsToTracksData {
         return `${artistId}-${trackId}`;
     }
 
-	each(callback: { (err, result?): void }) {
+	each(callback: { (err, result?: IArtistsToTracksData): void }) {
         this.uow.each(this.tableName, callback);
 	}
 
-    getById(id: string, callback: { (err, result?): void }) {
+    getById(id: string, callback: { (err, result?: IArtistsToTracksData): void }) {
         this.uow.getById(this.tableName, id, callback);
     }
 

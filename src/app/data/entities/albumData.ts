@@ -7,6 +7,11 @@ import { AlbumToImagesData } from './albumToImagesData';
 import { ArtistsToAlbumsData } from './artistsToAlbumsData';
 
 
+export interface IAlbumRecord extends IAlbum {
+    updatedTs: number;
+    syncTs: number;
+}
+
 class AlbumData {
     uow = null;
     tableName = 'albums';
@@ -16,11 +21,11 @@ class AlbumData {
         this.uow.createTable(this.tableName, () => { });
 	}
 
-	each(callback: { (err, result?): void }) {
+	each(callback: { (err, result?: IAlbumRecord): void }) {
         this.uow.each(this.tableName, callback);
 	}
 
-	getById(albumId, callback: { (err, result?): void }) {
+	getById(albumId, callback: { (err, result?: IAlbumRecord): void }) {
         this.uow.getById(this.tableName, albumId, callback);
     }
 
@@ -28,7 +33,7 @@ class AlbumData {
         this.uow.getCount(this.tableName, callback);
 	}
 
-    create(album: IAlbum, callback: { (err, result?): void }) {
+    create(album: IAlbumRecord, callback: { (err, result?): void }) {
         const tasks = [];
         const artists = new ArtistData(this.uow);
         const images = new ImageData(this.uow);
@@ -55,7 +60,7 @@ class AlbumData {
         Promise.all(tasks).then(() => callback(null, true));
 	}
 
-	update(albumId, album: IAlbum, callback: { (err, result?): void }) {
+	update(albumId, album: IAlbumRecord, callback: { (err, result?): void }) {
         const tasks = [];
         const artists = new ArtistData(this.uow);
         const images = new ImageData(this.uow);
@@ -85,7 +90,7 @@ class AlbumData {
         this.uow.delete(this.tableName, albumId, callback);
     }
 
-    refresh(albumId, album, callback: { (err, result?): void }) {
+    refresh(albumId, album: IAlbumRecord, callback: { (err, result?): void }) {
         this.uow.getById(this.tableName, albumId, (err, record) => {
             if (err) {
                 return callback(err);

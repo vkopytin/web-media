@@ -10,6 +10,8 @@ export interface IMyLibrary {
     playlistId?: string;
     isLiked?: boolean;
     position?: number;
+    updatedTs: number;
+    syncTs: number;
 }
 
 class MyLibraryData {

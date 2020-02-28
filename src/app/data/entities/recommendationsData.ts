@@ -8,6 +8,8 @@ export interface IRecomendation {
     track?: ITrack;
     date?: number;
     index?: number;
+    updatedTs: number;
+    syncTs: number;
 }
 
 class RecommendationsData {
