@@ -1,4 +1,4 @@
-import { Events } from 'databindjs';
+import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
@@ -8,9 +8,10 @@ import { current, asyncQueue } from '../utils';
 
 const searchQueue = asyncQueue();
 
-class SearchViewModel extends Events {
+class SearchViewModel extends ViewModel {
 
     settings = {
+        ...this.settings,
         term: '',
         isLoading: false,
         offset: 0,

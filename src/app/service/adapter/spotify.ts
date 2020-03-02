@@ -158,7 +158,7 @@ const delayWithin = (ms = 800) => new Promise((resolve) => {
     setTimeout(() => resolve(true), ms);
 });
 
-class SoptifyAdapter {
+class SpotifyAdapter {
 
     constructor(public token: string) {
 
@@ -782,4 +782,4 @@ class SoptifyAdapter {
     }
 }
 
-export { SoptifyAdapter };
+export { SpotifyAdapter };

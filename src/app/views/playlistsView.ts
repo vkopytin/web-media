@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { BaseView } from '../base/baseView';
 import { template } from '../templates/playlists';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
@@ -15,7 +15,7 @@ export interface IPlaylistsViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
 }
 
-class PlaylistsView extends withEvents(React.Component)<IPlaylistsViewProps, {}> {
+class PlaylistsView extends BaseView<IPlaylistsViewProps, PlaylistsView['state']> {
     state = {
         openLogin: false,
         playlists: [] as PlaylistsViewModelItem[],

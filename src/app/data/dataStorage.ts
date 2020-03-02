@@ -35,7 +35,7 @@ class DataStorage {
 							callback(null, uow);
 						});
 					} catch (ex) {
-						throw ex;
+						callback(ex, null);
 					}
 					break;
 				case 'remote':

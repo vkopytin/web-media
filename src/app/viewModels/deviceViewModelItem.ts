@@ -1,9 +1,9 @@
-import { Events } from 'databindjs';
+import { ViewModel } from '../base/viewModel';
 import * as _ from 'underscore';
 import { IDevice } from '../service/adapter/spotify';
 
 
-class DeviceViewModelItem extends Events {
+class DeviceViewModelItem extends ViewModel {
     constructor(public device: IDevice) {
         super();
     }

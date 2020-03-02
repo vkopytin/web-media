@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { BaseView } from '../base/baseView';
 import { template } from '../templates/app';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import { AppViewModel, TrackViewModelItem } from '../viewModels';
@@ -13,7 +13,7 @@ export interface IAppViewProps {
 
 }
 
-class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
+class AppView extends BaseView<IAppViewProps, AppView['state']> {
     state = {
         openLogin: false,
         transition: ['', ''],
@@ -23,7 +23,6 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
         devices: [] as IDevice[],
         profile: {} as IUserInfo,
         scrolledToBottom: false,
-        errors: [] as ServiceResult<any, Error>[],
         currentTrackId: '',
         topTracks: [] as TrackViewModelItem[]
     };
@@ -56,24 +55,6 @@ class AppView extends withEvents(React.Component)<IAppViewProps, {}> {
 
     componentWillUnmount() {
         unbindFrom(this.binding);
-    }
-
-    prop<K extends keyof AppView['state']>(propName: K, val?: AppView['state'][K]): AppView['state'][K] {
-        if (arguments.length > 1) {
-            this.state[propName] = val;
-            this.trigger('change:prop(' + propName + ')');
-        }
-
-        return this.state[propName];
-    }
-
-    errors(val?: ServiceResult<any, Error>[]) {
-        if (arguments.length && val !== this.prop('errors')) {
-            this.prop('errors', val);
-            this.showErrors(val);
-        }
-
-        return this.prop('errors');
     }
 
     openDevices(show) {

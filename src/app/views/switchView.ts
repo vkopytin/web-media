@@ -1,6 +1,6 @@
 import * as React from 'react';
+import { BaseView } from '../base/baseView';
 import * as _ from 'underscore';
-import { withEvents } from 'databindjs';
 
 
 export interface ISwitchViewProps {
@@ -10,7 +10,7 @@ export interface ISwitchViewProps {
 
 const panels = ['home', 'playlists', 'search', 'tracks', 'releases'];
 
-class SwitchView extends withEvents(React.Component)<ISwitchViewProps, {}> {
+class SwitchView extends BaseView<ISwitchViewProps, {}> {
     state = {
         prevPanel: this.props.currentView,
         currentView: this.props.currentView,

@@ -1,4 +1,4 @@
-import { Events } from 'databindjs';
+import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
@@ -7,10 +7,10 @@ import { current, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
 
 
-class MyTracksViewModel extends Events {
+class MyTracksViewModel extends ViewModel {
 
     settings = {
-        errors: [] as ServiceResult<any, Error>[],
+        ...this.settings,
         total: 0,
         limit: 20,
         offset: 0,
@@ -133,15 +133,6 @@ class MyTracksViewModel extends Events {
 
     playInTracks(item: TrackViewModelItem) {
         item.playTracks(this.tracks(), item);
-    }
-
-    errors(val?: ServiceResult<any, Error>[]) {
-        if (arguments.length && val !== this.settings.errors) {
-            this.settings.errors = val;
-            this.trigger('change:errors');
-        }
-
-        return this.settings.errors;
     }
 }
 

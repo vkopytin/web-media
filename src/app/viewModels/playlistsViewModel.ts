@@ -1,4 +1,4 @@
-import { Events } from 'databindjs';
+import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
 import { IUserPlaylistsResult, IResponseResult, ISpotifySong, IUserPlaylist, ITrack, IUserInfo } from '../service/adapter/spotify';
@@ -8,10 +8,10 @@ import { current, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
 
 
-class PlaylistsViewModel extends Events {
+class PlaylistsViewModel extends ViewModel {
 
     settings = {
-        errors: [] as ServiceResult<any, Error>[],
+        ...this.settings,
         openLogin: false,
         currentPlaylistId: '',
         offset: 0,
@@ -178,15 +178,6 @@ class PlaylistsViewModel extends Events {
         }
 
         return this.settings.currentPlaylistId;
-    }
-
-    errors(val?: ServiceResult<any, Error>[]) {
-        if (arguments.length && val !== this.settings.errors) {
-            this.settings.errors = val;
-            this.trigger('change:errors');
-        }
-
-        return this.settings.errors;
     }
 
     selectedTrack(val: TrackViewModelItem) {

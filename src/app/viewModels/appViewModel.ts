@@ -1,4 +1,4 @@
-import { Events } from 'databindjs';
+import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
 import { IDevice, IUserInfo, IDevicesResponse, IResponseResult, ISpotifySong, ITrack } from '../service/adapter/spotify';
@@ -10,13 +10,13 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 const panels = ['home', 'profile'];
 
-class AppViewModel extends Events {
+class AppViewModel extends ViewModel {
 
     settings = {
+        ...this.settings,
         openLogin: false,
         currentPanel: 'home' as 'home' | 'profile',
         currentDevice: null as DeviceViewModelItem,
-        errors: [] as ServiceResult<any, Error>[],
         currentTrackId: '',
         topTracks: [] as TrackViewModelItem[]
     };
@@ -74,15 +74,6 @@ class AppViewModel extends Events {
         }
         const topTracks = topTracksResult.val as IResponseResult<ITrack>;
         this.topTracks(_.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index)));
-    }
-
-    errors(val?: ServiceResult<any, Error>[]) {
-        if (arguments.length && val !== this.settings.errors) {
-            this.settings.errors = val;
-            this.trigger('change:errors');
-        }
-
-        return this.settings.errors;
     }
 
     async updateDevices() {

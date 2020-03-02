@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { BaseView } from '../base/baseView';
 import { template } from '../templates/devices';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
@@ -12,7 +12,7 @@ export interface IDevicesViewProps {
     openShowDevices(showHide);
 }
 
-class DevicesView extends withEvents(React.Component)<IDevicesViewProps, {}> {
+class DevicesView extends BaseView<IDevicesViewProps, DevicesView['state']> {
     state = {
         devices: [] as DeviceViewModelItem[],
         currentDevice: null as DeviceViewModelItem
@@ -43,15 +43,6 @@ class DevicesView extends withEvents(React.Component)<IDevicesViewProps, {}> {
 
     componentWillUnmount() {
         unbindFrom(this.binding);
-    }
-
-    prop<K extends keyof DevicesView['state']>(propName: K, val?: DevicesView['state'][K]): DevicesView['state'][K] {
-        if (arguments.length > 1) {
-            this.state[propName] = val;
-            this.trigger('change:prop(' + propName + ')');
-        }
-
-        return this.state[propName];
     }
 
     async switchDevice(device) {

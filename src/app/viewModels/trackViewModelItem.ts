@@ -1,4 +1,4 @@
-import { Events } from 'databindjs';
+import { ViewModel } from '../base/viewModel';
 import { formatTime, assertNoErrors } from '../utils';
 import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
@@ -10,10 +10,10 @@ import { ServiceResult } from '../base/serviceResult';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 
-class TrackViewModelItem extends Events {
+class TrackViewModelItem extends ViewModel {
     appViewModel = current(AppViewModel);
     settings = {
-        errors: [] as ServiceResult<any, Error>[],
+        ...this.settings,
         isLiked: false,
         playlists: [] as PlaylistsViewModelItem[]
     };
@@ -65,15 +65,6 @@ class TrackViewModelItem extends Events {
     thumbnailUrl() {
         const image = _.last(this.song.track.album.images);
         return image.url;
-    }
-
-    errors(val?: ServiceResult<any, Error>[]) {
-        if (arguments.length && val !== this.settings.errors) {
-            this.settings.errors = val;
-            this.trigger('change:errors');
-        }
-
-        return this.settings.errors;
     }
 
     async play(playlistUri: string) {

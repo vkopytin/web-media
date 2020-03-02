@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import * as React from 'react';
+import { BaseView } from '../base/baseView';
 import { template } from '../templates/selectPlaylists';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
@@ -15,7 +15,7 @@ export interface ISelectPlaylistsViewProps {
     track: TrackViewModelItem;
 }
 
-class SelectPlaylistsView extends withEvents(React.Component)<ISelectPlaylistsViewProps, {}> {
+class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, {}> {
     playlistsViewModel = current(PlaylistsViewModel);
 
     state = {
@@ -57,7 +57,7 @@ class SelectPlaylistsView extends withEvents(React.Component)<ISelectPlaylistsVi
     prop<K extends keyof SelectPlaylistsView['state']>(propName: K, val?: SelectPlaylistsView['state'][K]): SelectPlaylistsView['state'][K] {
         if (arguments.length > 1) {
             this.state[propName] = val;
-            this.trigger('change:prop(' + propName + ')');
+            super.trigger('change:prop(' + propName + ')');
         }
 
         return this.state[propName];

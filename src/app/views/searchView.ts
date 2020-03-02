@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { BaseView } from '../base/baseView';
 import { template } from '../templates/search';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
@@ -14,7 +14,7 @@ export interface ISearchViewProps {
     currentTrackId: string;
 }
 
-class SearchView extends withEvents(React.Component)<ISearchViewProps, {}> {
+class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
     state = {
         term: '',
         items: [] as TrackViewModelItem[]

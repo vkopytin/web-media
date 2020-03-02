@@ -7,7 +7,7 @@ import { SpotifyServiceError } from './errors/spotifyServiceError';
 import { SpotifyServiceUnexpectedError } from './errors/spotifyServiceUnexpectedError';
 import * as _ from 'underscore';
 import * as $ from 'jquery';
-import { SoptifyAdapter, IUserInfo, IDevice } from './adapter/spotify';
+import { SpotifyAdapter, IUserInfo, IDevice } from './adapter/spotify';
 import { ISettings } from './settings';
 import { withEvents } from 'databindjs';
 import { DataStorage } from '../data/dataStorage';
@@ -36,7 +36,7 @@ class SpotifyService extends withEvents(BaseService) {
                 return settingsResult;
             }
             const spotifySettgins = settingsResult.val as ISettings['spotify'];
-            const adapter = new SoptifyAdapter(spotifySettgins.accessToken);
+            const adapter = new SpotifyAdapter(spotifySettgins.accessToken);
 
             return SpotifyServiceResult.success(new SpotifyService(adapter));
 
@@ -49,14 +49,13 @@ class SpotifyService extends withEvents(BaseService) {
     currentProfile: IUserInfo = null;
     onStateChanged = debounce(this.onStateChangedInternal, 500);
 
-    constructor(public adapter: SoptifyAdapter) {
+    constructor(public adapter: SpotifyAdapter) {
         super();
     }
 
     onStateChangedInternal(...args) {
         this.trigger('change:state', ...args);
     }
-
 
     async seek(positionMs, deviceId) {
         try {

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { BaseView } from '../base/baseView';
 import { template } from '../templates/home';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
@@ -14,7 +14,7 @@ export interface IHomeViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
 }
 
-class HomeView extends withEvents(React.Component)<IHomeViewProps, {}> {
+class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
     state = {
         openLogin: false,
         items: [] as TrackViewModelItem[],
@@ -45,15 +45,6 @@ class HomeView extends withEvents(React.Component)<IHomeViewProps, {}> {
 
     componentWillUnmount() {
         unbindFrom(this.binding);
-    }
-
-    prop<K extends keyof HomeView['state']>(propName: K, val?: HomeView['state'][K]): HomeView['state'][K] {
-        if (arguments.length > 1) {
-            this.state[propName] = val;
-            this.trigger('change:prop(' + propName + ')');
-        }
-
-        return this.state[propName];
     }
 
     errors(val?: ServiceResult<any, Error>[]) {

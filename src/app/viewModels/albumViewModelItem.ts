@@ -1,11 +1,12 @@
-import { Events } from 'databindjs';
+import { ViewModel } from '../base/viewModel';
 import * as _ from 'underscore';
 import { IAlbum } from '../service/adapter/spotify';
 
 
-class AlbumViewModelItem extends Events {
+class AlbumViewModelItem extends ViewModel {
 
     settings = {
+        ...this.settings,
         isLiked: false
     };
 

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { BaseView } from '../base/baseView';
 import * as _ from 'underscore';
 import { template } from '../templates/newReleases';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
@@ -13,7 +13,7 @@ export interface INewReleasesViewProps {
     currentTrackId: string;
 }
 
-class NewReleasesView extends withEvents(React.Component)<INewReleasesViewProps, {}> {
+class NewReleasesView extends BaseView<INewReleasesViewProps, NewReleasesView['state']> {
     state = {
         openLogin: false,
         releases: [] as AlbumViewModelItem[],
@@ -58,15 +58,6 @@ class NewReleasesView extends withEvents(React.Component)<INewReleasesViewProps,
 
     componentWillUnmount() {
         unbindFrom(this.binding);
-    }
-
-    prop<K extends keyof NewReleasesView['state']>(propName: K, val?: NewReleasesView['state'][K]): NewReleasesView['state'][K] {
-        if (arguments.length > 1) {
-            this.state[propName] = val;
-            this.trigger('change:prop(' + propName + ')');
-        }
-
-        return this.state[propName];
     }
 
     isLiked(album: AlbumViewModelItem) {

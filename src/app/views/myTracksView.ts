@@ -1,5 +1,4 @@
-import * as $ from 'jquery';
-import * as React from 'react';
+import { BaseView } from '../base/baseView';
 import { template } from '../templates/myTracks';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
@@ -15,7 +14,7 @@ export interface IMyTracksViewProps {
     currentTrackId: string;
 }
 
-class MyTracksView extends withEvents(React.Component)<IMyTracksViewProps, {}> {
+class MyTracksView extends BaseView<IMyTracksViewProps, MyTracksView['state']> {
     state = {
         term: '',
         items: [] as TrackViewModelItem[],
@@ -59,15 +58,6 @@ class MyTracksView extends withEvents(React.Component)<IMyTracksViewProps, {}> {
             this.loadMoreCommand.exec();
         }
         this.prop('currentTrackId', this.props.currentTrackId);
-    }
-
-    prop<K extends keyof MyTracksView['state']>(propName: K, val?: MyTracksView['state'][K]): MyTracksView['state'][K] {
-        if (arguments.length > 1) {
-            this.state[propName] = val;
-            this.trigger('change:prop(' + propName + ')');
-        }
-
-        return this.state[propName];
     }
 
     isPlaying(track: TrackViewModelItem) {

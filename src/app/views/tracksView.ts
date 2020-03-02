@@ -1,6 +1,6 @@
-import * as React from 'react';
+import { BaseView } from '../base/baseView';
 import { template } from '../templates/tracks';
-import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
+import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
 import {
     PlaylistsViewModel,
     TrackViewModelItem,
@@ -17,7 +17,7 @@ export interface ITracksViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
 }
 
-class TracksView extends withEvents(React.Component)<ITracksViewProps, {}> {
+class TracksView extends BaseView<ITracksViewProps, {}> {
     state = {
         openLogin: false,
         tracks: [] as TrackViewModelItem[],

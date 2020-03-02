@@ -1,4 +1,4 @@
-import { Events } from 'databindjs';
+import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
@@ -10,9 +10,10 @@ import { IWebPlaybackState } from '../service/spotifyPlayer';
 
 const lockSection = asyncQueue();
 
-class MediaPlayerViewModel extends Events {
+class MediaPlayerViewModel extends ViewModel {
 
     settings = {
+        ...this.settings,
         isPlaying: false,
         timePlayed: 1,
         duration: 3.14 * 60 * 1000,
@@ -20,7 +21,6 @@ class MediaPlayerViewModel extends Events {
         albumName: '',
         volume: 0,
         thumbnailUrl: '',
-        errors: [] as ServiceResult<any, Error>[],
         currentTrackId: '',
         currentTrackUri: '',
         isLiked: false
@@ -166,15 +166,6 @@ class MediaPlayerViewModel extends Events {
         }
         const likedResult = trackExistsResult.val as boolean[];
         this.isLiked(_.first(likedResult));
-    }
-
-    errors(val?: ServiceResult<any, Error>[]) {
-        if (arguments.length && val !== this.settings.errors) {
-            this.settings.errors = val;
-            this.trigger('change:errors');
-        }
-
-        return this.settings.errors;
     }
 
     async monitorPlybackInternal() {

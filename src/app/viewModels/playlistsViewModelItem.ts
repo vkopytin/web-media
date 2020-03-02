@@ -1,11 +1,11 @@
-import { Events } from 'databindjs';
+import { ViewModel } from '../base/viewModel';
 import * as _ from 'underscore';
 import { IUserPlaylist } from '../service/adapter/spotify';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { Service } from '../service';
 
 
-class PlaylistsViewModelItem extends Events {
+class PlaylistsViewModelItem extends ViewModel {
     constructor(public playlist: IUserPlaylist) {
         super();
     }

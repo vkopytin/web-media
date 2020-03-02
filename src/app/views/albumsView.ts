@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { BaseView } from '../base/baseView';
 import { template } from '../templates/albums';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
@@ -14,7 +14,7 @@ export interface IAlbumsViewProps {
     currentTrackId: string;
 }
 
-class AlbumsView extends withEvents(React.Component)<IAlbumsViewProps, {}> {
+class AlbumsView extends BaseView<IAlbumsViewProps, AlbumsView['state']> {
     state = {
         openLogin: false,
         tracks: [] as TrackViewModelItem[],
@@ -38,15 +38,6 @@ class AlbumsView extends withEvents(React.Component)<IAlbumsViewProps, {}> {
 
     componentWillUnmount() {
         unbindFrom(this.binding);
-    }
-
-    prop<K extends keyof AlbumsView['state']>(propName: K, val?: AlbumsView['state'][K]): AlbumsView['state'][K] {
-        if (arguments.length > 1) {
-            this.state[propName] = val;
-            this.trigger('change:prop(' + propName + ')');
-        }
-
-        return this.state[propName];
     }
 
     uri() {

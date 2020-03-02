@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { BaseView } from '../base/baseView';
 import { template } from '../templates/mediaPlayer';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
@@ -15,7 +15,7 @@ export interface IMediaPlayerViewProps {
     currentTrackId(val?: string);
 }
 
-class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps, {}> {
+class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['state']> {
     state = {
         queue: [] as TrackViewModelItem[],
         duration: 1,
@@ -82,15 +82,6 @@ class MediaPlayerView extends withEvents(React.Component)<IMediaPlayerViewProps,
 
     componentWillUnmount() {
         unbindFrom(this.binding);
-    }
-
-    prop<K extends keyof MediaPlayerView['state']>(propName: K, val?: MediaPlayerView['state'][K]): MediaPlayerView['state'][K] {
-        if (arguments.length > 1) {
-            this.state[propName] = val;
-            this.trigger('change:prop(' + propName + ')');
-        }
-
-        return this.state[propName];
     }
 
     seekTrack(evnt: React.MouseEvent<HTMLDivElement, MouseEvent>) {
