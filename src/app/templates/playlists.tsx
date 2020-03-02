@@ -9,9 +9,25 @@ import { utils } from 'databindjs';
 const cn = utils.className;
 
 export const template = (view: PlaylistsView) => <>
+    <form>
+        <input
+            type="text"
+            placeholder="Enter new playlist name..."
+            defaultValue={view.prop('newPlaylistName')}
+            onChange={evnt => view.prop('newPlaylistName', evnt.target.value)}
+        />
+    </form>
+    <div className="segmented-control">
+        <a className="control-item active btn-primary" href="#create-public"
+            onClick={evnt => { evnt.preventDefault(); view.createPlaylistCommand.exec(true); }}
+        >Create public</a>
+        <a className="control-item btn-outlined btn-primary" href="#crate-private"
+            onClick={evnt => { evnt.preventDefault(); view.createPlaylistCommand.exec(false); }}
+        >Create private</a>
+    </div>
     <ul className="todo-list table-view">
         {_.map(view.prop('playlists'), (item, index) => {
-            return <li key={index} className="table-view-cell media">
+            return <li key={item.id()} className="table-view-cell media">
                 <a className="navigate-right"
                     onClick={evnt => { view.selectPlaylistCommand.exec(item.id() === view.prop('currentPlaylistId') ? null : item.id()) }}
                 >

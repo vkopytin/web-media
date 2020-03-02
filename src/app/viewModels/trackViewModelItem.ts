@@ -1,23 +1,53 @@
 import { Events } from 'databindjs';
 import { formatTime, assertNoErrors } from '../utils';
-import { Service } from '../service';
+import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
-import { IDevice, ISpotifySong } from '../service/adapter/spotify';
+import { IDevice, ISpotifySong, IUserPlaylist } from '../service/adapter/spotify';
 import { current } from '../utils';
 import { AppViewModel } from './appViewModel';
 import { MediaPlayerViewModel } from './mediaPlayerViewModel';
 import { ServiceResult } from '../base/serviceResult';
+import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 
 class TrackViewModelItem extends Events {
     appViewModel = current(AppViewModel);
     settings = {
         errors: [] as ServiceResult<any, Error>[],
-        isLiked: false
+        isLiked: false,
+        playlists: [] as PlaylistsViewModelItem[]
     };
+
+    isInit = _.delay(() => {
+        this.connect();
+        this.loadData('myPlaylists');
+    });
 
     constructor(public song: ISpotifySong, private index: number, private ss = current(Service)) {
         super();
+    }
+
+    async connect() {
+        const spotifyResult = await this.ss.service(SpotifyService);
+        if (assertNoErrors(spotifyResult, e => this.errors(e))) {
+            return;
+        }
+        const spotify = spotifyResult.val;
+        spotify.on('change:state', (...args) => this.loadData(...args));
+    }
+
+    async loadData(...args) {
+        if (!~args.indexOf('myPlaylists')) {
+            return;
+        }
+        const result = await this.ss.playlistsByTrack(this.song.track.id);
+        if (assertNoErrors(result, e => this.errors(e))) {
+            return result;
+        }
+
+        const playlists = result.val as IUserPlaylist[];
+
+        this.playlists(_.map(playlists, item => new PlaylistsViewModelItem(item)));
     }
 
     id() {
@@ -64,6 +94,15 @@ class TrackViewModelItem extends Events {
         const device = this.appViewModel.currentDevice();
         const playResult = this.ss.play(device?.id(), _.map(tracks, item => item.uri()), this.uri());
         assertNoErrors(playResult, e => this.errors(e));
+    }
+
+    playlists(val?: PlaylistsViewModelItem[]) {
+        if (arguments.length && this.settings.playlists !== val) {
+            this.settings.playlists = val;
+            this.trigger('change:playlists');
+        }
+
+        return this.settings.playlists;
     }
 
     isLiked(val?) {

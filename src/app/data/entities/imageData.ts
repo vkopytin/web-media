@@ -1,6 +1,7 @@
 import { PlaylistToImagesData } from './playlistToImagesData';
 import * as _ from 'underscore';
 import { IImageInfo } from '../../service/adapter/spotify';
+import { utils } from 'databindjs';
 
 
 export interface IImageData extends IImageInfo {
@@ -14,11 +15,20 @@ class ImageData {
 
 	constructor(uow) {
         this.uow = uow;
-        this.uow.createTable(this.tableName, () => { });
-	}
+    }
+    
+    createTable(cb: { (err, result): void }) {
+        this.uow.createTable(this.tableName, cb);
+    }
 
-	each(callback: { (err, result?: IImageData): void }) {
-        this.uow.each(this.tableName, callback);
+    each(callback: { (err, result?: IImageData, index?: number): void }) {
+        const queue = utils.asyncQueue();
+        this.uow.each(this.tableName, (err, result, index) => {
+            queue.push(next => {
+                callback(err, result, index);
+                next();
+            });
+        });
     }
     
     eachByPlaylistId(playlistId: string, callback: { (err?, result?: IImageData): void }) {

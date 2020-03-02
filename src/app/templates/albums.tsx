@@ -10,7 +10,7 @@ const cn = utils.className;
 export const template = (view: AlbumsView) => <>
     <ul className="todo-list table-view">
         {_.map(view.prop('tracks'), (item, index) => {
-            return <li key={index} className="table-view-cell media">
+            return <li key={item.id()} className="table-view-cell media">
                 <span className="media-object pull-left"
                     onClick={evnt => item.play(view.uri())}
                 >

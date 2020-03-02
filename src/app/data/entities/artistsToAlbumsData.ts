@@ -1,3 +1,6 @@
+import { utils } from 'databindjs';
+
+
 export interface IArtistsToAlbumsData {
     id: string;
     artistId: string;
@@ -12,15 +15,24 @@ class ArtistsToAlbumsData {
 
 	constructor(uow) {
         this.uow = uow;
-        this.uow.createTable(this.tableName, () => { });
+    }
+
+    createTable(cb: { (err, result): void }) {
+        this.uow.createTable(this.tableName, cb);
     }
 
     getId(artistId: string, albumId: string) {
         return `${artistId}-${albumId}`;
     }
 
-	each(callback: { (err, result?): void }) {
-        this.uow.each(this.tableName, callback);
+    each(callback: { (err, result?: IArtistsToAlbumsData, index?: number): void }) {
+        const queue = utils.asyncQueue();
+        this.uow.each(this.tableName, (err, result, index) => {
+            queue.push(next => {
+                callback(err, result, index);
+                next();
+            });
+        });
 	}
 
     getById(id: string, callback: { (err, result?: IArtistsToAlbumsData): void }) {

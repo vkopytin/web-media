@@ -15,7 +15,7 @@ export const template = (view: HomeView) => <>
     </div>
     <ul className="todo-list table-view">
         {_.map(view.prop('items'), (item, index) => {
-            return <li key={index} className="table-view-cell">
+            return <li key={item.id()} className="table-view-cell">
                 <span className="media-object pull-left"
                     onClick={evnt => { item.playTracks(view.prop('items'), item) }}
                 >

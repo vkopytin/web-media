@@ -1,6 +1,7 @@
 import { ArtistsToTracksData } from './artistsToTracksData';
 import * as _ from 'underscore';
 import { IArtist } from '../../service/adapter/spotify';
+import { utils } from 'databindjs';
 
 
 export interface IArtistRecord extends IArtist {
@@ -14,24 +15,43 @@ class ArtistData {
 
 	constructor(uow) {
         this.uow = uow;
-        this.uow.createTable(this.tableName, () => { });
-	}
+    }
+    
+    createTable(cb: { (err, result): void }) {
+        this.uow.createTable(this.tableName, cb);
+    }
 
-	each(callback: { (err, result?: IArtistRecord): void }) {
-        this.uow.each(this.tableName, callback);
+    each(callback: { (err?, result?: IArtistRecord, index?: number): void }) {
+        const queue = utils.asyncQueue();
+        this.uow.each(this.tableName, (err, result, index) => {
+            queue.push(next => {
+                callback(err, result, index);
+                next();
+            });
+        });
     }
     
     eachByTrack(trackId: string, callback: { (err?, result?: IArtistRecord): void }) {
+        const queue = utils.asyncQueue();
         const artistsToTracks = new ArtistsToTracksData(this.uow);
         artistsToTracks.each((err, atot) => {
-            if (_.isUndefined(atot)) return callback();
-            if (err) {
-                callback(err);
-            }
-            if (atot.trackId !== trackId) {
-                return;
-            }
-            this.getById(atot.artistId, callback);
+            queue.push(next => {
+                if (_.isUndefined(atot)) {
+                    callback();
+                    return next();
+                }
+                if (err) {
+                    callback(err);
+                    return next();
+                }
+                if (atot.trackId !== trackId) {
+                    return next();
+                }
+                this.getById(atot.artistId, (err, result) => {
+                    callback(err, result);
+                    next();
+                });
+            });
         });
     }
 

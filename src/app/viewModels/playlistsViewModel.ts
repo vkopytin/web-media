@@ -1,7 +1,7 @@
 import { Events } from 'databindjs';
 import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
-import { IUserPlaylistsResult, IResponseResult, ISpotifySong, IUserPlaylist, ITrack } from '../service/adapter/spotify';
+import { IUserPlaylistsResult, IResponseResult, ISpotifySong, IUserPlaylist, ITrack, IUserInfo } from '../service/adapter/spotify';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { current, assertNoErrors } from '../utils';
@@ -17,7 +17,10 @@ class PlaylistsViewModel extends Events {
         offset: 0,
         limit: 20,
         total: 0,
-        isLoading: false
+        isLoading: false,
+        likedTracks: [] as TrackViewModelItem[],
+        selectedTrack: null as TrackViewModelItem,
+        newPlaylistName: ''
     };
 
     selectPlaylistCommand = {
@@ -28,6 +31,9 @@ class PlaylistsViewModel extends Events {
     loadMoreCommand = {
         exec: () => this.loadMore()
     };
+    createPlaylistCommand = {
+        exec: (isPublic: boolean) => this.createNewPlaylist(isPublic)
+    }
 
     playlistsArray = [] as PlaylistsViewModelItem[];
     tracksArray = [] as TrackViewModelItem[];
@@ -112,9 +118,46 @@ class PlaylistsViewModel extends Events {
             const tracks = result.val as ITrack[];
         
             this.tracks(_.map(tracks, (item, index) => new TrackViewModelItem({ track: item } as any, index)));
+            this.checkTracks(this.tracks());
         } else {
             this.tracks([]);
         }
+    }
+
+    async checkTracks(tracks: TrackViewModelItem[]) {
+        const tracksToCheck = [];
+        const tasks = _.map(tracks, async track => {
+            const trackId = track.id();
+            const isLikedTrackResult = await this.ss.isLiked(trackId);
+            const isLiked = isLikedTrackResult.val as boolean;
+            if (isLiked === null) {
+                tracksToCheck.push(track);
+            } else {
+                track.isLiked(isLiked);
+            }
+        });
+        await Promise.all(tasks);
+        this.likedTracks(_.filter(this.tracks(), track => track.isLiked()));
+        if (!tracksToCheck.length) {
+            return;
+        }
+        const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
+        if (assertNoErrors(likedResult, e => this.errors(e))) {
+            return;
+        }
+        _.each(likedResult.val as boolean[], (liked, index) => {
+            tracksToCheck[index].isLiked(liked);
+        });
+        this.likedTracks(_.filter(this.tracks(), track => track.isLiked()));
+    }
+
+    likedTracks(val?: TrackViewModelItem[]) {
+        if (arguments.length && this.settings.likedTracks !== val) {
+            this.settings.likedTracks = val;
+            this.trigger('change:likedTracks');
+        }
+
+        return this.settings.likedTracks;
     }
 
     playlistsAddRange(value: PlaylistsViewModelItem[]) {
@@ -166,6 +209,45 @@ class PlaylistsViewModel extends Events {
         }
 
         return this.settings.errors;
+    }
+
+    selectedTrack(val: TrackViewModelItem) {
+        if (arguments.length && this.settings.selectedTrack !== val) {
+            this.settings.selectedTrack = val;
+            this.trigger('change:selectedTrack');
+        }
+
+        return this.settings.selectedTrack;
+    }
+
+    newPlaylistName(val?: string) {
+        if (arguments.length && this.settings.newPlaylistName !== val) {
+            this.settings.newPlaylistName = val;
+            this.trigger('change:newPlaylistName');
+        }
+
+        return this.settings.newPlaylistName;
+    }
+
+    async createNewPlaylist(isPublic: boolean) {
+        if (!this.newPlaylistName()) {
+            return;
+        }
+        const meResult = await this.ss.profile();
+        if (assertNoErrors(meResult, e => this.errors(e))) {
+            return;
+        }
+        const me = meResult.val as IUserInfo;
+        const spotifyResult = await this.ss.createNewPlaylist(
+            me.id,
+            this.newPlaylistName(),
+            '',
+            isPublic
+        );
+        if (assertNoErrors(spotifyResult, e => this.errors(e))) {
+            return;
+        }
+        this.fetchData();
     }
 }
 

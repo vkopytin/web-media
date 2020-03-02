@@ -1,43 +1,61 @@
 import * as _ from 'underscore';
-import { IResponseResult, ISpotifySong, IRecommendationsResult } from '../../service/adapter/spotify';
-import { TrackData } from '../entities/trackData';
+import { IRecommendationsResult } from '../../service/adapter/spotify';
 import { DataStorage } from '../dataStorage';
-import { AlbumData } from '../entities/albumData';
-import { ArtistData } from '../entities/artistData';
-import { ImageData } from '../entities/imageData';
-import { AlbumToImagesData } from '../entities/albumToImagesData';
 import { asAsync } from '../../utils';
-import { ArtistsToAlbumsData } from '../entities/artistsToAlbumsData';
-import { ArtistsToTracksData } from '../entities/artistsToTracksData';
-import { RecommendationsData } from '../entities/recommendationsData';
+import { RecommendationsData, IRecomendation } from '../entities/recommendationsData';
+import { utils } from 'databindjs';
 
 
 export async function importFromSpotifyRecommendationsResult(result: IRecommendationsResult, timestamp: number) {
-    const queue = [];
-    DataStorage.create(async (err, connection) => {
-        const recommendations = new RecommendationsData(connection);
-        const syncTs = +new Date();
-        recommendations.each((err, record) => {
-            if (_.isUndefined(record)) return;
-            if (record.date < (+new Date() - 1000 * 5)) {
-                recommendations.delete(record.id, () => { });
-            }
-        });
+    return asAsync<IRecomendation>(null, (cb: { (a, b?): void }) => {
+        DataStorage.create(async (err, connection) => {
+            const queue = utils.asyncQueue();
+            const recommendations = new RecommendationsData(connection);
+            const syncTs = +new Date();
+            recommendations.each((err, record) => {
+                queue.push(next => {
+                    if (_.isUndefined(record)) {
+                        next();
+                        return;
+                    }
+                    if (record.date < (+new Date() - 1000 * 5)) {
+                        recommendations.delete(record.id, (err, result) => {
+                            if (err) {
+                                cb(err);
+                            }
+                            next();
+                        });
+                    } else {
+                        next();
+                    }
+                });
+            });
 
-        _.each(result.tracks, (track, index) => {
-            const trackId = track.id;
-            queue.push(asAsync(recommendations, recommendations.refresh, trackId, {
-                id: trackId,
-                track: track,
-                date: timestamp,
-                index: index,
-                updatedTs: syncTs,
-                syncTs: syncTs
-            }));
-        });
+            _.each(result.tracks, (track, index) => {
+                queue.push(next => {
+                    const trackId = track.id;
+                    recommendations.refresh(trackId, {
+                        id: trackId,
+                        track: track,
+                        date: timestamp,
+                        index: index,
+                        updatedTs: syncTs,
+                        syncTs: syncTs
+                    }, (err, result) => {
+                        if (err) {
+                            cb(err);
+                        }
+                        next();
+                    });
+                });
+            });
 
-        connection.complete();
+            queue.push(next => {
+                cb(null, true);
+                next();
+            });
+
+            connection.complete();
+        });
     });
-
-    return Promise.all(queue);
 }

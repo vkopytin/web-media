@@ -20,7 +20,8 @@ class MyTracksView extends withEvents(React.Component)<IMyTracksViewProps, {}> {
         term: '',
         items: [] as TrackViewModelItem[],
         isLoading: false,
-        currentTrackId: ''
+        currentTrackId: '',
+        likedTracks: [] as TrackViewModelItem[]
     };
 
     loadMoreCommand = { exec() { } };
@@ -28,6 +29,7 @@ class MyTracksView extends withEvents(React.Component)<IMyTracksViewProps, {}> {
     binding = bindTo(this, () => current(MyTracksViewModel), {
         'loadMoreCommand': 'loadMoreCommand',
         'prop(items)': 'tracks',
+        'prop(likedTracks)': 'likedTracks',
         'prop(isLoading)': 'isLoading'
     });
 

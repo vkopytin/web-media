@@ -18,7 +18,7 @@ export function listTracks(offset = 0, limit = 20) {
                 myLibrary.each((err, result) => {
                     if (_.isUndefined(result)) {
                         next();
-                        return true;
+                        return false;
                     }
                     if (result.playlistId) {
                         return;

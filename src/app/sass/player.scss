@@ -331,9 +331,11 @@ footer:before {
     overflow-x: scroll;
     overflow-y: hidden;
     white-space: nowrap;
+    scroll-snap-type: x mandatory;
 }
 
 .stack .stack__card {
+    scroll-snap-align: start;
     border: 1px solid silver;
     display: inline-block;
     width: 44vw;

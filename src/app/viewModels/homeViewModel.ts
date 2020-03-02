@@ -70,13 +70,29 @@ class HomeViewModel extends Events {
     }
 
     async checkTracks(tracks: TrackViewModelItem[]) {
-        const ids = _.map(tracks, track => track.id());
-        const likedResult = await this.ss.hasTracks(ids);
+        const tracksToCheck = [];
+        const tasks = _.map(tracks, async track => {
+            const trackId = track.id();
+            const isLikedTrackResult = await this.ss.isLiked(trackId);
+            const isLiked = isLikedTrackResult.val as boolean;
+            if (isLiked === null) {
+                tracksToCheck.push(track);
+            } else {
+                track.isLiked(isLiked);
+            }
+        });
+        await Promise.all(tasks);
+        if (!tracksToCheck.length) {
+            this.likedTracks(_.filter(this.tracks(), track => track.isLiked()));
+            return;
+        }
+        const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
         if (assertNoErrors(likedResult, e => this.errors(e))) {
             return;
         }
         _.each(likedResult.val as boolean[], (liked, index) => {
-            tracks[index].isLiked(liked);
+            tracksToCheck[index].isLiked(liked);
+            this.likedTracks(_.filter(this.tracks(), track => track.isLiked()));
         });
     }
 

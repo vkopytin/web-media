@@ -258,6 +258,31 @@ class SoptifyAdapter {
         });
     }
 
+    createNewPlaylist(userId: string, name: string, description = '', isPublic = false) {
+        const data = {
+            name,
+            description,
+            public: isPublic
+        };
+        return new Promise<any>((resolve, reject) => {
+            $.ajax({
+                method: 'POST',
+                url: `https://api.spotify.com/v1/users/${userId}/playlists`,
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
+                }
+            });
+        });
+    }
+
     myPlaylists(offset=0, limit=20) {
         return new Promise<IUserPlaylistsResult>((resolve, reject) => {
             $.ajax({

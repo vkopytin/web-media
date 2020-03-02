@@ -5,6 +5,7 @@ import { ArtistData } from './artistData';
 import { ImageData } from './imageData';
 import { AlbumToImagesData } from './albumToImagesData';
 import { ArtistsToAlbumsData } from './artistsToAlbumsData';
+import { utils } from 'databindjs';
 
 
 export interface IAlbumRecord extends IAlbum {
@@ -18,12 +19,21 @@ class AlbumData {
 
 	constructor(uow) {
         this.uow = uow;
-        this.uow.createTable(this.tableName, () => { });
-	}
+    }
+    
+    createTable(cb: { (err, result): void }) {
+        this.uow.createTable(this.tableName, cb);
+    }
 
-	each(callback: { (err, result?: IAlbumRecord): void }) {
-        this.uow.each(this.tableName, callback);
-	}
+    each(callback: { (err?, result?: IAlbumRecord, index?: number): void }) {
+        const queue = utils.asyncQueue();
+        this.uow.each(this.tableName, (err, result, index) => {
+            queue.push(next => {
+                callback(err, result, index);
+                next();
+            });
+        });
+    }
 
 	getById(albumId, callback: { (err, result?: IAlbumRecord): void }) {
         this.uow.getById(this.tableName, albumId, callback);
@@ -34,7 +44,7 @@ class AlbumData {
 	}
 
     create(album: IAlbumRecord, callback: { (err, result?): void }) {
-        const tasks = [];
+        const queue = utils.asyncQueue();
         const artists = new ArtistData(this.uow);
         const images = new ImageData(this.uow);
         const albumToImages = new AlbumToImagesData(this.uow);
@@ -42,48 +52,131 @@ class AlbumData {
         const albumId = album.id;
 
         _.forEach(album.images, (image) => {
-            const imageUrl = image.url;
-            tasks.push(asAsync(images, images.refresh, imageUrl, image));
-            tasks.push(asAsync(albumToImages, albumToImages.refresh, imageUrl, albumId));
+            queue.push(next => {
+                const imageUrl = image.url;
+                images.refresh(imageUrl, image, (err, result) => {
+                    if (err) {
+                        callback(err);
+                        return next();
+                    }
+                    albumToImages.refresh(imageUrl, albumId, (err, result) => {
+                        if (err) {
+                            callback(err);
+                            return next();
+                        }
+                        next();
+                    });
+                });
+            });
         });
 
         _.forEach(album.artists, (artist) => {
-            const artistId = artist.id;
-            tasks.push(asAsync(artists, artists.refresh, artist.id, artist));
-            tasks.push(asAsync(artistsToAlbums, artistsToAlbums.refresh, artistId, albumId));
+            queue.push(next => {
+                const artistId = artist.id;
+                artists.refresh(artist.id, {
+                    ...artist,
+                    updatedTs: album.updatedTs,
+                    syncTs: album.syncTs
+                }, (err, result) => {
+                    if (err) {
+                        callback(err);
+                        return next();
+                    }
+                    artistsToAlbums.refresh(artistId, albumId, (err, result) => {
+                        if (err) {
+                            callback(err);
+                            return next();
+                        }
+                        next();
+                    });
+                });
+            });
         });
 
-        tasks.push(asAsync(this.uow, this.uow.create, this.tableName, {
-            ..._.omit(album, 'artists', 'images')
-        }))
+        queue.push(next => {
+            this.uow.create(this.tableName, {
+                ..._.omit(album, 'artists', 'images')
+            }, (err, result) => {
+                if (err) {
+                    callback(err);
+                    return next();
+                }
+                next();
+            });
+        });
 
-        Promise.all(tasks).then(() => callback(null, true));
+        queue.push(next => {
+            callback(null, album.id);
+            next();
+        });
 	}
 
-	update(albumId, album: IAlbumRecord, callback: { (err, result?): void }) {
-        const tasks = [];
+	update(albumId, album: IAlbumRecord, callback: { (err?, result?): void }) {
+        const queue = utils.asyncQueue();
         const artists = new ArtistData(this.uow);
         const images = new ImageData(this.uow);
         const albumToImages = new AlbumToImagesData(this.uow);
         const artistsToAlbums = new ArtistsToAlbumsData(this.uow);
 
         _.forEach(album.images, (image) => {
-            const imageUrl = image.url;
-            tasks.push(asAsync(images, images.refresh, imageUrl, image));
-            tasks.push(asAsync(albumToImages, albumToImages.refresh, imageUrl, albumId));
+            queue.push(subNext => {
+                const imageUrl = image.url;
+                images.refresh(imageUrl, image, (err, result) => {
+                    if (err) {
+                        callback(err);
+                        return subNext();
+                    }
+                    albumToImages.refresh(imageUrl, albumId, (err, result) => {
+                        if (err) {
+                            callback(err);
+                            return subNext();
+                        }
+                        callback(null, true);
+                        subNext();
+                    });
+                });
+            });
         });
 
         _.forEach(album.artists, (artist) => {
-            const artistId = artist.id;
-            tasks.push(asAsync(artists, artists.refresh, artist.id, artist));
-            tasks.push(asAsync(artistsToAlbums, artistsToAlbums.refresh, artistId, albumId));
+            queue.push(subNext => {
+                const artistId = artist.id;
+                artists.refresh(artist.id, {
+                    ...artist,
+                    updatedTs: album.updatedTs,
+                    syncTs: album.syncTs
+                }, (err, result) => {
+                    if (err) {
+                        callback(err);
+                        return subNext();
+                    }
+                    artistsToAlbums.refresh(artistId, albumId, (err, result) => {
+                        if (err) {
+                            callback(err);
+                            return subNext();
+                        }
+                        subNext();
+                    })
+                });
+            });
         });
 
-        tasks.push(asAsync(this.uow, this.uow.update, this.tableName, albumId, {
-            ..._.omit(album, 'artists', 'images')
-        }))
+        queue.push(next => {
+            this.uow.update(this.tableName, albumId, {
+                ..._.omit(album, 'artists', 'images')
+            }, (err, result) => {
+                if (err) {
+                    callback(err);
+                    return next();
+                }
+                next();
+            })
+        });
 
-        Promise.all(tasks).then(() => callback(null, true));
+        queue.push(next => {
+            callback(null, album.id);
+            next();
+        });
 	}
 
 	delete(albumId, callback: { (err, result?): void }) {

@@ -443,6 +443,36 @@ class Service {
 
         return result;
     }
+
+    async isLiked(trackId: string) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.isLiked(trackId);
+
+        return result;
+    }
+
+    async createNewPlaylist(userId: string, name: string, description = '', isPublic = false) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.createNewPlaylist(userId, name, description, isPublic);
+
+        return result;
+    }
+
+    async playlistsByTrack(trackId: string) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.playlistsByTrack(trackId);
+
+        return result;
+    }
 }
 
 export { Service, SpotifyService };

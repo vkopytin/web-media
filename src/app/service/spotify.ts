@@ -21,6 +21,9 @@ import { listRecommendations } from '../data/useCases/listRecommendations';
 import { listPlaylists } from '../data/useCases/listPlaylists';
 import { listPlaylistsTracks } from '../data/useCases/listPlaylistsTracks';
 import { listTracks } from '../data/useCases/listTracks';
+import { isLiked } from '../data/useCases/isLIked';
+import { listPlaylistsByTrack } from '../data/useCases/listPlaylistsByTrack';
+import { initializeStructure } from '../data/useCases/initializeStructure';
 
 
 function returnErrorResult<T>(message: string, ex: Error) {
@@ -39,6 +42,7 @@ function returnErrorResult<T>(message: string, ex: Error) {
 class SpotifyService extends withEvents(BaseService) {
     static async create(connection: Service) {
         try {
+            const res = await initializeStructure();
             const settingsResult = await connection.settings('spotify');
             if (settingsResult.isError) {
 
@@ -414,6 +418,36 @@ class SpotifyService extends withEvents(BaseService) {
     async hasAlbums(albumIds: string | string[]) {
         try {
             const res = await this.adapter.hasAlbums(albumIds);
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async isLiked(trackId) {
+        try {
+            const res = await isLiked(trackId);
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async createNewPlaylist(userId: string, name: string, description = '', isPublic = false) {
+        try {
+            const res = await this.adapter.createNewPlaylist(userId, name, description, isPublic);
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async playlistsByTrack(trackId: string) {
+        try {
+            const res = await listPlaylistsByTrack(trackId);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {

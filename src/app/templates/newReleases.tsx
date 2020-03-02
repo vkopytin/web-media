@@ -10,7 +10,7 @@ const cn = utils.className;
 export const template = (view: NewReleasesView) => <>
     <ul className="stack">
         {_.map(view.prop('releases'), (item, index) => {
-            return <li key={index} className="stack__card">
+            return <li key={item.id()} className="stack__card">
                 <div className="card__img" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}></div>
                 <a href="#" className="card_link"
                     onClick={evnt => { view.selectAlbumCommand.exec(view.prop('currentAlbum') === item ? null : item) }}

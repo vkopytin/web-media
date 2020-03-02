@@ -3,6 +3,7 @@ import { PlaylistToImagesData } from './playlistToImagesData';
 import { IUserPlaylist } from '../../service/adapter/spotify';
 import * as _ from 'underscore';
 import { asAsync } from '../../utils';
+import { utils } from 'databindjs';
 
 
 export interface IPlaylistData extends IUserPlaylist {
@@ -16,26 +17,43 @@ class PlaylistData {
 
 	constructor(uow) {
         this.uow = uow;
-        this.uow.createTable(this.tableName, () => { });
-	}
+    }
+    
+    createTable(cb: { (err, result): void }) {
+        this.uow.createTable(this.tableName, cb);
+    }
 
-	each(callback: { (err?, result?: IPlaylistData, index?: number): void }) {
+    each(callback: { (err?, result?: IPlaylistData, index?: number): void }) {
+        const queue = utils.asyncQueue();
         const images = new ImageData(this.uow);
 
         this.uow.each(this.tableName, (err, record: IPlaylistData, index: number) => {
-            if (_.isUndefined(record)) return callback();
-            if (err) {
-                callback(err);
-            }
-            const imagesArr = [];
-            const playlistId = record.id;
-            images.eachByPlaylistId(playlistId, (err, image) => {
-                imagesArr.push(image);
+            queue.push(next => {
+                if (_.isUndefined(record)) {
+                    callback();
+                    return next();
+                }
+                if (err) {
+                    callback(err);
+                    return next();
+                }
+                const imagesArr = [];
+                const playlistId = record.id;
+                images.eachByPlaylistId(playlistId, (err, image) => {
+                    if (err) {
+                        callback(err);
+                        return next();
+                    }
+                    if (_.isUndefined(image)) {
+                        callback(err, {
+                            ...record,
+                            images: imagesArr
+                        }, index);
+                        return next();
+                    }
+                    imagesArr.push(image);
+                });
             });
-            callback(err, {
-                ...record,
-                images: imagesArr
-            }, index);
         });
 	}
 
@@ -43,14 +61,18 @@ class PlaylistData {
         const images = new ImageData(this.uow);
 
         this.uow.getById(this.tableName, playlistId, (err, record) => {
+            if (err) return callback(err);
             const imagesArr = [];
             images.eachByPlaylistId(playlistId, (err, image) => {
-                if (_.isUndefined(image)) return callback();
+                if (err) {
+                    callback(err);
+                    return;
+                }
+                if (_.isUndefined(image)) return callback(err, {
+                    ...record,
+                    images: imagesArr
+                });
                 imagesArr.push(image);
-            });
-            callback(err, {
-                ...record,
-                images: imagesArr
             });
         });
     }
@@ -60,40 +82,84 @@ class PlaylistData {
 	}
 
     create(playlist: IPlaylistData, callback: { (err, result?): void }) {
-        const tasks = [];
+        const queue = utils.asyncQueue();
         const images = new ImageData(this.uow);
         const playlistToImages = new PlaylistToImagesData(this.uow);
         const playlistId = playlist.id;
 
         _.each(playlist.images, (image) => {
-            const imageUrl = image.url;
-            tasks.push(asAsync(images, images.refresh, imageUrl, image));
-            tasks.push(asAsync(playlistToImages, playlistToImages.refresh, imageUrl, playlistId));
+            queue.push(next => {
+                const imageUrl = image.url;
+                images.refresh(imageUrl, image, (err, result) => {
+                    if (err) {
+                        callback(err);
+                        return next();
+                    }
+                    playlistToImages.refresh(imageUrl, playlistId, (err, result) => {
+                        if (err) {
+                            callback(err);
+                        }
+                        next();
+                    });
+                });
+            });
         });
 
-        tasks.push(asAsync(this.uow, this.uow.create, this.tableName, {
-            ..._.omit(playlist, 'images')
-        }));
+        queue.push(next => {
+            this.uow.create(this.tableName, {
+                ..._.omit(playlist, 'images')
+            }, (err, result) => {
+                if (err) {
+                    callback(err);
+                }
+                next();
+            });
+        });
 
-        Promise.all(tasks).then(() => callback(null, true));
+        queue.push(next => {
+            callback(null, true);
+            next();
+        });
 	}
 
 	update(playlistId: string, playlist: IPlaylistData, callback: { (err, result?): void }) {
-        const tasks = [];
+        const queue = utils.asyncQueue();
         const images = new ImageData(this.uow);
         const playlistToImages = new PlaylistToImagesData(this.uow);
 
         _.each(playlist.images, (image) => {
-            const imageUrl = image.url;
-            tasks.push(asAsync(images, images.refresh, imageUrl, image));
-            tasks.push(asAsync(playlistToImages, playlistToImages.refresh, imageUrl, playlistId));
+            queue.push(next => {
+                const imageUrl = image.url;
+                images.refresh(imageUrl, image, (err, result) => {
+                    if (err) {
+                        callback(err);
+                        return next();
+                    }
+                    playlistToImages.refresh(imageUrl, playlistId, (err, result) => {
+                        if (err) {
+                            callback(err);
+                        }
+                        next();
+                    });
+                });
+            });
         });
 
-        tasks.push(asAsync(this.uow, this.uow.update, this.tableName, playlistId, {
-            ..._.omit(playlist, 'images')
-        }));
+        queue.push(next => {
+            this.uow.update(this.tableName, playlistId, {
+                ..._.omit(playlist, 'images')
+            }, (err, result) => {
+                if (err) {
+                    callback(err);
+                }
+                next();
+            });
+        });
 
-        Promise.all(tasks).then(() => callback(null, true));
+        queue.push(next => {
+            callback(null, true);
+            next();
+        });
 	}
 
 	delete(playlistId: string, callback: { (err, result?): void }) {

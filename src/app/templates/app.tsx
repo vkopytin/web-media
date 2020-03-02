@@ -70,9 +70,9 @@ export const template = (view: AppView) => <main>
                         />
                     </div>
                 </form>
-                <ul className="todo-list table-view">
+                <ul className="table-view">
                     {_.map(view.prop('topTracks'), (item, index) => {
-                        return <li key={index} className="table-view-cell media">
+                        return <li key={item.id()} className="table-view-cell media">
                             <span className="media-object pull-left player-left--32"
                                 onClick={evnt => item.playTracks(view.prop('topTracks'), item)}
                             >

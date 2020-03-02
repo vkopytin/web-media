@@ -7,6 +7,10 @@ class InMemoryStorage {
     constructor(public connection) {
     }
 
+    initializeStructure(cb: { (err?, res?): void }) {
+        cb(null, true);
+	}
+
     createTable(tableName, cb: { (err, res?): void }) {
         try {
             if (!this.db[tableName]) {
@@ -21,6 +25,9 @@ class InMemoryStorage {
     
     create(tableName: string, data: { id; }, cb: { (err, res?): void }) {
         try {
+            if (data.id in this.db[tableName]) {
+                return cb(new Error('record already exists'));
+            }
             this.db[tableName][data.id] = data;
 
             cb(null, data.id);
@@ -41,7 +48,7 @@ class InMemoryStorage {
                 ...data
             };
 
-            cb(null, true);
+            cb(null, data.id);
         } catch (ex) {
             cb(ex, null);
         }
@@ -60,7 +67,7 @@ class InMemoryStorage {
 
     getById(tableName: string, id, cb: { (err, id?): void }) {
         try {
-            cb(null, this.db[tableName][id] || null);
+            cb(null, this.db[tableName][id] || undefined);
         } catch (ex) {
             cb(ex);
         }
@@ -71,7 +78,7 @@ class InMemoryStorage {
         for (const key in this.db[tableName]) {
             if (Object.prototype.hasOwnProperty.call(this.db[tableName], key)) {
                 try {
-                    const stop = cb(null, this.db[tableName][key] || null, index++);
+                    const stop = cb(null, this.db[tableName][key] || null, index++) === false;
                     if (stop) {
                         return;
                     }
@@ -99,10 +106,6 @@ class InMemoryStorage {
         } catch (ex) {
             cb(ex);
         }
-    }
-
-    query(query, params, callback) {
-        return callback(false);
     }
 
     complete = _.debounce(this.completeInternal, 500);

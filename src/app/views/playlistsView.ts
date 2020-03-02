@@ -20,19 +20,25 @@ class PlaylistsView extends withEvents(React.Component)<IPlaylistsViewProps, {}>
         openLogin: false,
         playlists: [] as PlaylistsViewModelItem[],
         tracks: [] as TrackViewModelItem[],
+        likedTracks: [] as TrackViewModelItem[],
         currentPlaylistId: '',
         isLoading: false,
+        newPlaylistName: ''
     };
     selectPlaylistCommand = { exec(playlist) { } };
     loadMoreCommand = { exec() { } };
+    createPlaylistCommand = { exec(isPublic: boolean) { } };
 
     binding = bindTo(this, () => current(PlaylistsViewModel), {
         'prop(playlists)': 'playlists',
         'prop(tracks)': 'tracks',
         'prop(isLoading)': 'isLoading',
         'loadMoreCommand': 'loadMoreCommand',
+        'prop(likedTracks)': 'likedTracks',
         'selectPlaylistCommand': 'selectPlaylistCommand',
-        'prop(currentPlaylistId)': 'currentPlaylistId'
+        'createPlaylistCommand': 'createPlaylistCommand',
+        'prop(currentPlaylistId)': 'currentPlaylistId',
+        'prop(newPlaylistName)': 'newPlaylistName'
     });
 
     constructor(props) {

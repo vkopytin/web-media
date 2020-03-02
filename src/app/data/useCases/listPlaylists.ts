@@ -18,7 +18,7 @@ export function listPlaylists(offset = 0, limit = 0) {
                 playlists.each((err, result, index) => {
                     if (_.isUndefined(result)) {
                         next();
-                        return true;
+                        return false;
                     }
                     if (index < offset) {
                         return;

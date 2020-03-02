@@ -1,3 +1,6 @@
+import { utils } from 'databindjs';
+
+
 export interface IDeviceData {
     updatedTs: number;
     syncTs: number;
@@ -9,11 +12,20 @@ class DeviceData {
 
 	constructor(uow) {
         this.uow = uow;
-        this.uow.createTable(this.tableName, () => { });
-	}
+    }
+    
+    createTable(cb: { (err, result): void }) {
+        this.uow.createTable(this.tableName, cb);
+    }
 
-	each(callback: { (err, result?: IDeviceData): void }) {
-        this.uow.each(this.tableName, callback);
+    each(callback: { (err, result?: IDeviceData, index?: number): void }) {
+        const queue = utils.asyncQueue();
+        this.uow.each(this.tableName, (err, result, index) => {
+            queue.push(next => {
+                callback(err, result, index);
+                next();
+            });
+        });
 	}
 
 	getById(deviceId, callback: { (err, result?: IDeviceData): void }) {

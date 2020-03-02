@@ -2,7 +2,7 @@ import * as $ from 'jquery';
 import * as _ from 'underscore';
 import * as React from 'react';
 import { utils } from 'databindjs';
-import { SearchView } from '../views';
+import { SearchView, SelectPlaylistsView } from '../views';
 
 
 const cn = utils.className;
@@ -18,7 +18,7 @@ export const template = (view: SearchView) => <>
     </section>
     <ul className="todo-list table-view">
         {_.map(view.prop('items'), (item, index) => {
-            return <li key={index} className="table-view-cell media">
+            return <li key={item.id()} className="table-view-cell media">
                 <span className="media-object pull-left"
                     onClick={evnt => item.playTracks(view.prop('items'), item)}
                 >
@@ -27,8 +27,13 @@ export const template = (view: SearchView) => <>
                     </label>
                 </span>
                 <div className="media-body">
-                    {item.name()}
-                    <p>{item.album()}</p>
+                    <div style={{minWidth: '30vw', display: 'inline-block'}}>
+                        <span>{item.name()}</span>
+                        <p>{item.album()}</p>
+                    </div>
+                    <span style={{ width: '50vw', display: 'inline-block' }}>
+                        <SelectPlaylistsView track={item} />
+                    </span>
                 </div>
                 {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
                 {item.isLiked() || <span className="badge">{item.duration()}</span>}

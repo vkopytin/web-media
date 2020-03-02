@@ -1,6 +1,8 @@
 import { Events } from 'databindjs';
 import * as _ from 'underscore';
 import { IUserPlaylist } from '../service/adapter/spotify';
+import { TrackViewModelItem } from './trackViewModelItem';
+import { Service } from '../service';
 
 
 class PlaylistsViewModelItem extends Events {
@@ -29,7 +31,7 @@ class PlaylistsViewModelItem extends Events {
     }
 
     thumbnailUrl() {
-        return _.first(this.playlist.images).url;
+        return _.first(this.playlist.images)?.url;
     }
 
     equals(inst: PlaylistsViewModelItem) {

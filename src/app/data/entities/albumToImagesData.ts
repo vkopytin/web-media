@@ -1,3 +1,6 @@
+import { utils } from 'databindjs';
+
+
 export interface IAlbumToImagesData {
     id: string;
     albumId: string;
@@ -12,11 +15,20 @@ class AlbumToImagesData {
 
 	constructor(uow) {
         this.uow = uow;
-        this.uow.createTable(this.tableName, () => { });
     }
 
-	each(callback: { (err, result?: IAlbumToImagesData): void }) {
-        this.uow.each(this.tableName, callback);
+    createTable(cb: { (err, result): void }) {
+        this.uow.createTable(this.tableName, cb);
+    }
+
+    each(callback: { (err?, result?: IAlbumToImagesData, index?: number): void }) {
+        const queue = utils.asyncQueue();
+        this.uow.each(this.tableName, (err, result, index) => {
+            queue.push(next => {
+                callback(err, result, index);
+                next();
+            });
+        });
 	}
 
     getById(imageUrl: string, callback: { (err, result?: IAlbumToImagesData): void }) {

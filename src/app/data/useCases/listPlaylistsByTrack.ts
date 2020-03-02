@@ -4,32 +4,29 @@ import * as _ from 'underscore';
 import { utils } from 'databindjs';
 import { ITrack } from '../../service/adapter/spotify';
 import { MyLibraryData } from '../entities/myLibraryData';
+import { IPlaylistData } from '../entities/playlistData';
 
 
-export function listPlaylistsTracks(playlistId: string, offset = 0, limit = 20) {
-    return asAsync<ITrack[]>(null, (cb: { (a, b): void }) => {
+export function listPlaylistsByTrack(trackId: string, offset = 0, limit = 20) {
+    return asAsync<IPlaylistData[]>(null, (cb: { (a, b): void }) => {
         DataStorage.create(async (err, connection) => {
             const myLibrary = new MyLibraryData(connection);
             const queue = utils.asyncQueue();
             const subQueue = utils.asyncQueue(30);
-            const items = [] as ITrack[];
-
+            const items = [] as IPlaylistData[];
             queue.push(next => {
-                myLibrary.eachByPlaylist(playlistId, (err, result, index) => {
+                myLibrary.each((err, result) => {
                     if (_.isUndefined(result)) {
                         next();
                         return false;
                     }
-                    if (index < offset) {
+                    if (result.trackId === trackId && result.playlistId) {
+                        subQueue.push(next => {
+                            items.push(result.playlist);
+                            next();
+                        });
                         return;
                     }
-                    if (index > offset + limit) {
-                        return;
-                    }
-                    subQueue.push(next => {
-                        items.push(result.track);
-                        next();
-                    });
                 });
             });
             queue.push(next => {

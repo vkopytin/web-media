@@ -14,7 +14,8 @@ class MyTracksViewModel extends Events {
         total: 0,
         limit: 20,
         offset: 0,
-        isLoading: false
+        isLoading: false,
+        likedTracks: [] as TrackViewModelItem[]
     };
 
     loadMoreCommand = {
@@ -82,6 +83,43 @@ class MyTracksViewModel extends Events {
         }
         const tracks = tracksResult.val as ITrack[];
         this.tracks(_.map(tracks, (track, index) => new TrackViewModelItem({ track } as any, index)));
+        this.checkTracks(this.tracks());
+    }
+
+    async checkTracks(tracks: TrackViewModelItem[]) {
+        const tracksToCheck = [];
+        const tasks = _.map(tracks, async track => {
+            const trackId = track.id();
+            const isLikedTrackResult = await this.ss.isLiked(trackId);
+            const isLiked = isLikedTrackResult.val as boolean;
+            if (isLiked === null) {
+                tracksToCheck.push(track);
+            } else {
+                track.isLiked(isLiked);
+            }
+        });
+        await Promise.all(tasks);
+        this.likedTracks(_.filter(this.tracks(), track => track.isLiked()));
+        if (!tracksToCheck.length) {
+            return;
+        }
+        const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
+        if (assertNoErrors(likedResult, e => this.errors(e))) {
+            return;
+        }
+        _.each(likedResult.val as boolean[], (liked, index) => {
+            tracksToCheck[index].isLiked(liked);
+        });
+        this.likedTracks(_.filter(this.tracks(), track => track.isLiked()));
+    }
+
+    likedTracks(val?: TrackViewModelItem[]) {
+        if (arguments.length && this.settings.likedTracks !== val) {
+            this.settings.likedTracks = val;
+            this.trigger('change:likedTracks');
+        }
+
+        return this.settings.likedTracks;
     }
 
     isLoading(val?) {
