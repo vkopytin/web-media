@@ -64,6 +64,7 @@ class PlaylistsViewModel extends Events {
         const playlists = (result.val as IUserPlaylistsResult).items;
         this.settings.total = this.settings.offset + Math.min(this.settings.limit - 1, playlists.length - 1) + 1;
         this.settings.offset = this.settings.offset + Math.min(this.settings.limit, playlists.length);
+        this.playlists(_.map(playlists, item => new PlaylistsViewModelItem(item)));
     }
 
     async loadData(...args) {
@@ -71,14 +72,6 @@ class PlaylistsViewModel extends Events {
         if (!~args.indexOf('myPlaylists')) {
             return;
         }
-        const result = await this.ss.myPlaylists();
-        if (assertNoErrors(result, e => this.errors(e))) {
-            return result;
-        }
-
-        const playlists = result.val as IUserPlaylist[];
-
-        this.playlists(_.map(playlists, item => new PlaylistsViewModelItem(item)));
     }
 
     async loadMore() {
@@ -91,6 +84,7 @@ class PlaylistsViewModel extends Events {
         const playlists = (result.val as IUserPlaylistsResult).items;
         this.settings.total = this.settings.offset + Math.min(this.settings.limit - 1, playlists.length - 1) + 1;
         this.settings.offset = this.settings.offset + Math.min(this.settings.limit, playlists.length);
+        this.playlists([...this.playlists(), ..._.map(playlists, item => new PlaylistsViewModelItem(item))]);
         this.isLoading(false);
     }
 
@@ -101,6 +95,9 @@ class PlaylistsViewModel extends Events {
             if (assertNoErrors(result, e => this.errors(e))) {
                 return;
             }
+            const tracks = result.val as IResponseResult<ISpotifySong>;
+            this.tracks(_.map(tracks.items, (item, index) => new TrackViewModelItem(item, index)));
+            this.checkTracks(this.tracks());
         }
     }
 
@@ -110,33 +107,14 @@ class PlaylistsViewModel extends Events {
         }
         const currentPlaylistId = this.currentPlaylistId();
         if (currentPlaylistId) {
-            const result = await this.ss.listPlaylistTracks(currentPlaylistId);
-            if (result.isError) {
-                return;
-            }
 
-            const tracks = result.val as ITrack[];
-        
-            this.tracks(_.map(tracks, (item, index) => new TrackViewModelItem({ track: item } as any, index)));
-            this.checkTracks(this.tracks());
         } else {
             this.tracks([]);
         }
     }
 
     async checkTracks(tracks: TrackViewModelItem[]) {
-        const tracksToCheck = [];
-        const tasks = _.map(tracks, async track => {
-            const trackId = track.id();
-            const isLikedTrackResult = await this.ss.isLiked(trackId);
-            const isLiked = isLikedTrackResult.val as boolean;
-            if (isLiked === null) {
-                tracksToCheck.push(track);
-            } else {
-                track.isLiked(isLiked);
-            }
-        });
-        await Promise.all(tasks);
+        const tracksToCheck = tracks;
         this.likedTracks(_.filter(this.tracks(), track => track.isLiked()));
         if (!tracksToCheck.length) {
             return;

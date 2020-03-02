@@ -1,8 +1,10 @@
 import * as _ from 'underscore';
+import { IStorage } from './iStorage';
+
 
 const db = {};
 
-class InMemoryStorage {
+class InMemoryStorage implements IStorage {
     db = db;
     constructor(public connection) {
     }

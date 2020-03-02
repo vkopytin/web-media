@@ -52,40 +52,20 @@ class HomeViewModel extends Events {
         const artistIds = []; ///_.first(_.uniq(_.flatten(_.map(tracks.items, (song) => _.pluck(song.track.artists, 'id')))), 5);
         const trackIds = _.first(_.uniq(_.map(tracks.items, (song) => song.track.id)), 5);
         const res = await this.ss.fetchRecommendations('US', artistIds, trackIds);
+        const recomendations = res.val as IRecommendationsResult;
+        const newTracks = _.map(recomendations.tracks, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
+        this.tracks(newTracks);
+        this.checkTracks(newTracks);
     }
 
     async loadData(...args) {
         if (!~args.indexOf('recommendations')) {
             return;
         }
-        const res = await this.ss.listRecommendations();
-        if (res.isError) {
-            return;
-        }
-        const recomendations = res.val as ITrack[];
-        const newTracks = _.map(recomendations, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
-
-        this.tracks(newTracks);
-        this.checkTracks(newTracks);
     }
 
     async checkTracks(tracks: TrackViewModelItem[]) {
-        const tracksToCheck = [];
-        const tasks = _.map(tracks, async track => {
-            const trackId = track.id();
-            const isLikedTrackResult = await this.ss.isLiked(trackId);
-            const isLiked = isLikedTrackResult.val as boolean;
-            if (isLiked === null) {
-                tracksToCheck.push(track);
-            } else {
-                track.isLiked(isLiked);
-            }
-        });
-        await Promise.all(tasks);
-        if (!tracksToCheck.length) {
-            this.likedTracks(_.filter(this.tracks(), track => track.isLiked()));
-            return;
-        }
+        const tracksToCheck = tracks;
         const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
         if (assertNoErrors(likedResult, e => this.errors(e))) {
             return;

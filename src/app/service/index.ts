@@ -216,16 +216,6 @@ class Service {
         return result;
     }
 
-    async listRecommendations() {
-        const spotify = await this.service(SpotifyService);
-        if (spotify.isError) {
-            return spotify;
-        }
-        const result = await spotify.val.listRecommendations();
-
-        return result;
-    }
-
     async fetchMyPlaylists(offset = 0, limit = 20) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
@@ -237,17 +227,6 @@ class Service {
         return result;
     }
 
-    async myPlaylists(offset = 0, limit = 20) {
-        const spotify = await this.service(SpotifyService);
-        if (spotify.isError) {
-            return spotify;
-        }
-
-        const result = spotify.val.myPlaylists(offset, limit);
-
-        return result;
-    }
-
     async fetchPlaylistTracks(playlistId, offset=0, limit=20) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
@@ -255,17 +234,6 @@ class Service {
         }
 
         const result = spotify.val.fetchPlaylistTracks(playlistId, offset, limit);
-
-        return result;
-    }
-
-    async listPlaylistTracks(playlistId, offset=0, limit=20) {
-        const spotify = await this.service(SpotifyService);
-        if (spotify.isError) {
-            return spotify;
-        }
-
-        const result = spotify.val.listPlaylistTracks(playlistId, offset, limit);
 
         return result;
     }
@@ -391,17 +359,6 @@ class Service {
         return result;
     }
 
-    async listTracks(offset = 0, limit = 20) {
-        const spotify = await this.service(SpotifyService);
-        if (spotify.isError) {
-            return spotify;
-        }
-
-        const result = spotify.val.listTracks(offset, limit);
-
-        return result;
-    }
-
     async albums(offset?, limit?) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
@@ -444,32 +401,12 @@ class Service {
         return result;
     }
 
-    async isLiked(trackId: string) {
-        const spotify = await this.service(SpotifyService);
-        if (spotify.isError) {
-            return spotify;
-        }
-        const result = await spotify.val.isLiked(trackId);
-
-        return result;
-    }
-
     async createNewPlaylist(userId: string, name: string, description = '', isPublic = false) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
         const result = await spotify.val.createNewPlaylist(userId, name, description, isPublic);
-
-        return result;
-    }
-
-    async playlistsByTrack(trackId: string) {
-        const spotify = await this.service(SpotifyService);
-        if (spotify.isError) {
-            return spotify;
-        }
-        const result = await spotify.val.playlistsByTrack(trackId);
 
         return result;
     }

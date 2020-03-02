@@ -1,5 +1,6 @@
 import * as _ from 'underscore';
 import { utils } from 'databindjs';
+import { IStorage } from './iStorage';
 
 
 const using = <T extends { onsuccess; onerror; result; error; onupgradeneeded; }, R>(obj: T, next: (err, res?: any) => any) => {
@@ -44,7 +45,7 @@ const using = <T extends { onsuccess; onerror; result; error; onupgradeneeded; }
     };
 }
 
-class IndexedDbStorage {
+class IndexedDbStorage implements IStorage {
 	constructor(public connection) {
 		this.connection = connection;
 		this.connection.addEventListener('error', (event) => {

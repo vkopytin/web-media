@@ -40,14 +40,6 @@ class TrackViewModelItem extends Events {
         if (!~args.indexOf('myPlaylists')) {
             return;
         }
-        const result = await this.ss.playlistsByTrack(this.song.track.id);
-        if (assertNoErrors(result, e => this.errors(e))) {
-            return result;
-        }
-
-        const playlists = result.val as IUserPlaylist[];
-
-        this.playlists(_.map(playlists, item => new PlaylistsViewModelItem(item)));
     }
 
     id() {

@@ -52,6 +52,8 @@ class MyTracksViewModel extends Events {
         const tracks = res.val as IResponseResult<ISpotifySong>;
         this.settings.total = tracks.total;
         this.settings.offset = tracks.offset + Math.min(this.settings.limit, tracks.items.length);
+        this.tracks(_.map(tracks.items, (song, index) => new TrackViewModelItem(song, index)));
+        this.checkTracks(this.tracks());
 
         this.isLoading(false);
     }
@@ -69,6 +71,9 @@ class MyTracksViewModel extends Events {
         const tracks = res.val as IResponseResult<ISpotifySong>;
         this.settings.total = tracks.total;
         this.settings.offset = tracks.offset + Math.min(this.settings.limit, tracks.items.length);
+        const tracksItems = _.map(tracks.items, (song, index) => new TrackViewModelItem(song, index));
+        this.tracks([...this.tracks(), ...tracksItems]);
+        this.checkTracks(tracksItems);
         this.isLoading(false);
     }
 
@@ -76,29 +81,10 @@ class MyTracksViewModel extends Events {
         if (!~args.indexOf('myTracks')) {
             return;
         }
-        const tracksResult = await this.ss.listTracks(0, this.settings.offset);
-        if (assertNoErrors(tracksResult, e => this.errors(e))) {
-            this.isLoading(false);
-            return;
-        }
-        const tracks = tracksResult.val as ITrack[];
-        this.tracks(_.map(tracks, (track, index) => new TrackViewModelItem({ track } as any, index)));
-        this.checkTracks(this.tracks());
     }
 
     async checkTracks(tracks: TrackViewModelItem[]) {
-        const tracksToCheck = [];
-        const tasks = _.map(tracks, async track => {
-            const trackId = track.id();
-            const isLikedTrackResult = await this.ss.isLiked(trackId);
-            const isLiked = isLikedTrackResult.val as boolean;
-            if (isLiked === null) {
-                tracksToCheck.push(track);
-            } else {
-                track.isLiked(isLiked);
-            }
-        });
-        await Promise.all(tasks);
+        const tracksToCheck = tracks;
         this.likedTracks(_.filter(this.tracks(), track => track.isLiked()));
         if (!tracksToCheck.length) {
             return;
