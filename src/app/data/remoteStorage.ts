@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { IStorage } from './iStorage';
+import { IStorage, IStorageConfig } from './iStorage';
 
 
 class RemoteStorage implements IStorage {
@@ -10,7 +10,7 @@ class RemoteStorage implements IStorage {
         cb(null, false);
 	}
 
-    createTable(tableName, cb: { (err, res?): void }) {
+    createTable(config: IStorageConfig, cb: { (err, res?): void }) {
         try {
             cb(null, false);
         } catch (ex) {
@@ -18,7 +18,7 @@ class RemoteStorage implements IStorage {
         }
     }
     
-    create(tableName: string, data: { id; }, cb: { (err, res?): void }) {
+    create(config: IStorageConfig, data: { id; }, cb: { (err, res?): void }) {
         try {
             cb(null, null);
         } catch (ex) {
@@ -26,7 +26,7 @@ class RemoteStorage implements IStorage {
         }
     }
 
-    update(tableName: string, id, data, cb: { (err, res?): void }) {
+    update(config: IStorageConfig, id, data, cb: { (err, res?): void }) {
         try {
             cb(null, null);
         } catch (ex) {
@@ -36,7 +36,7 @@ class RemoteStorage implements IStorage {
         return true;
     }
 
-    delete(tableName: string, id, cb: { (err, result?): void }) {
+    delete(config: IStorageConfig, id, cb: { (err, result?): void }) {
         try {
             cb(null, false);
         } catch (ex) {
@@ -44,7 +44,7 @@ class RemoteStorage implements IStorage {
         }
     }
 
-    getById(tableName: string, id, cb: { (err, id?): void }) {
+    getById(config: IStorageConfig, id, cb: { (err, id?): void }) {
         try {
             cb(null, null);
         } catch (ex) {
@@ -52,7 +52,7 @@ class RemoteStorage implements IStorage {
         }
     }
 
-    each(tableName: string, cb: { (err?, record?, index?: number): boolean }) {
+    each(config: IStorageConfig, cb: { (err?, record?, index?: number): boolean }) {
         let index = 0;
 
         cb();
@@ -60,7 +60,7 @@ class RemoteStorage implements IStorage {
         return true;
     }
 
-    getCount(tableName, cb: { (err, res?): void }) {
+    getCount(config: IStorageConfig, cb: { (err, res?): void }) {
         try {
             let count = 0;
 

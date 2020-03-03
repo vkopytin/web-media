@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { IStorage } from './iStorage';
+import { IStorage, IStorageConfig } from './iStorage';
 
 
 const db = {};
@@ -13,7 +13,8 @@ class InMemoryStorage implements IStorage {
         cb(null, true);
 	}
 
-    createTable(tableName, cb: { (err, res?): void }) {
+    createTable(config: IStorageConfig, cb: { (err, res?): void }) {
+        const tableName = config.name;
         try {
             if (!this.db[tableName]) {
                 this.db[tableName] = {};
@@ -25,7 +26,8 @@ class InMemoryStorage implements IStorage {
         }
     }
     
-    create(tableName: string, data: { id; }, cb: { (err, res?): void }) {
+    create(config: IStorageConfig, data: { id; }, cb: { (err, res?): void }) {
+        const tableName = config.name;
         try {
             if (data.id in this.db[tableName]) {
                 return cb(new Error('record already exists'));
@@ -38,7 +40,8 @@ class InMemoryStorage implements IStorage {
         }
     }
 
-    update(tableName: string, id, data, cb: { (err, res?): void }) {
+    update(config: IStorageConfig, id, data, cb: { (err, res?): void }) {
+        const tableName = config.name;
         try {
             const item = this.db[tableName][id];
             if (!item) {
@@ -58,7 +61,8 @@ class InMemoryStorage implements IStorage {
         return true;
     }
 
-    delete(tableName: string, id, cb: { (err, result?): void }) {
+    delete(config: IStorageConfig, id, cb: { (err, result?): void }) {
+        const tableName = config.name;
         try {
             delete this.db[tableName][id];
             cb(null, true);
@@ -67,7 +71,8 @@ class InMemoryStorage implements IStorage {
         }
     }
 
-    getById(tableName: string, id, cb: { (err, id?): void }) {
+    getById(config: IStorageConfig, id, cb: { (err, id?): void }) {
+        const tableName = config.name;
         try {
             cb(null, this.db[tableName][id] || undefined);
         } catch (ex) {
@@ -75,7 +80,8 @@ class InMemoryStorage implements IStorage {
         }
     }
 
-    each(tableName: string, cb: { (err?, record?, index?: number): boolean }) {
+    each(config: IStorageConfig, cb: { (err?, record?, index?: number): boolean }) {
+        const tableName = config.name;
         let index = 0;
         for (const key in this.db[tableName]) {
             if (Object.prototype.hasOwnProperty.call(this.db[tableName], key)) {
@@ -95,7 +101,8 @@ class InMemoryStorage implements IStorage {
         return true;
     }
 
-    getCount(tableName, cb: { (err, res?): void }) {
+    getCount(config: IStorageConfig, cb: { (err, res?): void }) {
+        const tableName = config.name;
         try {
             let count = 0;
             for (const k in db[tableName]) {

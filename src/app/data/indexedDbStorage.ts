@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 import { utils } from 'databindjs';
-import { IStorage } from './iStorage';
+import { IStorage, IStorageConfig } from './iStorage';
 
 
 const using = <T extends { onsuccess; onerror; result; error; onupgradeneeded; }, R>(obj: T, next: (err, res?: any) => any) => {
@@ -59,11 +59,16 @@ class IndexedDbStorage implements IStorage {
         this.connection.onerror = () => cb(this.connection.error);
 	}
 
-	createTable(tableName, cb: { (err, res?): void }) {
+	createTable(config: IStorageConfig, cb: { (err, res?): void }) {
 		try {
+			const tableName = config.name;
 			const res = this.connection.result;
-			const store = res.createObjectStore(tableName, { keyPath: 'id', autoIncrement: true });
-			store.createIndex('id_unique', 'id', { unique: true });
+			const store = res.createObjectStore(tableName, config.options);
+			_.each(config.index, (details: any, indexName) => {
+				_.each(details, (options, keyPath) => {
+					store.createIndex(indexName, keyPath, options);
+				});
+			});
 
 			cb(null, res);
 		} catch (ex) {
@@ -71,7 +76,8 @@ class IndexedDbStorage implements IStorage {
 		}
 	}
 	
-	create(tableName: string, data: { id; }, cb: { (err, res?): void }) {
+	create(config: IStorageConfig, data: { id; }, cb: { (err, res?): void }) {
+		const tableName = config.name;
 		const exec = (evnt) => {
 			if (evnt !== null) {
 				this.connection.removeEventListener('success', exec);
@@ -105,7 +111,8 @@ class IndexedDbStorage implements IStorage {
 		}
 	}
 
-	update(tableName: string, id, data, cb: { (err, res?): void }) {
+	update(config: IStorageConfig, id, data, cb: { (err, res?): void }) {
+		const tableName = config.name;
 		const exec = (evnt) => {
 			if (evnt !== null) {
 				this.connection.removeEventListener('success', exec);
@@ -142,7 +149,8 @@ class IndexedDbStorage implements IStorage {
 		}
 	}
 
-	delete(tableName: string, id, cb: { (err, result?): void }) {
+	delete(config: IStorageConfig, id, cb: { (err, result?): void }) {
+		const tableName = config.name;
 		const exec = (evnt) => {
 			if (evnt !== null) {
 				this.connection.removeEventListener('success', exec);
@@ -173,7 +181,13 @@ class IndexedDbStorage implements IStorage {
 		}
 	}
 
-	getById(tableName: string, id, cb: { (err?, id?): void }) {
+	getIdIndex(config: IStorageConfig) {
+		const firstIndex = _.first(_.keys(config.index));
+		return firstIndex;
+	}
+
+	getById(config: IStorageConfig, id, cb: { (err?, id?): void }) {
+		const tableName = config.name;
 		const exec = (evnt) => {
 			if (evnt !== null) {
 				this.connection.removeEventListener('success', exec);
@@ -187,7 +201,8 @@ class IndexedDbStorage implements IStorage {
 				clearInterval(timeout);
 				cb(err);
 			}
-			const request = store.get(id);
+			const index = store.index(this.getIdIndex(config));
+			const request = index.get(id);
 			request.onsuccess = evnt => {
 				clearInterval(timeout);
 				cb(null, request.result || null);
@@ -204,7 +219,8 @@ class IndexedDbStorage implements IStorage {
 		}
 	}
 
-	each(tableName: string, cb: { (err?, record?, index?: number): boolean }) {
+	each(config: IStorageConfig, cb: { (err?, record?, index?: number): boolean }) {
+		const tableName = config.name;
 		const queue = utils.asyncQueue();
 		const exec = (evnt) => {
 			if (evnt !== null) {
@@ -223,7 +239,11 @@ class IndexedDbStorage implements IStorage {
 					cb();
 					next();
 				}
-				const cursor = store.openCursor();
+				const index = config.orderBy ? store.index(config.orderBy) : store;
+				const cursor = config.orderDesk
+					? index.openCursor(null, 'prev')
+					: index.openCursor(null, 'next');
+
 				cursor.onsuccess = event => {
 					const res = event.target.result;
 					if (res) {
@@ -248,7 +268,8 @@ class IndexedDbStorage implements IStorage {
 		}
 	}
 
-	getCount(tableName, cb: { (err, res?): void }) {
+	getCount(config: IStorageConfig, cb: { (err, res?): void }) {
+		const tableName = config.name;
 		using(this.connection, (err, res) => res)
 			.next((err, res) => {
 				return res.transaction(tableName, 'readonly');
