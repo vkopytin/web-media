@@ -11,7 +11,7 @@ const searchQueue = asyncQueue();
 class SearchViewModel extends ViewModel {
 
     settings = {
-        ...this.settings,
+        ...(this as ViewModel).settings,
         term: '',
         isLoading: false,
         offset: 0,

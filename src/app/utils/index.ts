@@ -60,14 +60,14 @@ export function assertNoErrors(...args) {
     return errors.length > 0;
 }
 
-function asAsync<T1, T2, T3, T4, Y>(c, fn: { (a: T1, a1: T2, a2: T3, a3: T4, cb: { (err, res: Y): void }): void }, a: T1, a1: T2, a2: T3, a3: T4): Promise<Y>
-function asAsync<T1, T2, T3, Y>(c, fn: { (a: T1, a1: T2, a2: T3, cb: { (err, res: Y): void }): void }, a: T1, a1: T2, a3: T3): Promise<Y>
-function asAsync<T1, T2, Y>(c, fn: { (a: T1, a1: T2, cb: {(err, res: Y): void}): void}, a: T1, a1: T2): Promise<Y>
-function asAsync<T, Y>(c, fn: { (a: T, cb: { (err, res: Y): void }): void }, a: T): Promise<Y>
-function asAsync<Y>(c, fn: { (cb: {(err, res: Y): void}): void}): Promise<Y>
+function asAsync<T1, T2, T3, T4, Y>(c, fn: { (a: T1, a1: T2, a2: T3, a3: T4, cb: { (err?, res?: Y): void }): void }, a: T1, a1: T2, a2: T3, a3: T4): Promise<Y>
+function asAsync<T1, T2, T3, Y>(c, fn: { (a: T1, a1: T2, a2: T3, cb: { (err?, res?: Y): void }): void }, a: T1, a1: T2, a3: T3): Promise<Y>
+function asAsync<T1, T2, Y>(c, fn: { (a: T1, a1: T2, cb: {(err?, res?: Y): void}): void}, a: T1, a1: T2): Promise<Y>
+function asAsync<T, Y>(c, fn: { (a: T, cb: { (err?, res?: Y): void }): void }, a: T): Promise<Y>
+function asAsync<Y>(c, fn: { (cb: {(err?, res?: Y): void}): void}): Promise<Y>
 function asAsync(c, fn, ...args) {
     return new Promise((resolve, reject) => {
-        fn.apply(c, [...args, (err, res) => {
+        fn.apply(c, [...args, (err?, res?) => {
             if (err) {
                 return reject(err);
             }
@@ -76,6 +76,40 @@ function asAsync(c, fn, ...args) {
     });
 }
 export { asAsync };
+
+function asAsyncOf<T1, T2, T3, T4, Y>(c, fn: { (a: T1, a1: T2, a2: T3, a3: T4, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2, a2: T3, a3: T4): AsyncGenerator<Y>
+function asAsyncOf<T1, T2, T3, Y>(c, fn: { (a: T1, a1: T2, a2: T3, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2, a3: T3): AsyncGenerator<Y>
+function asAsyncOf<T1, T2, Y>(c, fn: { (a: T1, a1: T2, cb: {(err?, res?: Y, index?: number): boolean}): void}, a: T1, a1: T2): AsyncGenerator<Y>
+function asAsyncOf<T, Y>(c, fn: { (a: T, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T): AsyncGenerator<Y>
+function asAsyncOf<Y>(c, fn: { (cb: {(err?, res?: Y, index?: number): boolean}): void}): AsyncGenerator<Y>
+async function * asAsyncOf(context, fn, ...args) {
+    let next = (result?) => { };
+    let fail = (err) => { };
+    let finish = {};
+    fn.apply(context, [...args, function (err, result, index) {
+        if (arguments.length === 0) {
+            next(finish);
+            return true;
+        }
+        if (err) {
+            fail(err);
+            return true;
+        }
+        next(result);
+    }]);
+    while (true) {
+        const promise = new Promise((resolve, error) => {
+            next = resolve;
+            fail = error;
+        });
+        const record = await promise;
+        if (record === finish) {
+            return 'finish';
+        }
+        yield record;
+    }
+}
+export { asAsyncOf };
 
 export function debounce(func, wait = 0, cancelObj = 'canceled') {
     let timerId, latestResolve, shouldCancel;

@@ -13,7 +13,7 @@ const panels = ['home', 'profile'];
 class AppViewModel extends ViewModel {
 
     settings = {
-        ...this.settings,
+        ...(this as ViewModel).settings,
         openLogin: false,
         currentPanel: 'home' as 'home' | 'profile',
         currentDevice: null as DeviceViewModelItem,

@@ -13,7 +13,7 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 class TrackViewModelItem extends ViewModel {
     appViewModel = current(AppViewModel);
     settings = {
-        ...this.settings,
+        ...(this as ViewModel).settings,
         isLiked: false,
         playlists: [] as PlaylistsViewModelItem[]
     };

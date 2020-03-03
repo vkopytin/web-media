@@ -11,7 +11,7 @@ import { ServiceResult } from '../base/serviceResult';
 class NewReleasesViewModel extends ViewModel {
 
     settings = {
-        ...this.settings,
+        ...(this as ViewModel).settings,
         currentAlbum: null as AlbumViewModelItem
     };
 
@@ -80,7 +80,7 @@ class NewReleasesViewModel extends ViewModel {
                     ...item,
                     album: item.album || currentAlbum.album
                 },
-                played_at: ''
+                added_at: ''
             }, index)));
         } else {
             this.tracks([]);

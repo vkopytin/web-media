@@ -6,12 +6,13 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { current, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
+import { listPlaylists } from '../data/useCases';
 
 
 class PlaylistsViewModel extends ViewModel {
 
     settings = {
-        ...this.settings,
+        ...(this as ViewModel).settings,
         openLogin: false,
         currentPlaylistId: '',
         offset: 0,
@@ -40,6 +41,7 @@ class PlaylistsViewModel extends ViewModel {
 
     isInit = _.delay(() => {
         this.connect();
+        this.loadData('myPlaylists');
         this.fetchData();
     });
 
@@ -64,7 +66,7 @@ class PlaylistsViewModel extends ViewModel {
         const playlists = (result.val as IUserPlaylistsResult).items;
         this.settings.total = this.settings.offset + Math.min(this.settings.limit - 1, playlists.length - 1) + 1;
         this.settings.offset = this.settings.offset + Math.min(this.settings.limit, playlists.length);
-        this.playlists(_.map(playlists, item => new PlaylistsViewModelItem(item)));
+        //this.playlists(_.map(playlists, item => new PlaylistsViewModelItem(item)));
     }
 
     async loadData(...args) {
@@ -72,6 +74,10 @@ class PlaylistsViewModel extends ViewModel {
         if (!~args.indexOf('myPlaylists')) {
             return;
         }
+        const playlists = await listPlaylists(0, this.settings.total);
+        this.settings.total = this.settings.offset + Math.min(this.settings.limit - 1, playlists.length - 1) + 1;
+        this.settings.offset = this.settings.offset + Math.min(this.settings.limit, playlists.length);
+        this.playlists(_.map(playlists, item => new PlaylistsViewModelItem(item)));
     }
 
     async loadMore() {
@@ -84,7 +90,7 @@ class PlaylistsViewModel extends ViewModel {
         const playlists = (result.val as IUserPlaylistsResult).items;
         this.settings.total = this.settings.offset + Math.min(this.settings.limit - 1, playlists.length - 1) + 1;
         this.settings.offset = this.settings.offset + Math.min(this.settings.limit, playlists.length);
-        this.playlists([...this.playlists(), ..._.map(playlists, item => new PlaylistsViewModelItem(item))]);
+        //this.playlists([...this.playlists(), ..._.map(playlists, item => new PlaylistsViewModelItem(item))]);
         this.isLoading(false);
     }
 

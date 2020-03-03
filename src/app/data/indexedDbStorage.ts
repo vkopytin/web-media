@@ -55,7 +55,7 @@ class IndexedDbStorage implements IStorage {
 
 	initializeStructure(cb: { (err?, res?): void }) {
 		this.connection.onupgradeneeded = (evnt) => cb(null, this.connection.result);
-        this.connection.onsuccess = () => cb();
+        this.connection.onsuccess = () => cb(null);
         this.connection.onerror = () => cb(this.connection.error);
 	}
 
@@ -227,9 +227,13 @@ class IndexedDbStorage implements IStorage {
 				cursor.onsuccess = event => {
 					const res = event.target.result;
 					if (res) {
-						cb(null, res.value || null);
-						res.continue();
-					} 
+						const stop = cb(null, res.value || null) === true;
+						if (stop) {
+							tr.abort();
+						} else {
+							res.continue();
+						}
+					}
 				};
 				cursor.onerror = err => {
 					cb(err);
@@ -264,6 +268,17 @@ class IndexedDbStorage implements IStorage {
 	}
 
 	complete() {
+		const exec = (evnt) => {
+			if (evnt !== null) {
+				this.connection.removeEventListener('success', exec);
+			}
+			this.connection.result.close();
+		};
+		if (_.result(this.connection, 'readyState') !== 'done') {
+			this.connection.addEventListener('success', exec);
+		} else {
+			exec(null);
+		}
 	}
 }
 

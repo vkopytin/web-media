@@ -13,7 +13,7 @@ const lockSection = asyncQueue();
 class MediaPlayerViewModel extends ViewModel {
 
     settings = {
-        ...this.settings,
+        ...(this as ViewModel).settings,
         isPlaying: false,
         timePlayed: 1,
         duration: 3.14 * 60 * 1000,

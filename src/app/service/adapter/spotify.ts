@@ -77,7 +77,8 @@ export interface IUserPlaylist {
 
 export interface ISpotifySong {
     track: ITrack;
-    played_at: string;
+    played_at?: string;
+    added_at: string;
 }
 
 export interface IDevicesResponse {

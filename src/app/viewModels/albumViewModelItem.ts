@@ -6,7 +6,7 @@ import { IAlbum } from '../service/adapter/spotify';
 class AlbumViewModelItem extends ViewModel {
 
     settings = {
-        ...this.settings,
+        ...(this as ViewModel).settings,
         isLiked: false
     };
 

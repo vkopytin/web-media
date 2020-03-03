@@ -5,12 +5,13 @@ import * as _ from 'underscore';
 import { ISpotifySong, IResponseResult, ITrack } from '../service/adapter/spotify';
 import { current, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
+import { listTracks } from '../data/useCases';
 
 
 class MyTracksViewModel extends ViewModel {
 
     settings = {
-        ...this.settings,
+        ...(this as ViewModel).settings,
         total: 0,
         limit: 20,
         offset: 0,
@@ -44,15 +45,15 @@ class MyTracksViewModel extends ViewModel {
     async fetchData() {
         this.isLoading(true);
         this.settings.offset = 0;
-        const res = await this.ss.fetchTracks(this.settings.offset, this.settings.limit);
+        const res = await this.ss.fetchTracks(this.settings.offset, this.settings.limit + 1);
         if (res.isError) {
             this.isLoading(false);
             return;
         }
         const tracks = res.val as IResponseResult<ISpotifySong>;
-        this.settings.total = tracks.total;
-        this.settings.offset = tracks.offset + Math.min(this.settings.limit, tracks.items.length);
-        this.tracks(_.map(tracks.items, (song, index) => new TrackViewModelItem(song, index)));
+        this.settings.total = this.settings.offset + Math.min(this.settings.limit + 1, tracks.items.length);
+        this.settings.offset = this.settings.offset + Math.min(this.settings.limit, tracks.items.length);
+        //this.tracks(_.map(tracks.items, (song, index) => new TrackViewModelItem(song, index)));
         this.checkTracks(this.tracks());
 
         this.isLoading(false);
@@ -63,16 +64,16 @@ class MyTracksViewModel extends ViewModel {
             return;
         }
         this.isLoading(true);
-        const res = await this.ss.fetchTracks(this.settings.offset, this.settings.limit);
+        const res = await this.ss.fetchTracks(this.settings.offset, this.settings.limit + 1);
         if (assertNoErrors(res, e => this.errors(e))) {
             this.isLoading(false);
             return;
         }
         const tracks = res.val as IResponseResult<ISpotifySong>;
-        this.settings.total = tracks.total;
-        this.settings.offset = tracks.offset + Math.min(this.settings.limit, tracks.items.length);
-        const tracksItems = _.map(tracks.items, (song, index) => new TrackViewModelItem(song, index));
-        this.tracks([...this.tracks(), ...tracksItems]);
+        this.settings.total = this.settings.offset + Math.min(this.settings.limit + 1, tracks.items.length);
+        this.settings.offset = this.settings.offset + Math.min(this.settings.limit, tracks.items.length);
+        const tracksItems = _.map(tracks.items.slice(0, this.settings.limit), (song, index) => new TrackViewModelItem(song, index));
+        //this.tracks([...this.tracks(), ...tracksItems]);
         this.checkTracks(tracksItems);
         this.isLoading(false);
     }
@@ -81,10 +82,13 @@ class MyTracksViewModel extends ViewModel {
         if (!~args.indexOf('myTracks')) {
             return;
         }
+        const tracks = await listTracks(0, this.settings.total);
+        this.tracks(_.map(tracks, item => new TrackViewModelItem({ track: item, added_at: '' }, -1)));
+        _.each(_.range(0, tracks.length, 40), offset => this.checkTracks(this.tracks(), offset, 40));
     }
 
-    async checkTracks(tracks: TrackViewModelItem[]) {
-        const tracksToCheck = tracks;
+    async checkTracks(tracks: TrackViewModelItem[], offset = 0, limit = tracks.length) {
+        const tracksToCheck = tracks.slice(offset, offset + 50);
         this.likedTracks(_.filter(this.tracks(), track => track.isLiked()));
         if (!tracksToCheck.length) {
             return;

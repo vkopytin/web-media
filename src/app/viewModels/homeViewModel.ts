@@ -10,7 +10,7 @@ import { ServiceResult } from '../base/serviceResult';
 class HomeViewModel extends ViewModel {
 
     settings = {
-        ...this.settings,
+        ...(this as ViewModel).settings,
         openLogin: false,
         likedTracks: [] as TrackViewModelItem[]
     };

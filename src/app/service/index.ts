@@ -5,6 +5,8 @@ import { SpotifyPlayerService } from './spotifyPlayer';
 import { asyncQueue } from '../utils';
 import * as _ from 'underscore';
 import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult';
+import { PlaylistsStore } from '../data/entities/playlistsStore';
+import { DataStorage } from '../data/dataStorage';
 
 
 const lockSpotifyService = asyncQueue();

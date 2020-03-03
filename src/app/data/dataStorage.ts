@@ -18,33 +18,33 @@ const config: IConfig = {
 // Unit of Work Factory
 class DataStorage {
 	static create(callback: { (err, result: IStorage): void }) {
-		queue.push(next => {
-			switch (config.dbType) {
-				case 'inMemory':
-					import('./inMemoryStorage').then(({ InMemoryStorage }) => {
+		return new Promise((resolve) => {
+			queue.push(async next => {
+				switch (config.dbType) {
+					case 'inMemory':
+						const { InMemoryStorage } = await import('./inMemoryStorage');
 						const uow = new InMemoryStorage(null);
-
-						callback(null, uow);
-					});
-					break;
-				case 'indexedDb':
-					try {
-						import('./indexedDbStorage').then(({ IndexedDbStorage }) => {
-							const connection = indexedDB.open(serviceId, 1);
+						await callback(null, uow);
+						break;
+					case 'indexedDb':
+						try {
+							const { IndexedDbStorage } = await import('./indexedDbStorage');
+							const connection = indexedDB.open(serviceId, 2);
 							const uow = new IndexedDbStorage(connection);
-							callback(null, uow);
-						});
-					} catch (ex) {
-						callback(ex, null);
-					}
-					break;
-				case 'remote':
-					import('./remoteStorage').then(({ RemoteStorage }) => {
+							await callback(null, uow);
+
+						} catch (ex) {
+							await callback(ex, null);
+						}
+						break;
+					case 'remote':
+						const { RemoteStorage } = await import('./remoteStorage');
 						const storage = new RemoteStorage(null);
-						callback(null, storage);
-					});
-			}
-			next();
+						await callback(null, storage);
+				}
+				resolve();
+				next();
+			});
 		});
 	}
 }
