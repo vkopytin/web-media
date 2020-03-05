@@ -20,7 +20,7 @@ export interface IStorage {
     createTable(config: IStorageConfig, cb: { (err, res?): void });
     getById(config: IStorageConfig, id, cb: { (err?, id?): void });
     where(config: IStorageConfig, where: { [key: string]: any }, cb: { (err?, result?): boolean });
-    each(config: IStorageConfig, cb: { (err?, record?, index?: number): boolean });
+    each<T = {}>(config: IStorageConfig, cb: { (err?, record?: T, index?: number): boolean });
     create(config: IStorageConfig, data: { [key: string]: any, id?; }, cb: { (err, res?): void });
     update(config: IStorageConfig, id, data, cb: { (err, res?): void });
     delete(config: IStorageConfig, id, cb: { (err, result?): void });
