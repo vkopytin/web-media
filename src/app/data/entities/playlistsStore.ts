@@ -1,7 +1,10 @@
 import * as _ from 'underscore';
 import { IStorage, IStorageConfig } from "../iStorage";
 import { asAsync, asAsyncOf } from '../../utils';
-import { IPlaylistRecord } from './interfaces';
+import { IPlaylistRecord, IPlaylistTrackRecord } from './interfaces';
+import { Relation } from './relation';
+import { TracksStore } from './tracksStore';
+import { MyStore } from './myStore';
 
 
 class PlaylistsStore {
@@ -19,42 +22,107 @@ class PlaylistsStore {
         }
     };
 
+    relation = new Relation<{
+        playlistId: string;
+        trackId: string;
+        added_at?: Date;
+    }>(this.storage, {
+        playlistId: '',
+        trackId: ''
+    });
+
     constructor(public storage: IStorage) {
 
     }
 
-    async create(playlist: IPlaylistRecord) {
-        const result = await asAsync(this.storage, this.storage.create, this.storeConfig, playlist);
-        return result;
+    async createTable() {
+        await this.relation.createTable();
+        return asAsync(this.storage, this.storage.createTable, this.storeConfig);
     }
 
-    async update(playlist: IPlaylistRecord) {
-        const result = await asAsync(this.storage, this.storage.update, this.storeConfig, playlist.id, playlist);
-        return result;
+    create(playlist: IPlaylistRecord) {
+        return asAsync(this.storage, this.storage.create, this.storeConfig, playlist);
+    }
+
+    update(playlist: IPlaylistRecord) {
+        return asAsync(this.storage, this.storage.update, this.storeConfig, playlist.id, playlist);
+    }
+
+    delete(playlistId: string) {
+        return asAsync(this.storage, this.storage.delete, this.storeConfig, playlistId);
     }
 
     async refresh(playlist: IPlaylistRecord) {
         const record = await asAsync(this.storage, this.storage.getById, this.storeConfig, playlist.id);
         if (record) {
-            return this.update({
+            return await this.update({
                 ...record,
                 ...playlist
             });
         } else {
-            return this.create(playlist);
+            return await this.create(playlist);
         }
+    }
+
+    async addTracks(playlistId: string, tracks: IPlaylistTrackRecord | IPlaylistTrackRecord[]) {
+        const tracksStore = new TracksStore(this.storage);
+        for (const track of [].concat(tracks) as IPlaylistTrackRecord[]) {
+            await tracksStore.refresh(track.track);
+            await this.relation.refresh({
+                playlistId,
+                trackId: track.track.id,
+                added_at: new Date(track.added_at)
+            });
+        }
+    }
+
+    async removeTrack(playlistId: string, trackId: string) {
+        const tracks = new TracksStore(this.storage);
+        const myStore = new MyStore(this.storage);
+        const trackInStore = await myStore.getByTrackId(trackId);
+        let trackInPlaylist = false;
+        for await (const playlist of this.listByTrackId(trackId)) {
+            if (playlist.id !== playlistId) {
+                trackInPlaylist = true;
+                break;
+            }
+        }
+        if (!trackInPlaylist && !trackInStore) {
+            await tracks.delete(trackId);
+        }
+
+        return await this.relation.delete({
+            playlistId,
+            trackId
+        });
     }
 
     get(playlistId: string) {
         return asAsync(this.storage, this.storage.getById, this.storeConfig, playlistId);
+    }
+
+    async * listByTrackId(trackId: string) {
+        const count = await this.count();
+        for await (const record of this.relation.where({ trackId })) {
+            yield record;
+        }
+        return null;
     }
     
     list(offset = 0, limit = 20) {
         return asAsyncOf(this.storage, this.storage.each, this.storeConfig);
     }
 
-    async createTable() {
-        return asAsync(this.storage, this.storage.createTable, this.storeConfig);
+    async * listTracks(playlistId: string) {
+        const tracksStore = new TracksStore(this.storage);
+        for await (const refTrack of this.relation.where({ playlistId })) {
+            yield await tracksStore.get(refTrack.trackId);
+        }
+        return null;
+    }
+
+    count() {
+        return asAsync(this.storage, this.storage.getCount, this.storeConfig);
     }
 }
 

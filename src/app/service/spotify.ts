@@ -12,7 +12,7 @@ import { ISettings } from './settings';
 import { withEvents } from 'databindjs';
 import { DataStorage } from '../data/dataStorage';
 import { asAsync, debounce } from '../utils';
-import { initializeStructure, putPlaylists, listTracks, putTracks } from '../data/useCases';
+import { initializeStructure, putPlaylists, listMyTracks, putMyTracks, addTrackToPlaylist } from '../data/useCases';
 
 
 function returnErrorResult<T>(message: string, ex: Error) {
@@ -209,6 +209,9 @@ class SpotifyService extends withEvents(BaseService) {
         try {
             const res = await this.adapter.listPlaylistTracks(playlistId, offset, limit);
 
+            await addTrackToPlaylist(playlistId, res.items);
+            this.onStateChanged('playlistTracks');
+
             return SpotifyServiceResult.success(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
@@ -314,7 +317,7 @@ class SpotifyService extends withEvents(BaseService) {
         try {
             const res = await this.adapter.tracks(offset, limit);
 
-            await putTracks(_.map(res.items, item => ({
+            await putMyTracks(_.map(res.items, item => ({
                 ...item.track,
                 added_at: new Date(item.added_at)
             })));

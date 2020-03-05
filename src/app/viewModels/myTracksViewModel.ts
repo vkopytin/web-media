@@ -5,7 +5,7 @@ import * as _ from 'underscore';
 import { ISpotifySong, IResponseResult, ITrack } from '../service/adapter/spotify';
 import { current, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
-import { listTracks } from '../data/useCases';
+import { listMyTracks } from '../data/useCases';
 
 
 class MyTracksViewModel extends ViewModel {
@@ -82,7 +82,7 @@ class MyTracksViewModel extends ViewModel {
         if (!~args.indexOf('myTracks')) {
             return;
         }
-        const tracks = await listTracks(0, this.settings.total);
+        const tracks = await listMyTracks(0, this.settings.total);
         this.tracks(_.map(tracks, item => new TrackViewModelItem({ track: item, added_at: '' }, -1)));
         _.each(_.range(0, tracks.length, 40), offset => this.checkTracks(this.tracks(), offset, 40));
     }

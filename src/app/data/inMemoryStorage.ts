@@ -80,6 +80,10 @@ class InMemoryStorage implements IStorage {
         }
     }
 
+    where(config: IStorageConfig, where: { [key: string]: any }, cb: { (err?, result?): boolean }) {
+        
+    }
+
     each(config: IStorageConfig, cb: { (err?, record?, index?: number): boolean }) {
         const tableName = config.name;
         let index = 0;

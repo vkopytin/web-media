@@ -27,6 +27,10 @@ class TracksStore {
 
     }
 
+    async createTable() {
+        return asAsync(this.storage, this.storage.createTable, this.storeConfig);
+    }
+
     async create(track: ITrackRecord) {
         const result = await asAsync(this.storage, this.storage.create, this.storeConfig, track);
         return result;
@@ -37,19 +41,24 @@ class TracksStore {
         return result;
     }
 
+    async delete(trackId: string) {
+        const result = await asAsync(this.storage, this.storage.delete, this.storeConfig, trackId);
+        return result;
+    }
+
     async refresh(track: ITrackRecord) {
         const record = await asAsync(this.storage, this.storage.getById, this.storeConfig, track.id);
         if (record) {
-            return this.update({
+            return await this.update({
                 ...record,
                 ...track
             });
         } else {
-            return this.create(track);
+            return await this.create(track);
         }
     }
 
-    get(trackId: string) {
+    get(trackId: string): Promise<ITrackRecord> {
         return asAsync(this.storage, this.storage.getById, this.storeConfig, trackId);
     }
     
@@ -69,8 +78,8 @@ class TracksStore {
         });
     }
 
-    async createTable() {
-        return asAsync(this.storage, this.storage.createTable, this.storeConfig);
+    count() {
+        return asAsync(this.storage, this.storage.getCount, this.storeConfig);
     }
 }
 

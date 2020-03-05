@@ -1,4 +1,5 @@
 import * as _ from 'underscore';
+import { utils } from 'databindjs';
 
 
 export function formatTime(ms: number) {
@@ -67,12 +68,16 @@ function asAsync<T, Y>(c, fn: { (a: T, cb: { (err?, res?: Y): void }): void }, a
 function asAsync<Y>(c, fn: { (cb: {(err?, res?: Y): void}): void}): Promise<Y>
 function asAsync(c, fn, ...args) {
     return new Promise((resolve, reject) => {
-        fn.apply(c, [...args, (err?, res?) => {
-            if (err) {
-                return reject(err);
-            }
-            return resolve(res);
-        }]);
+        try {
+            fn.apply(c, [...args, (err?, res?) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(res);
+            }]);
+        } catch (ex) {
+            reject(ex);
+        }
     });
 }
 export { asAsync };
@@ -82,21 +87,32 @@ function asAsyncOf<T1, T2, T3, Y>(c, fn: { (a: T1, a1: T2, a2: T3, cb: { (err?, 
 function asAsyncOf<T1, T2, Y>(c, fn: { (a: T1, a1: T2, cb: {(err?, res?: Y, index?: number): boolean}): void}, a: T1, a1: T2): AsyncGenerator<Y>
 function asAsyncOf<T, Y>(c, fn: { (a: T, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T): AsyncGenerator<Y>
 function asAsyncOf<Y>(c, fn: { (cb: {(err?, res?: Y, index?: number): boolean}): void}): AsyncGenerator<Y>
-async function * asAsyncOf(context, fn, ...args) {
+async function* asAsyncOf(context, fn, ...args) {
     let next = (result?) => { };
     let fail = (err) => { };
     let finish = {};
-    fn.apply(context, [...args, function (err, result, index) {
-        if (arguments.length === 0) {
-            next(finish);
-            return true;
-        }
-        if (err) {
-            fail(err);
-            return true;
-        }
-        next(result);
-    }]);
+    const queue = utils.asyncQueue();
+    try {
+        fn.apply(context, [...args, function (err, result, index) {
+            const nextArgs = [].slice.call(arguments, 0);
+            queue.push(done => {
+                setTimeout(() => {
+                    if (nextArgs.length === 0) {
+                        next(finish);
+                        return true;
+                    }
+                    if (err) {
+                        fail(err);
+                        return true;
+                    }
+                    next(result);
+                    done();
+                });
+            });
+        }]);
+    } catch (ex) {
+        fail(ex);
+    }
     while (true) {
         const promise = new Promise((resolve, error) => {
             next = resolve;

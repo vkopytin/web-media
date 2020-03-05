@@ -8,6 +8,7 @@ import { AppViewModel } from './appViewModel';
 import { MediaPlayerViewModel } from './mediaPlayerViewModel';
 import { ServiceResult } from '../base/serviceResult';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
+import { listPlaylistsByTrack } from '../data/useCases';
 
 
 class TrackViewModelItem extends ViewModel {
@@ -20,7 +21,7 @@ class TrackViewModelItem extends ViewModel {
 
     isInit = _.delay(() => {
         this.connect();
-        this.loadData('myPlaylists');
+        this.loadData('playlistTracks');
     });
 
     constructor(public song: ISpotifySong, private index: number, private ss = current(Service)) {
@@ -37,9 +38,11 @@ class TrackViewModelItem extends ViewModel {
     }
 
     async loadData(...args) {
-        if (!~args.indexOf('myPlaylists')) {
+        if (!~args.indexOf('playlistTracks')) {
             return;
         }
+        const trackPlaylists = await listPlaylistsByTrack(this.id());
+        this.playlists(_.map(trackPlaylists, pl => new PlaylistsViewModelItem(pl)));
     }
 
     id() {

@@ -52,6 +52,10 @@ class RemoteStorage implements IStorage {
         }
     }
 
+    where(config: IStorageConfig, where: { [key: string]: any }, cb: { (err?, result?): boolean }) {
+        
+    }
+
     each(config: IStorageConfig, cb: { (err?, record?, index?: number): boolean }) {
         let index = 0;
 
