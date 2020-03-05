@@ -20,7 +20,7 @@ export const template = (view: TracksView) => <>
                 </span>
                 <div className="media-body">
                     <div style={{minWidth: '30vw', display: 'inline-block'}}>
-                        <span>{item.name()}</span>
+                        <span>{1 + view.prop('tracks').indexOf(item)} - {item.name()}</span>
                         <p>{item.album()}</p>
                     </div>
                     <span style={{ width: '50vw', display: 'inline-block' }}>

@@ -27,6 +27,7 @@ class PlaylistsView extends BaseView<IPlaylistsViewProps, PlaylistsView['state']
     };
     selectPlaylistCommand = { exec(playlist) { } };
     loadMoreCommand = { exec() { } };
+    loadMoreTracksCommand = { exec() {} };
     createPlaylistCommand = { exec(isPublic: boolean) { } };
 
     binding = bindTo(this, () => current(PlaylistsViewModel), {
@@ -34,6 +35,7 @@ class PlaylistsView extends BaseView<IPlaylistsViewProps, PlaylistsView['state']
         'prop(tracks)': 'tracks',
         'prop(isLoading)': 'isLoading',
         'loadMoreCommand': 'loadMoreCommand',
+        'loadMoreTracksCommand': 'loadMoreTracksCommand',
         'prop(likedTracks)': 'likedTracks',
         'selectPlaylistCommand': 'selectPlaylistCommand',
         'createPlaylistCommand': 'createPlaylistCommand',

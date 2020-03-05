@@ -38,11 +38,17 @@ export const template = (view: PlaylistsView) => <>
                     </div>
                     <span className="badge">{item.tracksTotal()}</span>
                 </a>
-                {item.id() === view.prop('currentPlaylistId') && <TracksView
+                {item.id() === view.prop('currentPlaylistId') && [<TracksView key={1}
                     showErrors={e => view.props.showErrors(e)}
                     playlist={item}
                     currentTrackId={view.props.currentTrackId}
-                />}
+                />,
+                <div key={2} className="center">
+                    {view.prop('isLoading') || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
+                        onClick={evnt => view.loadMoreTracksCommand.exec()}
+                    ></button>}
+                    {view.prop('isLoading') && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
+                </div>]}
             </li>
         })}
     </ul>

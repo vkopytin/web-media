@@ -47,7 +47,7 @@ export function putPlaylists(playlists: IPlaylistRecord[]) {
     });
 }
 
-export function listPlaylists(offset = 0, limit = 20) {
+export function listPlaylists(offset = 0, limit?) {
     return asAsync(() => { }, (cb: { (err, result: IPlaylistRecord[]): void }) => {
         DataStorage.create(async (err, storage) => {
             try {
@@ -81,7 +81,7 @@ export function putMyTracks(tracks: ITrackRecord[]) {
     });
 }
 
-export function listMyTracks(offset = 0, limit = 20) {
+export function listMyTracks(offset = 0, limit?) {
     return asAsync(() => { }, (cb: { (err, result: ITrackRecord[]): void }) => {
         DataStorage.create(async (err, storage) => {
             try {

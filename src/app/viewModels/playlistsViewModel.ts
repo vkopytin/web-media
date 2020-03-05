@@ -6,7 +6,7 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { current, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
-import { listPlaylists } from '../data/useCases';
+import { listPlaylists, listTracksByPlaylist } from '../data/useCases';
 
 
 class PlaylistsViewModel extends ViewModel {
@@ -15,9 +15,16 @@ class PlaylistsViewModel extends ViewModel {
         ...(this as ViewModel).settings,
         openLogin: false,
         currentPlaylistId: '',
-        offset: 0,
-        limit: 20,
-        total: 0,
+        playlist: {
+            offset: 0,
+            limit: 20,
+            total: 0
+        },
+        track: {
+            offset: 0,
+            limit: 20,
+            total: 0
+        },
         isLoading: false,
         likedTracks: [] as TrackViewModelItem[],
         selectedTrack: null as TrackViewModelItem,
@@ -31,6 +38,9 @@ class PlaylistsViewModel extends ViewModel {
     };
     loadMoreCommand = {
         exec: () => this.loadMore()
+    };
+    loadMoreTracksCommand = {
+        exec: () => this.loadMoreTracks()
     };
     createPlaylistCommand = {
         exec: (isPublic: boolean) => this.createNewPlaylist(isPublic)
@@ -59,13 +69,13 @@ class PlaylistsViewModel extends ViewModel {
     }
 
     async fetchData() {
-        const result = await this.ss.fetchMyPlaylists(this.settings.offset, this.settings.limit);
+        const result = await this.ss.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
         if (assertNoErrors(result, e => this.errors(e))) {
             return result;
         }
         const playlists = (result.val as IUserPlaylistsResult).items;
-        this.settings.total = this.settings.offset + Math.min(this.settings.limit - 1, playlists.length - 1) + 1;
-        this.settings.offset = this.settings.offset + Math.min(this.settings.limit, playlists.length);
+        this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
+        this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
         //this.playlists(_.map(playlists, item => new PlaylistsViewModelItem(item)));
     }
 
@@ -74,36 +84,55 @@ class PlaylistsViewModel extends ViewModel {
         if (!~args.indexOf('myPlaylists')) {
             return;
         }
-        const playlists = await listPlaylists(0, this.settings.total);
-        this.settings.total = this.settings.offset + Math.min(this.settings.limit - 1, playlists.length - 1) + 1;
-        this.settings.offset = this.settings.offset + Math.min(this.settings.limit, playlists.length);
+        const playlists = await listPlaylists(0, this.settings.playlist.total);
         this.playlists(_.map(playlists, item => new PlaylistsViewModelItem(item)));
     }
 
     async loadMore() {
         this.isLoading(true);
-        const result = await this.ss.fetchMyPlaylists(this.settings.offset, this.settings.limit);
+        const result = await this.ss.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
         if (assertNoErrors(result, e => this.errors(e))) {
             this.isLoading(false);
             return result;
         }
         const playlists = (result.val as IUserPlaylistsResult).items;
-        this.settings.total = this.settings.offset + Math.min(this.settings.limit - 1, playlists.length - 1) + 1;
-        this.settings.offset = this.settings.offset + Math.min(this.settings.limit, playlists.length);
+        this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
+        this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
         //this.playlists([...this.playlists(), ..._.map(playlists, item => new PlaylistsViewModelItem(item))]);
         this.isLoading(false);
     }
 
     async fetchTracks() {
+        this.settings.track.offset = 0;
+        this.settings.track.total = 0;
         const currentPlaylistId = this.currentPlaylistId();
+        this.tracks([]);
         if (currentPlaylistId) {
-            const result = await this.ss.fetchPlaylistTracks(currentPlaylistId);
+            this.loadTracks('playlistTracks');
+            const result = await this.ss.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
             if (assertNoErrors(result, e => this.errors(e))) {
                 return;
             }
-            const tracks = result.val as IResponseResult<ISpotifySong>;
-            this.tracks(_.map(tracks.items, (item, index) => new TrackViewModelItem(item, index)));
-            this.checkTracks(this.tracks());
+            const tracks = (result.val as IResponseResult<ISpotifySong>).items;
+            this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
+            this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);    
+            //this.tracks(_.map(tracks.items, (item, index) => new TrackViewModelItem(item, index)));
+            //this.checkTracks(this.tracks());
+        }
+    }
+
+    async loadMoreTracks() {
+        const currentPlaylistId = this.currentPlaylistId();
+        if (currentPlaylistId) {
+            const result = await this.ss.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
+            if (assertNoErrors(result, e => this.errors(e))) {
+                return;
+            }
+            const tracks = (result.val as IResponseResult<ISpotifySong>).items;
+            this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
+            this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);    
+            //this.tracks(_.map(tracks.items, (item, index) => new TrackViewModelItem(item, index)));
+            //this.checkTracks(this.tracks());
         }
     }
 
@@ -113,7 +142,12 @@ class PlaylistsViewModel extends ViewModel {
         }
         const currentPlaylistId = this.currentPlaylistId();
         if (currentPlaylistId) {
-
+            const tracks = await listTracksByPlaylist(currentPlaylistId);
+            this.tracks(_.map(tracks, item => new TrackViewModelItem({
+                track: item,
+                added_at: ''
+            }, 0)));
+    
         } else {
             this.tracks([]);
         }
