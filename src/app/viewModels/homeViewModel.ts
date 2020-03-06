@@ -44,7 +44,7 @@ class HomeViewModel extends ViewModel {
     }
 
     async fetchData() {
-        const tracksResult = await this.ss.fetchTracks(0, 20);
+        const tracksResult = await this.ss.fetchTracks(0, 5);
         if (assertNoErrors(tracksResult, e => this.errors(e))) {
             return;
         }

@@ -32,7 +32,15 @@ class PlaylistsStore {
     });
 
     constructor(public storage: IStorage) {
-
+        this.relation.storeConfig = {
+            ...this.relation.storeConfig,
+            index: {
+                ...this.relation.storeConfig.index,
+                added_at: {
+                    added_at: {}
+                }
+            }
+        };
     }
 
     async createTable() {
@@ -64,6 +72,18 @@ class PlaylistsStore {
         }
     }
 
+    get(playlistId: string) {
+        return asAsync(this.storage, this.storage.getById, this.storeConfig, playlistId);
+    }
+
+    list(offset = 0, limit?) {
+        return asAsyncOf(this.storage, this.storage.each as ((config: IStorageConfig, cb: (err?: any, result?: IPlaylistRecord, index?: number) => boolean) => any), this.storeConfig);
+    }
+
+    count() {
+        return asAsync(this.storage, this.storage.getCount, this.storeConfig);
+    }
+
     async addTracks(playlistId: string, tracks: IPlaylistTrackRecord | IPlaylistTrackRecord[]) {
         const tracksStore = new TracksStore(this.storage);
         for (const track of [].concat(tracks) as IPlaylistTrackRecord[]) {
@@ -82,7 +102,7 @@ class PlaylistsStore {
         const trackInStore = await myStore.getByTrackId(trackId);
         let trackInPlaylist = false;
         for await (const playlist of this.listByTrackId(trackId)) {
-            if (playlist.id !== playlistId) {
+            if (playlist.playlistId !== playlistId) {
                 trackInPlaylist = true;
                 break;
             }
@@ -97,20 +117,11 @@ class PlaylistsStore {
         });
     }
 
-    get(playlistId: string) {
-        return asAsync(this.storage, this.storage.getById, this.storeConfig, playlistId);
-    }
-
     async * listByTrackId(trackId: string) {
-        const count = await this.count();
         for await (const record of this.relation.where({ trackId })) {
             yield record;
         }
         return null;
-    }
-    
-    list(offset = 0, limit = 20) {
-        return asAsyncOf(this.storage, this.storage.each, this.storeConfig);
     }
 
     async * listTracks(playlistId: string) {
@@ -119,10 +130,6 @@ class PlaylistsStore {
             yield await tracksStore.get(refTrack.trackId);
         }
         return null;
-    }
-
-    count() {
-        return asAsync(this.storage, this.storage.getCount, this.storeConfig);
     }
 }
 

@@ -15,6 +15,7 @@ export interface IAppViewProps {
 
 class AppView extends BaseView<IAppViewProps, AppView['state']> {
     state = {
+        errors: [] as ServiceResult<any, Error>[],
         openLogin: false,
         transition: ['', ''],
         prevPanel: 'home',
@@ -34,7 +35,7 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
         'prop(currentPanel)': 'currentPanel',
         'prop(devices)': 'devices',
         'prop(profile)': 'profile',
-        'errors': 'errors',
+        '-errors': 'errors',
         'prop(currentTrackId)': 'currentTrackId',
         'prop(topTracks)': 'topTracks'
     });
@@ -116,6 +117,10 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
         if (!_.isEmpty(tokenExpired)) {
             this.prop('openLogin', true);
         }
+        if (errors.length) {
+            console.log(errors);
+        }
+        this.prop('errors', [...this.prop('errors'), ...errors]);
     }
 
     isPlaying(track: TrackViewModelItem) {

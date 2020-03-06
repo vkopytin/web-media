@@ -44,7 +44,7 @@ class PlaylistsViewModel extends ViewModel {
     };
     createPlaylistCommand = {
         exec: (isPublic: boolean) => this.createNewPlaylist(isPublic)
-    }
+    };
 
     playlistsArray = [] as PlaylistsViewModelItem[];
     tracksArray = [] as TrackViewModelItem[];

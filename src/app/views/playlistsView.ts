@@ -17,6 +17,7 @@ export interface IPlaylistsViewProps {
 
 class PlaylistsView extends BaseView<IPlaylistsViewProps, PlaylistsView['state']> {
     state = {
+        errors: [] as ServiceResult<any, Error>[],
         openLogin: false,
         playlists: [] as PlaylistsViewModelItem[],
         tracks: [] as TrackViewModelItem[],
@@ -40,7 +41,8 @@ class PlaylistsView extends BaseView<IPlaylistsViewProps, PlaylistsView['state']
         'selectPlaylistCommand': 'selectPlaylistCommand',
         'createPlaylistCommand': 'createPlaylistCommand',
         'prop(currentPlaylistId)': 'currentPlaylistId',
-        'prop(newPlaylistName)': 'newPlaylistName'
+        'prop(newPlaylistName)': 'newPlaylistName',
+        '-errors': 'errors'
     });
 
     constructor(props) {
@@ -67,6 +69,10 @@ class PlaylistsView extends BaseView<IPlaylistsViewProps, PlaylistsView['state']
         }
 
         return this.state[propName];
+    }
+
+    showErrors(errors) {
+        this.props.showErrors(errors);
     }
 
     render() {

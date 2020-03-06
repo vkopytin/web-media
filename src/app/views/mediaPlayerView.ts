@@ -63,7 +63,7 @@ class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['s
         'prop(volume)': 'volume',
         'prop(thumbnailUrl)': 'thumbnailUrl',
         'prop(isLiked)': 'isLiked',
-        'errors': 'errors',
+        '-errors': 'errors',
         'props.currentTrackId': 'currentTrackId'
     });
 
@@ -117,13 +117,17 @@ class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['s
         return formatTime(this.prop('duration') - this.prop('timePlayed'));
     }
 
-    errors(val?: ServiceResult<any, Error>[]) {
+    errors1(val?: ServiceResult<any, Error>[]) {
         if (arguments.length && val !== this.prop('errors')) {
-            this.prop('errors', val);
+            this.prop('errors', [...this.prop('errors'), ...val]);
             this.props.showErrors(val);
         }
 
         return this.prop('errors');
+    }
+
+    showErrors(errors) {
+        this.props.showErrors(errors);
     }
 
     render() {

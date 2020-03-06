@@ -412,6 +412,26 @@ class Service {
 
         return result;
     }
+
+    async addTrackToPlaylist(trackUris: string | string[], playlistId: string) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.addTrackToPlaylist(trackUris, playlistId);
+
+        return result;
+    }
+
+    async removeTrackFromPlaylist(trackUris: string | string[], playlistId: string) {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.removeTrackFromPlaylist(trackUris, playlistId);
+
+        return result;
+    }
 }
 
 export { Service, SpotifyService };

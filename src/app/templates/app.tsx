@@ -102,6 +102,22 @@ export const template = (view: AppView) => <main>
             </header>
             <DevicesView openShowDevices={showHide => view.openDevices(showHide)} />
         </div>
+        <div className={cn("popover ?visible", view.prop('errors').length)} style={{
+            display: view.prop('errors').length ? 'block' : 'none'
+        }}>
+            <header className="bar bar-nav">
+                <h1 className="title">Errors</h1>
+            </header>
+            <ul className="table-view">
+                {_.map(view.prop('errors'), (error, index) => {
+                    return <li key={index} className="table-view-cell"
+                        onClick={evnt => console.log(error.error)}
+                    >
+                        {'' + error.error}
+                    </li>
+                })}
+            </ul>
+        </div>
         <header className="bar bar-nav">
             <a className="icon icon-person pull-right"
                 onClick={evnt => view.prop('openLogin', true)}

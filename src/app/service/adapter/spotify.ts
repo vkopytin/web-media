@@ -305,7 +305,51 @@ class SpotifyAdapter {
         });
     }
 
-    listPlaylistTracks(playlistId, offset=0, limit=20) {
+    addTrackToPlaylist(trackUris: string | string[], playlistId: string) {
+        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
+            $.ajax({
+                method: 'POST',
+                url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    uris: [].concat(trackUris)
+                }),
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
+                }
+            });
+        });
+    }
+
+    removeTrackFromPlaylist(trackUris: string | string[], playlistId: string) {
+        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
+            $.ajax({
+                method: 'DELETE',
+                url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    uris: [].concat(trackUris)
+                }),
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
+                }
+            });
+        });
+    }
+
+    listPlaylistTracks(playlistId: string, offset=0, limit=20) {
         return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
                 url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,

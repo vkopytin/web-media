@@ -3,6 +3,7 @@ import * as _ from 'underscore';
 import * as React from 'react';
 import { HomeView } from '../views/homeView';
 import { utils } from 'databindjs';
+import { SelectPlaylistsView } from '../views';
 
 
 const cn = utils.className;
@@ -24,8 +25,13 @@ export const template = (view: HomeView) => <>
                     </label>
                 </span>
                 <div className="media-body">
+                    <div style={{ minWidth: '30vw', display: 'inline-block' }}>
                     {item.name()}
-                    <p>{item.album()}</p>
+                        <p>{item.album()}</p>
+                    </div>
+                    <span style={{ width: '50vw', display: 'inline-block' }}>
+                        <SelectPlaylistsView track={item} />
+                    </span>
                 </div>
                 {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
                 {item.isLiked() || <span className="badge">{item.duration()}</span>}

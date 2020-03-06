@@ -62,17 +62,16 @@ class TracksStore {
         return asAsync(this.storage, this.storage.getById, this.storeConfig, trackId);
     }
     
-    list(offset = 0, limit = 20) {
+    list(offset = 0, limit?) {
         return asAsyncOf(null, (cb: { (res?, result?, index?): boolean }) => {
-            let index = 0;
             this.storage.each(this.storeConfig, (...args) => {
+                const index = args[2] || offset;
                 if (index < offset) {
                     return;
                 }
-                if (index > offset + limit) {
+                if (limit && ((index + 1) > (offset + limit))) {
                     return cb();
                 }
-                index++;
                 return cb(...args);
             });
         });

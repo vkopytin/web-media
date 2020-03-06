@@ -20,8 +20,18 @@ class MyStore {
         index: {
             id: {
                 id: { unique: true }
+            },
+            added_at: {
+                added_at: { }
+            },
+            trackId: {
+                trackId: {
+                    unique: true
+                }
             }
-        }
+        },
+        orderBy: 'added_at',
+        orderDesk: true
     };
 
     constructor(public storage: IStorage) {
@@ -56,22 +66,49 @@ class MyStore {
         }
     }
 
+    get(myStoreId: string) {
+        return asAsync(this.storage, this.storage.getById, this.storeConfig, myStoreId);
+    }
+
+    list(offset = 0, limit?) {
+        return asAsyncOf(null, (cb: { (res?, result?: IMyStore, index?): boolean }) => {
+            this.storage.each(this.storeConfig, (...args) => {
+                const index = args[2] || offset;
+                if (index < offset) {
+                    return;
+                }
+                if (limit && ((index + 1) > (offset + limit))) {
+                    return cb();
+                }
+                return cb(...args);
+            });
+        });
+    }
+
+    where(where: { [key: string]: any }) {
+        return asAsyncOf(this.storage, this.storage.where, this.storeConfig, where);
+    }
+
+    count() {
+        return asAsync(this.storage, this.storage.getCount, this.storeConfig);
+    }
+
     async addTrack(track: ITrackRecord) {
         const tracks = new TracksStore(this.storage);
         const existinTrack = await tracks.get(track.id);
         if (!existinTrack) {
             const res = await tracks.create(track);
         }
-        const length = await this.count();
-        for await (const record of this.list(0, length)) {
+        for await (const record of this.list()) {
             if (record.trackId === track.id) {
                 return await this.refresh({
                     ...record,
-                    trackId: track.id
+                    trackId: track.id,
+                    added_at: track['added_at']
                 });
             }
         }
-        await this.create({ trackId: track.id });
+        await this.create({ trackId: track.id, added_at: track['added_at'] });
     }
 
     async removeTrack(track: ITrackRecord) {
@@ -85,10 +122,6 @@ class MyStore {
         return await asAsync(this.storage, this.storage.delete, this.storeConfig, record.id);
     }
 
-    get(myStoreId: string) {
-        return asAsync(this.storage, this.storage.getById, this.storeConfig, myStoreId);
-    }
-
     async getByTrackId(trackId: string) {
         for await (const record of this.list(0, 1)) {
             if (record.trackId === trackId) {
@@ -99,44 +132,12 @@ class MyStore {
         return null;
     }
 
-    where(where: { [key: string]: any }) {
-        return asAsyncOf(this.storage, this.storage.where, this.storeConfig, where);
-    }
-
-    list(offset = 0, limit = 20) {
-        return asAsyncOf(null, (cb: { (res?, result?, index?): boolean }) => {
-            this.storage.each(this.storeConfig, (...args) => {
-                const index = args[2];
-                if (index < offset) {
-                    return;
-                }
-                if (index > offset + limit) {
-                    return cb();
-                }
-                return cb(...args);
-            });
-        });
-    }
-
-    async * listMyTracks(offset = 0, limit = 20) {
+    async * listMyTracks(offset = 0, limit?) {
         const tracksStore = new TracksStore(this.storage);
         for await (const storeRecord of this.list(offset, limit)) {
             yield await tracksStore.get(storeRecord['trackId']);
         }
         return 'finish';
-    }
-
-    async listMyTracks1(offset = 0, limit = 20) {
-        const tracksStore = new TracksStore(this.storage);
-        const records = [];
-        for await (const storeRecord of this.list(offset, limit)) {
-            records.push(storeRecord);
-        }
-        return await Promise.all(_.map(records, r => tracksStore.get(r.trackId)));
-    }
-
-    count() {
-        return asAsync(this.storage, this.storage.getCount, this.storeConfig);
     }
 }
 

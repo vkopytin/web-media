@@ -91,38 +91,43 @@ async function* asAsyncOf(context, fn, ...args) {
     let next = (result?) => { };
     let fail = (err) => { };
     let finish = {};
-    const queue = utils.asyncQueue();
+    const items = [];
+    let started = true;
     try {
         fn.apply(context, [...args, function (err, result, index) {
             const nextArgs = [].slice.call(arguments, 0);
-            queue.push(done => {
-                setTimeout(() => {
-                    if (nextArgs.length === 0) {
-                        next(finish);
-                        return true;
-                    }
-                    if (err) {
-                        fail(err);
-                        return true;
-                    }
-                    next(result);
-                    done();
-                });
-            });
+            if (nextArgs.length === 0) {
+                started = false;
+                next(finish);
+                return true;
+            }
+            if (err) {
+                fail(err);
+                return true;
+            }
+            items.push(result);
+            next(result);
         }]);
     } catch (ex) {
         fail(ex);
     }
     while (true) {
-        const promise = new Promise((resolve, error) => {
+        const promise = started ? new Promise((resolve, error) => {
             next = resolve;
             fail = error;
-        });
+        }) : Promise.resolve(finish);
         const record = await promise;
         if (record === finish) {
+            while (items.length) {
+                const item = items.pop();
+                yield item;
+            }
             return 'finish';
         }
-        yield record;
+        while (items.length) {
+            const item = items.pop();
+            yield item;
+        }
     }
 }
 export { asAsyncOf };

@@ -27,10 +27,21 @@ class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, {}> {
     switchDeviceCommand = {
         exec(device: DeviceViewModelItem) { }
     };
+    addToPlaylistCommand = {
+        exec(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) { }
+    };
+    removeFromPlaylistCommand = {
+        exec(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) { }
+    };
+
+    fetchData = () => { };
 
     binding = bindTo(this, () => this.state.track, {
         'prop(items)': '.playlistsViewModel.playlists',
-        'prop(playlists)': 'playlists'
+        'fetchData': '.playlistsViewModel.getchData',
+        'prop(playlists)': 'playlists',
+        'addToPlaylistCommand': 'addToPlaylistCommand',
+        'removeFromPlaylistCommand': 'removeFromPlaylistCommand'
     });
 
     constructor(props) {

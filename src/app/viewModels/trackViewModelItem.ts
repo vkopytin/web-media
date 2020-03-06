@@ -8,7 +8,7 @@ import { AppViewModel } from './appViewModel';
 import { MediaPlayerViewModel } from './mediaPlayerViewModel';
 import { ServiceResult } from '../base/serviceResult';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
-import { listPlaylistsByTrack } from '../data/useCases';
+import { listPlaylistsByTrack, addTrackToPlaylist, removeTrackFromPlaylist } from '../data/useCases';
 
 
 class TrackViewModelItem extends ViewModel {
@@ -17,6 +17,13 @@ class TrackViewModelItem extends ViewModel {
         ...(this as ViewModel).settings,
         isLiked: false,
         playlists: [] as PlaylistsViewModelItem[]
+    };
+
+    addToPlaylistCommand = {
+        exec: (track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.addToPlaylist(track, playlist)
+    };
+    removeFromPlaylistCommand = {
+        exec: (track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist)
     };
 
     isInit = _.delay(() => {
@@ -98,6 +105,24 @@ class TrackViewModelItem extends ViewModel {
         }
 
         return this.settings.isLiked;
+    }
+
+    async addToPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
+        const result = await this.ss.addTrackToPlaylist(track.uri(), playlist.id());
+        if (assertNoErrors(result, e => this.errors(e))) {
+            return;
+        }
+        await addTrackToPlaylist(playlist.id(), track.song);
+        this.loadData('playlistTracks');
+    }
+
+    async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
+        const result = this.ss.removeTrackFromPlaylist(track.uri(), playlist.id());
+        if (assertNoErrors(result, e => this.errors(e))) {
+            return;
+        }
+        await removeTrackFromPlaylist(playlist.id(), track.id());
+        this.loadData('playlistTracks');
     }
 }
 

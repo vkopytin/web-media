@@ -249,8 +249,8 @@ class IndexedDbStorage implements IStorage {
 			const store = tr.objectStore(tableName);
 			const indexes = _.intersection(keys, store.indexNames);
 			const order = config.orderDesk ? 'prev' : 'next';
-			const index = indexes.length ? store.index(indexes[0]) : store;
-			const keyRange = indexes.length ? IDBKeyRange.only(where[indexes[0]]) : null;
+			const index = config.orderBy ? store.index(config.orderBy) : indexes.length ? store.index(indexes[0]) : store;
+			const keyRange = config.orderBy ? null : indexes.length ? IDBKeyRange.only(where[indexes[0]]) : null;
 			const cursor = index.openCursor(keyRange, order);
 			let indexNumber = 0;
 			cursor.onsuccess = (event: any) => {

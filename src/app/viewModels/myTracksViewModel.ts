@@ -45,6 +45,7 @@ class MyTracksViewModel extends ViewModel {
     async fetchData() {
         this.isLoading(true);
         this.settings.offset = 0;
+        this.loadData('myTracks');
         const res = await this.ss.fetchTracks(this.settings.offset, this.settings.limit + 1);
         if (res.isError) {
             this.isLoading(false);
@@ -64,6 +65,7 @@ class MyTracksViewModel extends ViewModel {
             return;
         }
         this.isLoading(true);
+        this.loadData('myTracks');
         const res = await this.ss.fetchTracks(this.settings.offset, this.settings.limit + 1);
         if (assertNoErrors(res, e => this.errors(e))) {
             this.isLoading(false);
@@ -82,7 +84,7 @@ class MyTracksViewModel extends ViewModel {
         if (!~args.indexOf('myTracks')) {
             return;
         }
-        const tracks = await listMyTracks(0, this.settings.total);
+        const tracks = await listMyTracks();
         this.tracks(_.map(tracks, item => new TrackViewModelItem({ track: item, added_at: '' }, -1)));
         _.each(_.range(0, tracks.length, 40), offset => this.checkTracks(this.tracks(), offset, 40));
     }

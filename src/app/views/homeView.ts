@@ -27,7 +27,8 @@ class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
     binding = bindTo(this, () => current(HomeViewModel), {
         'prop(items)': 'tracks',
         'prop(likedTracks)': 'likedTracks',
-        'refreshCommand': 'refreshCommand'
+        'refreshCommand': 'refreshCommand',
+        '-errors': 'errors'
     });
 
     constructor(props) {
@@ -47,17 +48,12 @@ class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
         unbindFrom(this.binding);
     }
 
-    errors(val?: ServiceResult<any, Error>[]) {
-        if (arguments.length && val !== this.prop('errors')) {
-            this.prop('errors', val);
-            this.props.showErrors(val);
-        }
-
-        return this.prop('errors');
-    }
-
     isPlaying(track: TrackViewModelItem) {
         return this.props.currentTrackId === track.id();
+    }
+
+    showErrors(errors) {
+        this.props.showErrors(errors);
     }
 
     render() {

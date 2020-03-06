@@ -24,7 +24,7 @@ export function initializeStructure() {
                     await storage.complete();
                     cb(null, true);
                 } catch (ex) {
-                    err(ex);
+                    cb(ex);
                 }
             });
         });
@@ -32,7 +32,7 @@ export function initializeStructure() {
 }
 
 export function putPlaylists(playlists: IPlaylistRecord[]) {
-    return asAsync(() => { }, (cb: { (err, result: boolean): void }) => {
+    return asAsync(() => { }, (cb: { (err, result?: boolean): void }) => {
         DataStorage.create((err, storage) => {
             const playlistsStore = new PlaylistsStore(storage);
             const tasks = _.map(playlists, playlist => {
@@ -42,13 +42,13 @@ export function putPlaylists(playlists: IPlaylistRecord[]) {
             Promise.all(tasks).then(() => {
                 storage.complete();
                 cb(null, true);
-            }).catch(ex => err(ex));
+            }).catch(ex => cb(ex));
         });
     });
 }
 
 export function listPlaylists(offset = 0, limit?) {
-    return asAsync(() => { }, (cb: { (err, result: IPlaylistRecord[]): void }) => {
+    return asAsync(() => { }, (cb: { (err, result?: IPlaylistRecord[]): void }) => {
         DataStorage.create(async (err, storage) => {
             try {
                 const playlistsStore = new PlaylistsStore(storage);
@@ -59,14 +59,14 @@ export function listPlaylists(offset = 0, limit?) {
                 storage.complete();
                 cb(null, items);
             } catch (ex) {
-                err(ex);
+                cb(ex);
             }
         });
     });
 }
 
 export function putMyTracks(tracks: ITrackRecord[]) {
-    return asAsync(() => { }, (cb: { (err, result: boolean): void }) => {
+    return asAsync(() => { }, (cb: { (err, result?: boolean): void }) => {
         DataStorage.create((err, storage) => {
             const myStore = new MyStore(storage);
             const tasks = _.map(tracks, async (track) => {
@@ -76,13 +76,13 @@ export function putMyTracks(tracks: ITrackRecord[]) {
             Promise.all(tasks).then(() => {
                 storage.complete();
                 cb(null, true);
-            }).catch(ex => err(ex));
+            }).catch(ex => cb(ex));
         });
     });
 }
 
 export function listMyTracks(offset = 0, limit?) {
-    return asAsync(() => { }, (cb: { (err, result: ITrackRecord[]): void }) => {
+    return asAsync(() => { }, (cb: { (err, result?: ITrackRecord[]): void }) => {
         DataStorage.create(async (err, storage) => {
             try {
                 const myStore = new MyStore(storage);
@@ -93,18 +93,34 @@ export function listMyTracks(offset = 0, limit?) {
                 storage.complete();
                 cb(null, items);
             } catch (ex) {
-                err(ex);
+                cb(ex);
             }
         });
     });
 }
 
-export function addTrackToPlaylist(playlistId: string, playlistTrack: IPlaylistTrackRecord[]) {
+export function addTrackToPlaylist(playlistId: string, playlistTrack: IPlaylistTrackRecord | IPlaylistTrackRecord[]) {
     return new Promise((resolve, reject) => {
         DataStorage.create(async (err, storage) => {
             try {
                 const playlists = new PlaylistsStore(storage);
                 await playlists.addTracks(playlistId, playlistTrack);
+                resolve();
+            } catch (ex) {
+                reject(ex);
+            }
+        });
+    });
+}
+
+export function removeTrackFromPlaylist(playlistId: string, playlistTrackId: string | string[]) {
+    return new Promise((resolve, reject) => {
+        DataStorage.create(async (err, storage) => {
+            try {
+                const playlists = new PlaylistsStore(storage);
+                for (const trackId of [].concat(playlistTrackId)) {
+                    await playlists.removeTrack(playlistId, trackId);
+                }
                 resolve();
             } catch (ex) {
                 reject(ex);

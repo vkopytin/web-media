@@ -382,6 +382,26 @@ class SpotifyService extends withEvents(BaseService) {
             return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
         }
     }
+
+    async addTrackToPlaylist(trackUris: string | string[], playlistId: string) {
+        try {
+            const res = await this.adapter.addTrackToPlaylist(trackUris, playlistId);
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
+    async removeTrackFromPlaylist(trackUris: string | string[], playlistId: string) {
+        try {
+            const res = await this.adapter.removeTrackFromPlaylist(trackUris, playlistId);
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
 }
 
 export { SpotifyService };

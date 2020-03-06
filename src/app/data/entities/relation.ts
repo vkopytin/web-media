@@ -9,8 +9,7 @@ class Relation<T extends {}> {
     storeConfig: IStorageConfig = {
         name: this.tableName,
         options: {
-            keyPath: 'index',
-            autoIncrement: true
+            keyPath: 'id'
         }
     };
 
@@ -83,9 +82,21 @@ class Relation<T extends {}> {
         return asAsync(this.storage, this.storage.getById, this.storeConfig, this.getId(pair));
     }
 
-    eachBy<K extends keyof T>(key: T, keyId: T[K]) {
+    list(offset = 0, limit?) {
+        return asAsyncOf(this.storage, this.storage.each as ((config: IStorageConfig, cb: (err?: any, result?: T, index?: number) => boolean) => any), this.storeConfig);
+    }
+
+    where(where: Partial<T>) {
+        return asAsyncOf(this.storage, this.storage.where, this.storeConfig, where);
+    }
+
+    count() {
+        return asAsync(this.storage, this.storage.getCount, this.storeConfig);
+    }
+
+    eachBy<K extends keyof T>(key: K, keyId: T[K]) {
         return asAsyncOf(null, (cb: { (err?, result?, index?): boolean }) => {
-            this.storage.each(this.storeConfig, (err, result, index) => {
+            this.storage.each(this.storeConfig, (err, result: T, index) => {
                 if (_.isUndefined(result)) {
                     cb();
                     return true;
@@ -96,18 +107,6 @@ class Relation<T extends {}> {
                 }
             });
         });
-    }
-
-    list(offset = 0, limit = 20) {
-        return asAsyncOf(this.storage, this.storage.each as ((config: IStorageConfig, cb: (err?: any, result?: T, index?: number) => boolean) => any), this.storeConfig);
-    }
-
-    where(where: { [key: string]: any }) {
-        return asAsyncOf(this.storage, this.storage.where, this.storeConfig, where);
-    }
-
-    count() {
-        return asAsync(this.storage, this.storage.getCount, this.storeConfig);
     }
 }
 

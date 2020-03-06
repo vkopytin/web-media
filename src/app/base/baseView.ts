@@ -21,7 +21,7 @@ class BaseView<P = {}, S = {}, SS = any> extends withEvents2(React.Component)<P,
 
     errors(val?: ServiceResult<any, Error>[]) {
         if (arguments.length && val !== (this.prop as any)('errors')) {
-            (this as any).prop('errors', val);
+            (this as any).prop('errors', [...(this as any).prop('errors'), ...val]);
             this.showErrors(val);
         }
 
