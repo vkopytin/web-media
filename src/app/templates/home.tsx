@@ -15,28 +15,34 @@ export const template = (view: HomeView) => <>
         ></button>
     </div>
     <ul className="todo-list table-view">
-        {_.map(view.prop('items'), (item, index) => {
-            return <li key={item.id()} className="table-view-cell">
+        {_.map(view.prop('items'), (item, index) => [
+            <li key={item.id()} className="table-view-cell">
                 <span className="media-object pull-left"
-                    onClick={evnt => { item.playTracks(view.prop('items'), item) }}
+                    onClick={evnt => { item.playTracks(view.prop('items')) }}
                 >
                     <label className={cn("toggle view ?active", view.isPlaying(item))}>
                         <div className="toggle-handle"></div>
                     </label>
                 </span>
-                <div className="media-body">
-                    <div style={{ minWidth: '30vw', display: 'inline-block' }}>
-                    {item.name()}
-                        <p>{item.album()}</p>
+                <a className="navigate-right"
+                    onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}
+                >
+                    <div className="media-body">
+                        <div>
+                            <span className="song-title">{item.name()}</span>
+                            &nbsp;-&nbsp;
+                            <span className="author-title">{item.artist()}</span>
+                        </div>
+                        <div className="album-title">{item.album()}</div>
                     </div>
-                    <span style={{ width: '50vw', display: 'inline-block' }}>
-                        <SelectPlaylistsView track={item} />
-                    </span>
-                </div>
+                </a>
                 {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
                 {item.isLiked() || <span className="badge">{item.duration()}</span>}
             </li>
-        })}
+            ,
+            (view.prop('selectedItem')) === item &&
+            <li key={item.id() + 1} className="table-view-cell table-view-divider"><SelectPlaylistsView track={item} /></li>
+        ])}
     </ul>
     <section className="info content-padded">
         <p>Media Player</p>

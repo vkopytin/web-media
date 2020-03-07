@@ -9,10 +9,12 @@ import { MediaPlayerViewModel } from './mediaPlayerViewModel';
 import { ServiceResult } from '../base/serviceResult';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { listPlaylistsByTrack, addTrackToPlaylist, removeTrackFromPlaylist } from '../data/useCases';
+import { PlaylistsViewModel } from './playlistsViewModel';
 
 
 class TrackViewModelItem extends ViewModel {
     appViewModel = current(AppViewModel);
+    playlistsViewModel = current(PlaylistsViewModel);
     settings = {
         ...(this as ViewModel).settings,
         isLiked: false,
@@ -48,8 +50,7 @@ class TrackViewModelItem extends ViewModel {
         if (!~args.indexOf('playlistTracks')) {
             return;
         }
-        const trackPlaylists = await listPlaylistsByTrack(this.id());
-        this.playlists(_.map(trackPlaylists, pl => new PlaylistsViewModelItem(pl)));
+        this.playlists(this.playlistsViewModel.playlists());
     }
 
     id() {
@@ -62,6 +63,11 @@ class TrackViewModelItem extends ViewModel {
 
     album() {
         return this.song.track.album.name;
+    }
+
+    artist() {
+        const [artist] = this.song.track.artists;
+        return (artist && artist.name) || '';
     }
 
     duration() {
@@ -83,7 +89,7 @@ class TrackViewModelItem extends ViewModel {
         this.ss.play(device?.id(), playlistUri, this.uri());
     }
 
-    async playTracks(tracks: TrackViewModelItem[], item: TrackViewModelItem) {
+    async playTracks(tracks: TrackViewModelItem[]) {
         const device = this.appViewModel.currentDevice();
         const playResult = this.ss.play(device?.id(), _.map(tracks, item => item.uri()), this.uri());
         assertNoErrors(playResult, e => this.errors(e));

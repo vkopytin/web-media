@@ -74,7 +74,7 @@ export const template = (view: AppView) => <main>
                     {_.map(view.prop('topTracks'), (item, index) => {
                         return <li key={item.id()} className="table-view-cell media">
                             <span className="media-object pull-left player-left--32"
-                                onClick={evnt => item.playTracks(view.prop('topTracks'), item)}
+                                onClick={evnt => item.playTracks(view.prop('topTracks'))}
                             >
                                 <div className="region">
                                     <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>

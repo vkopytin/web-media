@@ -14,21 +14,26 @@ export interface IHomeViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
 }
 
+
 class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
     state = {
         openLogin: false,
         items: [] as TrackViewModelItem[],
         errors: [] as ServiceResult<any, Error>[],
-        likedTracks: [] as TrackViewModelItem[]
+        likedTracks: [] as TrackViewModelItem[],
+        selectedItem: null as TrackViewModelItem
     };
 
     refreshCommand = { exec() { } };
+    selectTrackCommand = { exec(track: TrackViewModelItem) { } };
     
     binding = bindTo(this, () => current(HomeViewModel), {
         'prop(items)': 'tracks',
         'prop(likedTracks)': 'likedTracks',
         'refreshCommand': 'refreshCommand',
-        '-errors': 'errors'
+        '-errors': 'errors',
+        'prop(selectedItem)': 'prop(selectedTrack)',
+        'selectTrackCommand': 'selectTrackCommand'
     });
 
     constructor(props) {

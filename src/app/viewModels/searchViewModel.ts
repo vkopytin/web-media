@@ -110,7 +110,7 @@ class SearchViewModel extends ViewModel {
     }
 
     playInTracks(item: TrackViewModelItem) {
-        item.playTracks(this.tracks(), item);
+        item.playTracks(this.tracks());
     }
 }
 

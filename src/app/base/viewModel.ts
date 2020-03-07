@@ -2,10 +2,21 @@ import { Events } from 'databindjs';
 import { ServiceResult } from './serviceResult';
 
 
-class ViewModel extends Events {
-    settings = {
-        errors: [] as ServiceResult<any, Error>[]
-    };
+export interface IDefaultViewModelProps {
+    errors?: ServiceResult<any, Error>[];
+}
+
+class ViewModel<S extends IDefaultViewModelProps = IDefaultViewModelProps> extends Events {
+    settings = { errors: [] } as S;
+
+    prop<K extends keyof S>(propName: K, val?: S[K]): S[K] {
+        if (arguments.length > 1) {
+            (this.settings as any)[propName] = val;
+            this.trigger('change:prop(' + propName + ')');
+        }
+
+        return this.settings[propName];
+    }
 
     errors(val?: ServiceResult<any, Error>[]) {
         if (arguments.length && val !== this.settings.errors) {

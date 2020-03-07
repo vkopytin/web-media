@@ -12,20 +12,20 @@ export const template = (view: MyTracksView) => <>
         {_.map(view.prop('items'), (item, index) => {
             return <li key={item.id()} className="table-view-cell media">
                 <span className="media-object pull-left"
-                    onClick={evnt => item.playTracks(view.prop('items'), item)}
+                    onClick={evnt => item.playTracks(view.prop('items'))}
                 >
                     <label className={cn("toggle view ?active", view.isPlaying(item))}>
                         <div className="toggle-handle"></div>
                     </label>
                 </span>
                 <div className="media-body">
-                <div style={{minWidth: '30vw', display: 'inline-block'}}>
-                        <span>{item.name()}</span>
-                        <p>{item.album()}</p>
+                    <div>
+                        <span className="song-title">{item.name()}</span>
+                        &nbsp;-&nbsp;
+                            <span className="author-title">{item.artist()}</span>
                     </div>
-                    <span style={{ width: '50vw', display: 'inline-block' }}>
-                        <SelectPlaylistsView track={item} />
-                    </span>
+                    <div className="album-title">{item.album()}</div>
+                    <SelectPlaylistsView track={item} />
                 </div>
                 {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
                 {item.isLiked() || <span className="badge">{item.duration()}</span>}

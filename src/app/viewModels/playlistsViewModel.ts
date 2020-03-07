@@ -76,7 +76,7 @@ class PlaylistsViewModel extends ViewModel {
         const playlists = (result.val as IUserPlaylistsResult).items;
         this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
         this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
-        //this.playlists(_.map(playlists, item => new PlaylistsViewModelItem(item)));
+        this.playlists(_.map(playlists, item => new PlaylistsViewModelItem(item)));
     }
 
     async loadData(...args) {
@@ -98,7 +98,7 @@ class PlaylistsViewModel extends ViewModel {
         const playlists = (result.val as IUserPlaylistsResult).items;
         this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
         this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
-        //this.playlists([...this.playlists(), ..._.map(playlists, item => new PlaylistsViewModelItem(item))]);
+        this.playlists([...this.playlists(), ..._.map(playlists, item => new PlaylistsViewModelItem(item))]);
         this.isLoading(false);
     }
 
@@ -116,8 +116,8 @@ class PlaylistsViewModel extends ViewModel {
             const tracks = (result.val as IResponseResult<ISpotifySong>).items;
             this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
             this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);    
-            //this.tracks(_.map(tracks.items, (item, index) => new TrackViewModelItem(item, index)));
-            //this.checkTracks(this.tracks());
+            this.tracks(_.map(tracks, (item, index) => new TrackViewModelItem(item, index)));
+            this.checkTracks(this.tracks());
         }
     }
 
@@ -131,25 +131,14 @@ class PlaylistsViewModel extends ViewModel {
             const tracks = (result.val as IResponseResult<ISpotifySong>).items;
             this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
             this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);    
-            //this.tracks(_.map(tracks.items, (item, index) => new TrackViewModelItem(item, index)));
-            //this.checkTracks(this.tracks());
+            this.tracks(_.map(tracks, (item, index) => new TrackViewModelItem(item, index)));
+            this.checkTracks(this.tracks());
         }
     }
 
     async loadTracks(...args) {
         if (!~args.indexOf('playlistTracks')) {
             return;
-        }
-        const currentPlaylistId = this.currentPlaylistId();
-        if (currentPlaylistId) {
-            const tracks = await listTracksByPlaylist(currentPlaylistId);
-            this.tracks(_.map(tracks, item => new TrackViewModelItem({
-                track: item,
-                added_at: ''
-            }, 0)));
-    
-        } else {
-            this.tracks([]);
         }
     }
 

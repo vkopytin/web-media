@@ -7,17 +7,24 @@ import { current, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
 
 
-class HomeViewModel extends ViewModel {
+class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
 
     settings = {
-        ...(this as ViewModel).settings,
+        ...(this as any as ViewModel).settings,
         openLogin: false,
-        likedTracks: [] as TrackViewModelItem[]
+        likedTracks: [] as TrackViewModelItem[],
+        selectedTrack: null as TrackViewModelItem
     };
 
     refreshCommand = {
         exec: () => {
             this.fetchData();
+        }
+    }
+
+    selectTrackCommand = {
+        exec: (track: TrackViewModelItem) => {
+            this.prop('selectedTrack', track);
         }
     }
 
@@ -99,7 +106,7 @@ class HomeViewModel extends ViewModel {
     }
 
     playInTracks(item: TrackViewModelItem) {
-        item.playTracks(this.tracks(), item);
+        item.playTracks(this.tracks());
     }
 
     async resume() {

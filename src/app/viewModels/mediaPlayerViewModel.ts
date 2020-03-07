@@ -378,7 +378,7 @@ class MediaPlayerViewModel extends ViewModel {
     }
 
     playInTracks(item: TrackViewModelItem) {
-        item.playTracks(this.queue(), item);
+        item.playTracks(this.queue());
     }
 
     async resume() {
