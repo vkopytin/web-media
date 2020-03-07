@@ -36,7 +36,7 @@ class RemoteStorage implements IStorage {
         return true;
     }
 
-    delete(config: IStorageConfig, id, cb: { (err, result?): void }) {
+    delete(config: IStorageConfig, id: string, cb: { (err, result?): void }) {
         try {
             cb(null, false);
         } catch (ex) {
@@ -44,7 +44,7 @@ class RemoteStorage implements IStorage {
         }
     }
 
-    getById(config: IStorageConfig, id, cb: { (err, id?): void }) {
+    getById(config: IStorageConfig, id: string, cb: { (err, id?): void }) {
         try {
             cb(null, null);
         } catch (ex) {

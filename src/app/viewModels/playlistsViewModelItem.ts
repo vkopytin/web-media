@@ -1,6 +1,6 @@
 import { ViewModel } from '../base/viewModel';
 import * as _ from 'underscore';
-import { IUserPlaylist } from '../service/adapter/spotify';
+import { IUserPlaylist } from '../adapter/spotify';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { Service } from '../service';
 

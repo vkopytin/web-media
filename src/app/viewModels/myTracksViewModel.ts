@@ -2,7 +2,7 @@ import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
-import { ISpotifySong, IResponseResult, ITrack } from '../service/adapter/spotify';
+import { ISpotifySong, IResponseResult, ITrack } from '../adapter/spotify';
 import { current, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
 import { listMyTracks } from '../data/useCases';

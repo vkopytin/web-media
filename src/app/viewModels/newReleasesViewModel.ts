@@ -2,7 +2,7 @@ import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
-import { IResponseResult, IAlbum, ITrack } from '../service/adapter/spotify';
+import { IResponseResult, IAlbum, ITrack } from '../adapter/spotify';
 import { AlbumViewModelItem } from './albumViewModelItem';
 import { current, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';

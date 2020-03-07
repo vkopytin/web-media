@@ -1,7 +1,7 @@
 import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
-import { IUserPlaylistsResult, IResponseResult, ISpotifySong, IUserPlaylist, ITrack, IUserInfo } from '../service/adapter/spotify';
+import { IUserPlaylistsResult, IResponseResult, ISpotifySong, IUserPlaylist, ITrack, IUserInfo } from '../adapter/spotify';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { current, assertNoErrors } from '../utils';

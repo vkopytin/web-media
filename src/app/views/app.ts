@@ -3,7 +3,7 @@ import { template } from '../templates/app';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import { AppViewModel, TrackViewModelItem } from '../viewModels';
 import * as _ from 'underscore';
-import { IDevice, IUserInfo } from '../service/adapter/spotify';
+import { IDevice, IUserInfo } from '../adapter/spotify';
 import { current } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';

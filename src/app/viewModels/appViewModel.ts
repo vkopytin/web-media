@@ -1,11 +1,12 @@
 import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
-import { IDevice, IUserInfo, IDevicesResponse, IResponseResult, ISpotifySong, ITrack } from '../service/adapter/spotify';
+import { IDevice, IUserInfo, IDevicesResponse, IResponseResult, ISpotifySong, ITrack } from '../adapter/spotify';
 import { DeviceViewModelItem } from './deviceViewModelItem';
 import { current, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
 import { TrackViewModelItem } from './trackViewModelItem';
+import { SpotifySyncService } from '../service/spotifySyncService';
 
 
 const panels = ['home', 'profile'];
@@ -28,12 +29,22 @@ class AppViewModel extends ViewModel {
     userInfo = {} as IUserInfo;
 
     isInit = _.delay(() => {
+        this.startSync();
         this.connect();
         this.fetchData();
     });
 
     constructor(private ss = current(Service)) {
         super();
+    }
+
+    async startSync() {
+        const syncServiceResult = await this.ss.service(SpotifySyncService);
+        if (assertNoErrors(syncServiceResult, e => this.errors(e))) {
+            return;
+        }
+        const syncService = syncServiceResult.val;
+        syncService.syncData();
     }
 
     async connect() {

@@ -56,7 +56,7 @@ export function assertNoErrors(...args) {
     const results = _.flatten(_.initial(args)) as any[];
     const errors = _.filter(results, r => r.isError);
 
-    fillErrors(errors);
+    !_.isEmpty(errors) && fillErrors(errors);
 
     return errors.length > 0;
 }

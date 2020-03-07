@@ -1,13 +1,13 @@
 import { BaseService } from '../base/baseService';
 import { Service } from './index';
 import { SpotifyServiceResult } from './results/spotifyServiceResult';
-import { ErrorWithStatus } from './adapter/errors/errorWithStatus';
+import { ErrorWithStatus } from '../adapter/errors/errorWithStatus';
 import { TokenExpiredError } from './errors/tokenExpiredError';
 import { SpotifyServiceError } from './errors/spotifyServiceError';
 import { SpotifyServiceUnexpectedError } from './errors/spotifyServiceUnexpectedError';
 import * as _ from 'underscore';
 import * as $ from 'jquery';
-import { SpotifyAdapter, IUserInfo, IDevice } from './adapter/spotify';
+import { SpotifyAdapter, IUserInfo, IDevice } from '../adapter/spotify';
 import { ISettings } from './settings';
 import { withEvents } from 'databindjs';
 import { debounce } from '../utils';

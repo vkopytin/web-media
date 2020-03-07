@@ -7,16 +7,19 @@ import * as _ from 'underscore';
 import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult';
 import { PlaylistsStore } from '../data/entities/playlistsStore';
 import { DataStorage } from '../data/dataStorage';
+import { SpotifySyncService } from './spotifySyncService';
 
 
 const lockSpotifyService = asyncQueue();
 const lockSettingsService = asyncQueue();
 const lockSpotifyPlayerService = asyncQueue();
+const lockSpotifySyncService = asyncQueue();
 
 class Service {
     settingsService: ServiceResult<SettingsService, Error> = null;
     spotifyService: ServiceResult<SpotifyService, Error> = null;
     spotifyPlayerService: ServiceResult<SpotifyPlayerService, Error> = null;
+    spotifySyncService: ServiceResult<SpotifySyncService, Error> = null;
 
     async service<T extends {}, O extends {}>(
         ctor: { prototype: T },
@@ -59,6 +62,19 @@ class Service {
                         }
 
                         resolve(this.spotifyPlayerService = await SpotifyPlayerService.create(this) as any);
+                        next();
+                    }, this));
+                });
+            case SpotifySyncService as any:
+                return new Promise((resolve, reject) => {
+                    lockSpotifySyncService.push(_.bind(async function (this: Service, next) {
+                        if (this.spotifySyncService) {
+                            resolve(this.spotifySyncService as any);
+                            next();
+                            return;
+                        }
+
+                        resolve(this.spotifySyncService = await SpotifySyncService.create(this) as any);
                         next();
                     }, this));
                 });

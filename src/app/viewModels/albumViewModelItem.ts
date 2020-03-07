@@ -1,6 +1,6 @@
 import { ViewModel } from '../base/viewModel';
 import * as _ from 'underscore';
-import { IAlbum } from '../service/adapter/spotify';
+import { IAlbum } from '../adapter/spotify';
 
 
 class AlbumViewModelItem extends ViewModel {

@@ -2,7 +2,7 @@ import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
-import { ISpotifySong, IRecommendationsResult, IResponseResult, ITrack } from '../service/adapter/spotify';
+import { ISpotifySong, IRecommendationsResult, IResponseResult, ITrack } from '../adapter/spotify';
 import { current, asyncQueue } from '../utils';
 
 
