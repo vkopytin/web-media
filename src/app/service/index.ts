@@ -5,21 +5,23 @@ import { SpotifyPlayerService } from './spotifyPlayer';
 import { asyncQueue } from '../utils';
 import * as _ from 'underscore';
 import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult';
-import { PlaylistsStore } from '../data/entities/playlistsStore';
-import { DataStorage } from '../data/dataStorage';
 import { SpotifySyncService } from './spotifySyncService';
+import { DataService } from './dataService';
+import { ITrack } from '../adapter/spotify';
 
 
 const lockSpotifyService = asyncQueue();
 const lockSettingsService = asyncQueue();
 const lockSpotifyPlayerService = asyncQueue();
 const lockSpotifySyncService = asyncQueue();
+const lockDataService = asyncQueue();
 
 class Service {
     settingsService: ServiceResult<SettingsService, Error> = null;
     spotifyService: ServiceResult<SpotifyService, Error> = null;
     spotifyPlayerService: ServiceResult<SpotifyPlayerService, Error> = null;
     spotifySyncService: ServiceResult<SpotifySyncService, Error> = null;
+    dataService: ServiceResult<DataService, Error> = null;
 
     async service<T extends {}, O extends {}>(
         ctor: { prototype: T },
@@ -75,6 +77,19 @@ class Service {
                         }
 
                         resolve(this.spotifySyncService = await SpotifySyncService.create(this) as any);
+                        next();
+                    }, this));
+                });
+            case DataService as any:
+                return new Promise((resolve, reject) => {
+                    lockDataService.push(_.bind(async function (this: Service, next) {
+                        if (this.dataService) {
+                            resolve(this.dataService as any);
+                            next();
+                            return;
+                        }
+    
+                        resolve(this.dataService = await DataService.create(this) as any);
                         next();
                     }, this));
                 });
@@ -189,11 +204,11 @@ class Service {
     }
 
     async hasTracks(trackIds: string | string[]) {
-        const spotify = await this.service(SpotifyService);
-        if (spotify.isError) {
-            return spotify;
+        const service = await this.service(DataService);
+        if (service.isError) {
+            return service;
         }
-        const result = await spotify.val.hasTracks(trackIds);
+        const result = await service.val.hasTracks(trackIds);
 
         return result;
     }
@@ -235,23 +250,23 @@ class Service {
     }
 
     async fetchMyPlaylists(offset = 0, limit = 20) {
-        const spotify = await this.service(SpotifyService);
-        if (spotify.isError) {
-            return spotify;
+        const service = await this.service(DataService);
+        if (service.isError) {
+            return service;
         }
 
-        const result = spotify.val.fetchMyPlaylists(offset, limit);
+        const result = service.val.fetchMyPlaylists(offset, limit);
 
         return result;
     }
 
     async fetchPlaylistTracks(playlistId, offset=0, limit=20) {
-        const spotify = await this.service(SpotifyService);
-        if (spotify.isError) {
-            return spotify;
+        const service = await this.service(DataService);
+        if (service.isError) {
+            return service;
         }
 
-        const result = spotify.val.fetchPlaylistTracks(playlistId, offset, limit);
+        const result = service.val.fetchPlaylistTracks(playlistId, offset, limit);
 
         return result;
     }
@@ -367,12 +382,23 @@ class Service {
     }
 
     async fetchTracks(offset = 0, limit = 20) {
-        const spotify = await this.service(SpotifyService);
-        if (spotify.isError) {
-            return spotify;
+        const service = await this.service(DataService);
+        if (service.isError) {
+            return service;
         }
 
-        const result = spotify.val.fetchTracks(offset, limit);
+        const result = service.val.fetchTracks(offset, limit);
+
+        return result;
+    }
+
+    async listPlaylistsByTrack(trackId: string) {
+        const service = await this.service(DataService);
+        if (service.isError) {
+            return service;
+        }
+
+        const result = service.val.listPlaylistsByTrack(trackId);
 
         return result;
     }
@@ -429,12 +455,20 @@ class Service {
         return result;
     }
 
-    async addTrackToPlaylist(trackUris: string | string[], playlistId: string) {
+    async addTrackToPlaylist(tracks: ITrack | ITrack[], playlistId: string) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
-        const result = await spotify.val.addTrackToPlaylist(trackUris, playlistId);
+        const result = await spotify.val.addTrackToPlaylist(_.map([].concat(tracks), t => t.uri), playlistId);
+        const data = await this.service(DataService);
+        if (data.isError) {
+            return data;
+        }
+        const addResult = await data.val.addTracksToPlaylist(playlistId, tracks);
+        if (addResult.isError) {
+            await spotify.val.removeTrackFromPlaylist(_.map([].concat(tracks), t => t.uri), playlistId);
+        }
 
         return result;
     }

@@ -73,7 +73,7 @@ class MyStore {
     list(offset = 0, limit?) {
         return asAsyncOf(null, (cb: { (res?, result?: IMyStore, index?): boolean }) => {
             this.storage.each(this.storeConfig, (...args) => {
-                const index = args[2] || offset;
+                const index = args[2];
                 if (index < offset) {
                     return;
                 }

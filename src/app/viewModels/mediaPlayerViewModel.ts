@@ -19,6 +19,7 @@ class MediaPlayerViewModel extends ViewModel {
         duration: 3.14 * 60 * 1000,
         trackName: '',
         albumName: '',
+        artistName: '',
         volume: 0,
         thumbnailUrl: '',
         currentTrackId: '',
@@ -117,6 +118,7 @@ class MediaPlayerViewModel extends ViewModel {
         if (!state) {
             return;
         }
+        const [artist] = state.track_window.current_track.artists;
         this.currentTrackUri(state.track_window.current_track.uri);
         this.currentTrackId(state.track_window.current_track.id);
         this.duration(state.duration);
@@ -124,6 +126,7 @@ class MediaPlayerViewModel extends ViewModel {
         this.isPlaying(!state.paused);
         this.trackName(state.track_window.current_track.name);
         this.albumName(state.track_window.current_track.album.name);
+        this.artistName(artist.name);
         this.thumbnailUrl(_.last(state.track_window.current_track.album.images).url);
         this.autoSeek();
         this.checkTrackExists();
@@ -143,6 +146,7 @@ class MediaPlayerViewModel extends ViewModel {
 
         this.lastTime = +new Date();
         if (currentlyPlaying && currentlyPlaying.item) {
+            const [artist] = currentlyPlaying.item.artists;
             this.currentTrackUri(currentlyPlaying.item.uri);
             this.currentTrackId(currentlyPlaying.item.id);
             this.volume(currentlyPlaying.device.volume_percent);
@@ -151,6 +155,7 @@ class MediaPlayerViewModel extends ViewModel {
             this.isPlaying(currentlyPlaying.is_playing);
             this.trackName(currentlyPlaying.item.name)
             this.albumName(currentlyPlaying.item.album.name)
+            this.artistName(artist.name);
             this.thumbnailUrl(_.last(currentlyPlaying.item.album.images).url)
             this.autoSeek();
             this.checkTrackExists();
@@ -429,6 +434,15 @@ class MediaPlayerViewModel extends ViewModel {
         }
 
         return this.settings.albumName;
+    }
+
+    artistName(val?) {
+        if (arguments.length && val !== this.settings.artistName) {
+            this.settings.artistName = val;
+            this.trigger('change:artistName');
+        }
+
+        return this.settings.artistName;
     }
 
     volume(val?) {

@@ -5,8 +5,7 @@ import { IUserPlaylistsResult, IResponseResult, ISpotifySong, IUserPlaylist, ITr
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { current, assertNoErrors } from '../utils';
-import { ServiceResult } from '../base/serviceResult';
-import { listPlaylists, listTracksByPlaylist } from '../data/useCases';
+import { listPlaylists } from '../data/useCases';
 
 
 class PlaylistsViewModel extends ViewModel {

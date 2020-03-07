@@ -65,7 +65,7 @@ class TracksStore {
     list(offset = 0, limit?) {
         return asAsyncOf(null, (cb: { (res?, result?, index?): boolean }) => {
             this.storage.each(this.storeConfig, (...args) => {
-                const index = args[2] || offset;
+                const index = args[2];
                 if (index < offset) {
                     return;
                 }
@@ -75,6 +75,10 @@ class TracksStore {
                 return cb(...args);
             });
         });
+    }
+
+    where(where: Partial<ITrackRecord>) {
+        return asAsyncOf(this.storage, this.storage.where, this.storeConfig, where);
     }
 
     count() {

@@ -80,6 +80,10 @@ class PlaylistsStore {
         return asAsyncOf(this.storage, this.storage.each as ((config: IStorageConfig, cb: (err?: any, result?: IPlaylistRecord, index?: number) => boolean) => any), this.storeConfig);
     }
 
+    where(where: Partial<IPlaylistRecord>) {
+        return asAsyncOf(this.storage, this.storage.where, this.storeConfig, where);
+    }
+
     count() {
         return asAsync(this.storage, this.storage.getCount, this.storeConfig);
     }
@@ -130,6 +134,15 @@ class PlaylistsStore {
             yield await tracksStore.get(refTrack.trackId);
         }
         return null;
+    }
+
+    async tracksTotal(playlistId: string) {
+        let total = 0;
+        for await (const refTrack of this.relation.where({ playlistId })) {
+            total++;
+        }
+
+        return total;
     }
 }
 

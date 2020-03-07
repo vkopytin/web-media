@@ -8,7 +8,7 @@ import { AppViewModel } from './appViewModel';
 import { MediaPlayerViewModel } from './mediaPlayerViewModel';
 import { ServiceResult } from '../base/serviceResult';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
-import { listPlaylistsByTrack, addTrackToPlaylist, removeTrackFromPlaylist } from '../data/useCases';
+import { addTrackToPlaylist, removeTrackFromPlaylist } from '../data/useCases';
 import { PlaylistsViewModel } from './playlistsViewModel';
 
 
@@ -50,7 +50,12 @@ class TrackViewModelItem extends ViewModel {
         if (!~args.indexOf('playlistTracks')) {
             return;
         }
-        this.playlists(this.playlistsViewModel.playlists());
+        const playlistsByTrackResult = await this.ss.listPlaylistsByTrack(this.id());
+        if (assertNoErrors(playlistsByTrackResult, e => this.errors(e))) {
+            return;
+        }
+        const playlists = playlistsByTrackResult.val as IUserPlaylist[];
+        this.playlists(_.map(playlists, playlist => new PlaylistsViewModelItem(playlist)));
     }
 
     id() {
@@ -114,11 +119,10 @@ class TrackViewModelItem extends ViewModel {
     }
 
     async addToPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
-        const result = await this.ss.addTrackToPlaylist(track.uri(), playlist.id());
+        const result = await this.ss.addTrackToPlaylist(track.song.track, playlist.id());
         if (assertNoErrors(result, e => this.errors(e))) {
             return;
         }
-        await addTrackToPlaylist(playlist.id(), track.song);
         this.loadData('playlistTracks');
     }
 

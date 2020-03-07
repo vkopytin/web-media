@@ -25,7 +25,7 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
             <div className="playback-info">
                 <a className="track-info">
                     <div className="song-title">
-                        <span>{view.prop('trackName')}</span>
+                        <span>{view.prop('trackName')} - {view.prop('artistName')}</span>
                     </div>
                     <div className="album-title">
                         <span>{view.prop('albumName')}</span>

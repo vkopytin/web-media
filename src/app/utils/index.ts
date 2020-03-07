@@ -119,13 +119,13 @@ async function* asAsyncOf(context, fn, ...args) {
         const record = await promise;
         if (record === finish) {
             while (items.length) {
-                const item = items.pop();
+                const item = items.shift();
                 yield item;
             }
-            return 'finish';
+            return;
         }
         while (items.length) {
-            const item = items.pop();
+            const item = items.shift();
             yield item;
         }
     }

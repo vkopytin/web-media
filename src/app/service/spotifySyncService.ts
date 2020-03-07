@@ -3,23 +3,53 @@ import { BaseService } from '../base/baseService';
 import { Service } from '.';
 import { assertNoErrors } from '../utils';
 import * as _ from 'underscore';
-import { IResponseResult, ISpotifySong } from '../adapter/spotify';
+import { IResponseResult, ISpotifySong, IUserPlaylistsResult, IUserPlaylist } from '../adapter/spotify';
 import { SpotifySyncServiceResult } from './results/spotifySyncServiceResult';
-import { putMyTracks } from '../data/useCases';
+import { putMyTracks, putPlaylists, addTrackToPlaylist } from '../data/useCases';
+import { SpotifyService } from './spotify';
 
 
 class SpotifySyncService extends withEvents(BaseService) {
     static async create(connection: Service) {
-        return SpotifySyncServiceResult.success(new SpotifySyncService(connection));
+        const spotifyResult = await connection.service(SpotifyService);
+        if (spotifyResult.isError) {
+            return spotifyResult;
+        }
+        const spotify = spotifyResult.val;
+        return SpotifySyncServiceResult.success(new SpotifySyncService(connection, spotify));
     }
 
     limit = 49;
 
-    constructor(public ss: Service) {
+    constructor(public ss: Service, public spotify: SpotifyService) {
         super();
     }
 
     async syncData() {
+        await this.syncMyTracks();
+        const playlists = await this.syncMyPlaylists();
+        for (const playlist of playlists) {
+            await this.syncTracksByPlaylist(playlist.id);
+        }
+        this.cleanUpData();
+    }
+
+    async syncMyPlaylists() {
+        let res = [] as IUserPlaylist[];
+        for await (const playlists of this.listMyPlaylists()) {
+            await putPlaylists(playlists);
+            res = res.concat(playlists);
+        }
+        return res;
+    }
+
+    async syncTracksByPlaylist(playlistId: string) {
+        for await (const tracks of this.listPlaylistTracks(playlistId)) {
+            await addTrackToPlaylist(playlistId, tracks);
+        }
+    }
+
+    async syncMyTracks() {
         for await (const songs of this.listMyTracks()) {
             await putMyTracks(_.map(songs, song => ({
                 added_at: song.added_at,
@@ -28,11 +58,11 @@ class SpotifySyncService extends withEvents(BaseService) {
         }
     }
 
-    async * listMyTracks() {
+    async * listPlaylistTracks(playlistId: string) {
         let total = this.limit;
         let offset = 0;
-        while (offset !== total) {
-            const result = await this.ss.fetchTracks(offset, this.limit + 1);
+        while (offset < total) {
+            const result = await this.spotify.fetchPlaylistTracks(playlistId, offset, this.limit + 1);
             if (assertNoErrors(result, e => _.delay(() => { throw e; }))) {
                 return;
             }
@@ -42,6 +72,42 @@ class SpotifySyncService extends withEvents(BaseService) {
 
             yield response.items;
         }
+    }
+
+    async * listMyPlaylists() {
+        let total = this.limit;
+        let offset = 0;
+        while (offset < total) {
+            const result = await this.spotify.fetchMyPlaylists(offset, this.limit + 1);
+            if (assertNoErrors(result, e => _.delay(() => { throw e; }))) {
+                return;
+            }
+            const response = result.val as IUserPlaylistsResult;
+            total = offset + Math.min(this.limit + 1, response.items.length);
+            offset = offset + Math.min(this.limit, response.items.length);
+
+            yield response.items;
+        }
+    }
+
+    async * listMyTracks() {
+        let total = this.limit;
+        let offset = 0;
+        while (offset < total) {
+            const result = await this.spotify.fetchTracks(offset, this.limit + 1);
+            if (assertNoErrors(result, e => _.delay(() => { throw e; }))) {
+                return;
+            }
+            const response = result.val as IResponseResult<ISpotifySong>;
+            total = offset + Math.min(this.limit + 1, response.items.length);
+            offset = offset + Math.min(this.limit, response.items.length);
+
+            yield response.items;
+        }
+    }
+
+    async cleanUpData() {
+        return true;
     }
 }
 

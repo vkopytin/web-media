@@ -5,6 +5,7 @@ import { asAsync } from '../../utils';
 import { PlaylistsStore } from '../entities/playlistsStore';
 import { TracksStore } from '../entities/tracksStore';
 import { MyStore } from '../entities/myStore';
+import { ISongRecord } from '../entities/interfaces/iSongRecord';
 
 
 export function initializeStructure() {
@@ -82,13 +83,18 @@ export function putMyTracks(tracks: ITrackRecord[]) {
 }
 
 export function listMyTracks(offset = 0, limit?) {
-    return asAsync(() => { }, (cb: { (err, result?: ITrackRecord[]): void }) => {
+    return asAsync(() => { }, (cb: { (err, result?: ISongRecord[]): void }) => {
         DataStorage.create(async (err, storage) => {
             try {
-                const myStore = new MyStore(storage);
-                const items = [] as ITrackRecord[];
-                for await (const item of myStore.listMyTracks(offset, limit)) {
-                    items.push(item);
+                const items = [] as ISongRecord[];
+                const myStore = new MyStore(storage)
+                const tracksStore = new TracksStore(storage);
+                for await (const storeRecord of myStore.list(offset, limit)) {
+                    const track = await tracksStore.get(storeRecord['trackId']);
+                    items.push({
+                        track,
+                        added_at: '' + storeRecord.added_at
+                    });
                 }
                 storage.complete();
                 cb(null, items);
@@ -105,6 +111,8 @@ export function addTrackToPlaylist(playlistId: string, playlistTrack: IPlaylistT
             try {
                 const playlists = new PlaylistsStore(storage);
                 await playlists.addTracks(playlistId, playlistTrack);
+
+                storage.complete();
                 resolve();
             } catch (ex) {
                 reject(ex);
@@ -121,6 +129,7 @@ export function removeTrackFromPlaylist(playlistId: string, playlistTrackId: str
                 for (const trackId of [].concat(playlistTrackId)) {
                     await playlists.removeTrack(playlistId, trackId);
                 }
+                storage.complete();
                 resolve();
             } catch (ex) {
                 reject(ex);
@@ -130,14 +139,21 @@ export function removeTrackFromPlaylist(playlistId: string, playlistTrackId: str
 }
 
 export function listTracksByPlaylist(playlistId: string) {
-    return new Promise<ITrackRecord[]>((resolve, reject) => {
+    return new Promise<ISongRecord[]>((resolve, reject) => {
         DataStorage.create(async (err, storage) => {
             try {
-                const playlists = new PlaylistsStore(storage);
-                const tracks = [] as ITrackRecord[];
-                for await (const track of playlists.listTracks(playlistId)) {
-                    tracks.push(track);
+                const playlistStorage = new PlaylistsStore(storage);
+                const tracks = [] as ISongRecord[];
+                const tracksStore = new TracksStore(storage);
+                for await (const refTrack of playlistStorage.relation.where({ playlistId })) {
+                    const track = await tracksStore.get(refTrack.trackId);
+                    tracks.push({
+                        track,
+                        added_at: refTrack.added_at
+                    });
                 }
+
+                storage.complete();
                 resolve(tracks);
             } catch (ex) {
                 reject(ex);
@@ -155,6 +171,8 @@ export function listPlaylistsByTrack(trackId: string) {
                 for await (const refPlaylist of playlistsStore.listByTrackId(trackId)) {
                     playlists.push(await playlistsStore.get(refPlaylist.playlistId));
                 }
+
+                storage.complete();
                 resolve(playlists);
             } catch (ex) {
                 reject(ex);

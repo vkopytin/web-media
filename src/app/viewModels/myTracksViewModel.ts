@@ -2,10 +2,8 @@ import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
-import { ISpotifySong, IResponseResult, ITrack } from '../adapter/spotify';
+import { ISpotifySong, IResponseResult } from '../adapter/spotify';
 import { current, assertNoErrors } from '../utils';
-import { ServiceResult } from '../base/serviceResult';
-import { listMyTracks } from '../data/useCases';
 
 
 class MyTracksViewModel extends ViewModel {
@@ -54,7 +52,7 @@ class MyTracksViewModel extends ViewModel {
         const tracks = res.val as IResponseResult<ISpotifySong>;
         this.settings.total = this.settings.offset + Math.min(this.settings.limit + 1, tracks.items.length);
         this.settings.offset = this.settings.offset + Math.min(this.settings.limit, tracks.items.length);
-        this.tracks(_.map(tracks.items, (song, index) => new TrackViewModelItem(song, index)));
+        this.tracks(_.map(tracks.items.slice(0, this.settings.limit), (song, index) => new TrackViewModelItem(song, index)));
         this.checkTracks(this.tracks());
 
         this.isLoading(false);

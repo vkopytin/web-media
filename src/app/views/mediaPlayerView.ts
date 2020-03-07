@@ -26,7 +26,8 @@ class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['s
         albumName: '',
         errors: [] as ServiceResult<any, Error>[],
         thumbnailUrl: '',
-        isLiked: false
+        isLiked: false,
+        artistName: ''
     };
 
     resumeCommand = { exec() { } };
@@ -60,6 +61,7 @@ class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['s
         'prop(isPlaying)': 'isPlaying',
         'prop(trackName)': 'trackName',
         'prop(albumName)': 'albumName',
+        'prop(artistName)': 'artistName',
         'prop(volume)': 'volume',
         'prop(thumbnailUrl)': 'thumbnailUrl',
         'prop(isLiked)': 'isLiked',
