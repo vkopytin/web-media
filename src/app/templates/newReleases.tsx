@@ -45,7 +45,8 @@ export const template = (view: NewReleasesView) => <>
     </ul>
     {view.prop('currentAlbum') && <AlbumsView
         currentTrackId={view.props.currentTrackId}
-        album={view.prop('currentAlbum')}
+        uri={view.prop('currentAlbum')?.uri()}
+        tracks={view.prop('tracks')}
     />}
     <footer className="info content-padded">
         <p>Media Player</p>

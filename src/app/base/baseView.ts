@@ -11,7 +11,7 @@ const withEvents2: <TBase extends Constructor<{}>>(Base: TBase) => {
 class BaseView<P = {}, S = {}, SS = any> extends withEvents2(React.Component)<P, S, SS> {
 
     prop<K extends keyof S>(propName: K, val?: S[K]): S[K] {
-        if (arguments.length > 1) {
+        if (arguments.length > 1 && val !== (this.state as any)[propName]) {
             (this.state as any)[propName] = val;
             this.trigger('change:prop(' + propName + ')');
         }

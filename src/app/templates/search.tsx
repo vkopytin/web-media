@@ -2,7 +2,7 @@ import * as $ from 'jquery';
 import * as _ from 'underscore';
 import * as React from 'react';
 import { utils } from 'databindjs';
-import { SearchView, SelectPlaylistsView } from '../views';
+import { AlbumsView, SearchView, SelectPlaylistsView } from '../views';
 
 
 const cn = utils.className;
@@ -31,14 +31,18 @@ export const template = (view: SearchView) => <>
         >Playlists</a>
     </div>
     <ul className="todo-list table-view">
-        {_.map(view.prop('items'), (item, index) => {
+        {_.map(view.prop('tracks'), (item, index) => {
             return <li key={item.id()} className="table-view-cell media">
-                <span className="media-object pull-left"
-                    onClick={evnt => item.playTracks(view.prop('items'))}
+                <span className="media-object pull-left player-left--32"
+                    onClick={evnt => item.playTracks(view.prop('tracks'))}
                 >
-                    <label className={cn("toggle view ?active", view.isPlaying(item))}>
-                        <div className="toggle-handle"></div>
-                    </label>
+                    <div className="region">
+                        <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
+                            {view.isPlaying(item) || <button className="button-play icon icon-play"
+                            ></button>}
+                            {view.isPlaying(item) && <button className="button-play icon icon-pause"></button>}
+                        </div>
+                    </div>
                 </span>
                 <div className="media-body">
                     <div>
@@ -52,6 +56,71 @@ export const template = (view: SearchView) => <>
                 {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
                 {item.isLiked() || <span className="badge">{item.duration()}</span>}
             </li>
+        })}
+        {_.map(view.prop('artists'), (item, index) => {
+            return <li key={item.id()} className="table-view-cell media">
+                <span className="media-object pull-left player-left--32"
+                >
+                    <div className="region">
+                        <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
+                        </div>
+                    </div>
+                </span>
+                <div className="media-body">
+                    <div>
+                        <span className="song-title">{item.name()}</span>
+                    </div>
+                </div>
+            </li>
+        })}
+        {_.map(view.prop('albums'), (item, index) => {
+            return [<li key={item.id()} className="table-view-cell media"
+                onClick={evnt => view.prop('currentAlbum', view.prop('currentAlbum')?.id() === item.id() ? null : item)}
+            >
+                <span className="media-object pull-left player-left--32"
+                >
+                    <div className="region">
+                        <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
+                        </div>
+                    </div>
+                </span>
+                <div className="media-body">
+                    <div>
+                        <span className="song-title">{item.name()}</span>
+                    </div>
+                </div>
+            </li>,
+            view.prop('currentAlbum') === item && <AlbumsView
+                key={item.id() + '-1'}
+                currentTrackId={view.props.currentTrackId}
+                uri={view.prop('currentAlbum')?.uri()}
+                tracks={view.prop('currentTracks')}
+            />
+            ]
+        })}
+        {_.map(view.prop('playlists'), (item, index) => {
+            return [<li key={item.id()} className="table-view-cell media"
+                onClick={evnt => view.prop('currentPlaylist', view.prop('currentPlaylist')?.id() === item.id() ? null : item)}
+            >
+                <span className="media-object pull-left player-left--32"
+                >
+                    <div className="region">
+                        <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
+                        </div>
+                    </div>
+                </span>
+                <div className="media-body">
+                    <div>
+                        <span className="song-title">{item.name()}</span>
+                    </div>
+                </div>
+            </li>,
+            view.prop('currentPlaylist') === item && <AlbumsView
+                key={item.id() + '-2'}
+                currentTrackId={view.props.currentTrackId}
+                uri={view.prop('currentPlaylist')?.uri()}
+                tracks={view.prop('currentTracks')}
+            />]
         })}
     </ul>
 </>;

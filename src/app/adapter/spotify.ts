@@ -36,7 +36,7 @@ export interface IUserInfo {
     };
     href?: string;
     id?: string;
-    images?: Array<any>;
+    images?: IImageInfo[];
     product?: 'open' | string;
     type?: 'user' | string;
     uri?: string;
@@ -56,6 +56,7 @@ export interface IArtist {
     external_urls: {
         spotify: string;
     };
+    images: IImageInfo[];
     spotify: string;
     href: string;
     id: string;

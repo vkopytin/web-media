@@ -4,7 +4,8 @@ import { template } from '../templates/newReleases';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
     NewReleasesViewModel,
-    AlbumViewModelItem
+    AlbumViewModelItem,
+    TrackViewModelItem
 } from '../viewModels';
 import { current } from '../utils';
 
@@ -18,7 +19,8 @@ class NewReleasesView extends BaseView<INewReleasesViewProps, NewReleasesView['s
         openLogin: false,
         releases: [] as AlbumViewModelItem[],
         currentAlbum: null as AlbumViewModelItem,
-        likedAlbums: [] as AlbumViewModelItem[]
+        likedAlbums: [] as AlbumViewModelItem[],
+        tracks: [] as TrackViewModelItem[]
     };
     
     selectAlbumCommand = {

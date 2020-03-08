@@ -44,7 +44,7 @@ class AlbumViewModelItem extends ViewModel {
     }
 
     thumbnailUrl() {
-        return _.first(this.album.images).url;
+        return _.first(this.album.images)?.url;
     }
 
     releaseDate() {

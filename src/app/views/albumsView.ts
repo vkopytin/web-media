@@ -3,15 +3,14 @@ import { template } from '../templates/albums';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
 import {
     TrackViewModelItem,
-    AlbumViewModelItem,
-    NewReleasesViewModel
+    AlbumViewModelItem
 } from '../viewModels';
-import { current } from '../utils';
 
 
 export interface IAlbumsViewProps {
-    album: AlbumViewModelItem;
+    uri: string;
     currentTrackId: string;
+    tracks: TrackViewModelItem[];
 }
 
 class AlbumsView extends BaseView<IAlbumsViewProps, AlbumsView['state']> {
@@ -19,7 +18,9 @@ class AlbumsView extends BaseView<IAlbumsViewProps, AlbumsView['state']> {
         openLogin: false,
         tracks: [] as TrackViewModelItem[],
     };
-    binding = bindTo(this, () => current(NewReleasesViewModel), {
+    binding = bindTo(this, () => {
+        tracks: [] as TrackViewModelItem[]
+    }, {
         'prop(tracks)': 'tracks'
     });
 
@@ -40,8 +41,12 @@ class AlbumsView extends BaseView<IAlbumsViewProps, AlbumsView['state']> {
         unbindFrom(this.binding);
     }
 
+    componentDidUpdate(prevProps: IAlbumsViewProps, prevState, snapshot) {
+        this.prop('tracks', this.props.tracks);
+    }
+
     uri() {
-        return this.props.album.uri();
+        return this.props.uri;
     }
 
     isPlaying(track: TrackViewModelItem) {

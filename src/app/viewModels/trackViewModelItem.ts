@@ -67,7 +67,7 @@ class TrackViewModelItem extends ViewModel {
     }
 
     album() {
-        return this.song.track.album.name;
+        return this.song.track.album?.name || '<Missing album>';
     }
 
     artist() {
@@ -85,7 +85,7 @@ class TrackViewModelItem extends ViewModel {
 
     thumbnailUrl() {
         const image = _.last(this.song.track.album.images);
-        return image.url;
+        return image?.url;
     }
 
     async play(playlistUri: string) {

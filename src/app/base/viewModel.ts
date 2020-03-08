@@ -10,7 +10,7 @@ class ViewModel<S extends IDefaultViewModelProps = IDefaultViewModelProps> exten
     settings = { errors: [] } as S;
 
     prop<K extends keyof S>(propName: K, val?: S[K]): S[K] {
-        if (arguments.length > 1) {
+        if (arguments.length > 1 && val !== (this.settings as any)[propName]) {
             (this.settings as any)[propName] = val;
             this.trigger('change:prop(' + propName + ')');
         }
