@@ -497,3 +497,32 @@ border-bottom-right-radius: 12px;
     width: 16px;
     height: 16px;
 }
+
+.table-view-cell {
+    display: flex;
+
+    .media-body {
+        filter: drop-shadow(2px 4px 6px grey);
+        white-space: nowrap;
+        overflow: visible;
+    }
+
+    .media-object {
+        flex-shrink: 0;
+    }
+
+    .navigate-right {
+        flex-shrink: 0;
+        flex-grow: 1;
+        margin-right: 8px;
+    }
+
+    .chips-list {
+        margin-left: 50px;
+        flex-wrap: wrap;
+    }
+
+    .center {
+        flex: 10;
+    }
+}

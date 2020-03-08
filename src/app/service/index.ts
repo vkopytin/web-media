@@ -456,29 +456,37 @@ class Service {
     }
 
     async addTrackToPlaylist(tracks: ITrack | ITrack[], playlistId: string) {
-        const spotify = await this.service(SpotifyService);
-        if (spotify.isError) {
-            return spotify;
-        }
-        const result = await spotify.val.addTrackToPlaylist(_.map([].concat(tracks), t => t.uri), playlistId);
         const data = await this.service(DataService);
         if (data.isError) {
             return data;
         }
         const addResult = await data.val.addTracksToPlaylist(playlistId, tracks);
         if (addResult.isError) {
-            await spotify.val.removeTrackFromPlaylist(_.map([].concat(tracks), t => t.uri), playlistId);
+            return;
         }
-
-        return result;
-    }
-
-    async removeTrackFromPlaylist(trackUris: string | string[], playlistId: string) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
-        const result = await spotify.val.removeTrackFromPlaylist(trackUris, playlistId);
+        const result = await spotify.val.addTrackToPlaylist(_.map([].concat(tracks), t => t.uri), playlistId);
+
+        return result;
+    }
+
+    async removeTrackFromPlaylist(tracks: ITrack | ITrack[], playlistId: string) {
+        const dataResult = await this.service(DataService);
+        if (dataResult.isError) {
+            return dataResult;
+        }
+        const removeResult = await dataResult.val.removeTrackFromPlaylist(playlistId, tracks);
+        if (removeResult.isError) {
+            return;
+        }
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.removeTrackFromPlaylist(_.map([].concat(tracks), t => t.uri), playlistId);
 
         return result;
     }

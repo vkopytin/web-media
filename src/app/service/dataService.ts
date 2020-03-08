@@ -5,7 +5,7 @@ import { assertNoErrors } from '../utils';
 import * as _ from 'underscore';
 import { DataServiceResult } from './results/dataServiceResult';
 import { IUserPlaylistsResult, ITrack } from '../adapter/spotify';
-import { listPlaylists, listTracksByPlaylist, listMyTracks, initializeStructure, listPlaylistsByTrack, addTrackToPlaylist } from '../data/useCases';
+import { listPlaylists, listTracksByPlaylist, listMyTracks, initializeStructure, listPlaylistsByTrack, addTrackToPlaylist, removeTrackFromPlaylist } from '../data/useCases';
 import { DataStorage } from '../data/dataStorage';
 import { PlaylistsStore } from '../data/entities/playlistsStore';
 import { MyStore } from '../data/entities/myStore';
@@ -105,6 +105,23 @@ class DataService extends withEvents(BaseService) {
                             track,
                             added_at: new Date().toISOString()
                         });
+                    }
+                    storage.complete();
+                    resolve(DataServiceResult.success(true));
+                } catch (ex) {
+                    reject(DataServiceResult.error(ex));
+                }
+            });
+        });
+    }
+
+    async removeTrackFromPlaylist(playlistId: string, tracks: ITrack | ITrack[]) {
+        return new Promise<DataServiceResult<boolean, Error>>((resolve, reject) => {
+            DataStorage.create(async (err, storage) => {
+                try {
+                    const playlists = new PlaylistsStore(storage);
+                    for (const track of [].concat(tracks)) {
+                        await playlists.removeTrack(playlistId, track.id);
                     }
                     storage.complete();
                     resolve(DataServiceResult.success(true));

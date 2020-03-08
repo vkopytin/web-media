@@ -127,11 +127,10 @@ class TrackViewModelItem extends ViewModel {
     }
 
     async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
-        const result = this.ss.removeTrackFromPlaylist(track.uri(), playlist.id());
+        const result = await this.ss.removeTrackFromPlaylist(track.song.track, playlist.id());
         if (assertNoErrors(result, e => this.errors(e))) {
             return;
         }
-        await removeTrackFromPlaylist(playlist.id(), track.id());
         this.loadData('playlistTracks');
     }
 }

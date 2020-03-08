@@ -25,8 +25,8 @@ export const template = (view: MyTracksView) => <>
                             <span className="author-title">{item.artist()}</span>
                     </div>
                     <div className="album-title">{item.album()}</div>
-                    <SelectPlaylistsView track={item} />
                 </div>
+                <SelectPlaylistsView track={item} />
                 {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
                 {item.isLiked() || <span className="badge">{item.duration()}</span>}
             </li>

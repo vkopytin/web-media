@@ -6,16 +6,16 @@ import { SelectPlaylistsView } from '../views';
 
 const cn = utils.className;
 
-export const template = (view: SelectPlaylistsView) => <div>
+export const template = (view: SelectPlaylistsView) => <div className="chips-list">
     {_.map(view.prop('items'), (item) => {
         if (view.playlistHasTrack(item, view.prop('track'))) {
-            return <span className="badge badge-positive" key={item.id()}
+            return <span className="chips chips-positive" key={item.id()}
                 onClick={evnt => view.removeFromPlaylistCommand.exec(view.prop('track'), item)}
             >
                 {item.name()}
             </span>
         }
-        return <span className="badge" key={item.id()}
+        return <span className="chips" key={item.id()}
             onClick={evnt => view.addToPlaylistCommand.exec(view.prop('track'), item)}
         >
             {item.name()}

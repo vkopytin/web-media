@@ -27,7 +27,7 @@ export const template = (view: PlaylistsView) => <>
     </div>
     <ul className="todo-list table-view">
         {_.map(view.prop('playlists'), (item, index) => {
-            return <li key={item.id()} className="table-view-cell media">
+            return [<li key={item.id()} className="table-view-cell media">
                 <a className="navigate-right"
                     onClick={evnt => { view.selectPlaylistCommand.exec(item.id() === view.prop('currentPlaylistId') ? null : item.id()) }}
                 >
@@ -38,19 +38,20 @@ export const template = (view: PlaylistsView) => <>
                     </div>
                     <span className="badge">{item.tracksTotal()}</span>
                 </a>
-                {item.id() === view.prop('currentPlaylistId') && [<TracksView key={1}
-                    showErrors={e => view.props.showErrors(e)}
+            </li>,
+                item.id() === view.prop('currentPlaylistId') && [
+                    <TracksView showErrors={e => view.props.showErrors(e)}
+                        key={1}
                     playlist={item}
                     currentTrackId={view.props.currentTrackId}
-                />,
-                <div key={2} className="center">
+                    />,
+                    <li key={2} className="table-view-cell"><div key={2} className="center">
                     {view.prop('isLoading') || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
                         onClick={evnt => view.loadMoreTracksCommand.exec()}
                     ></button>}
                     {view.prop('isLoading') && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
-                </div>]}
-            </li>
-        })}
+                </div></li>]
+        ]})}
     </ul>
     <div className="center">
         {view.prop('isLoading') || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"

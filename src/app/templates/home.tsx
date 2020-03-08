@@ -15,7 +15,7 @@ export const template = (view: HomeView) => <>
         ></button>
     </div>
     <ul className="todo-list table-view">
-        {_.map(view.prop('items'), (item, index) => [
+        {_.map(view.prop('items'), (item, index) => 
             <li key={item.id()} className="table-view-cell">
                 <span className="media-object pull-left"
                     onClick={evnt => { item.playTracks(view.prop('items')) }}
@@ -36,13 +36,12 @@ export const template = (view: HomeView) => <>
                         <div className="album-title">{item.album()}</div>
                     </div>
                 </a>
+                {(view.prop('selectedItem')) === item &&
+                    <SelectPlaylistsView track={item} />}
                 {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
                 {item.isLiked() || <span className="badge">{item.duration()}</span>}
             </li>
-            ,
-            (view.prop('selectedItem')) === item &&
-            <li key={item.id() + 1} className="table-view-cell table-view-divider"><SelectPlaylistsView track={item} /></li>
-        ])}
+        )}
     </ul>
     <section className="info content-padded">
         <p>Media Player</p>
