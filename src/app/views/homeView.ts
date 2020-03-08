@@ -18,6 +18,7 @@ export interface IHomeViewProps {
 class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
     state = {
         openLogin: false,
+        isLoading: false,
         items: [] as TrackViewModelItem[],
         errors: [] as ServiceResult<any, Error>[],
         likedTracks: [] as TrackViewModelItem[],
@@ -30,6 +31,7 @@ class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
     binding = bindTo(this, () => current(HomeViewModel), {
         'prop(items)': 'tracks',
         'prop(likedTracks)': 'likedTracks',
+        'prop(isLoading)': 'prop(isLoading)',
         'refreshCommand': 'refreshCommand',
         '-errors': 'errors',
         'prop(selectedItem)': 'prop(selectedTrack)',

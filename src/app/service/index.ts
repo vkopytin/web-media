@@ -7,7 +7,7 @@ import * as _ from 'underscore';
 import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult';
 import { SpotifySyncService } from './spotifySyncService';
 import { DataService } from './dataService';
-import { ITrack } from '../adapter/spotify';
+import { ITrack, ISearchType } from '../adapter/spotify';
 
 
 const lockSpotifyService = asyncQueue();
@@ -260,7 +260,7 @@ class Service {
         return result;
     }
 
-    async fetchPlaylistTracks(playlistId, offset=0, limit=20) {
+    async fetchPlaylistTracks(playlistId: string, offset=0, limit=20) {
         const service = await this.service(DataService);
         if (service.isError) {
             return service;
@@ -348,13 +348,13 @@ class Service {
         return result;
     }
 
-    async search(term, offset, limit) {
+    async search(type: ISearchType, term: string, offset = 0, limit = 20) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
 
-        const result = spotify.val.search(term, offset, limit);
+        const result = spotify.val.search(type, term, offset, limit);
 
         return result;
     }
@@ -451,8 +451,16 @@ class Service {
             return spotify;
         }
         const result = await spotify.val.createNewPlaylist(userId, name, description, isPublic);
+        if (result.isError) {
+            return result;
+        }
+        const syncServiceResult = await this.service(SpotifySyncService);
+        if (syncServiceResult.isError) {
+            return;
+        }
+        const syncPlaylistsResult = syncServiceResult.val.syncMyPlaylists();
 
-        return result;
+        return syncPlaylistsResult;
     }
 
     async addTrackToPlaylist(tracks: ITrack | ITrack[], playlistId: string) {

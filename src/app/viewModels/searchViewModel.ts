@@ -2,7 +2,7 @@ import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
-import { ISpotifySong, IRecommendationsResult, IResponseResult, ITrack } from '../adapter/spotify';
+import { ISpotifySong, IRecommendationsResult, IResponseResult, ITrack, ISearchType, ISearchResult } from '../adapter/spotify';
 import { current, asyncQueue } from '../utils';
 
 
@@ -13,13 +13,14 @@ class SearchViewModel extends ViewModel {
     settings = {
         ...(this as ViewModel).settings,
         term: '',
+        searchType: 'track' as ISearchType,
         isLoading: false,
+        tracks: [] as TrackViewModelItem[],
         offset: 0,
         total: 0,
         limit: 20
     };
 
-    trackArray = [] as Array<TrackViewModelItem>;
     loadMoreCommand = {
         exec: () => this.loadMore()
     };
@@ -35,16 +36,18 @@ class SearchViewModel extends ViewModel {
     async fetchData() {
         this.isLoading(true);
         this.settings.offset = 0;
-        const res = await this.ss.search(this.term(), this.settings.offset, this.settings.limit);
+        const res = await this.ss.search(this.searchType(), this.term(), this.settings.offset, this.settings.limit);
         if (res.isError) {
             this.isLoading(false);
             return;
         }
-        const search = res.val as { tracks: IResponseResult<ITrack> };
-        this.settings.total = search.tracks.total;
-        this.settings.offset = search.tracks.offset + Math.min(this.settings.limit, search.tracks.items.length);
-
-        this.tracks(_.map(search.tracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index)));
+        const search = res.val as ISearchResult;
+        if ('tracks' in search) {
+            this.settings.total = search.tracks.total;
+            this.settings.offset = search.tracks.offset + Math.min(this.settings.limit, search.tracks.items.length);
+    
+            this.tracks(_.map(search.tracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index)));
+        }
         this.isLoading(false);
     }
 
@@ -53,16 +56,18 @@ class SearchViewModel extends ViewModel {
             return;
         }
         this.isLoading(true);
-        const res = await this.ss.search(this.term(), this.settings.offset, this.settings.limit);
+        const res = await this.ss.search(this.searchType(), this.term(), this.settings.offset, this.settings.limit);
         if (res.isError) {
             this.isLoading(false);
             return;
         }
-        const search = res.val as { tracks: IResponseResult<ITrack> };
-        this.tracksAddRange(_.map(search.tracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, search.tracks.offset + index)));
+        const search = res.val as ISearchResult;
+        if ('tracks' in search) {
+            this.tracksAddRange(_.map(search.tracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, search.tracks.offset + index)));
 
-        this.settings.total = search.tracks.total;
-        this.settings.offset = search.tracks.offset + Math.min(this.settings.limit, search.tracks.items.length);
+            this.settings.total = search.tracks.total;
+            this.settings.offset = search.tracks.offset + Math.min(this.settings.limit, search.tracks.items.length);
+        }
         this.isLoading(false);
     }
 
@@ -96,16 +101,26 @@ class SearchViewModel extends ViewModel {
     }
 
     tracks(value?: any[]) {
-        if (arguments.length && value !== this.trackArray) {
-            this.trackArray = value;
+        if (arguments.length && value !== this.settings.tracks) {
+            this.settings.tracks = value;
             this.trigger('change:tracks');
         }
 
-        return this.trackArray;
+        return this.settings.tracks;
     }
 
+    searchType(value?: any[]) {
+        if (arguments.length && value !== this.settings.searchType) {
+            this.settings.searchType = value;
+            this.trigger('change:searchType');
+
+            this.fetchData();
+        }
+
+        return this.settings.searchType;
+    }
     tracksAddRange(value: TrackViewModelItem[]) {
-        const array = [...this.trackArray, ...value];
+        const array = [...this.settings.tracks, ...value];
         this.tracks(array);
     }
 

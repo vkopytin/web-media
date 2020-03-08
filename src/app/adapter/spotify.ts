@@ -115,6 +115,13 @@ export interface IResponseResult<T> {
     total: number;
 }
 
+export interface ISearchResult {
+    tracks?: IResponseResult<ITrack>;
+    artists?: IResponseResult<IArtist>;
+    albums?: IResponseResult<IAlbum>;
+    playlists?: IResponseResult<IUserPlaylist>;
+}
+
 export interface IUserPlaylistsResult {
     href: string;
     items: IUserPlaylist[];
@@ -155,6 +162,8 @@ export interface ICurrentlyPlayingResult {
     };
     is_playing: boolean;
 }
+
+export type ISearchType = 'track' | 'album' | 'artist' | 'playlist';
 
 const delayWithin = (ms = 800) => new Promise((resolve) => {
     setTimeout(() => resolve(true), ms);
@@ -526,8 +535,8 @@ class SpotifyAdapter {
         });
     }
 
-    search(term, offset = 0, limit = 20) {
-        return new Promise<IResponseResult<IAlbum>>((resolve, reject) => {
+    search(type: ISearchType, term, offset = 0, limit = 20) {
+        return new Promise<ISearchResult>((resolve, reject) => {
             $.ajax({
                 url: 'https://api.spotify.com/v1/search',
                 headers: {
@@ -535,7 +544,7 @@ class SpotifyAdapter {
                 },
                 data: {
                     q: term,
-                    type: 'track',
+                    type: type,
                     ...offset ? { offset: offset } : {},
                     limit: limit
                 },

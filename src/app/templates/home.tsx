@@ -3,16 +3,19 @@ import * as _ from 'underscore';
 import * as React from 'react';
 import { HomeView } from '../views/homeView';
 import { utils } from 'databindjs';
-import { SelectPlaylistsView } from '../views';
+import { SelectPlaylistsView, PickPlaylistsView } from '../views';
 
 
 const cn = utils.className;
 
 export const template = (view: HomeView) => <>
     <div className="center">
-        <button className=" button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
+        <PickPlaylistsView/>
+        {view.prop('isLoading') || <button className="button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
             onClick={evnt => view.refreshCommand.exec()}
-        ></button>
+        ></button>}
+        {view.prop('isLoading') && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
+        ></button>}
     </div>
     <ul className="todo-list table-view">
         {_.map(view.prop('items'), (item, index) => 

@@ -2,9 +2,9 @@ import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
-import { ISpotifySong, IRecommendationsResult, IResponseResult, ITrack } from '../adapter/spotify';
+import { ISpotifySong, IRecommendationsResult, IResponseResult } from '../adapter/spotify';
 import { current, assertNoErrors } from '../utils';
-import { ServiceResult } from '../base/serviceResult';
+import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 
 class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
@@ -13,7 +13,9 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
         ...(this as any as ViewModel).settings,
         openLogin: false,
         likedTracks: [] as TrackViewModelItem[],
-        selectedTrack: null as TrackViewModelItem
+        selectedTrack: null as TrackViewModelItem,
+        selectedPlaylist: null as PlaylistsViewModelItem,
+        isLoading: false
     };
 
     refreshCommand = {
@@ -51,7 +53,10 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
     }
 
     async fetchData() {
-        const tracksResult = await this.ss.fetchTracks(0, 5);
+        this.prop('isLoading', true);
+        const tracksResult = this.selectedPlaylist()
+            ? await this.ss.fetchPlaylistTracks(this.selectedPlaylist().id(), 0, 20)
+            : await this.ss.fetchTracks(0, 20);
         if (assertNoErrors(tracksResult, e => this.errors(e))) {
             return;
         }
@@ -59,10 +64,14 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
         const artistIds = []; ///_.first(_.uniq(_.flatten(_.map(tracks.items, (song) => _.pluck(song.track.artists, 'id')))), 5);
         const trackIds = _.first(_.uniq(_.map(tracks.items, (song) => song.track.id)), 5);
         const res = await this.ss.fetchRecommendations('US', artistIds, trackIds);
+        if (assertNoErrors(res, e => this.errors(e))) {
+            return;
+        }
         const recomendations = res.val as IRecommendationsResult;
         const newTracks = _.map(recomendations.tracks, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
         this.tracks(newTracks);
         this.checkTracks(newTracks);
+        this.prop('isLoading', false);
     }
 
     async loadData(...args) {
@@ -90,6 +99,16 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
         }
 
         return this.trackArray;
+    }
+
+    selectedPlaylist(value?: PlaylistsViewModelItem) {
+        if (arguments.length && value !== this.settings.selectedPlaylist) {
+            this.settings.selectedPlaylist = value;
+            this.trigger('change:selectedPlaylist');
+            this.fetchData();
+        }
+
+        return this.settings.selectedPlaylist;
     }
 
     likedTracks(val?: TrackViewModelItem[]) {

@@ -10,3 +10,4 @@ export { SearchView } from './searchView';
 export { MediaPlayerView } from './mediaPlayerView';
 export { MyTracksView } from './myTracksView';
 export { SelectPlaylistsView } from './selectPlaylistsView';
+export { PickPlaylistsView } from './pickPlaylistView';

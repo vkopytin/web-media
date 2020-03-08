@@ -7,6 +7,7 @@ import {
 } from '../viewModels';
 import { current } from '../utils';
 import * as _ from 'underscore';
+import { ISearchType } from '../adapter/spotify';
 
 
 export interface ISearchViewProps {
@@ -17,7 +18,8 @@ export interface ISearchViewProps {
 class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
     state = {
         term: '',
-        items: [] as TrackViewModelItem[]
+        items: [] as TrackViewModelItem[],
+        searchType: 'track' as ISearchType
     };
 
     loadMoreCommand = { exec() { } };
@@ -25,6 +27,7 @@ class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
     binding = bindTo(this, () => current(SearchViewModel), {
         'prop(term)': 'term',
         'prop(items)': 'tracks',
+        'prop(searchType)': 'searchType',
         'loadMoreCommand': 'loadMoreCommand'
     });
 
@@ -53,15 +56,6 @@ class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
         if (this.props.loadMore) {
             this.loadMoreCommand.exec();
         }
-    }
-
-    prop<K extends keyof SearchView['state']>(propName: K, val?: SearchView['state'][K]): SearchView['state'][K] {
-        if (arguments.length > 1) {
-            this.state[propName] = val;
-            this.trigger('change:prop(' + propName + ')');
-        }
-
-        return this.state[propName];
     }
 
     isPlaying(track: TrackViewModelItem) {

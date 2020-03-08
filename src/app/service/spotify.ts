@@ -7,7 +7,7 @@ import { SpotifyServiceError } from './errors/spotifyServiceError';
 import { SpotifyServiceUnexpectedError } from './errors/spotifyServiceUnexpectedError';
 import * as _ from 'underscore';
 import * as $ from 'jquery';
-import { SpotifyAdapter, IUserInfo, IDevice } from '../adapter/spotify';
+import { SpotifyAdapter, IUserInfo, IDevice, ISearchType } from '../adapter/spotify';
 import { ISettings } from './settings';
 import { withEvents } from 'databindjs';
 import { debounce } from '../utils';
@@ -273,9 +273,9 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async search(term, offset, limit) {
+    async search(type: ISearchType, term: string, offset = 0, limit = 20) {
         try {
-            const res = await this.adapter.search(term, offset, limit);
+            const res = await this.adapter.search(type, term, offset, limit);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {

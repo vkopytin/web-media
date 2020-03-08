@@ -16,6 +16,20 @@ export const template = (view: SearchView) => <>
             />
         </form>
     </section>
+    <div className="segmented-control">
+        <a className={cn("control-item ?active", view.prop('searchType') === 'track')} href="#create-public"
+            onClick={evnt => { evnt.preventDefault(); view.prop('searchType', 'track') }}
+        >Tracks</a>
+        <a className={cn("control-item ?active", view.prop('searchType') === 'artist')} href="#crate-private"
+            onClick={evnt => { evnt.preventDefault(); view.prop('searchType', 'artist') }}
+        >Artist</a>
+        <a className={cn("control-item ?active", view.prop('searchType') === 'album')} href="#crate-private"
+            onClick={evnt => { evnt.preventDefault(); view.prop('searchType', 'album') }}
+        >Albums</a>
+        <a className={cn("control-item ?active", view.prop('searchType') === 'playlist')} href="#crate-private"
+            onClick={evnt => { evnt.preventDefault(); view.prop('searchType', 'playlist') }}
+        >Playlists</a>
+    </div>
     <ul className="todo-list table-view">
         {_.map(view.prop('items'), (item, index) => {
             return <li key={item.id()} className="table-view-cell media">
@@ -33,8 +47,8 @@ export const template = (view: SearchView) => <>
                             <span className="author-title">{item.artist()}</span>
                     </div>
                     <div className="album-title">{item.album()}</div>
-                    <SelectPlaylistsView track={item} />
                 </div>
+                <SelectPlaylistsView track={item} />
                 {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
                 {item.isLiked() || <span className="badge">{item.duration()}</span>}
             </li>
