@@ -3,15 +3,12 @@
 // --------------------------------------------------
 
 .chips-list {
-  display: flex;
-  flex-wrap: wrap;
   background-color: #1121;
 }
 
 .chips {
+  display: inline-block;
   text-align: center;
-  flex-grow: 1;
-  flex-shrink: 1;
   padding: 4px 8px 4px 8px;
   margin: 2px;
   font-size: 12px;

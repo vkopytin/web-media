@@ -20,7 +20,8 @@ class MyTracksView extends BaseView<IMyTracksViewProps, MyTracksView['state']> {
         items: [] as TrackViewModelItem[],
         isLoading: false,
         currentTrackId: '',
-        likedTracks: [] as TrackViewModelItem[]
+        likedTracks: [] as TrackViewModelItem[],
+        selectedItem: null as TrackViewModelItem
     };
 
     loadMoreCommand = { exec() { } };
@@ -29,7 +30,8 @@ class MyTracksView extends BaseView<IMyTracksViewProps, MyTracksView['state']> {
         'loadMoreCommand': 'loadMoreCommand',
         'prop(items)': 'tracks',
         'prop(likedTracks)': 'likedTracks',
-        'prop(isLoading)': 'isLoading'
+        'prop(isLoading)': 'isLoading',
+        'prop(selectedItem)': 'selectedItem'
     });
 
     searchTracks = _.debounce(term => {

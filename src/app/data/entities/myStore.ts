@@ -109,6 +109,7 @@ class MyStore {
             }
         }
         await this.create({ trackId: track.id, added_at: track['added_at'] });
+        return track;
     }
 
     async removeTrack(track: ITrackRecord) {

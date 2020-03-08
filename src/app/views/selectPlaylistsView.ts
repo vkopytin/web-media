@@ -13,6 +13,7 @@ import { current } from '../utils';
 
 export interface ISelectPlaylistsViewProps {
     track: TrackViewModelItem;
+    active?: boolean;
 }
 
 class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, {}> {

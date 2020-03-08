@@ -17,15 +17,18 @@ export const template = (view: TracksView) => <>
                     <div className="toggle-handle"></div>
                 </label>
             </span>
-            <div className="media-body">
+            <div className="media-body"
+                onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}
+            >
                 <div>
                     <span className="song-title">{item.name()}</span>
                     &nbsp;-&nbsp;
                             <span className="author-title">{item.artist()}</span>
                 </div>
                 <div className="album-title">{item.album()}</div>
-                <SelectPlaylistsView track={item} />
             </div>
+            {(view.prop('selectedItem')) === item && <SelectPlaylistsView track={item} />}
+            {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
             {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
             {item.isLiked() || <span className="badge">{item.duration()}</span>}
         </li>

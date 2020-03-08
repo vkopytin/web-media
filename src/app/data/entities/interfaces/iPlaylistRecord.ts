@@ -11,4 +11,5 @@ export interface IPlaylistRecord {
     };
     images: Array<IImageRecord>;
     owner: IUserRecord;
+    snapshot_id: string;
 }

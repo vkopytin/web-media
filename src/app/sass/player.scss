@@ -499,30 +499,32 @@ border-bottom-right-radius: 12px;
 }
 
 .table-view-cell {
-    display: flex;
+    > .list-item:not(.btn) {
+        position: relative;
+        display: block;
+        padding: inherit;
+        margin: -11px -65px -11px -15px;
+        overflow: hidden;
+        color: inherit;
+    }
 
     .media-body {
         filter: drop-shadow(2px 4px 6px grey);
-        white-space: nowrap;
-        overflow: visible;
+        float: left;
     }
 
     .media-object {
-        flex-shrink: 0;
     }
 
     .navigate-right {
-        flex-shrink: 0;
-        flex-grow: 1;
         margin-right: 8px;
     }
 
     .chips-list {
+        display: inline;
         margin-left: 50px;
-        flex-wrap: wrap;
     }
 
     .center {
-        flex: 10;
     }
 }

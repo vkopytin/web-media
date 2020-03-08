@@ -15,7 +15,7 @@ export const template = (view: SelectPlaylistsView) => <div className="chips-lis
                 {item.name()}
             </span>
         }
-        return <span className="chips" key={item.id()}
+        return view.props.active ? null : <span className="chips" key={item.id()}
             onClick={evnt => view.addToPlaylistCommand.exec(view.prop('track'), item)}
         >
             {item.name()}

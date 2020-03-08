@@ -73,6 +73,7 @@ export interface IUserPlaylist {
     };
     images: Array<IImageInfo>;
     owner: IUserInfo;
+    snapshot_id: string;
 }
 
 export interface ISpotifySong {

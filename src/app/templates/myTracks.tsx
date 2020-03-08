@@ -18,7 +18,9 @@ export const template = (view: MyTracksView) => <>
                         <div className="toggle-handle"></div>
                     </label>
                 </span>
-                <div className="media-body">
+                <div className="media-body"
+                    onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}
+                >
                     <div>
                         <span className="song-title">{item.name()}</span>
                         &nbsp;-&nbsp;
@@ -26,7 +28,8 @@ export const template = (view: MyTracksView) => <>
                     </div>
                     <div className="album-title">{item.album()}</div>
                 </div>
-                <SelectPlaylistsView track={item} />
+                {(view.prop('selectedItem')) === item && <SelectPlaylistsView track={item} />}
+                {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
                 {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
                 {item.isLiked() || <span className="badge">{item.duration()}</span>}
             </li>

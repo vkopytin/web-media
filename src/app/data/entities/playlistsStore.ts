@@ -39,7 +39,8 @@ class PlaylistsStore {
                 added_at: {
                     added_at: {}
                 }
-            }
+            },
+            orderBy: 'added_at'
         };
     }
 
@@ -72,7 +73,7 @@ class PlaylistsStore {
         }
     }
 
-    get(playlistId: string) {
+    get(playlistId: string): Promise<IPlaylistRecord> {
         return asAsync(this.storage, this.storage.getById, this.storeConfig, playlistId);
     }
 

@@ -24,10 +24,10 @@ export const template = (view: HomeView) => <>
                         <div className="toggle-handle"></div>
                     </label>
                 </span>
-                <a className="navigate-right"
-                    onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}
-                >
-                    <div className="media-body">
+                <span className="list-item push-right">
+                    <div className="media-body pull-left"
+                        onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}
+                    >
                         <div>
                             <span className="song-title">{item.name()}</span>
                             &nbsp;-&nbsp;
@@ -35,9 +35,9 @@ export const template = (view: HomeView) => <>
                         </div>
                         <div className="album-title">{item.album()}</div>
                     </div>
-                </a>
-                {(view.prop('selectedItem')) === item &&
-                    <SelectPlaylistsView track={item} />}
+                    {(view.prop('selectedItem')) === item && <SelectPlaylistsView track={item} />}
+                    {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
+                </span>
                 {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
                 {item.isLiked() || <span className="badge">{item.duration()}</span>}
             </li>

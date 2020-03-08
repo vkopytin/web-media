@@ -22,11 +22,13 @@ class TracksView extends BaseView<ITracksViewProps, {}> {
         openLogin: false,
         tracks: [] as TrackViewModelItem[],
         likedTracks: [] as TrackViewModelItem[],
-        errors: [] as ServiceResult<any, Error>[]
+        errors: [] as ServiceResult<any, Error>[],
+        selectedItem: null as TrackViewModelItem
     };
     binding = bindTo(this, () => current(PlaylistsViewModel), {
         'prop(tracks)': 'tracks',
-        'prop(likedTracks)': 'likedTracks'
+        'prop(likedTracks)': 'likedTracks',
+        'prop(selectedItem)': 'selectedItem'
     });
 
     constructor(props) {

@@ -33,16 +33,21 @@ export function initializeStructure() {
 }
 
 export function putPlaylists(playlists: IPlaylistRecord[]) {
-    return asAsync(() => { }, (cb: { (err, result?: boolean): void }) => {
+    return asAsync(() => { }, (cb: { (err, result?: IPlaylistRecord[]): void }) => {
         DataStorage.create((err, storage) => {
             const playlistsStore = new PlaylistsStore(storage);
-            const tasks = _.map(playlists, playlist => {
-                return playlistsStore.refresh(playlist);
+            const tasks = _.map(playlists, async playlist => {
+                const currentPlaylist = await playlistsStore.get(playlist.id);
+                if (currentPlaylist.snapshot_id !== playlist.snapshot_id) {
+                    await playlistsStore.refresh(playlist);
+                    return playlist;
+                }
+                return null;
             });
 
-            Promise.all(tasks).then(() => {
+            Promise.all(tasks).then((result) => {
                 storage.complete();
-                cb(null, true);
+                cb(null, _.compact(result));
             }).catch(ex => cb(ex));
         });
     });
@@ -71,12 +76,13 @@ export function putMyTracks(tracks: ITrackRecord[]) {
         DataStorage.create((err, storage) => {
             const myStore = new MyStore(storage);
             const tasks = _.map(tracks, async (track) => {
-                return await myStore.addTrack(track);
+                const newTrack = await myStore.addTrack(track);
+                return newTrack === track;
             });
 
-            Promise.all(tasks).then(() => {
+            Promise.all(tasks).then((result) => {
                 storage.complete();
-                cb(null, true);
+                cb(null, !!~result.indexOf(true));
             }).catch(ex => cb(ex));
         });
     });
