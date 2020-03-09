@@ -11,7 +11,6 @@ class DeviceViewModelItem extends ViewModel {
         return this.device.id;
     }
 
-
     name() {
         return this.device.name;
     }

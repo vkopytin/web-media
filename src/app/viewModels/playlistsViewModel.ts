@@ -12,6 +12,8 @@ class PlaylistsViewModel extends ViewModel {
 
     settings = {
         ...(this as ViewModel).settings,
+        playlists: [] as PlaylistsViewModelItem[],
+        tracks: [] as TrackViewModelItem[],
         openLogin: false,
         currentPlaylistId: '',
         playlist: {
@@ -30,31 +32,12 @@ class PlaylistsViewModel extends ViewModel {
         newPlaylistName: ''
     };
 
-    selectPlaylistCommand = {
-        exec: (playlistId: string) => {
-            this.currentPlaylistId(playlistId);
-        }
-    };
-    loadMoreCommand = {
-        exec: () => this.loadMore()
-    };
-    loadMoreTracksCommand = {
-        exec: () => this.loadMoreTracks()
-    };
-    createPlaylistCommand = {
-        exec: (isPublic: boolean) => this.createNewPlaylist(isPublic)
-    };
-
-    likeTrackCommand = {
-        exec: (track: TrackViewModelItem) => this.likeTrack(track)
-    };
-
-    unlikeTrackCommand = {
-        exec: (track: TrackViewModelItem) => this.unlikeTrack(track)
-    };
-
-    playlistsArray = [] as PlaylistsViewModelItem[];
-    tracksArray = [] as TrackViewModelItem[];
+    selectPlaylistCommand = { exec: (playlistId: string) => this.currentPlaylistId(playlistId) };
+    loadMoreCommand = { exec: () => this.loadMore() };
+    loadMoreTracksCommand = { exec: () => this.loadMoreTracks() };
+    createPlaylistCommand = { exec: (isPublic: boolean) => this.createNewPlaylist(isPublic) };
+    likeTrackCommand = { exec: (track: TrackViewModelItem) => this.likeTrack(track) };
+    unlikeTrackCommand = { exec: (track: TrackViewModelItem) => this.unlikeTrack(track) };
 
     isInit = _.delay(() => {
         this.connect();
@@ -64,6 +47,70 @@ class PlaylistsViewModel extends ViewModel {
 
     constructor(private ss = current(Service)) {
         super();
+    }
+
+    isLoading(val?) {
+        if (arguments.length && val !== this.settings.isLoading) {
+            this.settings.isLoading = val;
+            this.trigger('change:isLoading');
+        }
+
+        return this.settings.isLoading;
+    }
+
+    playlists(val?: PlaylistsViewModelItem[]) {
+        if (arguments.length && this.settings.playlists !== val) {
+            this.settings.playlists = val;
+            this.trigger('change:playlists');
+        }
+
+        return this.settings.playlists;
+    }
+
+    tracks(val?: TrackViewModelItem[]) {
+        if (arguments.length && this.settings.tracks !== val) {
+            this.settings.tracks = val;
+            this.trigger('change:tracks');
+        }
+
+        return this.settings.tracks;
+    }
+
+    currentPlaylistId(val?: string) {
+        if (arguments.length && this.settings.currentPlaylistId !== val) {
+            this.settings.currentPlaylistId = val;
+            this.trigger('change:currentPlaylistId');
+            _.delay(() => this.fetchTracks());
+        }
+
+        return this.settings.currentPlaylistId;
+    }
+
+    selectedTrack(val: TrackViewModelItem) {
+        if (arguments.length && this.settings.selectedTrack !== val) {
+            this.settings.selectedTrack = val;
+            this.trigger('change:selectedTrack');
+        }
+
+        return this.settings.selectedTrack;
+    }
+
+    newPlaylistName(val?: string) {
+        if (arguments.length && this.settings.newPlaylistName !== val) {
+            this.settings.newPlaylistName = val;
+            this.trigger('change:newPlaylistName');
+        }
+
+        return this.settings.newPlaylistName;
+    }
+
+    likedTracks(val?: TrackViewModelItem[]) {
+        if (arguments.length && this.settings.likedTracks !== val) {
+            this.settings.likedTracks = val;
+            this.trigger('change:likedTracks');
+        }
+
+        return this.settings.likedTracks;
     }
 
     async connect() {
@@ -165,73 +212,9 @@ class PlaylistsViewModel extends ViewModel {
         this.likedTracks(_.filter(this.tracks(), track => track.isLiked()));
     }
 
-    likedTracks(val?: TrackViewModelItem[]) {
-        if (arguments.length && this.settings.likedTracks !== val) {
-            this.settings.likedTracks = val;
-            this.trigger('change:likedTracks');
-        }
-
-        return this.settings.likedTracks;
-    }
-
     playlistsAddRange(value: PlaylistsViewModelItem[]) {
-        const array = [...this.playlistsArray, ...value];
+        const array = [...this.settings.playlists, ...value];
         this.playlists(array);
-    }
-
-    isLoading(val?) {
-        if (arguments.length && val !== this.settings.isLoading) {
-            this.settings.isLoading = val;
-            this.trigger('change:isLoading');
-        }
-
-        return this.settings.isLoading;
-    }
-
-    playlists(val?: PlaylistsViewModelItem[]) {
-        if (arguments.length && this.playlistsArray !== val) {
-            this.playlistsArray = val;
-            this.trigger('change:playlists');
-        }
-
-        return this.playlistsArray;
-    }
-
-    tracks(val?: TrackViewModelItem[]) {
-        if (arguments.length && this.tracksArray !== val) {
-            this.tracksArray = val;
-            this.trigger('change:tracks');
-        }
-
-        return this.tracksArray;
-    }
-
-    currentPlaylistId(val?: string) {
-        if (arguments.length && this.settings.currentPlaylistId !== val) {
-            this.settings.currentPlaylistId = val;
-            this.trigger('change:currentPlaylistId');
-            _.delay(() => this.fetchTracks());
-        }
-
-        return this.settings.currentPlaylistId;
-    }
-
-    selectedTrack(val: TrackViewModelItem) {
-        if (arguments.length && this.settings.selectedTrack !== val) {
-            this.settings.selectedTrack = val;
-            this.trigger('change:selectedTrack');
-        }
-
-        return this.settings.selectedTrack;
-    }
-
-    newPlaylistName(val?: string) {
-        if (arguments.length && this.settings.newPlaylistName !== val) {
-            this.settings.newPlaylistName = val;
-            this.trigger('change:newPlaylistName');
-        }
-
-        return this.settings.newPlaylistName;
     }
 
     async createNewPlaylist(isPublic: boolean) {

@@ -23,18 +23,22 @@ class ArtistViewModelItem extends ViewModel {
         super();
     }
 
-    async connect() {
-        const spotifyResult = await this.ss.service(SpotifyService);
-        if (assertNoErrors(spotifyResult, e => this.errors(e))) {
-            return;
+    playlists(val?: PlaylistsViewModelItem[]) {
+        if (arguments.length && this.settings.playlists !== val) {
+            this.settings.playlists = val;
+            this.trigger('change:playlists');
         }
-        const spotify = spotifyResult.val;
+
+        return this.settings.playlists;
     }
 
-    async loadData(...args) {
-        if (!~args.indexOf('playlistTracks')) {
-            return;
+    isLiked(val?) {
+        if (arguments.length && val !== this.settings.isLiked) {
+            this.settings.isLiked = val;
+            this.trigger('change:isLiked');
         }
+
+        return this.settings.isLiked;
     }
 
     id() {
@@ -54,6 +58,20 @@ class ArtistViewModelItem extends ViewModel {
         return image?.url;
     }
 
+    async connect() {
+        const spotifyResult = await this.ss.service(SpotifyService);
+        if (assertNoErrors(spotifyResult, e => this.errors(e))) {
+            return;
+        }
+        const spotify = spotifyResult.val;
+    }
+
+    async loadData(...args) {
+        if (!~args.indexOf('playlistTracks')) {
+            return;
+        }
+    }
+
     async play() {
         const device = this.appViewModel.currentDevice();
 
@@ -64,24 +82,6 @@ class ArtistViewModelItem extends ViewModel {
         const device = this.appViewModel.currentDevice();
         const playResult = this.ss.play(device?.id(), this.uri());
         assertNoErrors(playResult, e => this.errors(e));
-    }
-
-    playlists(val?: PlaylistsViewModelItem[]) {
-        if (arguments.length && this.settings.playlists !== val) {
-            this.settings.playlists = val;
-            this.trigger('change:playlists');
-        }
-
-        return this.settings.playlists;
-    }
-
-    isLiked(val?) {
-        if (arguments.length && val !== this.settings.isLiked) {
-            this.settings.isLiked = val;
-            this.trigger('change:isLiked');
-        }
-
-        return this.settings.isLiked;
     }
 }
 

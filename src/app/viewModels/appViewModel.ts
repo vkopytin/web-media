@@ -16,13 +16,11 @@ class AppViewModel extends ViewModel {
         currentPanel: 'home' as 'home' | 'profile',
         currentDevice: null as DeviceViewModelItem,
         currentTrackId: '',
+        devices: [] as DeviceViewModelItem[],
         topTracks: [] as TrackViewModelItem[]
     };
 
-    switchDeviceCommand = {
-        exec: (device: DeviceViewModelItem) => this.switchDevice(device)
-    }
-    devicesArray = [] as any[];
+    switchDeviceCommand = { exec: (device: DeviceViewModelItem) => this.switchDevice(device) };
     userInfo = {} as IUserInfo;
 
     isInit = _.delay(() => {
@@ -33,6 +31,69 @@ class AppViewModel extends ViewModel {
 
     constructor(private ss = current(Service)) {
         super();
+    }
+
+    currentPanel(val?) {
+        if (arguments.length) {
+            this.settings.currentPanel = val;
+            this.trigger('change:currentPanel');
+        }
+
+        return this.settings.currentPanel;
+    }
+
+    currentDevice(val?: DeviceViewModelItem) {
+        if (arguments.length) {
+            this.settings.currentDevice = val;
+            this.trigger('change:currentDevice');
+        }
+
+        return this.settings.currentDevice;
+    }
+
+    devices(val?: DeviceViewModelItem[]) {
+        if (arguments.length && this.settings.devices !== val) {
+            this.settings.devices = val;
+            this.trigger('change:devices');
+        }
+
+        return this.settings.devices;
+    }
+
+    profile(val?) {
+        if (arguments.length && this.userInfo !== val) {
+            this.userInfo = val;
+            this.trigger('change:profile');
+        }
+
+        return this.userInfo;
+    }
+
+    currentTrackId(val?) {
+        if (arguments.length && val !== this.settings.currentTrackId) {
+            this.settings.currentTrackId = val;
+            this.trigger('change:currentTrackId');
+        }
+
+        return this.settings.currentTrackId;
+    }
+
+    topTracks(val?) {
+        if (arguments.length && val !== this.settings.topTracks) {
+            this.settings.topTracks = val;
+            this.trigger('change:topTracks');
+        }
+
+        return this.settings.topTracks;
+    }
+
+    openLogin(val?) {
+        if (arguments.length) {
+            this.settings.openLogin = !!val;
+            this.trigger('change:openLogin');
+        }
+
+        return this.settings.openLogin;
     }
 
     async startSync() {
@@ -92,53 +153,8 @@ class AppViewModel extends ViewModel {
             this.devices(_.map(devices, item => new DeviceViewModelItem(item)));
         }
 
-        const currentDevice = _.find(this.devices(), d => d.isActive()) || null;
+        const currentDevice = _.find<DeviceViewModelItem>(this.devices(), d => d.isActive()) || null;
         this.currentDevice(currentDevice);
-    }
-
-    openLogin(val?) {
-        if (arguments.length) {
-            this.settings.openLogin = !!val;
-            this.trigger('change:openLogin');
-        }
-
-        return this.settings.openLogin;
-    }
-
-    currentPanel(val?) {
-        if (arguments.length) {
-            this.settings.currentPanel = val;
-            this.trigger('change:currentPanel');
-        }
-
-        return this.settings.currentPanel;
-    }
-
-    currentDevice(val?: DeviceViewModelItem) {
-        if (arguments.length) {
-            this.settings.currentDevice = val;
-            this.trigger('change:currentDevice');
-        }
-
-        return this.settings.currentDevice;
-    }
-
-    devices(val?) {
-        if (arguments.length && this.devicesArray !== val) {
-            this.devicesArray = val;
-            this.trigger('change:devices');
-        }
-
-        return this.devicesArray;
-    }
-
-    profile(val?) {
-        if (arguments.length && this.userInfo !== val) {
-            this.userInfo = val;
-            this.trigger('change:profile');
-        }
-
-        return this.userInfo;
     }
 
     switchDevice(device: DeviceViewModelItem) {
@@ -146,24 +162,6 @@ class AppViewModel extends ViewModel {
         _.delay(() => {
             this.updateDevices();
         }, 1000);
-    }
-
-    currentTrackId(val?) {
-        if (arguments.length && val !== this.settings.currentTrackId) {
-            this.settings.currentTrackId = val;
-            this.trigger('change:currentTrackId');
-        }
-
-        return this.settings.currentTrackId;
-    }
-
-    topTracks(val?) {
-        if (arguments.length && val !== this.settings.topTracks) {
-            this.settings.topTracks = val;
-            this.trigger('change:topTracks');
-        }
-
-        return this.settings.topTracks;
     }
 }
 

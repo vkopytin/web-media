@@ -33,25 +33,22 @@ class TrackViewModelItem extends ViewModel {
         super();
     }
 
-    async connect() {
-        const spotifyResult = await this.ss.service(SpotifyService);
-        if (assertNoErrors(spotifyResult, e => this.errors(e))) {
-            return;
+    playlists(val?: PlaylistsViewModelItem[]) {
+        if (arguments.length && this.settings.playlists !== val) {
+            this.settings.playlists = val;
+            this.trigger('change:playlists');
         }
-        const spotify = spotifyResult.val;
-        spotify.on('change:state', (...args) => this.loadData(...args));
+
+        return this.settings.playlists;
     }
 
-    async loadData(...args) {
-        if (!~args.indexOf('playlistTracks')) {
-            return;
+    isLiked(val?) {
+        if (arguments.length && val !== this.settings.isLiked) {
+            this.settings.isLiked = val;
+            this.trigger('change:isLiked');
         }
-        const playlistsByTrackResult = await this.ss.listPlaylistsByTrack(this.id());
-        if (assertNoErrors(playlistsByTrackResult, e => this.errors(e))) {
-            return;
-        }
-        const playlists = playlistsByTrackResult.val as IUserPlaylist[];
-        this.playlists(_.map(playlists, playlist => new PlaylistsViewModelItem(playlist)));
+
+        return this.settings.isLiked;
     }
 
     id() {
@@ -84,6 +81,27 @@ class TrackViewModelItem extends ViewModel {
         return image?.url;
     }
 
+    async connect() {
+        const spotifyResult = await this.ss.service(SpotifyService);
+        if (assertNoErrors(spotifyResult, e => this.errors(e))) {
+            return;
+        }
+        const spotify = spotifyResult.val;
+        spotify.on('change:state', (...args) => this.loadData(...args));
+    }
+
+    async loadData(...args) {
+        if (!~args.indexOf('playlistTracks')) {
+            return;
+        }
+        const playlistsByTrackResult = await this.ss.listPlaylistsByTrack(this.id());
+        if (assertNoErrors(playlistsByTrackResult, e => this.errors(e))) {
+            return;
+        }
+        const playlists = playlistsByTrackResult.val as IUserPlaylist[];
+        this.playlists(_.map(playlists, playlist => new PlaylistsViewModelItem(playlist)));
+    }
+
     async play(playlistUri: string) {
         const device = this.appViewModel.currentDevice();
 
@@ -94,24 +112,6 @@ class TrackViewModelItem extends ViewModel {
         const device = this.appViewModel.currentDevice();
         const playResult = this.ss.play(device?.id(), _.map(tracks, item => item.uri()), this.uri());
         assertNoErrors(playResult, e => this.errors(e));
-    }
-
-    playlists(val?: PlaylistsViewModelItem[]) {
-        if (arguments.length && this.settings.playlists !== val) {
-            this.settings.playlists = val;
-            this.trigger('change:playlists');
-        }
-
-        return this.settings.playlists;
-    }
-
-    isLiked(val?) {
-        if (arguments.length && val !== this.settings.isLiked) {
-            this.settings.isLiked = val;
-            this.trigger('change:isLiked');
-        }
-
-        return this.settings.isLiked;
     }
 
     async addToPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {

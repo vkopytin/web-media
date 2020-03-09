@@ -24,56 +24,22 @@ class MediaPlayerViewModel extends ViewModel {
         currentTrack: null as ITrack,
         currentTrackId: '',
         currentTrackUri: '',
-        isLiked: false
+        isLiked: false,
+        tracks: [] as Array<TrackViewModelItem>
     };
 
-    resumeCommand = {
-        exec: () => this.play()
-    };
+    resumeCommand = { exec: () => this.play() };
+    pauseCommand = { exec: () => this.pause() };
+    prevCommand = { exec: () => this.previous() };
+    nextCommand = { exec: () => this.next() };
+    volumeUpCommand = { exec: () => this.volumeUp() };
+    volumeCommand = { exec: (percent) => this.setVolume(percent) };
+    volumeDownCommand = { exec: () => this.volumeDown() };
+    refreshPlaybackCommand = { exec: () => this.fetchData() };
+    likeSongCommand = { exec: () => this.likeTrack() };
+    unlikeSongCommand = { exec: () => this.unlikeTrack() };
+    seekPlaybackCommand = { exec: (percent) => this.manualSeek(percent) };
 
-    pauseCommand = {
-        exec: () => this.pause()
-    }
-
-    prevCommand = {
-        exec: () => this.previous()
-    }
-
-    nextCommand = {
-        exec: () => this.next()
-    }
-
-    volumeUpCommand = {
-        exec: () => this.volumeUp()
-    }
-
-    volumeCommand = {
-        exec: (percent) => this.setVolume(percent)
-    }
-
-    volumeDownCommand = {
-        exec: () => this.volumeDown()
-    }
-
-    refreshPlaybackCommand = {
-        exec: () => {
-            this.fetchData();
-        }
-    }
-
-    likeSongCommand = {
-        exec: () => this.likeTrack()
-    }
-
-    unlikeSongCommand = {
-        exec: () => this.unlikeTrack()
-    }
-
-    seekPlaybackCommand = {
-        exec: (percent) => this.manualSeek(percent)
-    }
-
-    trackArray = [] as Array<TrackViewModelItem>;
     monitorPlyback = _.debounce(this.monitorPlybackInternal, 5 * 1000);
     autoSeek = _.debounce(this.autoSeekInternal, 500);
     fetchData = _.debounce(this.fetchDataInternal, 500);
@@ -84,6 +50,123 @@ class MediaPlayerViewModel extends ViewModel {
         super();
 
         _.delay(() => this.connect());
+    }
+
+    queue(val?: TrackViewModelItem[]) {
+        if (arguments.length && val !== this.settings.tracks) {
+            this.settings.tracks = val;
+            this.trigger('change:queue');
+        }
+
+        return this.settings.tracks;
+    }
+
+    isPlaying(val?: boolean) {
+        if (arguments.length && val !== this.settings.isPlaying) {
+            this.settings.isPlaying = val;
+            this.trigger('change:isPlaying');
+        }
+
+        return this.settings.isPlaying;
+    }
+
+    timePlayed(val?: number) {
+        if (arguments.length && val !== this.settings.timePlayed) {
+            this.settings.timePlayed = val;
+            this.trigger('change:timePlayed');
+        }
+
+        return this.settings.timePlayed;
+    }
+
+    duration(val?: number) {
+        if (arguments.length && val !== this.settings.duration) {
+            this.settings.duration = val;
+            this.trigger('change:duration');
+        }
+
+        return this.settings.duration;
+    }
+
+    trackName(val?: string) {
+        if (arguments.length && val !== this.settings.trackName) {
+            this.settings.trackName = val;
+            this.trigger('change:trackName');
+        }
+
+        return this.settings.trackName;
+    }
+
+    albumName(val?: string) {
+        if (arguments.length && val !== this.settings.albumName) {
+            this.settings.albumName = val;
+            this.trigger('change:albumName');
+        }
+
+        return this.settings.albumName;
+    }
+
+    artistName(val?: string) {
+        if (arguments.length && val !== this.settings.artistName) {
+            this.settings.artistName = val;
+            this.trigger('change:artistName');
+        }
+
+        return this.settings.artistName;
+    }
+
+    volume(val?: number) {
+        if (arguments.length && val !== this.settings.volume) {
+            this.settings.volume = val;
+            this.trigger('change:volume');
+        }
+
+        return this.settings.volume;
+    }
+
+    thumbnailUrl(val?) {
+        if (arguments.length && val !== this.settings.thumbnailUrl) {
+            this.settings.thumbnailUrl = val;
+            this.trigger('change:thumbnailUrl');
+        }
+
+        return this.settings.thumbnailUrl;
+    }
+
+    currentTrackId(val?) {
+        if (arguments.length && val !== this.settings.currentTrackId) {
+            this.settings.currentTrackId = val;
+            this.trigger('change:currentTrackId');
+        }
+
+        return this.settings.currentTrackId;
+    }
+
+    currentTrack(val?) {
+        if (arguments.length && val !== this.settings.currentTrack) {
+            this.settings.currentTrack = val;
+            this.trigger('change:currentTrack');
+        }
+
+        return this.settings.currentTrack;
+    }
+
+    currentTrackUri(val?) {
+        if (arguments.length && val !== this.settings.currentTrackUri) {
+            this.settings.currentTrackUri = val;
+            this.trigger('change:currentTrackUri');
+        }
+
+        return this.settings.currentTrackUri;
+    }
+
+    isLiked(val?) {
+        if (arguments.length && val !== this.settings.isLiked) {
+            this.settings.isLiked = !!val;
+            this.trigger('change:isLiked');
+        }
+
+        return this.settings.isLiked;
     }
 
     async connect() {
@@ -135,7 +218,7 @@ class MediaPlayerViewModel extends ViewModel {
         if (assertNoErrors(playerResult, e => this.errors(e))) {
             return;
         }
-        this.volume(playerResult.val.getVolume());
+        this.volume(await playerResult.val.getVolume());
     }
 
     async fetchDataInternal() {
@@ -211,7 +294,7 @@ class MediaPlayerViewModel extends ViewModel {
         }, this));
     }
 
-    async setVolume(percent) {
+    async setVolume(percent: number) {
         lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
             const stateResult = await this.ss.spotifyPlayerState();
             if (assertNoErrors(stateResult, e => this.errors(e))) {
@@ -375,132 +458,14 @@ class MediaPlayerViewModel extends ViewModel {
         });
     }
 
-    queue(value?: any[]) {
-        if (arguments.length && value !== this.trackArray) {
-            this.trackArray = value;
-            this.trigger('change:queue');
-        }
-
-        return this.trackArray;
-    }
-
     playInTracks(item: TrackViewModelItem) {
-        item.playTracks(this.queue());
+        return item.playTracks(this.queue());
     }
 
     async resume() {
         const playerResult= await this.ss.spotifyPlayer();
         playerResult.val.resume();
     }
-
-    isPlaying(val?) {
-        if (arguments.length && val !== this.settings.isPlaying) {
-            this.settings.isPlaying = val;
-            this.trigger('change:isPlaying');
-        }
-
-        return this.settings.isPlaying;
-    }
-
-    timePlayed(val?) {
-        if (arguments.length && val !== this.settings.timePlayed) {
-            this.settings.timePlayed = val;
-            this.trigger('change:timePlayed');
-        }
-
-        return this.settings.timePlayed;
-    }
-
-    duration(val?) {
-        if (arguments.length && val !== this.settings.duration) {
-            this.settings.duration = val;
-            this.trigger('change:duration');
-        }
-
-        return this.settings.duration;
-    }
-
-    trackName(val?) {
-        if (arguments.length && val !== this.settings.trackName) {
-            this.settings.trackName = val;
-            this.trigger('change:trackName');
-        }
-
-        return this.settings.trackName;
-    }
-
-    albumName(val?) {
-        if (arguments.length && val !== this.settings.albumName) {
-            this.settings.albumName = val;
-            this.trigger('change:albumName');
-        }
-
-        return this.settings.albumName;
-    }
-
-    artistName(val?) {
-        if (arguments.length && val !== this.settings.artistName) {
-            this.settings.artistName = val;
-            this.trigger('change:artistName');
-        }
-
-        return this.settings.artistName;
-    }
-
-    volume(val?) {
-        if (arguments.length && val !== this.settings.volume) {
-            this.settings.volume = val;
-            this.trigger('change:volume');
-        }
-
-        return this.settings.volume;
-    }
-
-    thumbnailUrl(val?) {
-        if (arguments.length && val !== this.settings.thumbnailUrl) {
-            this.settings.thumbnailUrl = val;
-            this.trigger('change:thumbnailUrl');
-        }
-
-        return this.settings.thumbnailUrl;
-    }
-
-    currentTrackId(val?) {
-        if (arguments.length && val !== this.settings.currentTrackId) {
-            this.settings.currentTrackId = val;
-            this.trigger('change:currentTrackId');
-        }
-
-        return this.settings.currentTrackId;
-    }
-
-    currentTrack(val?) {
-        if (arguments.length && val !== this.settings.currentTrack) {
-            this.settings.currentTrack = val;
-            this.trigger('change:currentTrack');
-        }
-
-        return this.settings.currentTrack;
-    }
-
-    currentTrackUri(val?) {
-        if (arguments.length && val !== this.settings.currentTrackUri) {
-            this.settings.currentTrackUri = val;
-            this.trigger('change:currentTrackUri');
-        }
-
-        return this.settings.currentTrackUri;
-    }
-
-    isLiked(val?) {
-        if (arguments.length && val !== this.settings.isLiked) {
-            this.settings.isLiked = !!val;
-            this.trigger('change:isLiked');
-        }
-
-        return this.settings.isLiked;
-    }
 }
 
 export { MediaPlayerViewModel };
-

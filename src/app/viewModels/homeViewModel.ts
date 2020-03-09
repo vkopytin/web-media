@@ -12,30 +12,17 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
     settings = {
         ...(this as any as ViewModel).settings,
         openLogin: false,
+        tracks: [] as Array<TrackViewModelItem>,
         likedTracks: [] as TrackViewModelItem[],
         selectedTrack: null as TrackViewModelItem,
         selectedPlaylist: null as PlaylistsViewModelItem,
         isLoading: false
     };
 
-    refreshCommand = {
-        exec: () => this.fetchData()
-    };
-
-    selectTrackCommand = {
-        exec: (track: TrackViewModelItem) => this.prop('selectedTrack', track)
-        
-    };
-
-    likeTrackCommand = {
-        exec: (track: TrackViewModelItem) => this.likeTrack(track)
-    };
-
-    unlikeTrackCommand = {
-        exec: (track: TrackViewModelItem) => this.unlikeTrack(track)
-    };
-
-    trackArray = [] as Array<TrackViewModelItem>;
+    refreshCommand = { exec: () => this.fetchData() };
+    selectTrackCommand = { exec: (track: TrackViewModelItem) => this.prop('selectedTrack', track) };
+    likeTrackCommand = { exec: (track: TrackViewModelItem) => this.likeTrack(track) };
+    unlikeTrackCommand = { exec: (track: TrackViewModelItem) => this.unlikeTrack(track) };
 
     isInit = _.delay(() => {
         this.connect();
@@ -46,6 +33,34 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
         super();
 
         this.ss.spotifyPlayer();
+    }
+
+    tracks(val?: any[]) {
+        if (arguments.length && val !== this.settings.tracks) {
+            this.settings.tracks = val;
+            this.trigger('change:tracks');
+        }
+
+        return this.settings.tracks;
+    }
+
+    selectedPlaylist(val?: PlaylistsViewModelItem) {
+        if (arguments.length && val !== this.settings.selectedPlaylist) {
+            this.settings.selectedPlaylist = val;
+            this.trigger('change:selectedPlaylist');
+            this.fetchData();
+        }
+
+        return this.settings.selectedPlaylist;
+    }
+
+    likedTracks(val?: TrackViewModelItem[]) {
+        if (arguments.length && this.settings.likedTracks !== val) {
+            this.settings.likedTracks = val;
+            this.trigger('change:likedTracks');
+        }
+
+        return this.settings.likedTracks;
     }
 
     async connect() {
@@ -97,40 +112,12 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
         });
     }
 
-    tracks(value?: any[]) {
-        if (arguments.length && value !== this.trackArray) {
-            this.trackArray = value;
-            this.trigger('change:tracks');
-        }
-
-        return this.trackArray;
-    }
-
-    selectedPlaylist(value?: PlaylistsViewModelItem) {
-        if (arguments.length && value !== this.settings.selectedPlaylist) {
-            this.settings.selectedPlaylist = value;
-            this.trigger('change:selectedPlaylist');
-            this.fetchData();
-        }
-
-        return this.settings.selectedPlaylist;
-    }
-
-    likedTracks(val?: TrackViewModelItem[]) {
-        if (arguments.length && this.settings.likedTracks !== val) {
-            this.settings.likedTracks = val;
-            this.trigger('change:likedTracks');
-        }
-
-        return this.settings.likedTracks;
-    }
-
     loadMore() {
 
     }
 
     playInTracks(item: TrackViewModelItem) {
-        item.playTracks(this.tracks());
+        return item.playTracks(this.tracks());
     }
 
     async resume() {

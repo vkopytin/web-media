@@ -14,13 +14,11 @@ class MyTracksViewModel extends ViewModel {
         limit: 20,
         offset: 0,
         isLoading: false,
-        likedTracks: [] as TrackViewModelItem[]
+        likedTracks: [] as TrackViewModelItem[],
+        tracks: [] as TrackViewModelItem[]
     };
 
-    loadMoreCommand = {
-        exec: () => this.loadMore()
-    }
-    trackArray = [] as Array<TrackViewModelItem>;
+    loadMoreCommand = { exec: () => this.loadMore() };
 
     isInit = _.delay(() => {
         this.connect();
@@ -29,6 +27,33 @@ class MyTracksViewModel extends ViewModel {
 
     constructor(private ss = current(Service)) {
         super();
+    }
+
+    likedTracks(val?: TrackViewModelItem[]) {
+        if (arguments.length && this.settings.likedTracks !== val) {
+            this.settings.likedTracks = val;
+            this.trigger('change:likedTracks');
+        }
+
+        return this.settings.likedTracks;
+    }
+
+    isLoading(val?) {
+        if (arguments.length && val !== this.settings.isLoading) {
+            this.settings.isLoading = val;
+            this.trigger('change:isLoading');
+        }
+
+        return this.settings.isLoading;
+    }
+
+    tracks(val?: any[]) {
+        if (arguments.length && val !== this.settings.tracks) {
+            this.settings.tracks = val;
+            this.trigger('change:tracks');
+        }
+
+        return this.settings.tracks;
     }
 
     async connect() {
@@ -100,35 +125,8 @@ class MyTracksViewModel extends ViewModel {
         this.likedTracks(_.filter(this.tracks(), track => track.isLiked()));
     }
 
-    likedTracks(val?: TrackViewModelItem[]) {
-        if (arguments.length && this.settings.likedTracks !== val) {
-            this.settings.likedTracks = val;
-            this.trigger('change:likedTracks');
-        }
-
-        return this.settings.likedTracks;
-    }
-
-    isLoading(val?) {
-        if (arguments.length && val !== this.settings.isLoading) {
-            this.settings.isLoading = val;
-            this.trigger('change:isLoading');
-        }
-
-        return this.settings.isLoading;
-    }
-
-    tracks(value?: any[]) {
-        if (arguments.length && value !== this.trackArray) {
-            this.trackArray = value;
-            this.trigger('change:tracks');
-        }
-
-        return this.trackArray;
-    }
-
     tracksAddRange(value: TrackViewModelItem[]) {
-        const array = [...this.trackArray, ...value];
+        const array = [...this.settings.tracks, ...value];
         this.tracks(array);
     }
 

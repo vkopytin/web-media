@@ -32,9 +32,7 @@ class SearchViewModel extends ViewModel {
         currentTracks: [] as TrackViewModelItem[]
     };
 
-    loadMoreCommand = {
-        exec: () => this.loadMore()
-    };
+    loadMoreCommand = { exec: () => this.loadMore() };
 
     isInit = _.delay(() => this.fetchData(), 100);
 
@@ -42,6 +40,123 @@ class SearchViewModel extends ViewModel {
         super();
 
         this.ss.spotifyPlayer();
+    }
+
+    isLoading(val?) {
+        if (arguments.length && val !== this.settings.isLoading) {
+            this.settings.isLoading = val;
+            this.trigger('change:isLoading');
+        }
+
+        return this.settings.isLoading;
+    }
+
+    term(val?) {
+        if (arguments.length && val !== this.settings.term) {
+            this.settings.term = val;
+            this.trigger('change:term');
+
+            searchQueue.push(_.bind(async function (this: SearchViewModel, next) {
+                if (this.settings.term) {
+                    await this.fetchData();
+                    next();
+                } else {
+                    this.tracks([]);
+                    next();
+                }
+            }, this));
+        }
+
+        return this.settings.term;
+    }
+
+    tracks(val?: any[]) {
+        if (arguments.length && val !== this.settings.tracks) {
+            this.settings.tracks = val;
+            this.trigger('change:tracks');
+        }
+
+        return this.settings.tracks;
+    }
+
+    artists(val?: any[]) {
+        if (arguments.length && val !== this.settings.artists) {
+            this.settings.artists = val;
+            this.trigger('change:artists');
+        }
+
+        return this.settings.artists;
+    }
+
+    albums(val?: any[]) {
+        if (arguments.length && val !== this.settings.albums) {
+            this.settings.albums = val;
+            this.trigger('change:albums');
+        }
+
+        return this.settings.albums;
+    }
+
+    playlists(val?: any[]) {
+        if (arguments.length && val !== this.settings.playlists) {
+            this.settings.playlists = val;
+            this.trigger('change:playlists');
+        }
+
+        return this.settings.playlists;
+    }
+
+    searchType(val?: any[]) {
+        if (arguments.length && val !== this.settings.searchType) {
+            this.settings.searchType = val;
+            this.trigger('change:searchType');
+
+            this.fetchData();
+        }
+
+        return this.settings.searchType;
+    }
+
+    currentAlbum(val?: AlbumViewModelItem) {
+        if (arguments.length && val !== this.settings.currentAlbum) {
+            this.settings.currentAlbum = val;
+            this.trigger('change:currentAlbum');
+
+            this.fetchTracks();
+        }
+
+        return this.settings.currentAlbum;
+    }
+
+    currentPlaylist(val?: PlaylistsViewModelItem) {
+        if (arguments.length && val !== this.settings.currentPlaylist) {
+            this.settings.currentPlaylist = val;
+            this.trigger('change:currentPlaylist');
+
+            this.fetchTracks();
+        }
+
+        return this.settings.currentPlaylist;
+    }
+
+    currentArtist(val?: ArtistViewModelItem) {
+        if (arguments.length && val !== this.settings.currentArtist) {
+            this.settings.currentArtist = val;
+            this.trigger('change:currentArtist');
+
+            this.fetchTracks();
+        }
+
+        return this.settings.currentArtist;
+    }
+
+    currentTracks(val?: TrackViewModelItem[]) {
+        if (arguments.length && val !== this.settings.currentTracks) {
+            this.settings.currentTracks = val;
+            this.trigger('change:currentTracks');
+        }
+
+        return this.settings.currentTracks;
     }
 
     async fetchData() {
@@ -147,125 +262,6 @@ class SearchViewModel extends ViewModel {
             const tracksModels = _.map(tracksResult.tracks, (item, index) => new TrackViewModelItem({ track: item } as any, index));
             this.currentTracks(tracksModels);
         }
-    }
-
-    isLoading(val?) {
-        if (arguments.length && val !== this.settings.isLoading) {
-            this.settings.isLoading = val;
-            this.trigger('change:isLoading');
-        }
-
-        return this.settings.isLoading;
-    }
-
-
-    term(val?) {
-        if (arguments.length && val !== this.settings.term) {
-            this.settings.term = val;
-            this.trigger('change:term');
-
-            searchQueue.push(_.bind(async function (this: SearchViewModel, next) {
-                if (this.settings.term) {
-                    await this.fetchData();
-                    next();
-                } else {
-                    this.tracks([]);
-                    next();
-                }
-            }, this));
-        }
-
-        return this.settings.term;
-    }
-
-    tracks(value?: any[]) {
-        if (arguments.length && value !== this.settings.tracks) {
-            this.settings.tracks = value;
-            this.trigger('change:tracks');
-        }
-
-        return this.settings.tracks;
-    }
-
-    artists(value?: any[]) {
-        if (arguments.length && value !== this.settings.artists) {
-            this.settings.artists = value;
-            this.trigger('change:artists');
-        }
-
-        return this.settings.artists;
-    }
-
-    albums(value?: any[]) {
-        if (arguments.length && value !== this.settings.albums) {
-            this.settings.albums = value;
-            this.trigger('change:albums');
-        }
-
-        return this.settings.albums;
-    }
-
-    playlists(value?: any[]) {
-        if (arguments.length && value !== this.settings.playlists) {
-            this.settings.playlists = value;
-            this.trigger('change:playlists');
-        }
-
-        return this.settings.playlists;
-    }
-
-    searchType(value?: any[]) {
-        if (arguments.length && value !== this.settings.searchType) {
-            this.settings.searchType = value;
-            this.trigger('change:searchType');
-
-            this.fetchData();
-        }
-
-        return this.settings.searchType;
-    }
-
-    currentAlbum(value?: AlbumViewModelItem) {
-        if (arguments.length && value !== this.settings.currentAlbum) {
-            this.settings.currentAlbum = value;
-            this.trigger('change:currentAlbum');
-
-            this.fetchTracks();
-        }
-
-        return this.settings.currentAlbum;
-    }
-
-    currentPlaylist(value?: PlaylistsViewModelItem) {
-        if (arguments.length && value !== this.settings.currentPlaylist) {
-            this.settings.currentPlaylist = value;
-            this.trigger('change:currentPlaylist');
-
-            this.fetchTracks();
-        }
-
-        return this.settings.currentPlaylist;
-    }
-
-    currentArtist(value?: ArtistViewModelItem) {
-        if (arguments.length && value !== this.settings.currentArtist) {
-            this.settings.currentArtist = value;
-            this.trigger('change:currentArtist');
-
-            this.fetchTracks();
-        }
-
-        return this.settings.currentArtist;
-    }
-
-
-    currentTracks(value?: TrackViewModelItem[]) {
-        if (arguments.length && value !== this.settings.currentTracks) {
-            this.settings.currentTracks = value;
-            this.trigger('change:currentTracks');
-        }
-
-        return this.settings.currentTracks;
     }
 
     tracksAddRange(value: TrackViewModelItem[]) {

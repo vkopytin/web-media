@@ -14,6 +14,15 @@ class AlbumViewModelItem extends ViewModel {
         super();
     }
 
+    isLiked(val?) {
+        if (arguments.length && val !== this.settings.isLiked) {
+            this.settings.isLiked = val;
+            this.trigger('change:isLiked');
+        }
+
+        return this.settings.isLiked;
+    }
+
     id() {
         return this.album.id;
     }
@@ -53,15 +62,6 @@ class AlbumViewModelItem extends ViewModel {
 
     totalTracks() {
         return this.album.total_tracks;
-    }
-
-    isLiked(val?) {
-        if (arguments.length && val !== this.settings.isLiked) {
-            this.settings.isLiked = val;
-            this.trigger('change:isLiked');
-        }
-
-        return this.settings.isLiked;
     }
 }
 
