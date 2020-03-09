@@ -1,12 +1,9 @@
+import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
 import { BaseView } from '../base/baseView';
-import { template } from '../templates/home';
-import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import {
-    HomeViewModel,
-    TrackViewModelItem
-} from '../viewModels';
-import { current } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
+import { template } from '../templates/home';
+import { current } from '../utils';
+import { HomeViewModel, TrackViewModelItem } from '../viewModels';
 
 
 export interface IHomeViewProps {
@@ -17,10 +14,10 @@ export interface IHomeViewProps {
 
 class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
     state = {
+        errors: [] as ServiceResult<any, Error>[],
         openLogin: false,
         isLoading: false,
         items: [] as TrackViewModelItem[],
-        errors: [] as ServiceResult<any, Error>[],
         likedTracks: [] as TrackViewModelItem[],
         selectedItem: null as TrackViewModelItem
     };
@@ -31,6 +28,7 @@ class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
     unlikeTrackCommand = { exec(track: TrackViewModelItem) { } };
 
     binding = bindTo(this, () => current(HomeViewModel), {
+        '-errors': 'errors',
         'refreshCommand': 'refreshCommand',
         'selectTrackCommand': 'selectTrackCommand',
         'likeTrackCommand': 'likeTrackCommand',
@@ -38,7 +36,6 @@ class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
         'prop(items)': 'tracks',
         'prop(likedTracks)': 'likedTracks',
         'prop(isLoading)': 'prop(isLoading)',
-        '-errors': 'errors',
         'prop(selectedItem)': 'prop(selectedTrack)'
     });
 
@@ -73,3 +70,4 @@ class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
 }
 
 export { HomeView };
+

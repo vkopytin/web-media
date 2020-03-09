@@ -1,14 +1,10 @@
+import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
 import * as _ from 'underscore';
 import { BaseView } from '../base/baseView';
+import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/selectPlaylists';
-import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import {
-    DeviceViewModelItem,
-    PlaylistsViewModel,
-    PlaylistsViewModelItem,
-    TrackViewModelItem
-} from '../viewModels';
 import { current } from '../utils';
+import { DeviceViewModelItem, PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 
 export interface ISelectPlaylistsViewProps {
@@ -16,13 +12,14 @@ export interface ISelectPlaylistsViewProps {
     active?: boolean;
 }
 
-class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, {}> {
+class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, SelectPlaylistsView['state']> {
     playlistsViewModel = current(PlaylistsViewModel);
 
     state = {
+        errors: [] as ServiceResult<any, Error>[],
         items: [] as PlaylistsViewModelItem[],
         playlists: [] as PlaylistsViewModelItem[],
-        track: this.props.track
+        track: null as TrackViewModelItem
     };
 
     switchDeviceCommand = {
@@ -38,15 +35,16 @@ class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, {}> {
     fetchData = () => { };
 
     binding = bindTo(this, () => this.state.track, {
+        'addToPlaylistCommand': 'addToPlaylistCommand',
+        'removeFromPlaylistCommand': 'removeFromPlaylistCommand',
         'prop(items)': '.playlistsViewModel.playlists',
         'fetchData': '.playlistsViewModel.getchData',
-        'prop(playlists)': 'playlists',
-        'addToPlaylistCommand': 'addToPlaylistCommand',
-        'removeFromPlaylistCommand': 'removeFromPlaylistCommand'
+        'prop(playlists)': 'playlists'
     });
 
     constructor(props) {
         super(props);
+        this.state.track = this.props.track;
         subscribeToChange(this.binding, () => {
             this.setState({
                 ...this.state
@@ -66,15 +64,6 @@ class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, {}> {
         this.prop('track', this.props.track);
     }
 
-    prop<K extends keyof SelectPlaylistsView['state']>(propName: K, val?: SelectPlaylistsView['state'][K]): SelectPlaylistsView['state'][K] {
-        if (arguments.length > 1) {
-            this.state[propName] = val;
-            super.trigger('change:prop(' + propName + ')');
-        }
-
-        return this.state[propName];
-    }
-
     addToPlaylist(playlist: PlaylistsViewModelItem) {
 
     }
@@ -89,3 +78,4 @@ class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, {}> {
 }
 
 export { SelectPlaylistsView };
+

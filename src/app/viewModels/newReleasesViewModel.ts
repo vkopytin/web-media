@@ -1,11 +1,10 @@
+import * as _ from 'underscore';
+import { IAlbum, IResponseResult, ITrack } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
-import { TrackViewModelItem } from './trackViewModelItem';
-import * as _ from 'underscore';
-import { IResponseResult, IAlbum, ITrack } from '../adapter/spotify';
+import { assertNoErrors, current } from '../utils';
 import { AlbumViewModelItem } from './albumViewModelItem';
-import { current, assertNoErrors } from '../utils';
-import { ServiceResult } from '../base/serviceResult';
+import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class NewReleasesViewModel extends ViewModel {
@@ -155,3 +154,4 @@ class NewReleasesViewModel extends ViewModel {
 }
 
 export { NewReleasesViewModel };
+

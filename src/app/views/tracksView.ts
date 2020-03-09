@@ -1,14 +1,9 @@
-import { BaseView } from '../base/baseView';
-import { template } from '../templates/tracks';
 import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import {
-    PlaylistsViewModel,
-    TrackViewModelItem,
-    PlaylistsViewModelItem,
-    AlbumViewModelItem
-} from '../viewModels';
-import { current } from '../utils';
+import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
+import { template } from '../templates/tracks';
+import { current } from '../utils';
+import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 
 export interface ITracksViewProps {
@@ -17,12 +12,12 @@ export interface ITracksViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
 }
 
-class TracksView extends BaseView<ITracksViewProps, {}> {
+class TracksView extends BaseView<ITracksViewProps, TracksView['state']> {
     state = {
+        errors: [] as ServiceResult<any, Error>[],
         openLogin: false,
         tracks: [] as TrackViewModelItem[],
         likedTracks: [] as TrackViewModelItem[],
-        errors: [] as ServiceResult<any, Error>[],
         selectedItem: null as TrackViewModelItem
     };
 
@@ -30,11 +25,11 @@ class TracksView extends BaseView<ITracksViewProps, {}> {
     unlikeTrackCommand = { exec(track: TrackViewModelItem) { } };
 
     binding = bindTo(this, () => current(PlaylistsViewModel), {
+        'likeTrackCommand': 'likeTrackCommand',
+        'unlikeTrackCommand': 'unlikeTrackCommand',
         'prop(tracks)': 'tracks',
         'prop(likedTracks)': 'likedTracks',
-        'prop(selectedItem)': 'selectedItem',
-        'likeTrackCommand': 'likeTrackCommand',
-        'unlikeTrackCommand': 'unlikeTrackCommand'
+        'prop(selectedItem)': 'selectedItem'
     });
 
     constructor(props) {
@@ -52,15 +47,6 @@ class TracksView extends BaseView<ITracksViewProps, {}> {
 
     componentWillUnmount() {
         unbindFrom(this.binding);
-    }
-
-    prop<K extends keyof TracksView['state']>(propName: K, val?: TracksView['state'][K]): TracksView['state'][K] {
-        if (arguments.length > 1) {
-            this.state[propName] = val;
-            this.trigger('change:prop(' + propName + ')');
-        }
-
-        return this.state[propName];
     }
 
     uri() {
@@ -86,3 +72,4 @@ class TracksView extends BaseView<ITracksViewProps, {}> {
 }
 
 export { TracksView };
+

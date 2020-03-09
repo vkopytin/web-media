@@ -1,10 +1,8 @@
+import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
 import { BaseView } from '../base/baseView';
+import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/albums';
-import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import {
-    TrackViewModelItem,
-    AlbumViewModelItem
-} from '../viewModels';
+import { TrackViewModelItem } from '../viewModels';
 
 
 export interface IAlbumsViewProps {
@@ -15,6 +13,7 @@ export interface IAlbumsViewProps {
 
 class AlbumsView extends BaseView<IAlbumsViewProps, AlbumsView['state']> {
     state = {
+        errors: [] as ServiceResult<any, Error>[],
         openLogin: false,
         tracks: [] as TrackViewModelItem[],
     };
@@ -59,3 +58,4 @@ class AlbumsView extends BaseView<IAlbumsViewProps, AlbumsView['state']> {
 }
 
 export { AlbumsView };
+

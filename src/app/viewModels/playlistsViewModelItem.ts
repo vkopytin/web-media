@@ -1,8 +1,6 @@
-import { ViewModel } from '../base/viewModel';
 import * as _ from 'underscore';
 import { IUserPlaylist } from '../adapter/spotify';
-import { TrackViewModelItem } from './trackViewModelItem';
-import { Service } from '../service';
+import { ViewModel } from '../base/viewModel';
 import sanitizeHtml = require('sanitize-html');
 
 
@@ -57,3 +55,4 @@ class PlaylistsViewModelItem extends ViewModel {
 }
 
 export { PlaylistsViewModelItem };
+

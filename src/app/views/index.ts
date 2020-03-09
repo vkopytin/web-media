@@ -1,13 +1,14 @@
-export { NewReleasesView } from './newReleasesView';
+export { AlbumsView } from './albumsView';
 export { AppView } from './app';
 export { DevicesView } from './devicesView';
-export { PlaylistsView } from './playlistsView';
 export { HomeView } from './homeView';
-export { SwitchView } from './switchView';
-export { TracksView } from './tracksView';
-export { AlbumsView } from './albumsView';
-export { SearchView } from './searchView';
 export { MediaPlayerView } from './mediaPlayerView';
 export { MyTracksView } from './myTracksView';
-export { SelectPlaylistsView } from './selectPlaylistsView';
+export { NewReleasesView } from './newReleasesView';
 export { PickPlaylistsView } from './pickPlaylistView';
+export { PlaylistsView } from './playlistsView';
+export { SearchView } from './searchView';
+export { SelectPlaylistsView } from './selectPlaylistsView';
+export { SwitchView } from './switchView';
+export { TracksView } from './tracksView';
+

@@ -1,13 +1,9 @@
+import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
 import { BaseView } from '../base/baseView';
-import { template } from '../templates/playlists';
-import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import {
-    PlaylistsViewModel,
-    PlaylistsViewModelItem,
-    TrackViewModelItem
-} from '../viewModels';
-import { current } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
+import { template } from '../templates/playlists';
+import { current } from '../utils';
+import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 
 export interface IPlaylistsViewProps {
@@ -32,17 +28,17 @@ class PlaylistsView extends BaseView<IPlaylistsViewProps, PlaylistsView['state']
     createPlaylistCommand = { exec(isPublic: boolean) { } };
 
     binding = bindTo(this, () => current(PlaylistsViewModel), {
+        '-errors': 'errors',
+        'loadMoreCommand': 'loadMoreCommand',
+        'loadMoreTracksCommand': 'loadMoreTracksCommand',
+        'selectPlaylistCommand': 'selectPlaylistCommand',
+        'createPlaylistCommand': 'createPlaylistCommand',
         'prop(playlists)': 'playlists',
         'prop(tracks)': 'tracks',
         'prop(isLoading)': 'isLoading',
-        'loadMoreCommand': 'loadMoreCommand',
-        'loadMoreTracksCommand': 'loadMoreTracksCommand',
         'prop(likedTracks)': 'likedTracks',
-        'selectPlaylistCommand': 'selectPlaylistCommand',
-        'createPlaylistCommand': 'createPlaylistCommand',
         'prop(currentPlaylistId)': 'currentPlaylistId',
-        'prop(newPlaylistName)': 'newPlaylistName',
-        '-errors': 'errors'
+        'prop(newPlaylistName)': 'newPlaylistName'
     });
 
     constructor(props) {
@@ -62,15 +58,6 @@ class PlaylistsView extends BaseView<IPlaylistsViewProps, PlaylistsView['state']
         unbindFrom(this.binding);
     }
 
-    prop<K extends keyof PlaylistsView['state']>(propName: K, val?: PlaylistsView['state'][K]): PlaylistsView['state'][K] {
-        if (arguments.length > 1) {
-            this.state[propName] = val;
-            this.trigger('change:prop(' + propName + ')');
-        }
-
-        return this.state[propName];
-    }
-
     showErrors(errors) {
         this.props.showErrors(errors);
     }
@@ -81,3 +68,4 @@ class PlaylistsView extends BaseView<IPlaylistsViewProps, PlaylistsView['state']
 }
 
 export { PlaylistsView };
+

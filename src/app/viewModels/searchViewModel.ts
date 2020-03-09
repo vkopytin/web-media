@@ -1,13 +1,12 @@
+import * as _ from 'underscore';
+import { IResponseResult, ISearchResult, ISearchType, ISpotifySong, ITrack } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
-import { TrackViewModelItem } from './trackViewModelItem';
-import * as _ from 'underscore';
-import { ISpotifySong, IRecommendationsResult, IResponseResult, ITrack, ISearchType, ISearchResult } from '../adapter/spotify';
-import { current, asyncQueue, assertNoErrors } from '../utils';
-import { ArtistViewModelItem } from './artistViewModelItem';
+import { assertNoErrors, asyncQueue, current } from '../utils';
 import { AlbumViewModelItem } from './albumViewModelItem';
+import { ArtistViewModelItem } from './artistViewModelItem';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
-import { ISongRecord } from '../data/entities/interfaces/iSongRecord';
+import { TrackViewModelItem } from './trackViewModelItem';
 
 
 const searchQueue = asyncQueue();
@@ -295,3 +294,4 @@ class SearchViewModel extends ViewModel {
 }
 
 export { SearchViewModel };
+

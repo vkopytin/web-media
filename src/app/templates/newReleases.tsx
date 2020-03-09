@@ -1,8 +1,7 @@
-import * as $ from 'jquery';
-import * as _ from 'underscore';
-import * as React from 'react';
-import { NewReleasesView, AlbumsView } from '../views';
 import { utils } from 'databindjs';
+import * as React from 'react';
+import * as _ from 'underscore';
+import { AlbumsView, NewReleasesView } from '../views';
 
 
 const cn = utils.className;

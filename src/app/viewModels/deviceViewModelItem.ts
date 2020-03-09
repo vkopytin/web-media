@@ -1,6 +1,5 @@
-import { ViewModel } from '../base/viewModel';
-import * as _ from 'underscore';
 import { IDevice } from '../adapter/spotify';
+import { ViewModel } from '../base/viewModel';
 
 
 class DeviceViewModelItem extends ViewModel {
@@ -23,3 +22,4 @@ class DeviceViewModelItem extends ViewModel {
 }
 
 export { DeviceViewModelItem };
+

@@ -1,12 +1,12 @@
-import { BaseView } from '../base/baseView';
-import { template } from '../templates/app';
-import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import { AppViewModel, TrackViewModelItem } from '../viewModels';
+import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
 import * as _ from 'underscore';
 import { IDevice, IUserInfo } from '../adapter/spotify';
-import { current } from '../utils';
+import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
+import { template } from '../templates/app';
+import { current } from '../utils';
+import { AppViewModel, TrackViewModelItem } from '../viewModels';
 
 
 export interface IAppViewProps {
@@ -31,11 +31,11 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
     onPageScroll = _.debounce(evnt => this.onPageScrollInternal(evnt), 500);
 
     binding = bindTo(this, () => current(AppViewModel), {
+        '-errors': 'errors',
         'prop(openLogin)': 'openLogin',
         'prop(currentPanel)': 'currentPanel',
         'prop(devices)': 'devices',
         'prop(profile)': 'profile',
-        '-errors': 'errors',
         'prop(currentTrackId)': 'currentTrackId',
         'prop(topTracks)': 'topTracks'
     });
@@ -60,6 +60,10 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
 
     openDevices(show) {
         this.toggleSelectDevices(show ? 'hide' : 'show');
+    }
+
+    isPlaying(track: TrackViewModelItem) {
+        return this.prop('currentTrackId') === track.id();
     }
 
     toggleSelectDevices(fromState?: 'show' | 'hide') {
@@ -123,13 +127,10 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
         this.prop('errors', [...this.prop('errors'), ...errors]);
     }
 
-    isPlaying(track: TrackViewModelItem) {
-        return this.prop('currentTrackId') === track.id();
-    }
-
     render() {
         return template(this);
     }
 }
 
 export { AppView };
+

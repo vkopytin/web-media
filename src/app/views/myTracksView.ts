@@ -1,12 +1,10 @@
-import { BaseView } from '../base/baseView';
-import { template } from '../templates/myTracks';
-import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import {
-    MyTracksViewModel,
-    TrackViewModelItem
-} from '../viewModels';
-import { current } from '../utils';
+import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
 import * as _ from 'underscore';
+import { BaseView } from '../base/baseView';
+import { ServiceResult } from '../base/serviceResult';
+import { template } from '../templates/myTracks';
+import { current } from '../utils';
+import { MyTracksViewModel, TrackViewModelItem } from '../viewModels';
 
 
 export interface IMyTracksViewProps {
@@ -16,6 +14,7 @@ export interface IMyTracksViewProps {
 
 class MyTracksView extends BaseView<IMyTracksViewProps, MyTracksView['state']> {
     state = {
+        errors: [] as ServiceResult<any, Error>[],
         term: '',
         items: [] as TrackViewModelItem[],
         isLoading: false,
@@ -72,3 +71,4 @@ class MyTracksView extends BaseView<IMyTracksViewProps, MyTracksView['state']> {
 }
 
 export { MyTracksView };
+

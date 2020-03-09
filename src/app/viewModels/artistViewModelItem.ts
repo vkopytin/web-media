@@ -1,9 +1,8 @@
-import { ViewModel } from '../base/viewModel';
-import { formatTime, assertNoErrors } from '../utils';
-import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
-import { ISpotifySong, IUserPlaylist, ITrack, IArtist } from '../adapter/spotify';
-import { current } from '../utils';
+import { IArtist } from '../adapter/spotify';
+import { ViewModel } from '../base/viewModel';
+import { Service, SpotifyService } from '../service';
+import { assertNoErrors, current } from '../utils';
 import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
@@ -87,3 +86,4 @@ class ArtistViewModelItem extends ViewModel {
 }
 
 export { ArtistViewModelItem };
+

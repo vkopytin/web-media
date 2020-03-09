@@ -1,9 +1,9 @@
+import * as _ from 'underscore';
+import { IResponseResult, ISpotifySong } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
+import { assertNoErrors, current } from '../utils';
 import { TrackViewModelItem } from './trackViewModelItem';
-import * as _ from 'underscore';
-import { ISpotifySong, IResponseResult } from '../adapter/spotify';
-import { current, assertNoErrors } from '../utils';
 
 
 class MyTracksViewModel extends ViewModel {
@@ -138,3 +138,4 @@ class MyTracksViewModel extends ViewModel {
 }
 
 export { MyTracksViewModel };
+

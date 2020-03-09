@@ -1,11 +1,10 @@
+import * as _ from 'underscore';
+import { IPlayerResult, ITrack } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
-import { TrackViewModelItem } from './trackViewModelItem';
-import * as _ from 'underscore';
-import { ICurrentlyPlayingResult, IPlayerResult, ITrack } from '../adapter/spotify';
-import { current, asyncQueue, assertNoErrors } from '../utils';
-import { ServiceResult } from '../base/serviceResult';
 import { IWebPlaybackState } from '../service/spotifyPlayer';
+import { assertNoErrors, asyncQueue, current } from '../utils';
+import { TrackViewModelItem } from './trackViewModelItem';
 
 
 const lockSection = asyncQueue();
@@ -504,3 +503,4 @@ class MediaPlayerViewModel extends ViewModel {
 }
 
 export { MediaPlayerViewModel };
+

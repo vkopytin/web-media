@@ -1,7 +1,7 @@
-import * as _ from 'underscore';
-import * as React from 'react';
-import { MediaPlayerView } from '../views';
 import { utils } from 'databindjs';
+import * as React from 'react';
+import * as _ from 'underscore';
+import { MediaPlayerView } from '../views';
 
 
 const cn = utils.className;

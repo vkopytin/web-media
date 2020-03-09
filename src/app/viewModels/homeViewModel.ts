@@ -1,10 +1,10 @@
+import * as _ from 'underscore';
+import { IRecommendationsResult, IResponseResult, ISpotifySong } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
-import { TrackViewModelItem } from './trackViewModelItem';
-import * as _ from 'underscore';
-import { ISpotifySong, IRecommendationsResult, IResponseResult } from '../adapter/spotify';
-import { current, assertNoErrors } from '../utils';
+import { assertNoErrors, current } from '../utils';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
+import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
@@ -150,3 +150,4 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
 }
 
 export { HomeViewModel };
+

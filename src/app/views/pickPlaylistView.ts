@@ -1,15 +1,9 @@
-import * as _ from 'underscore';
+import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
 import { BaseView } from '../base/baseView';
+import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/pickPlaylist';
-import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import {
-    DeviceViewModelItem,
-    PlaylistsViewModel,
-    PlaylistsViewModelItem,
-    TrackViewModelItem,
-    HomeViewModel
-} from '../viewModels';
 import { current } from '../utils';
+import { HomeViewModel, PlaylistsViewModel, PlaylistsViewModelItem } from '../viewModels';
 
 
 export interface IPickPlaylistsViewProps {
@@ -20,6 +14,7 @@ class PickPlaylistsView extends BaseView<IPickPlaylistsViewProps, PickPlaylistsV
     playlistsViewModel = current(PlaylistsViewModel);
 
     state = {
+        errors: [] as ServiceResult<any, Error>[],
         items: [] as PlaylistsViewModelItem[],
         selectedPlaylist: null as PlaylistsViewModelItem
     };
@@ -55,3 +50,4 @@ class PickPlaylistsView extends BaseView<IPickPlaylistsViewProps, PickPlaylistsV
 }
 
 export { PickPlaylistsView };
+

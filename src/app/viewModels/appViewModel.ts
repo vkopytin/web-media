@@ -1,15 +1,12 @@
-import { ViewModel } from '../base/viewModel';
-import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
-import { IDevice, IUserInfo, IDevicesResponse, IResponseResult, ISpotifySong, ITrack } from '../adapter/spotify';
-import { DeviceViewModelItem } from './deviceViewModelItem';
-import { current, assertNoErrors } from '../utils';
-import { ServiceResult } from '../base/serviceResult';
-import { TrackViewModelItem } from './trackViewModelItem';
+import { IDevice, IResponseResult, ITrack, IUserInfo } from '../adapter/spotify';
+import { ViewModel } from '../base/viewModel';
+import { Service } from '../service';
 import { SpotifySyncService } from '../service/spotifySyncService';
+import { assertNoErrors, current } from '../utils';
+import { DeviceViewModelItem } from './deviceViewModelItem';
+import { TrackViewModelItem } from './trackViewModelItem';
 
-
-const panels = ['home', 'profile'];
 
 class AppViewModel extends ViewModel {
 
@@ -171,3 +168,4 @@ class AppViewModel extends ViewModel {
 }
 
 export { AppViewModel };
+

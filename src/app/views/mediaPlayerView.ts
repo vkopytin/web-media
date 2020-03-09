@@ -1,13 +1,9 @@
+import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
 import { BaseView } from '../base/baseView';
-import { template } from '../templates/mediaPlayer';
-import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import {
-    MediaPlayerViewModel,
-    TrackViewModelItem
-} from '../viewModels';
-import { current, formatTime } from '../utils';
-import * as _ from 'underscore';
 import { ServiceResult } from '../base/serviceResult';
+import { template } from '../templates/mediaPlayer';
+import { current, formatTime } from '../utils';
+import { MediaPlayerViewModel, TrackViewModelItem } from '../viewModels';
 
 
 export interface IMediaPlayerViewProps {
@@ -17,6 +13,7 @@ export interface IMediaPlayerViewProps {
 
 class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['state']> {
     state = {
+        errors: [] as ServiceResult<any, Error>[],
         queue: [] as TrackViewModelItem[],
         duration: 1,
         timePlayed: 100,
@@ -24,7 +21,6 @@ class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['s
         volume: 80,
         trackName: '',
         albumName: '',
-        errors: [] as ServiceResult<any, Error>[],
         thumbnailUrl: '',
         isLiked: false,
         artistName: ''
@@ -43,6 +39,7 @@ class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['s
     volumeCommand = { exec(percent) { } };
     
     binding = bindTo(this, () => current(MediaPlayerViewModel), {
+        '-errors': 'errors',
         'resumeCommand': 'resumeCommand',
         'pauseCommand': 'pauseCommand',
         'prevCommand': 'prevCommand',
@@ -65,7 +62,6 @@ class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['s
         'prop(volume)': 'volume',
         'prop(thumbnailUrl)': 'thumbnailUrl',
         'prop(isLiked)': 'isLiked',
-        '-errors': 'errors',
         'props.currentTrackId': 'currentTrackId'
     });
 
@@ -119,15 +115,6 @@ class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['s
         return formatTime(this.prop('duration') - this.prop('timePlayed'));
     }
 
-    errors1(val?: ServiceResult<any, Error>[]) {
-        if (arguments.length && val !== this.prop('errors')) {
-            this.prop('errors', [...this.prop('errors'), ...val]);
-            this.props.showErrors(val);
-        }
-
-        return this.prop('errors');
-    }
-
     showErrors(errors) {
         this.props.showErrors(errors);
     }
@@ -138,3 +125,4 @@ class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['s
 }
 
 export { MediaPlayerView };
+

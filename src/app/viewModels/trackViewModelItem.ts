@@ -1,15 +1,11 @@
-import { ViewModel } from '../base/viewModel';
-import { formatTime, assertNoErrors } from '../utils';
-import { Service, SpotifyService } from '../service';
 import * as _ from 'underscore';
-import { IDevice, ISpotifySong, IUserPlaylist } from '../adapter/spotify';
-import { current } from '../utils';
+import { ISpotifySong, IUserPlaylist } from '../adapter/spotify';
+import { ViewModel } from '../base/viewModel';
+import { Service, SpotifyService } from '../service';
+import { assertNoErrors, current, formatTime } from '../utils';
 import { AppViewModel } from './appViewModel';
-import { MediaPlayerViewModel } from './mediaPlayerViewModel';
-import { ServiceResult } from '../base/serviceResult';
-import { PlaylistsViewModelItem } from './playlistsViewModelItem';
-import { addTrackToPlaylist, removeTrackFromPlaylist } from '../data/useCases';
 import { PlaylistsViewModel } from './playlistsViewModel';
+import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 
 class TrackViewModelItem extends ViewModel {
@@ -150,3 +146,4 @@ class TrackViewModelItem extends ViewModel {
 }
 
 export { TrackViewModelItem };
+

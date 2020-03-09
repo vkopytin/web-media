@@ -1,6 +1,6 @@
-import * as _ from 'underscore';
-import * as React from 'react';
 import { utils } from 'databindjs';
+import * as React from 'react';
+import * as _ from 'underscore';
 import { PickPlaylistsView } from '../views';
 
 

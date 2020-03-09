@@ -1,5 +1,5 @@
-import * as _ from 'underscore';
 import * as React from 'react';
+import * as _ from 'underscore';
 import { DevicesView } from '../views/devicesView';
 
 

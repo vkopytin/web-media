@@ -1,18 +1,8 @@
-import * as $ from 'jquery';
-import * as _ from 'underscore';
-import * as React from 'react';
-import {
-    AppView,
-    HomeView,
-    PlaylistsView,
-    SwitchView,
-    DevicesView,
-    NewReleasesView,
-    SearchView,
-    MediaPlayerView,
-    MyTracksView
-} from '../views';
 import { utils } from 'databindjs';
+import * as $ from 'jquery';
+import * as React from 'react';
+import * as _ from 'underscore';
+import { AppView, DevicesView, HomeView, MediaPlayerView, MyTracksView, NewReleasesView, PlaylistsView, SearchView, SwitchView } from '../views';
 
 
 const cn = utils.className;

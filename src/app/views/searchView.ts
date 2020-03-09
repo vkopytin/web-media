@@ -1,15 +1,11 @@
-import { BaseView } from '../base/baseView';
-import { template } from '../templates/search';
-import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import {
-    SearchViewModel,
-    TrackViewModelItem,
-    AlbumViewModelItem,
-    PlaylistsViewModelItem
-} from '../viewModels';
-import { current } from '../utils';
+import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
 import * as _ from 'underscore';
 import { ISearchType } from '../adapter/spotify';
+import { BaseView } from '../base/baseView';
+import { ServiceResult } from '../base/serviceResult';
+import { template } from '../templates/search';
+import { current } from '../utils';
+import { AlbumViewModelItem, PlaylistsViewModelItem, SearchViewModel, TrackViewModelItem } from '../viewModels';
 import { ArtistViewModelItem } from '../viewModels/artistViewModelItem';
 
 
@@ -20,6 +16,7 @@ export interface ISearchViewProps {
 
 class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
     state = {
+        errors: [] as ServiceResult<any, Error>[],
         term: '',
         searchType: 'track' as ISearchType,
         tracks: [] as TrackViewModelItem[],
@@ -35,13 +32,13 @@ class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
     loadMoreCommand = { exec() { } };
     
     binding = bindTo(this, () => current(SearchViewModel), {
+        'loadMoreCommand': 'loadMoreCommand',
         'prop(term)': 'term',
         'prop(tracks)': 'tracks',
         'prop(artists)': 'artists',
         'prop(albums)': 'albums',
         'prop(playlists)': 'playlists',
         'prop(searchType)': 'searchType',
-        'loadMoreCommand': 'loadMoreCommand',
         'prop(currentArtist)': 'currentArtist',
         'prop(currentAlbum)': 'currentAlbum',
         'prop(currentPlaylist)': 'currentPlaylist',
@@ -85,3 +82,4 @@ class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
 }
 
 export { SearchView };
+

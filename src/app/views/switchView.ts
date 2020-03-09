@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { BaseView } from '../base/baseView';
 import * as _ from 'underscore';
+import { BaseView } from '../base/baseView';
+import { ServiceResult } from '../base/serviceResult';
 
 
 export interface ISwitchViewProps {
@@ -12,6 +13,7 @@ const panels = ['home', 'playlists', 'tracks', 'search', 'releases'];
 
 class SwitchView extends BaseView<ISwitchViewProps, {}> {
     state = {
+        errors: [] as ServiceResult<any, Error>[],
         prevPanel: this.props.currentView,
         currentView: this.props.currentView,
         renderCurrent: false,
@@ -84,3 +86,4 @@ class SwitchView extends BaseView<ISwitchViewProps, {}> {
 }
 
 export { SwitchView };
+

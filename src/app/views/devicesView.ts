@@ -1,11 +1,9 @@
+import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
 import { BaseView } from '../base/baseView';
+import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/devices';
-import { bindTo, subscribeToChange, unbindFrom, updateLayout, withEvents } from 'databindjs';
-import {
-    AppViewModel,
-    DeviceViewModelItem
-} from '../viewModels';
 import { current } from '../utils';
+import { AppViewModel, DeviceViewModelItem } from '../viewModels';
 
 
 export interface IDevicesViewProps {
@@ -14,6 +12,7 @@ export interface IDevicesViewProps {
 
 class DevicesView extends BaseView<IDevicesViewProps, DevicesView['state']> {
     state = {
+        errors: [] as ServiceResult<any, Error>[],
         devices: [] as DeviceViewModelItem[],
         currentDevice: null as DeviceViewModelItem
     };
@@ -23,8 +22,8 @@ class DevicesView extends BaseView<IDevicesViewProps, DevicesView['state']> {
     };
 
     binding = bindTo(this, () => current(AppViewModel), {
-        'prop(devices)': 'devices',
         'switchDeviceCommand': 'switchDeviceCommand',
+        'prop(devices)': 'devices',
         'prop(currentDevice)': 'currentDevice'
     });
 
@@ -56,3 +55,4 @@ class DevicesView extends BaseView<IDevicesViewProps, DevicesView['state']> {
 }
 
 export { DevicesView };
+
