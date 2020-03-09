@@ -58,7 +58,9 @@ export const template = (view: SearchView) => <>
             </li>
         })}
         {_.map(view.prop('artists'), (item, index) => {
-            return <li key={item.id()} className="table-view-cell media">
+            return [<li key={item.id()} className="table-view-cell media"
+                onClick={evnt => view.prop('currentArtist', view.prop('currentArtist')?.id() === item.id() ? null : item)}
+            >
                 <span className="media-object pull-left player-left--32"
                 >
                     <div className="region">
@@ -71,7 +73,13 @@ export const template = (view: SearchView) => <>
                         <span className="song-title">{item.name()}</span>
                     </div>
                 </div>
-            </li>
+            </li>,
+            view.prop('currentArtist') === item && <AlbumsView
+                key={item.id() + '-3'}
+                currentTrackId={view.props.currentTrackId}
+                uri={null}
+                tracks={view.prop('currentTracks')}
+            />]
         })}
         {_.map(view.prop('albums'), (item, index) => {
             return [<li key={item.id()} className="table-view-cell media"
@@ -88,7 +96,9 @@ export const template = (view: SearchView) => <>
                     <div>
                         <span className="song-title">{item.name()}</span>
                     </div>
+                    <div className="album-title">{item.firstArtist()}</div>
                 </div>
+                <span className="badge">{item.totalTracks()}</span>}
             </li>,
             view.prop('currentAlbum') === item && <AlbumsView
                 key={item.id() + '-1'}
@@ -113,7 +123,10 @@ export const template = (view: SearchView) => <>
                     <div>
                         <span className="song-title">{item.name()}</span>
                     </div>
+                    <div className="album-title">/{item.owner()}</div>
+                    <p dangerouslySetInnerHTML={{ __html: item.description() }}></p>
                 </div>
+                <span className="badge">{item.tracksTotal()}</span>
             </li>,
             view.prop('currentPlaylist') === item && <AlbumsView
                 key={item.id() + '-2'}

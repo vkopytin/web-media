@@ -28,6 +28,7 @@ class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
         playlists: [] as PlaylistsViewModelItem[],
         currentAlbum: null as AlbumViewModelItem,
         currentPlaylist: null as PlaylistsViewModelItem,
+        currentArtist: null as ArtistViewModelItem,
         currentTracks: [] as TrackViewModelItem[]
     };
 
@@ -41,6 +42,7 @@ class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
         'prop(playlists)': 'playlists',
         'prop(searchType)': 'searchType',
         'loadMoreCommand': 'loadMoreCommand',
+        'prop(currentArtist)': 'currentArtist',
         'prop(currentAlbum)': 'currentAlbum',
         'prop(currentPlaylist)': 'currentPlaylist',
         'prop(currentTracks)': 'currentTracks'

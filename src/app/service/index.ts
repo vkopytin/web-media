@@ -183,6 +183,16 @@ class Service {
         return result;
     }
 
+    async fetchArtistTopTracks(artistId: string, country = 'US') {
+        const spotify = await this.service(SpotifyService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.fetchArtistTopTracks(artistId, country);
+
+        return result;
+    }
+
     async addTrack(trackId: string) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {

@@ -140,7 +140,13 @@ class SearchViewModel extends ViewModel {
             const tracksModels = _.map(tracksResult.items, (item, index) => new TrackViewModelItem(item, index));
             this.currentTracks(tracksModels);
         } else if (this.searchType() === 'artist' && this.currentArtist()) {
-
+            const artistTracksResult = await spotifyResult.val.fetchArtistTopTracks(this.currentArtist().id(), 'US');
+            if (assertNoErrors(artistTracksResult, e => this.errors(e))) {
+                return;
+            }
+            const tracksResult = artistTracksResult.val as { tracks: ITrack[] };
+            const tracksModels = _.map(tracksResult.tracks, (item, index) => new TrackViewModelItem({ track: item } as any, index));
+            this.currentTracks(tracksModels);
         }
     }
 

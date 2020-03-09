@@ -10,12 +10,16 @@ const cn = utils.className;
 export const template = (view: TracksView) => <>
     <ul className="todo-list table-view">
         {_.map(view.prop('tracks'), (item, index) => <li key={item.id()} className="table-view-cell media">
-            <span className="media-object pull-left"
+            <span className="media-object pull-left player-left--32"
                 onClick={evnt => item.play(view.uri())}
             >
-                <label className={cn("toggle view ?active", view.isPlaying(item))}>
-                    <div className="toggle-handle"></div>
-                </label>
+                <div className="region">
+                    <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
+                        {view.isPlaying(item) || <button className="button-play icon icon-play"
+                        ></button>}
+                        {view.isPlaying(item) && <button className="button-play icon icon-pause"></button>}
+                    </div>
+                </div>
             </span>
             <div className="media-body"
                 onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}

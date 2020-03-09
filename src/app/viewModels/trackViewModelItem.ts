@@ -84,7 +84,7 @@ class TrackViewModelItem extends ViewModel {
     }
 
     thumbnailUrl() {
-        const image = _.last(this.song.track.album.images);
+        const image = _.last(this.song.track.album?.images);
         return image?.url;
     }
 

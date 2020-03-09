@@ -28,7 +28,7 @@ class AlbumViewModelItem extends ViewModel {
     }
 
     firstArtist() {
-        return _.first(this.album.artists);
+        return _.first(this.album.artists)?.name || '';
     }
 
     firstArtistUrl() {

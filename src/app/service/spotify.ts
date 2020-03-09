@@ -219,6 +219,16 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
+    async fetchArtistTopTracks(artistId: string, country = 'US') {
+        try {
+            const res = await this.adapter.artistTopTracks(artistId, country);
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
+
     async addTrack(trackIds: string | string[]) {
         try {
             const res = await this.adapter.addTracks(trackIds);

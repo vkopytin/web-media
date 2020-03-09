@@ -36,7 +36,7 @@ export const template = (view: NewReleasesView) => <>
                     <span className="card__by">
                         by<span>&nbsp;</span>
                         <a href={item.firstArtistUrl()} className="card__author" title="author">
-                            {item.firstArtist().name}
+                            {item.firstArtist()}
                         </a>
                     </span>
                 </div>

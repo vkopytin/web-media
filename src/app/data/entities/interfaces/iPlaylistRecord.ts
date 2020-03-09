@@ -5,6 +5,7 @@ import { IImageRecord } from './iImageRecord';
 export interface IPlaylistRecord {
     id: string;
     name: string;
+    description: string;
     uri: string;
     tracks: {
         total: number;

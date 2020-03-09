@@ -68,6 +68,7 @@ export interface IArtist {
 export interface IUserPlaylist {
     id: string;
     name: string;
+    description: string;
     uri: string;
     tracks: {
         total: number;
@@ -387,6 +388,26 @@ class SpotifyAdapter {
                 url: `https://api.spotify.com/v1/me/top/tracks`,
                 headers: {
                     'Authorization': 'Bearer ' + this.token
+                },
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
+                }
+            });
+        });
+    }
+
+    artistTopTracks(artistId: string, country = 'US') {
+        return new Promise<IResponseResult<ITrack>>((resolve, reject) => {
+            $.ajax({
+                url: `https://api.spotify.com/v1/artists/${artistId}/top-tracks`,
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                data: {
+                    country: country
                 },
                 success(response) {
                     resolve(response);

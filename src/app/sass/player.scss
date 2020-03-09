@@ -121,25 +121,48 @@ footer:before {
     width: 40px;
     height: 40px;
     position: relative;
+
+    .region {
+        min-height: 40px;
+        min-width: 40px;
+        height: 100%;
+        width: 100%;
+        position: relative;
+    }
+
+    .button-play {
+        width: 80%;
+        height: 80%;
+        left: 10%;
+        top: 10%;
+    }
+
+    .album-media .button-play {
+        font-size: 18px;
+    }
 }
 
-.player-left--32 .region {
-    min-height: 40px;
-    min-width: 40px;
-    height: 100%;
-    width: 100%;
+.player-left--64 {
+    width: 60px;
+    height: 60px;
     position: relative;
-}
 
-.player-left--32 .button-play {
-    width: 80%;
-    height: 80%;
-    left: 10%;
-    top: 10%;
-}
-
-.player-left--32 .album-media .button-play {
-    font-size: 18px;
+    .region {
+        min-height: 60px;
+        min-width: 60px;
+        height: 100%;
+        width: 100%;
+        position: relative;
+    }
+    .button-play {
+        width: 80%;
+        height: 80%;
+        left: 10%;
+        top: 10%;
+    }
+    .album-media .button-play {
+        font-size: 20px;
+    }
 }
 
 .album-media {

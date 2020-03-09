@@ -3,6 +3,7 @@ import * as _ from 'underscore';
 import { IUserPlaylist } from '../adapter/spotify';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { Service } from '../service';
+import sanitizeHtml = require('sanitize-html');
 
 
 class PlaylistsViewModelItem extends ViewModel {
@@ -28,6 +29,10 @@ class PlaylistsViewModelItem extends ViewModel {
 
     tracksTotal() {
         return this.playlist.tracks.total;
+    }
+
+    description() {
+        return sanitizeHtml(this.playlist.description || '');
     }
 
     thumbnailUrl() {
