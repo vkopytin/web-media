@@ -193,22 +193,37 @@ class Service {
         return result;
     }
 
-    async addTrack(trackId: string) {
+    async addTracks(tracks: ITrack | ITrack[]) {
+        tracks = [].concat(tracks);
+        const dataServiceResult = await this.service(DataService);
+        if (dataServiceResult.isError) {
+            return dataServiceResult;
+        }
+        const addTrackResult = await dataServiceResult.val.addTracks(tracks);
+        if (addTrackResult.isError) {
+            return addTrackResult;
+        }
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
-        const result = await spotify.val.addTrack(trackId);
+        const result = await spotify.val.addTracks(_.map(tracks, t => t.id));
 
         return result;
     }
 
-    async removeTracks(trackIds: string | string[]) {
+    async removeTracks(tracks: ITrack | ITrack[]) {
+        tracks = [].concat(tracks);
+        const dataServiceResult = await this.service(DataService);
+        if (dataServiceResult.isError) {
+            return dataServiceResult;
+        }
+        dataServiceResult.val.removeTracks(tracks);
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
-        const result = await spotify.val.removeTracks(trackIds);
+        const result = await spotify.val.removeTracks(_.map(tracks, t => t.id));
 
         return result;
     }

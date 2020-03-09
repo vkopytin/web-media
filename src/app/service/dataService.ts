@@ -5,7 +5,7 @@ import { assertNoErrors } from '../utils';
 import * as _ from 'underscore';
 import { DataServiceResult } from './results/dataServiceResult';
 import { IUserPlaylistsResult, ITrack } from '../adapter/spotify';
-import { listPlaylists, listTracksByPlaylist, listMyTracks, initializeStructure, listPlaylistsByTrack, addTrackToPlaylist, removeTrackFromPlaylist } from '../data/useCases';
+import { listPlaylists, listTracksByPlaylist, listMyTracks, initializeStructure, listPlaylistsByTrack, addTrackToPlaylist, removeTrackFromPlaylist, putMyTracks } from '../data/useCases';
 import { DataStorage } from '../data/dataStorage';
 import { PlaylistsStore } from '../data/entities/playlistsStore';
 import { MyStore } from '../data/entities/myStore';
@@ -64,6 +64,35 @@ class DataService extends withEvents(BaseService) {
             offset: offset,
             previous: '',
             total: total
+        });
+    }
+
+    async addTracks(tracks: ITrack | ITrack[]) {
+        tracks = [].concat(tracks);
+
+        const result = await putMyTracks(_.map(tracks, t => ({
+            ...t,
+            added_at: new Date()
+        })));
+
+        return DataServiceResult.success(result);
+    }
+
+    removeTracks(tracks: ITrack | ITrack[]) {
+        tracks = [].concat(tracks);
+        return new Promise<boolean>((resolve, reject) => {
+            DataStorage.create((err, storage) => {
+                const myStore = new MyStore(storage);
+                const tasks = _.map(tracks as ITrack[], async (track) => {
+                    const newTrack = await myStore.removeTrack(track);
+                    return newTrack === track;
+                });
+    
+                Promise.all(tasks).then((result) => {
+                    storage.complete();
+                    resolve(!!~result.indexOf(true));
+                }).catch(ex => reject(ex));
+            });
         });
     }
 

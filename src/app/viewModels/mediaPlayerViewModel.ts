@@ -2,7 +2,7 @@ import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
 import { TrackViewModelItem } from './trackViewModelItem';
 import * as _ from 'underscore';
-import { ICurrentlyPlayingResult, IPlayerResult } from '../adapter/spotify';
+import { ICurrentlyPlayingResult, IPlayerResult, ITrack } from '../adapter/spotify';
 import { current, asyncQueue, assertNoErrors } from '../utils';
 import { ServiceResult } from '../base/serviceResult';
 import { IWebPlaybackState } from '../service/spotifyPlayer';
@@ -22,6 +22,7 @@ class MediaPlayerViewModel extends ViewModel {
         artistName: '',
         volume: 0,
         thumbnailUrl: '',
+        currentTrack: null as ITrack,
         currentTrackId: '',
         currentTrackUri: '',
         isLiked: false
@@ -119,6 +120,7 @@ class MediaPlayerViewModel extends ViewModel {
             return;
         }
         const [artist] = state.track_window.current_track.artists;
+        this.currentTrack(state.track_window.current_track);
         this.currentTrackUri(state.track_window.current_track.uri);
         this.currentTrackId(state.track_window.current_track.id);
         this.duration(state.duration);
@@ -147,6 +149,7 @@ class MediaPlayerViewModel extends ViewModel {
         this.lastTime = +new Date();
         if (currentlyPlaying && currentlyPlaying.item) {
             const [artist] = currentlyPlaying.item.artists;
+            this.currentTrack(currentlyPlaying.item);
             this.currentTrackUri(currentlyPlaying.item.uri);
             this.currentTrackId(currentlyPlaying.item.id);
             this.volume(currentlyPlaying.device.volume_percent);
@@ -356,21 +359,21 @@ class MediaPlayerViewModel extends ViewModel {
     }
 
     async likeTrack() {
-        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
-            const stateResult = await this.ss.addTrack(this.currentTrackId());
+        lockSection.push(async (next) => {
+            const stateResult = await this.ss.addTracks(this.currentTrack());
             assertNoErrors(stateResult, e => this.errors(e));
 
             next();
-        }, this));
+        });
     }
 
     async unlikeTrack() {
-        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
-            const stateResult = await this.ss.removeTracks(this.currentTrackId());
+        lockSection.push(async (next) => {
+            const stateResult = await this.ss.removeTracks(this.currentTrack());
             assertNoErrors(stateResult, e => this.errors(e));
 
             next();
-        }, this));
+        });
     }
 
     queue(value?: any[]) {
@@ -470,6 +473,15 @@ class MediaPlayerViewModel extends ViewModel {
         }
 
         return this.settings.currentTrackId;
+    }
+
+    currentTrack(val?) {
+        if (arguments.length && val !== this.settings.currentTrack) {
+            this.settings.currentTrack = val;
+            this.trigger('change:currentTrack');
+        }
+
+        return this.settings.currentTrack;
     }
 
     currentTrackUri(val?) {

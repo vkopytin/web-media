@@ -19,16 +19,21 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
     };
 
     refreshCommand = {
-        exec: () => {
-            this.fetchData();
-        }
-    }
+        exec: () => this.fetchData()
+    };
 
     selectTrackCommand = {
-        exec: (track: TrackViewModelItem) => {
-            this.prop('selectedTrack', track);
-        }
-    }
+        exec: (track: TrackViewModelItem) => this.prop('selectedTrack', track)
+        
+    };
+
+    likeTrackCommand = {
+        exec: (track: TrackViewModelItem) => this.likeTrack(track)
+    };
+
+    unlikeTrackCommand = {
+        exec: (track: TrackViewModelItem) => this.unlikeTrack(track)
+    };
 
     trackArray = [] as Array<TrackViewModelItem>;
 
@@ -131,6 +136,16 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
     async resume() {
         const playerResult= await this.ss.spotifyPlayer();
         playerResult.val.resume();
+    }
+
+    async likeTrack(track: TrackViewModelItem) {
+        await track.likeTrack();
+        this.checkTracks([track]);
+    }
+
+    async unlikeTrack(track: TrackViewModelItem) {
+        await track.unlikeTrack();
+        this.checkTracks([track]);
     }
 }
 

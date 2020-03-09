@@ -229,7 +229,7 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async addTrack(trackIds: string | string[]) {
+    async addTracks(trackIds: string | string[]) {
         try {
             const res = await this.adapter.addTracks(trackIds);
 

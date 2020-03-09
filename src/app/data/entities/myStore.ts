@@ -104,11 +104,11 @@ class MyStore {
                 return await this.refresh({
                     ...record,
                     trackId: track.id,
-                    added_at: track['added_at']
+                    added_at: new Date(track.added_at)
                 });
             }
         }
-        await this.create({ trackId: track.id, added_at: track['added_at'] });
+        await this.create({ trackId: track.id, added_at: new Date(track.added_at) });
         return track;
     }
 

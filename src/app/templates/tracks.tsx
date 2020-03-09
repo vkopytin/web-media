@@ -33,8 +33,12 @@ export const template = (view: TracksView) => <>
             </div>
             {(view.prop('selectedItem')) === item && <SelectPlaylistsView track={item} />}
             {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
-            {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
-            {item.isLiked() || <span className="badge">{item.duration()}</span>}
+            {item.isLiked() && <span className="badge badge-positive"
+                onClick={evnt => view.unlikeTrackCommand.exec(item)}
+            >{item.duration()}</span>}
+            {item.isLiked() || <span className="badge"
+                onClick={evnt => view.likeTrackCommand.exec(item)}
+            >{item.duration()}</span>}
         </li>
         )}
     </ul>

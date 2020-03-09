@@ -133,6 +133,20 @@ class TrackViewModelItem extends ViewModel {
         }
         this.loadData('playlistTracks');
     }
+
+    async likeTrack() {
+        const result = await this.ss.addTracks(this.song.track);
+        if (assertNoErrors(result, e => this.errors(e))) {
+            return;
+        }
+    }
+
+    async unlikeTrack() {
+        const result = await this.ss.removeTracks(this.song.track);
+        if (assertNoErrors(result, e => this.errors(e))) {
+            return;
+        }
+    }
 }
 
 export { TrackViewModelItem };

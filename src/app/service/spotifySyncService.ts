@@ -57,7 +57,7 @@ class SpotifySyncService extends withEvents(BaseService) {
     async syncMyTracks() {
         for await (const songs of this.listMyTracks()) {
             const syncMore = await putMyTracks(_.map(songs, song => ({
-                added_at: song.added_at,
+                added_at: new Date(song.added_at),
                 ...song.track
             })));
             if (!syncMore) {

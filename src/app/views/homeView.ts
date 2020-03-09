@@ -27,15 +27,19 @@ class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
 
     refreshCommand = { exec() { } };
     selectTrackCommand = { exec(track: TrackViewModelItem) { } };
+    likeTrackCommand = { exec(track: TrackViewModelItem) { } };
+    unlikeTrackCommand = { exec(track: TrackViewModelItem) { } };
 
     binding = bindTo(this, () => current(HomeViewModel), {
+        'refreshCommand': 'refreshCommand',
+        'selectTrackCommand': 'selectTrackCommand',
+        'likeTrackCommand': 'likeTrackCommand',
+        'unlikeTrackCommand': 'unlikeTrackCommand',
         'prop(items)': 'tracks',
         'prop(likedTracks)': 'likedTracks',
         'prop(isLoading)': 'prop(isLoading)',
-        'refreshCommand': 'refreshCommand',
         '-errors': 'errors',
-        'prop(selectedItem)': 'prop(selectedTrack)',
-        'selectTrackCommand': 'selectTrackCommand'
+        'prop(selectedItem)': 'prop(selectedTrack)'
     });
 
     constructor(props) {

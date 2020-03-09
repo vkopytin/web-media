@@ -45,6 +45,14 @@ class PlaylistsViewModel extends ViewModel {
         exec: (isPublic: boolean) => this.createNewPlaylist(isPublic)
     };
 
+    likeTrackCommand = {
+        exec: (track: TrackViewModelItem) => this.likeTrack(track)
+    };
+
+    unlikeTrackCommand = {
+        exec: (track: TrackViewModelItem) => this.unlikeTrack(track)
+    };
+
     playlistsArray = [] as PlaylistsViewModelItem[];
     tracksArray = [] as TrackViewModelItem[];
 
@@ -245,6 +253,16 @@ class PlaylistsViewModel extends ViewModel {
             return;
         }
         this.fetchData();
+    }
+
+    async likeTrack(track: TrackViewModelItem) {
+        await track.likeTrack();
+        this.checkTracks([track]);
+    }
+
+    async unlikeTrack(track: TrackViewModelItem) {
+        await track.unlikeTrack();
+        this.checkTracks([track]);
     }
 }
 

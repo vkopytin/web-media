@@ -10,4 +10,5 @@ export interface ITrackRecord {
     uri: string;
     duration_ms: number;
     track_number: number;
+    added_at?: Date;
 }

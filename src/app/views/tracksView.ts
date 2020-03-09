@@ -25,10 +25,16 @@ class TracksView extends BaseView<ITracksViewProps, {}> {
         errors: [] as ServiceResult<any, Error>[],
         selectedItem: null as TrackViewModelItem
     };
+
+    likeTrackCommand = { exec(track: TrackViewModelItem) { } };
+    unlikeTrackCommand = { exec(track: TrackViewModelItem) { } };
+
     binding = bindTo(this, () => current(PlaylistsViewModel), {
         'prop(tracks)': 'tracks',
         'prop(likedTracks)': 'likedTracks',
-        'prop(selectedItem)': 'selectedItem'
+        'prop(selectedItem)': 'selectedItem',
+        'likeTrackCommand': 'likeTrackCommand',
+        'unlikeTrackCommand': 'unlikeTrackCommand'
     });
 
     constructor(props) {
