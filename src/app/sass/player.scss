@@ -2,6 +2,9 @@
    Player CSS
 */
 
+$default-color:  #222 !default;
+$text-color: #999 !default;
+
 .content.shadow::before {
     position: absolute;
     top: 0;
@@ -25,7 +28,7 @@
 }
 
 footer:before {
-    background-color: white;
+    background-color: #222;
 }
 
 @keyframes rotate {
@@ -185,7 +188,7 @@ footer:before {
 }
 
 .button-play {
-    color: white;
+    color: lighten($text-color, 20%);
     cursor: pointer;
     transition: transform 0.1s ease 0s;
     box-shadow: rgba(0, 0, 0, 0.4) 0px 0px 10px;
@@ -197,7 +200,7 @@ footer:before {
     border-radius: 50%;
     border-width: 1px;
     border-style: solid;
-    border-color: white;
+    border-color: lighten($text-color, 20%);
     border-image: initial;
     background: rgba(0, 0, 0, 0.5);
     position: absolute;
@@ -309,7 +312,7 @@ footer:before {
 .progress-max {
     flex: 4 1 0%;
     height: 4px;
-    background-color: silver;
+    background-color: mediumorchid;
     cursor: pointer;
     outline: none;
 
@@ -325,7 +328,7 @@ footer:before {
 .progress {
     width: 47%;
     height: 4px;
-    background-color: grey;
+    background-color: mediumslateblue;
 }
 
 .volume-marker,
@@ -366,7 +369,7 @@ footer:before {
     position: sticky;
     left: 0;
     right: 0;
-    background-color: white;
+    background-color: $default-color;
     margin: 8px 0 0 8px;
     transition: all .4s cubic-bezier(0.175, 0.885, 0, 1);
     border-radius: 12px;
@@ -532,7 +535,7 @@ border-bottom-right-radius: 12px;
     }
 
     .media-body {
-        filter: drop-shadow(2px 4px 6px grey);
+        filter: drop-shadow(2px 4px 6px black);
         float: left;
     }
 

@@ -4,11 +4,11 @@
 
 .badge {
   display: inline-block;
-  padding: 2px 9px 3px;
+  padding: 4px 9px 3px;
   font-size: 12px;
   line-height: 1;
-  color: #333;
-  background-color: rgba(0,0,0,.15);
+  color: lighten($text-color, 20%);
+  background-color: darken($text-color, 20%);
   border-radius: 100px;
 
   // Inverted badges have no background.
@@ -24,7 +24,7 @@
 
 // Main badge
 .badge-primary {
-  color: #fff;
+  color: $text-color;
   background-color: $primary-color;
 
   &.badge-inverted {
@@ -34,7 +34,7 @@
 
 // Positive badge
 .badge-positive {
-  color: #fff;
+  color: $text-color;
   background-color: $positive-color;
 
   &.badge-inverted {

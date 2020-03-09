@@ -12,8 +12,7 @@ class PlaylistsStore {
     storeConfig: IStorageConfig = {
         name: this.tableName,
         options: {
-            keyPath: 'index',
-            autoIncrement: true
+            keyPath: 'index'
         },
         index: {
             id: {

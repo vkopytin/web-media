@@ -12,8 +12,8 @@
   padding: 4px 8px 4px 8px;
   margin: 2px;
   font-size: 12px;
-  color: #333;
-  background-color: rgba(0,0,0,.15);
+  color: lighten($text-color, 20%);
+  background-color: darken($text-color, 30%);
   cursor: pointer;
   border-radius: 100px;
 
@@ -30,7 +30,7 @@
 
 // Main chips
 .chips-primary {
-  color: #fff;
+  color: $text-color;
   background-color: $primary-color;
 
   &.chips-inverted {
@@ -40,7 +40,7 @@
 
 // Positive chips
 .chips-positive {
-  color: #fff;
+  color: $text-color;
   background-color: $positive-color;
 
   &.chips-inverted {
@@ -50,7 +50,7 @@
 
 // Negative chips
 .chips-negative {
-  color: #fff;
+  color: $text-color;
   background-color: $negative-color;
 
   &.chips-inverted {

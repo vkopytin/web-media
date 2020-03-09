@@ -7,7 +7,7 @@
   margin-top: 0;
   margin-bottom: 15px;
   list-style: none; // Remove usual bullet styles from table view
-  background-color: #fff;
+  background-color: $default-color;
   border-top: $border-default;
   border-bottom: $border-default;
 }
@@ -33,7 +33,7 @@
     color: inherit;
 
     &:active {
-      background-color: #eee;
+      background-color: lighten($default-color, 10%);
     }
   }
   p {

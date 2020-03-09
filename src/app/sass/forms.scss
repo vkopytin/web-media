@@ -34,7 +34,7 @@ input[type="color"] {
   padding: 0 15px;
   margin-bottom: 15px;
   line-height: $line-height-default;
-  background-color: #fff;
+  background-color: $default-color;
   border: $border-default;
   border-radius: 3px;
   outline: none;
@@ -73,7 +73,7 @@ select {
 
 // Remove spacing, borders, shadows and rounding since it all belongs on the .input-group not the input
 .input-group {
-  background-color: #fff;
+  background-color: $default-color;
 }
 .input-group input,
 .input-group textarea {

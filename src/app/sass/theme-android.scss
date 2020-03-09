@@ -428,7 +428,7 @@ a {
   background-color: transparent;
 
   .table-view-cell {
-    border-bottom: 1px solid #d9d9d9;
+    border-bottom: 1px solid #535353;
 
     // Remove the border from the last table view item
     &:last-child {
@@ -436,10 +436,10 @@ a {
     }
     > a:not(.btn):active {
       color: inherit;
-      background-color: #e0e0e0;
+      background-color: #616161;
 
       .icon {
-        color: #fff;
+        color: $text-color;
       }
     }
   }
@@ -582,12 +582,12 @@ textarea,
   border: 0;
 
   .control-item {
-    color: #fff;
+    color: $text-color;
     border-color: inherit;
 
     &:active,
     &.active {
-      color: #fff;
+      color: $text-color;
       background-color: $primary-color;
     }
   }

@@ -17,7 +17,7 @@ body {
   font: 400 14px/1.5 "Open Sans", sans-serif;
   color: #333;
   -webkit-text-size-adjust: 100%;
-  background-color: #fff;
+  background-color: $default-color;
   -webkit-font-smoothing: antialiased; // Fix for webkit rendering
 }
 
@@ -237,7 +237,7 @@ body {
     left: 15px;
     padding-top: 10px;
     padding-bottom: 10px;
-    background-color: #fff;
+    background-color: $default-color;
     background-clip: padding-box;
     border: 1px solid rgba(0,0,0,.2);
     border-radius: 3px;
@@ -296,12 +296,12 @@ body {
     margin-bottom: 0;
     font-size: 18px;
     color: #0a1855;
-    background-color: #fff;
+    background-color: $default-color;
     border: 0;
     @include transition(all .2s linear);
 
     &:hover {
-      background-color: #fff;
+      background-color: $default-color;
       @include box-shadow(0 0 50px rgba(255,255,255,.3));
     }
     &:active {
@@ -551,7 +551,7 @@ body {
   height: 44px;
   padding-top: 8px;
   padding-bottom: 8px;
-  background-color: #fff;
+  background-color: $default-color;
   border-bottom: 1px solid #ddd;
   -webkit-transition: -webkit-transform .5s;
      -moz-transition: -moz-transform .5s;
@@ -749,7 +749,7 @@ code {
   font-size: 24px;
   line-height: 50px;
   text-align: center;
-  background-color: #fff;
+  background-color: $default-color;
   border: 1px solid #ddd;
   border-radius: 25px;
 }
@@ -910,7 +910,7 @@ code {
     overflow: hidden;
     font-size: $font-size-default;
     line-height: $line-height-default;
-    background-color: #fff;
+    background-color: $default-color;
   }
   .device .content,
   .device .bar,
@@ -1073,7 +1073,7 @@ hr {
   margin-bottom: 0;
 }
 .bs-callout code {
-  background-color: #fff;
+  background-color: $default-color;
   border-radius: 3px;
 }
 
@@ -1114,7 +1114,7 @@ hr {
   display: block;
   padding: 10px 15px;
   margin-bottom: -1px;
-  background-color: #fff;
+  background-color: $default-color;
   border: 1px solid #ddd;
 }
 .list-group .team-member {

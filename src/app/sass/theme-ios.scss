@@ -19,6 +19,7 @@ $chrome-color:   rgba(247,247,247,.98) !global;
 $default-color:  #929292 !global;
 $positive-color: #4cd964 !global;
 $negative-color: #dd524d !global;
+$text-color: #777;
 
 // Bars
 $bar-base-height: 44px !global;
@@ -260,7 +261,7 @@ p {
 
 // Positive badge
 .badge-positive {
-  color: #fff;
+  color: $text-color;
   background-color: $positive-color;
 
   &.badge-inverted {
@@ -271,7 +272,7 @@ p {
 
 // Negative badge
 .badge-negative {
-  color: #fff;
+  color: $text-color;
   background-color: $negative-color;
 
   &.badge-inverted {
@@ -309,7 +310,7 @@ p {
       background-image: none;
     }
     > a:not(.btn):active {
-      color: inherit;
+      color: $text-color;
     }
   }
 
@@ -411,7 +412,7 @@ textarea,
       background-color: lighten($default-color, 35%);
     }
     &.active {
-      color: #fff;
+      color: $text-color;
       background-color: $default-color;
     }
   }

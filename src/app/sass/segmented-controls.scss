@@ -20,7 +20,7 @@
     padding-bottom: 7px;
     overflow: hidden;
     line-height: 1;
-    color: #333;
+    color: $text-color;
     text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -33,12 +33,12 @@
 
     // Tap state of segmented controller
     &:active {
-      background-color: #eee;
+      background-color: lighten($default-color, 5%)
     }
 
     // Selected state of segmented controller
     &.active {
-      background-color: #ccc;
+      background-color: lighten($default-color, 15%)
     }
   }
 }
@@ -58,7 +58,7 @@
       background-color: lighten($primary-color, 35%);
     }
     &.active {
-      color: #fff;
+      color: $default-color;
       background-color: $primary-color;
     }
   }
@@ -76,7 +76,7 @@
       background-color: lighten($positive-color, 35%);
     }
     &.active {
-      color: #fff;
+      color: $default-color;
       background-color: $positive-color;
     }
   }
@@ -94,7 +94,7 @@
       background-color: lighten($negative-color, 35%);
     }
     &.active {
-      color: #fff;
+      color: $default-color;
       background-color: $negative-color;
     }
   }

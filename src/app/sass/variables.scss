@@ -16,14 +16,14 @@ $line-height-default: 21px !default;
 // --------------------------------------------------
 
 // Main theme colors
-$primary-color: #428bca !default;
-$chrome-color:  #fff !default;
+$text-color: #999;
+$primary-color: #409b9e !default;
+$chrome-color:  #242424 !default;
 
 // Action colors
-$default-color:  #fff !default;
-$positive-color: #5cb85c !default;
+$default-color:  #222 !default;
+$positive-color: #422944 !default;
 $negative-color: #d9534f !default;
-
 
 // Bars
 // --------------------------------------------------
@@ -36,7 +36,7 @@ $bar-side-spacing: 10px !default;
 // Cards
 // --------------------------------------------------
 
-$card-bg: #fff !default;
+$card-bg: #222 !default;
 
 
 // Buttons
@@ -55,5 +55,5 @@ $timing-fuction: cubic-bezier(.1,.5,.1,1) !default; // Inspired by @c2prods
 // --------------------------------------------------
 
 $border-default-width: 1px;
-$border-default: $border-default-width solid #ddd;
+$border-default: $border-default-width solid #666;
 $border-radius: 6px !default;

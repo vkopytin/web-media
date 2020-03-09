@@ -7,10 +7,15 @@ import { IResponseResult, ISpotifySong, IUserPlaylistsResult, IUserPlaylist } fr
 import { SpotifySyncServiceResult } from './results/spotifySyncServiceResult';
 import { putMyTracks, putPlaylists, addTrackToPlaylist } from '../data/useCases';
 import { SpotifyService } from './spotify';
+import { DataService } from './dataService';
 
 
 class SpotifySyncService extends withEvents(BaseService) {
     static async create(connection: Service) {
+        const dataServiceResult = await connection.service(DataService);
+        if (dataServiceResult.isError) {
+            return dataServiceResult;
+        }
         const spotifyResult = await connection.service(SpotifyService);
         if (spotifyResult.isError) {
             return spotifyResult;
@@ -81,6 +86,7 @@ class SpotifySyncService extends withEvents(BaseService) {
         let total = this.limit;
         let offset = 0;
         while (offset < total) {
+            const currOffset = offset;
             const result = await this.spotify.fetchMyPlaylists(offset, this.limit + 1);
             if (assertNoErrors(result, e => _.delay(() => { throw e; }))) {
                 return;
@@ -89,7 +95,10 @@ class SpotifySyncService extends withEvents(BaseService) {
             total = offset + Math.min(this.limit + 1, response.items.length);
             offset = offset + Math.min(this.limit, response.items.length);
 
-            yield response.items;
+            yield _.map(response.items, (item, index) => ({
+                index: currOffset + index,
+                ...item
+            }));
         }
     }
 

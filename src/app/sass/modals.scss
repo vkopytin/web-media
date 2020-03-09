@@ -9,7 +9,7 @@
   width: 100%;
   min-height: 100%;
   overflow: hidden;
-  background-color: #fff;
+  background-color: $default-color;
   opacity: 0;
   -webkit-transition: -webkit-transform .25s, opacity 1ms .25s;
      -moz-transition: -moz-transform .25s, opacity 1ms .25s;

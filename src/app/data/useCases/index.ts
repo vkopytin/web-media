@@ -38,7 +38,7 @@ export function putPlaylists(playlists: IPlaylistRecord[]) {
             const playlistsStore = new PlaylistsStore(storage);
             const tasks = _.map(playlists, async playlist => {
                 const currentPlaylist = await playlistsStore.get(playlist.id);
-                if (currentPlaylist.snapshot_id !== playlist.snapshot_id) {
+                if (currentPlaylist?.snapshot_id !== playlist.snapshot_id) {
                     await playlistsStore.refresh(playlist);
                     return playlist;
                 }

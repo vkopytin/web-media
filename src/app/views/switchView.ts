@@ -8,7 +8,7 @@ export interface ISwitchViewProps {
     onClick?(evnt): void;
 }
 
-const panels = ['home', 'playlists', 'search', 'tracks', 'releases'];
+const panels = ['home', 'playlists', 'tracks', 'search', 'releases'];
 
 class SwitchView extends BaseView<ISwitchViewProps, {}> {
     state = {

@@ -98,7 +98,7 @@ export const template = (view: SearchView) => <>
                     </div>
                     <div className="album-title">{item.firstArtist()}</div>
                 </div>
-                <span className="badge">{item.totalTracks()}</span>}
+                <span className="badge">{item.totalTracks()}</span>
             </li>,
             view.prop('currentAlbum') === item && <AlbumsView
                 key={item.id() + '-1'}

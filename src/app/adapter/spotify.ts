@@ -125,6 +125,7 @@ export interface ISearchResult {
 }
 
 export interface IUserPlaylistsResult {
+    index?: number;
     href: string;
     items: IUserPlaylist[];
     limit: number;
