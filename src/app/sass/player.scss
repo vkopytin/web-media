@@ -536,6 +536,9 @@ border-bottom-right-radius: 12px;
 
     .media-body {
         filter: drop-shadow(2px 4px 6px black);
+        .chips-list {
+            padding-top: 0;
+        }
     }
 
     .media-object {

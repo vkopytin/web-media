@@ -40,10 +40,10 @@ export const template = (view: HomeView) => <>
                             <span className="author-title">{item.artist()}</span>
                         </div>
                         <div className="album-title">{item.album()}</div>
+                        {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
                     </div>
-                    </span>
+                </span>
                 {(view.prop('selectedItem')) === item && <SelectPlaylistsView track={item} />}
-                {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
                 {item.isLiked() && <span className="badge badge-positive"
                     onClick={evnt => view.unlikeTrackCommand.exec(item)}
                 >{item.duration()}</span>}

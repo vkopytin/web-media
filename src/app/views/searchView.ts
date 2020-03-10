@@ -26,7 +26,8 @@ class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
         currentAlbum: null as AlbumViewModelItem,
         currentPlaylist: null as PlaylistsViewModelItem,
         currentArtist: null as ArtistViewModelItem,
-        currentTracks: [] as TrackViewModelItem[]
+        currentTracks: [] as TrackViewModelItem[],
+        selectedItem: null as TrackViewModelItem
     };
 
     loadMoreCommand = { exec() { } };
@@ -42,7 +43,8 @@ class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
         'prop(currentArtist)': 'currentArtist',
         'prop(currentAlbum)': 'currentAlbum',
         'prop(currentPlaylist)': 'currentPlaylist',
-        'prop(currentTracks)': 'currentTracks'
+        'prop(currentTracks)': 'currentTracks',
+        'prop(selectedItem)': 'selectedItem'
     });
 
     searchTracks = _.debounce(term => {

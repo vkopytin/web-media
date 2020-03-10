@@ -8,7 +8,7 @@ const cn = utils.className;
 
 export const template = (view: PickPlaylistsView) => <div className="chips-list">
     {_.map(view.prop('items'), (item) => {
-        if (item, view.prop('selectedPlaylist') === item) {
+        if (item && view.prop('selectedPlaylist') === item) {
             return <span className="chips chips-positive" key={item.id()}
                 onClick={evnt => view.prop('selectedPlaylist', null)}
             >

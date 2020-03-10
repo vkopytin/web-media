@@ -38,7 +38,7 @@ class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, SelectPlay
         'addToPlaylistCommand': 'addToPlaylistCommand',
         'removeFromPlaylistCommand': 'removeFromPlaylistCommand',
         'prop(items)': '.playlistsViewModel.playlists',
-        'fetchData': '.playlistsViewModel.fetchData',
+        '-fetchData': '.playlistsViewModel.bind(fetchData)',
         'prop(playlists)': 'playlists'
     });
 

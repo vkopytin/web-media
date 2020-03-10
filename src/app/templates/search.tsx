@@ -43,15 +43,18 @@ export const template = (view: SearchView) => <>
                         </div>
                     </div>
                 </span>
-                <div className="media-body">
+                <div className="media-body"
+                    onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}
+                >
                     <div>
                         <span className="song-title">{item.name()}</span>
                         &nbsp;-&nbsp;
                             <span className="author-title">{item.artist()}</span>
                     </div>
                     <div className="album-title">{item.album()}</div>
+                    {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
                 </div>
-                <SelectPlaylistsView track={item} />
+                {(view.prop('selectedItem')) === item && <SelectPlaylistsView track={item} />}
                 {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
                 {item.isLiked() || <span className="badge">{item.duration()}</span>}
             </li>

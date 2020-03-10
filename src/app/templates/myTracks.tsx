@@ -30,9 +30,9 @@ export const template = (view: MyTracksView) => <>
                             <span className="author-title">{item.artist()}</span>
                     </div>
                     <div className="album-title">{item.album()}</div>
+                    {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
                 </div>
                 {(view.prop('selectedItem')) === item && <SelectPlaylistsView track={item} />}
-                {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
                 {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
                 {item.isLiked() || <span className="badge">{item.duration()}</span>}
             </li>
