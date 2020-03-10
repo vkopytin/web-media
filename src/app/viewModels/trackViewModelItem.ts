@@ -17,12 +17,8 @@ class TrackViewModelItem extends ViewModel {
         playlists: [] as PlaylistsViewModelItem[]
     };
 
-    addToPlaylistCommand = {
-        exec: (track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.addToPlaylist(track, playlist)
-    };
-    removeFromPlaylistCommand = {
-        exec: (track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist)
-    };
+    addToPlaylistCommand = { exec: (track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.addToPlaylist(track, playlist) };
+    removeFromPlaylistCommand = { exec: (track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist) };
 
     isInit = _.delay(() => {
         this.connect();

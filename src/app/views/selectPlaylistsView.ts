@@ -19,7 +19,7 @@ class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, SelectPlay
         errors: [] as ServiceResult<any, Error>[],
         items: [] as PlaylistsViewModelItem[],
         playlists: [] as PlaylistsViewModelItem[],
-        track: null as TrackViewModelItem
+        track: (this as any).props.track as TrackViewModelItem
     };
 
     switchDeviceCommand = {
@@ -38,13 +38,12 @@ class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, SelectPlay
         'addToPlaylistCommand': 'addToPlaylistCommand',
         'removeFromPlaylistCommand': 'removeFromPlaylistCommand',
         'prop(items)': '.playlistsViewModel.playlists',
-        'fetchData': '.playlistsViewModel.getchData',
+        'fetchData': '.playlistsViewModel.fetchData',
         'prop(playlists)': 'playlists'
     });
 
     constructor(props) {
         super(props);
-        this.state.track = this.props.track;
         subscribeToChange(this.binding, () => {
             this.setState({
                 ...this.state

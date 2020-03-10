@@ -31,7 +31,7 @@ export const template = (view: HomeView) => <>
                     </div>
                 </span>
                 <span className="list-item push-right">
-                    <div className="media-body pull-left"
+                    <div className="media-body"
                         onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}
                     >
                         <div>
@@ -41,9 +41,9 @@ export const template = (view: HomeView) => <>
                         </div>
                         <div className="album-title">{item.album()}</div>
                     </div>
-                    {(view.prop('selectedItem')) === item && <SelectPlaylistsView track={item} />}
-                    {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
-                </span>
+                    </span>
+                {(view.prop('selectedItem')) === item && <SelectPlaylistsView track={item} />}
+                {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
                 {item.isLiked() && <span className="badge badge-positive"
                     onClick={evnt => view.unlikeTrackCommand.exec(item)}
                 >{item.duration()}</span>}
@@ -56,6 +56,6 @@ export const template = (view: HomeView) => <>
     <section className="info content-padded">
         <p>Media Player</p>
         <p>Written by <a href="https://github.com/vkopytin">Volodymyr Kopytin</a></p>
-        <p>Part of <a href="https://www.npmjs.com/package/databindjs">DataBind JS</a></p>
+        <p>Powered by <a href="https://www.npmjs.com/package/databindjs">DataBind JS</a></p>
     </section>
 </>;

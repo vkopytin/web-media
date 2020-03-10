@@ -19,6 +19,10 @@
   overflow: hidden;
   border-bottom: $border-default;
 
+  &:nth-child(2n+0) {
+    background-color: lighten($default-color, 1%);
+  }
+
   // Remove the border from the last table view item
   &:last-child {
     border-bottom: 0;

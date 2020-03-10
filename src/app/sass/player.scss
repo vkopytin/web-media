@@ -536,7 +536,6 @@ border-bottom-right-radius: 12px;
 
     .media-body {
         filter: drop-shadow(2px 4px 6px black);
-        float: left;
     }
 
     .media-object {
@@ -547,8 +546,8 @@ border-bottom-right-radius: 12px;
     }
 
     .chips-list {
-        display: inline;
-        margin-left: 50px;
+        padding-top: 10px;
+        display: block;
     }
 
     .center {

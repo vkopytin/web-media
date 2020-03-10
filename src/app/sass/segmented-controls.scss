@@ -33,11 +33,13 @@
 
     // Tap state of segmented controller
     &:active {
+      color: lighten($text-color, 20%);
       background-color: lighten($default-color, 5%)
     }
 
     // Selected state of segmented controller
     &.active {
+      color: lighten($text-color, 10%);
       background-color: lighten($default-color, 15%)
     }
   }

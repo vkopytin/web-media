@@ -10,6 +10,7 @@
   color: lighten($text-color, 20%);
   background-color: darken($text-color, 20%);
   border-radius: 100px;
+  cursor: pointer;
 
   // Inverted badges have no background.
   &.badge-inverted {
