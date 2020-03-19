@@ -114,6 +114,8 @@ export const template = (view: AppView) => <main>
             ></a>
             <h1 className="title" onClick={evnt => view.toggleSelectDevices()}>
                 {view.prop('profile').display_name || '<Please Login>'}
+                &nbsp;-&nbsp;
+                {view.prop('currentDevice')?.name()}
                 <span className="icon icon-caret"></span>
             </h1>
         </header>

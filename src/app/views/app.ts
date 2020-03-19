@@ -6,7 +6,7 @@ import { ServiceResult } from '../base/serviceResult';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
 import { template } from '../templates/app';
 import { current } from '../utils';
-import { AppViewModel, TrackViewModelItem } from '../viewModels';
+import { AppViewModel, TrackViewModelItem, DeviceViewModelItem } from '../viewModels';
 
 
 export interface IAppViewProps {
@@ -22,6 +22,7 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
         currentPanel: 'home' as 'home' | 'playlists' | 'releases' | 'search' | 'tracks',
         showSelectDevices: 'hide' as 'show' | 'hide' | '',
         devices: [] as IDevice[],
+        currentDevice: null as DeviceViewModelItem,
         profile: {} as IUserInfo,
         scrolledToBottom: false,
         currentTrackId: '',
@@ -37,7 +38,8 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
         'prop(devices)': 'devices',
         'prop(profile)': 'profile',
         'prop(currentTrackId)': 'currentTrackId',
-        'prop(topTracks)': 'topTracks'
+        'prop(topTracks)': 'topTracks',
+        'prop(currentDevice)': 'currentDevice'
     });
 
     constructor(props) {

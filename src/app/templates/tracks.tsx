@@ -7,7 +7,7 @@ import { SelectPlaylistsView, TracksView } from '../views';
 const cn = utils.className;
 
 export const template = (view: TracksView) => <>
-    <ul className="todo-list table-view">
+    <ul className={cn(`${view.props.className} todo-list table-view`)}>
         {_.map(view.prop('tracks'), (item, index) => <li key={item.id()} className="table-view-cell media">
             <span className="media-object pull-left player-left--32"
                 onClick={evnt => item.play(view.uri())}
@@ -32,12 +32,17 @@ export const template = (view: TracksView) => <>
                 {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
             </div>
             {(view.prop('selectedItem')) === item && <SelectPlaylistsView track={item} />}
-            {item.isLiked() && <span className="badge badge-positive"
-                onClick={evnt => view.unlikeTrackCommand.exec(item)}
-            >{item.duration()}</span>}
-            {item.isLiked() || <span className="badge"
-                onClick={evnt => view.likeTrackCommand.exec(item)}
-            >{item.duration()}</span>}
+            <span className="badge-region">
+                {item.isLiked() && <span className="badge badge-positive"
+                    onClick={evnt => view.unlikeTrackCommand.exec(item)}
+                >{item.duration()}</span>}
+                {item.isLiked() || <span className="badge"
+                    onClick={evnt => view.likeTrackCommand.exec(item)}
+                >{item.duration()}</span>}
+                <span className="badge badge-negative">
+                    <span className="icon icon-trash"></span>
+                </span>
+            </span>
         </li>
         )}
     </ul>

@@ -34,7 +34,7 @@ class SpotifySyncService extends withEvents(BaseService) {
         await this.syncMyTracks();
         const playlists = await this.syncMyPlaylists();
         for (const playlist of playlists) {
-            await this.syncTracksByPlaylist(playlist.id);
+            await this.syncTracksByPlaylist(playlist);
         }
         this.cleanUpData();
     }
@@ -48,9 +48,9 @@ class SpotifySyncService extends withEvents(BaseService) {
         return res;
     }
 
-    async syncTracksByPlaylist(playlistId: string) {
-        for await (const tracks of this.listPlaylistTracks(playlistId)) {
-            await addTrackToPlaylist(playlistId, tracks);
+    async syncTracksByPlaylist(playlist: IUserPlaylist) {
+        for await (const tracks of this.listPlaylistTracks(playlist.id)) {
+            await addTrackToPlaylist(playlist, tracks);
         }
     }
 

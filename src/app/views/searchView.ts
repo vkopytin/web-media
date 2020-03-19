@@ -31,6 +31,8 @@ class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
     };
 
     loadMoreCommand = { exec() { } };
+    likeTrackCommand = { exec(track: TrackViewModelItem) { } };
+    unlikeTrackCommand = { exec(track: TrackViewModelItem) { } };
     
     binding = bindTo(this, () => current(SearchViewModel), {
         'loadMoreCommand': 'loadMoreCommand',

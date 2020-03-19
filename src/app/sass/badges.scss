@@ -19,6 +19,32 @@
   }
 }
 
+.badge-region {
+  display: inline-block;
+  font-size: 12px;
+  line-height: 1;
+  color: lighten($text-color, 20%);
+  padding: 0 5px 0 0;
+  background-color: transparent;
+
+  .icon {
+    font-size: 12px;
+  }
+
+  .badge {
+    margin-left: 4px;
+  }
+}
+
+.table-view-cell > .badge-region {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
 
 // Badge modifiers
 // --------------------------------------------------

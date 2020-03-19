@@ -5,6 +5,7 @@ import { IPlaylistRecord, IPlaylistTrackRecord } from './interfaces';
 import { Relation } from './relation';
 import { TracksStore } from './tracksStore';
 import { MyStore } from './myStore';
+import { IUserPlaylist } from '../../adapter/spotify';
 
 
 class PlaylistsStore {
@@ -25,6 +26,7 @@ class PlaylistsStore {
         playlistId: string;
         trackId: string;
         added_at?: Date;
+        snapshot_id?: string;
     }>(this.storage, {
         playlistId: '',
         trackId: ''
@@ -88,14 +90,15 @@ class PlaylistsStore {
         return asAsync(this.storage, this.storage.getCount, this.storeConfig);
     }
 
-    async addTracks(playlistId: string, tracks: IPlaylistTrackRecord | IPlaylistTrackRecord[]) {
+    async addTracks(playlist: IPlaylistRecord, tracks: IPlaylistTrackRecord | IPlaylistTrackRecord[]) {
         const tracksStore = new TracksStore(this.storage);
         for (const track of [].concat(tracks) as IPlaylistTrackRecord[]) {
             await tracksStore.refresh(track.track);
             await this.relation.refresh({
-                playlistId,
+                playlistId: playlist.id,
                 trackId: track.track.id,
-                added_at: new Date(track.added_at)
+                added_at: new Date(track.added_at),
+                snapshot_id: playlist.snapshot_id
             });
         }
     }

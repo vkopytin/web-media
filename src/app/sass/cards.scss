@@ -8,6 +8,9 @@
   background-color: $card-bg;
   border: $border-default;
   border-radius: $border-radius;
+  box-shadow: inset 0px 0px 8px 2px darken($card-bg, 10%);
+  background-image: linear-gradient( rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7) ), url("../../images/fabric-plaid.png");
+  background-attachment: local;
 }
 
 

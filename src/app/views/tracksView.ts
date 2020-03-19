@@ -7,6 +7,7 @@ import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '
 
 
 export interface ITracksViewProps {
+    className?: string;
     playlist: PlaylistsViewModelItem;
     currentTrackId: string;
     showErrors(errors: ServiceResult<any, Error>[]);

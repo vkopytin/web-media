@@ -111,7 +111,7 @@ class TrackViewModelItem extends ViewModel {
     }
 
     async addToPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
-        const result = await this.ss.addTrackToPlaylist(track.song.track, playlist.id());
+        const result = await this.ss.addTrackToPlaylist(track.song.track, playlist.playlist);
         if (assertNoErrors(result, e => this.errors(e))) {
             return;
         }

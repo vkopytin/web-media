@@ -8,6 +8,7 @@ import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult
 import { SpotifySyncService } from './spotifySyncService';
 import { DataService } from './dataService';
 import { ITrack, ISearchType } from '../adapter/spotify';
+import { IPlaylistRecord } from '../data/entities/interfaces';
 
 
 const lockSpotifyService = asyncQueue();
@@ -488,12 +489,12 @@ class Service {
         return syncPlaylistsResult;
     }
 
-    async addTrackToPlaylist(tracks: ITrack | ITrack[], playlistId: string) {
+    async addTrackToPlaylist(tracks: ITrack | ITrack[], playlist: IPlaylistRecord) {
         const data = await this.service(DataService);
         if (data.isError) {
             return data;
         }
-        const addResult = await data.val.addTracksToPlaylist(playlistId, tracks);
+        const addResult = await data.val.addTracksToPlaylist(playlist, tracks);
         if (addResult.isError) {
             return;
         }
@@ -501,7 +502,7 @@ class Service {
         if (spotify.isError) {
             return spotify;
         }
-        const result = await spotify.val.addTrackToPlaylist(_.map([].concat(tracks), t => t.uri), playlistId);
+        const result = await spotify.val.addTrackToPlaylist(_.map([].concat(tracks), t => t.uri), playlist.id);
 
         return result;
     }

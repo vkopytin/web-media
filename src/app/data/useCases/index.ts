@@ -6,6 +6,7 @@ import { PlaylistsStore } from '../entities/playlistsStore';
 import { TracksStore } from '../entities/tracksStore';
 import { MyStore } from '../entities/myStore';
 import { ISongRecord } from '../entities/interfaces/iSongRecord';
+import { IUserPlaylist } from '../../adapter/spotify';
 
 
 export function initializeStructure() {
@@ -111,12 +112,12 @@ export function listMyTracks(offset = 0, limit?) {
     });
 }
 
-export function addTrackToPlaylist(playlistId: string, playlistTrack: IPlaylistTrackRecord | IPlaylistTrackRecord[]) {
+export function addTrackToPlaylist(playlist: IPlaylistRecord, playlistTrack: IPlaylistTrackRecord | IPlaylistTrackRecord[]) {
     return new Promise((resolve, reject) => {
         DataStorage.create(async (err, storage) => {
             try {
                 const playlists = new PlaylistsStore(storage);
-                await playlists.addTracks(playlistId, playlistTrack);
+                await playlists.addTracks(playlist, playlistTrack);
 
                 storage.complete();
                 resolve();

@@ -1,15 +1,14 @@
 import { withEvents } from 'databindjs';
 import { BaseService } from '../base/baseService';
 import { Service } from '.';
-import { assertNoErrors } from '../utils';
 import * as _ from 'underscore';
 import { DataServiceResult } from './results/dataServiceResult';
-import { IUserPlaylistsResult, ITrack } from '../adapter/spotify';
-import { listPlaylists, listTracksByPlaylist, listMyTracks, initializeStructure, listPlaylistsByTrack, addTrackToPlaylist, removeTrackFromPlaylist, putMyTracks } from '../data/useCases';
+import { ITrack } from '../adapter/spotify';
+import { listPlaylists, listTracksByPlaylist, listMyTracks, initializeStructure, listPlaylistsByTrack, putMyTracks } from '../data/useCases';
 import { DataStorage } from '../data/dataStorage';
 import { PlaylistsStore } from '../data/entities/playlistsStore';
 import { MyStore } from '../data/entities/myStore';
-import { TracksStore } from '../data/entities/tracksStore';
+import { IPlaylistRecord } from '../data/entities/interfaces';
 
 
 class DataService extends withEvents(BaseService) {
@@ -124,13 +123,13 @@ class DataService extends withEvents(BaseService) {
         }
     }
 
-    async addTracksToPlaylist(playlistId: string, tracks: ITrack | ITrack[]) {
+    async addTracksToPlaylist(playlist: IPlaylistRecord, tracks: ITrack | ITrack[]) {
         return new Promise<DataServiceResult<boolean, Error>>((resolve, reject) => {
             DataStorage.create(async (err, storage) => {
                 try {
                     for (const track of [].concat(tracks)) {
                         const playlists = new PlaylistsStore(storage);
-                        await playlists.addTracks(playlistId, {
+                        await playlists.addTracks(playlist, {
                             track,
                             added_at: new Date().toISOString()
                         });

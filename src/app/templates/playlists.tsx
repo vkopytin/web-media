@@ -26,7 +26,8 @@ export const template = (view: PlaylistsView) => <>
     </div>
     <ul className="todo-list table-view">
         {_.map(view.prop('playlists'), (item, index) => {
-            return [<li key={item.id()} className="table-view-cell media">
+            return <li key={item.id()}>
+                <div className="table-view-cell media">
                 <a className="navigate-right"
                     onClick={evnt => { view.selectPlaylistCommand.exec(item.id() === view.prop('currentPlaylistId') ? null : item.id()) }}
                 >
@@ -36,21 +37,24 @@ export const template = (view: PlaylistsView) => <>
                         <p>{item.owner()}</p>
                     </div>
                     <span className="badge">{item.tracksTotal()}</span>
-                </a>
-            </li>,
-                item.id() === view.prop('currentPlaylistId') && [
-                    <TracksView showErrors={e => view.props.showErrors(e)}
+                    </a>
+                </div>
+                {item.id() === view.prop('currentPlaylistId') && <div className="card">
+                    <TracksView
+                        showErrors={e => view.props.showErrors(e)}
                         key={1}
-                    playlist={item}
-                    currentTrackId={view.props.currentTrackId}
-                    />,
-                    <li key={2} className="table-view-cell"><div key={2} className="center">
-                    {view.prop('isLoading') || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
-                        onClick={evnt => view.loadMoreTracksCommand.exec()}
-                    ></button>}
-                    {view.prop('isLoading') && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
-                </div></li>]
-        ]})}
+                        playlist={item}
+                        currentTrackId={view.props.currentTrackId}
+                    />
+                    <div key={2} className="center">
+                        {view.prop('isLoading') || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
+                            onClick={evnt => view.loadMoreTracksCommand.exec()}
+                        ></button>}
+                        {view.prop('isLoading') && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
+                    </div>
+                </div>}
+            </li>
+        })}
     </ul>
     <div className="center">
         {view.prop('isLoading') || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"

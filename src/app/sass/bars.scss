@@ -10,10 +10,12 @@
   height: $bar-base-height;
   padding-right: $bar-side-spacing;
   padding-left: $bar-side-spacing;
-  background-color: $chrome-color;
+  background-color: $bar-color;
   border-bottom: $border-default;
   -webkit-backface-visibility: hidden; // Make sure the bar is visible when a modal animates in.
           backface-visibility: hidden;
+  background-image: linear-gradient( rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3) ), url("../../images/stressed-linen.png");
+  background-attachment: local;
 }
 
 // Modifier class to dock any bar below .bar-nav

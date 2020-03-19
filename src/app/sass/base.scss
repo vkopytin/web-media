@@ -20,7 +20,8 @@ body {
   font-size: $font-size-default;
   line-height: $line-height-default;
   color: $text-color;
-  background-color: $default-color;
+  background-color: $chrome-color;
+  background-image: url("../../images/stressed-linen.png");
 }
 
 // Universal link styling
@@ -44,6 +45,8 @@ a {
   overflow: auto;
   background-color: $default-color;
   -webkit-overflow-scrolling: touch;
+  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url("../../images/shattered.png");
+  background-attachment: local;
 }
 
 // Hack to force all relatively and absolutely positioned elements still render while scrolling

@@ -8,8 +8,15 @@
   margin-bottom: 15px;
   list-style: none; // Remove usual bullet styles from table view
   background-color: $default-color;
-  border-top: $border-default;
+  /* border-top: $border-default; */
   border-bottom: $border-default;
+  > *:nth-child(2n+1) {
+    background-color: lighten($default-color, 5%);
+  }
+
+  > *:nth-child(2n+0) {
+    box-shadow: inset 0px 0px 8px 4px lighten($default-color, 4%);
+  }
 }
 
 // Pad each table view item and add dividers
@@ -18,10 +25,6 @@
   padding: 11px 65px 11px 15px;
   overflow: hidden;
   border-bottom: $border-default;
-
-  &:nth-child(2n+0) {
-    background-color: lighten($default-color, 1%);
-  }
 
   // Remove the border from the last table view item
   &:last-child {
