@@ -85,7 +85,7 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
                 ...this.state,
                 showSelectDevices: lastValue === 'show' ? 'hide' : 'show'
             });
-        }, 500);
+        }, 100);
     }
 
     onPageScrollInternal(evnt) {

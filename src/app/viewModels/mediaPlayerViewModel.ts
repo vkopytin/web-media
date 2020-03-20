@@ -218,7 +218,8 @@ class MediaPlayerViewModel extends ViewModel {
         if (assertNoErrors(playerResult, e => this.errors(e))) {
             return;
         }
-        this.volume(await playerResult.val.getVolume());
+        const volume = await playerResult.val.getVolume();
+        this.volume(volume);
     }
 
     async fetchDataInternal() {
@@ -309,7 +310,7 @@ class MediaPlayerViewModel extends ViewModel {
                     return;
                 }
                 this.volume(percent);
-                playerResult.val.setVolume(percent * 0.01);
+                playerResult.val.setVolume(percent);
             }
 
             next();
@@ -410,7 +411,7 @@ class MediaPlayerViewModel extends ViewModel {
                 if (assertNoErrors(playerResult, e => this.errors(e))) {
                     return;
                 }
-                const volume = await playerResult.val.getVolume() * 100;
+                const volume = await playerResult.val.getVolume();
                 this.volume(volume * 1.1);
             }
 
@@ -432,7 +433,7 @@ class MediaPlayerViewModel extends ViewModel {
                 if (assertNoErrors(playerResult, e => this.errors(e))) {
                     return;
                 }
-                const volume = await playerResult.val.getVolume() * 100;
+                const volume = await playerResult.val.getVolume();
                 this.volume(volume * 0.9);
             }
 

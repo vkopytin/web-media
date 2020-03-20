@@ -3,7 +3,7 @@ import * as $ from 'jquery';
 import * as React from 'react';
 import * as _ from 'underscore';
 import { AppView, DevicesView, HomeView, MediaPlayerView, MyTracksView, NewReleasesView, PlaylistsView, SearchView, SwitchView } from '../views';
-
+const imgSrc = require('../../images/Spotify_Logo_RGB_Green.png');
 
 const cn = utils.className;
 const redirectUri = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
@@ -15,7 +15,9 @@ export const template = (view: AppView) => <main>
                 <a className="icon icon-close pull-right" href="#"
                     onClick={evnt => view.prop('openLogin', false)}
                 ></a>
-                <h1 className="title">Login</h1>
+                <h1 className="title">
+                    <img className="spotify-logo" src={imgSrc.default} height="32" />
+                </h1>
             </header>
 
             <div className="content">
@@ -109,14 +111,15 @@ export const template = (view: AppView) => <main>
             </ul>
         </div>
         <header className="bar bar-nav">
+            <a className="icon icon-info pull-left"
+                onClick={evnt => view.toggleSelectDevices()}
+            >
+            </a>
             <a className="icon icon-person pull-right"
                 onClick={evnt => view.prop('openLogin', true)}
             ></a>
-            <h1 className="title" onClick={evnt => view.toggleSelectDevices()}>
-                {view.prop('profile').display_name || '<Please Login>'}
-                &nbsp;-&nbsp;
-                {view.prop('currentDevice')?.name()}
-                <span className="icon icon-caret"></span>
+            <h1 className="title">
+                <img className="spotify-logo" src={imgSrc.default} height="32"/>
             </h1>
         </header>
         <div className="bar bar-standard bar-header-secondary bar-header-playback" style={{ height: '92px' }}>

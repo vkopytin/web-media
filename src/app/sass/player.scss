@@ -5,6 +5,12 @@
 $default-color:  #22222222 !default;
 $text-color: #999 !default;
 
+.spotify-logo {
+    display: inline-block;
+    margin: 5px;
+    height: 32px;
+}
+
 .content.shadow::before {
     position: absolute;
     top: 0;
