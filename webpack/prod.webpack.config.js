@@ -1,7 +1,5 @@
 // production environmanet
-const webpack = require('webpack');
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const BabiliPlugin = require('babili-webpack-plugin');
+
 const {
   combine,
   plugins,
@@ -42,9 +40,9 @@ const newConfig = (function (options) {
     module_rules
   )(config, options);
 })({
-  CDN: '/static/',
-  PUBLIC_DIR: 'app/',
-  FILE_NAME_PATTERN: '[name].[ext]?hash=[hash]',
+  CDN: '/Scripts/',
+  PUBLIC_DIR: 'spotify/',
+  FILE_NAME_PATTERN: '[name].[hash].[ext]',
   ...process.env
 });
 

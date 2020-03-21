@@ -26,20 +26,26 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
         profile: {} as IUserInfo,
         scrolledToBottom: false,
         currentTrackId: '',
-        topTracks: [] as TrackViewModelItem[]
+        topTracks: [] as TrackViewModelItem[],
+        refreshTokenUrl: '',
+        autoRefreshUrl: ''
     };
     elScroller = null as HTMLElement;
+    refreshTokenCommand = { exec() { throw new Error('Unbound command'); } };
     onPageScroll = _.debounce(evnt => this.onPageScrollInternal(evnt), 500);
 
     binding = bindTo(this, () => current(AppViewModel), {
         '-errors': 'errors',
+        'refreshTokenCommand': 'refreshTokenCommand',
         'prop(openLogin)': 'openLogin',
         'prop(currentPanel)': 'currentPanel',
         'prop(devices)': 'devices',
         'prop(profile)': 'profile',
         'prop(currentTrackId)': 'currentTrackId',
         'prop(topTracks)': 'topTracks',
-        'prop(currentDevice)': 'currentDevice'
+        'prop(currentDevice)': 'currentDevice',
+        'prop(refreshTokenUrl)': 'prop(refreshTokenUrl)',
+        'prop(autoRefreshUrl)': 'prop(autoRefreshUrl)'
     });
 
     constructor(props) {
@@ -122,11 +128,12 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
         const tokenExpired = _.filter(errors, err => err.is(TokenExpiredError));
         if (!_.isEmpty(tokenExpired)) {
             this.prop('openLogin', true);
+            this.refreshTokenCommand.exec();
         }
         if (errors.length) {
             console.log(errors);
         }
-        this.prop('errors', [...this.prop('errors'), ...errors]);
+        this.prop('errors', errors);
     }
 
     render() {

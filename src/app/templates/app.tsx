@@ -6,7 +6,6 @@ import { AppView, DevicesView, HomeView, MediaPlayerView, MyTracksView, NewRelea
 const imgSrc = require('../../images/Spotify_Logo_RGB_Green.png');
 
 const cn = utils.className;
-const redirectUri = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
 
 export const template = (view: AppView) => <main>
     <section className="todoapp device-content">
@@ -22,17 +21,7 @@ export const template = (view: AppView) => <main>
 
             <div className="content">
                 <p className="content-padded">
-                    <a className="btn btn-block btn-outlined" href={"https://accounts.spotify.com/authorize?" + $.param({
-                        client_id: '963f916fa62c4186a4b8370e16eef658',
-                        redirect_uri: redirectUri,
-                        scope: [
-                            'streaming', 'user-read-email', 'user-read-private',
-                            'user-modify-playback-state', 'user-top-read', 'user-library-read',
-                            'playlist-read-private'
-                        ].join(' '),
-                        response_type: 'token',
-                        state: 123
-                    })}>
+                    <a className="btn btn-block btn-outlined" href={view.prop('refreshTokenUrl')}>
                         Login on Spotify
                     </a>
                 </p>
@@ -119,7 +108,9 @@ export const template = (view: AppView) => <main>
                 onClick={evnt => view.prop('openLogin', true)}
             ></a>
             <h1 className="title">
-                <img className="spotify-logo" src={imgSrc.default} height="32"/>
+                <img className="spotify-logo" src={imgSrc.default} height="32"
+                    onClick={evnt => view.refreshTokenCommand.exec()}
+                />
             </h1>
         </header>
         <div className="bar bar-standard bar-header-secondary bar-header-playback" style={{ height: '92px' }}>
@@ -203,4 +194,8 @@ export const template = (view: AppView) => <main>
             </section>
         </SwitchView>
     </section>
+    {view.prop('autoRefreshUrl') && <iframe
+        src={view.prop('autoRefreshUrl')}
+        style={{ display: 'none' }}
+    ></iframe>}
 </main>;

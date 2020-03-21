@@ -39,9 +39,9 @@ const newConfig = (function (options) {
     module_rules
   )(config, options);
 })({
-  CDN: '/static/',
-  PUBLIC_DIR: 'app/',
-  FILE_NAME_PATTERN: '[name].[ext]?hash=[hash]',
+  CDN: '/Scripts/',
+  PUBLIC_DIR: 'spotify/',
+  FILE_NAME_PATTERN: '[name].[hash].[ext]',
   ...process.env
 });
 

@@ -43,7 +43,6 @@ a {
 
 // Content
 .content {
-  background-color: #efeff4;
 }
 
 
@@ -180,7 +179,6 @@ p {
 
 // Default bar
 .bar {
-  background-color: $chrome-color;
   border-bottom: 0;
   @include box-shadow(0 0 1px rgba(0,0,0,.85));
 

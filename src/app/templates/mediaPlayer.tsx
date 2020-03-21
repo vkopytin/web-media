@@ -7,7 +7,6 @@ import { MediaPlayerView } from '../views';
 const cn = utils.className;
 
 export const template = (view: MediaPlayerView) => <div className="player-playback">
-    <div>{_.map(view.errors(), (error, index) => <div key={index}>error.val</div>)}</div>
     <div className="player-left">
         <div className="region">
             <div className="album-media" style={{backgroundImage: `url(${view.prop('thumbnailUrl')})`}}>
@@ -52,7 +51,7 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
                     ></button>
                     <div className="playback-volume">
                         <div className="progress-max" onClick={evnt => view.updateVolume(evnt)}>
-                            <div className="progress" style={{width: `${view.prop('volume')}%`}}></div>
+                            <div className="progress" style={{width: `${view.getVolume()}%`}}></div>
                         </div>
                         <div className="volume-marker">
                             <span className="icon icon-sound3"></span>

@@ -7,6 +7,7 @@ import { SettingsServiceUnexpectedError } from './errors/settingsServiceUnexpect
 export interface ISettings {
     spotify?: {
         accessToken?: string;
+        volume?: number;
     };
 }
 const fromEntries = str => {
@@ -29,6 +30,7 @@ class SettingsService extends BaseService {
     static async create(connection: Service) {
         try {
             let token = getCookie('access_token');
+            const volume = getCookie('lastVolume') || 50;
             const authData = window.location.hash.replace(/^#/, ''),
                 authInfo = fromEntries(authData) as {
                     access_token: string;
@@ -42,7 +44,8 @@ class SettingsService extends BaseService {
 
                 return SettingsServiceResult.success(new SettingsService({
                     spotify: {
-                        accessToken: atob(token)
+                        accessToken: atob(token),
+                        volume: volume
                     }
                 }));
             }
@@ -50,12 +53,15 @@ class SettingsService extends BaseService {
             if (token) {
                 return SettingsServiceResult.success(new SettingsService({
                     spotify: {
-                        accessToken: atob(token)
+                        accessToken: atob(token),
+                        volume: volume
                     }
                 }));
             }
 
-            return SettingsServiceResult.success(new SettingsService({}));
+            return SettingsServiceResult.success(new SettingsService({
+                volume: volume
+            }));
         } catch (ex) {
             return SettingsServiceUnexpectedError.create('Unexpected settings fetch error', ex);
         }
@@ -69,9 +75,31 @@ class SettingsService extends BaseService {
         this.config = settings;
     }
 
+    volume(val?) {
+        if (arguments.length && val !== this.config.spotify.volume) {
+            this.config.spotify.volume = val;
+            document.cookie += 'lastVolume=' + val;
+        }
+
+        return this.config.spotify.volume;
+    }
+
     get<K extends keyof SettingsService['config']>(
         propName: K, val?: SettingsService['config'][K]
     ): SettingsServiceResult<SettingsService['config'][K], Error> {
+
+        return SettingsServiceResult.success(this.config[propName]);
+    }
+
+    set<K extends keyof SettingsService['config']>(
+        propName: K, val: SettingsService['config'][K]
+    ): SettingsServiceResult<SettingsService['config'][K], Error> {
+        if (val !== this.config[propName]) {
+            this.config[propName] = {
+                ...this.config[propName],
+                ...val
+            };
+        }
 
         return SettingsServiceResult.success(this.config[propName]);
     }

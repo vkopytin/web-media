@@ -9,6 +9,8 @@ import { SpotifySyncService } from './spotifySyncService';
 import { DataService } from './dataService';
 import { ITrack, ISearchType } from '../adapter/spotify';
 import { IPlaylistRecord } from '../data/entities/interfaces';
+import { SettingsServiceResult } from './results/settingsServiceResult';
+import { SpotifyServiceResult } from './results/spotifyServiceResult';
 
 
 const lockSpotifyService = asyncQueue();
@@ -109,15 +111,46 @@ class Service {
     }
 
     async settings<K extends keyof SettingsService['config']>(
-        propName: K, val?: SettingsService['config'][K]
-    ) {
+        propName: K,
+        val?: SettingsService['config'][K]
+    ): Promise<SettingsServiceResult<SettingsService['config'][K], Error>>;
+    async settings(...args) {
+        const propName = args[0];
+        const val = args[1];
         const settingsResult = await this.service(SettingsService);
         if (settingsResult.isError) {
 
             return settingsResult;
         }
+        if (args.length > 1) {
+            settingsResult.val.set(propName, val);
+        }
 
         return settingsResult.val.get(propName);
+    }
+
+    async refreshToken(newToken: string) {
+        const playerResult = await this.service(SpotifyPlayerService);
+        const spotifyResult = await this.service(SpotifyService);
+        if (playerResult.isError) {
+            return playerResult;
+        }
+        if (spotifyResult.isError) {
+            return spotifyResult;
+        }
+        const newSettingsResult = await this.settings('spotify', { accessToken: newToken });
+        if (newSettingsResult.isError) {
+            return newSettingsResult;
+        }
+        const refreshSpTokenResult = await playerResult.val.refreshToken(newToken);
+        if (refreshSpTokenResult.isError) {
+            return refreshSpTokenResult;
+        }
+        const refreshPlayerTokenResult = await spotifyResult.val.refreshToken(newToken);
+        if (refreshPlayerTokenResult.isError) {
+            return refreshPlayerTokenResult;
+        }
+        return SpotifyServiceResult.success(true);
     }
 
     async spotifyPlayer() {

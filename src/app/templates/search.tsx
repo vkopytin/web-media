@@ -64,82 +64,90 @@ export const template = (view: SearchView) => <>
             </li>
         })}
         {_.map(view.prop('artists'), (item, index) => {
-            return [<li key={item.id()} className="table-view-cell media"
-                onClick={evnt => view.prop('currentArtist', view.prop('currentArtist')?.id() === item.id() ? null : item)}
-            >
-                <span className="media-object pull-left player-left--32"
+            return <li key={item.id()}>
+                <div className="table-view-cell media"
+                    onClick={evnt => view.prop('currentArtist', view.prop('currentArtist')?.id() === item.id() ? null : item)}
                 >
-                    <div className="region">
-                        <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
+                    <span className="media-object pull-left player-left--32"
+                    >
+                        <div className="region">
+                            <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
+                            </div>
+                        </div>
+                    </span>
+                    <div className="media-body">
+                        <div>
+                            <span className="song-title">{item.name()}</span>
                         </div>
                     </div>
-                </span>
-                <div className="media-body">
-                    <div>
-                        <span className="song-title">{item.name()}</span>
-                    </div>
                 </div>
-            </li>,
-            view.prop('currentArtist') === item && <AlbumsView
-                key={item.id() + '-3'}
-                currentTrackId={view.props.currentTrackId}
-                uri={null}
-                tracks={view.prop('currentTracks')}
-            />]
+                {view.prop('currentArtist') === item && <div className="card" key={item.id() + '-3'}>
+                    <AlbumsView
+                        currentTrackId={view.props.currentTrackId}
+                        uri={null}
+                        tracks={view.prop('currentTracks')}
+                    />
+                </div>}
+            </li>
         })}
         {_.map(view.prop('albums'), (item, index) => {
-            return [<li key={item.id()} className="table-view-cell media"
-                onClick={evnt => view.prop('currentAlbum', view.prop('currentAlbum')?.id() === item.id() ? null : item)}
-            >
-                <span className="media-object pull-left player-left--32"
+            return <li key={item.id()}>
+                <div className="table-view-cell media"
+                    onClick={evnt => view.prop('currentAlbum', view.prop('currentAlbum')?.id() === item.id() ? null : item)}
                 >
-                    <div className="region">
-                        <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
+                    <span className="media-object pull-left player-left--32"
+                    >
+                        <div className="region">
+                            <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
+                            </div>
                         </div>
+                    </span>
+                    <div className="media-body">
+                        <div>
+                            <span className="song-title">{item.name()}</span>
+                        </div>
+                        <div className="album-title">{item.firstArtist()}</div>
                     </div>
-                </span>
-                <div className="media-body">
-                    <div>
-                        <span className="song-title">{item.name()}</span>
-                    </div>
-                    <div className="album-title">{item.firstArtist()}</div>
+                    <span className="badge">{item.totalTracks()}</span>
                 </div>
-                <span className="badge">{item.totalTracks()}</span>
-            </li>,
-            view.prop('currentAlbum') === item && <AlbumsView
-                key={item.id() + '-1'}
-                currentTrackId={view.props.currentTrackId}
-                uri={view.prop('currentAlbum')?.uri()}
-                tracks={view.prop('currentTracks')}
-            />
-            ]
+                {view.prop('currentAlbum') === item && <div className="card" key={item.id() + '-1'}>
+                    <AlbumsView
+                        currentTrackId={view.props.currentTrackId}
+                        uri={view.prop('currentAlbum')?.uri()}
+                        tracks={view.prop('currentTracks')}
+                    />
+                </div>}
+            </li>
         })}
         {_.map(view.prop('playlists'), (item, index) => {
-            return [<li key={item.id()} className="table-view-cell media"
-                onClick={evnt => view.prop('currentPlaylist', view.prop('currentPlaylist')?.id() === item.id() ? null : item)}
-            >
-                <span className="media-object pull-left player-left--32"
+            return <li key={item.id()}>
+                <div className="table-view-cell media"
+                    onClick={evnt => view.prop('currentPlaylist', view.prop('currentPlaylist')?.id() === item.id() ? null : item)}
                 >
-                    <div className="region">
-                        <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
+                    <span className="media-object pull-left player-left--32"
+                    >
+                        <div className="region">
+                            <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
+                            </div>
                         </div>
+                    </span>
+                    <div className="media-body">
+                        <div>
+                            <span className="song-title">{item.name()}</span>
+                        </div>
+                        <div className="album-title">/{item.owner()}</div>
+                        <p dangerouslySetInnerHTML={{ __html: item.description() }}></p>
                     </div>
-                </span>
-                <div className="media-body">
-                    <div>
-                        <span className="song-title">{item.name()}</span>
-                    </div>
-                    <div className="album-title">/{item.owner()}</div>
-                    <p dangerouslySetInnerHTML={{ __html: item.description() }}></p>
+                    <span className="badge">{item.tracksTotal()}</span>
                 </div>
-                <span className="badge">{item.tracksTotal()}</span>
-            </li>,
-            view.prop('currentPlaylist') === item && <AlbumsView
-                key={item.id() + '-2'}
-                currentTrackId={view.props.currentTrackId}
-                uri={view.prop('currentPlaylist')?.uri()}
-                tracks={view.prop('currentTracks')}
-            />]
+                {view.prop('currentPlaylist') === item && <div className="card" key={item.id() + '-2'}>
+                    <AlbumsView
+                        currentTrackId={view.props.currentTrackId}
+                        uri={view.prop('currentPlaylist')?.uri()}
+                        tracks={view.prop('currentTracks')}
+                    />
+                </div>}
+            </li>
         })}
     </ul>
 </>;

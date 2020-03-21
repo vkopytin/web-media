@@ -204,7 +204,7 @@ footer:before {
     left: 25%;
     top: 25%;
     border-radius: 50%;
-    border-width: 1px;
+    border: 1px;
     border-style: solid;
     border-color: lighten($text-color, 20%);
     border-image: initial;
@@ -276,7 +276,7 @@ footer:before {
     height: 16px;
     width: 16px;
     background: transparent;
-    border-width: initial;
+    border: initial;
     border-style: none;
     border-color: initial;
     border-image: initial;
@@ -291,7 +291,7 @@ footer:before {
     height: 22px;
     box-sizing: content-box;
     background: transparent;
-    border-width: initial;
+    border: initial;
     border-style: none;
     border-color: initial;
     border-image: initial;

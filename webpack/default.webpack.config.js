@@ -3,9 +3,7 @@ require('dotenv').config()
 const childProcess = require('child_process')
 const path = require('path')
 const webpack = require('webpack')
-//const HtmlWebpackPlugin = require('html-webpack-plugin')
-const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin')
-  // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = (options, workingDir) => {
   const CDN_PATH = options.CDN || '/';
@@ -24,7 +22,12 @@ module.exports = (options, workingDir) => {
     entry: {
       app: [path.join(workingDir, '../src/app/index')],
       vendor: [
-        'react'
+        'react',
+        'databindjs',
+        'tslib',
+        'jquery',
+        'underscore',
+        'utils'
       ]
     },
     output: {
@@ -174,14 +177,20 @@ module.exports = (options, workingDir) => {
         ],
       }, {
         test: /\.s[ac]ss$/i,
-        use: [
-          // Creates `style` nodes from JS strings
-          'style-loader',
+          use: (process.env.NODE_ENV === 'development' ? [
+            // Creates `style` nodes from JS strings
+            'style-loader'
+          ] : [{
+          loader: MiniCssExtractPlugin.loader,
+          options: {
+              hmr: process.env.NODE_ENV === 'development',
+          },
+      }]).concat([
           // Translates CSS into CommonJS
           'css-loader',
           // Compiles Sass to CSS
           'sass-loader'
-        ]
+        ])
       }, {
         test: /\.png$/,
         loader: 'file-loader',

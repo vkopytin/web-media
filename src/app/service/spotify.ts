@@ -52,6 +52,11 @@ class SpotifyService extends withEvents(BaseService) {
         super();
     }
 
+    refreshToken(newToken: string) {
+        this.adapter.token = newToken;
+        return SpotifyServiceResult.success(true);
+    }
+
     onStateChangedInternal(...args) {
         this.trigger('change:state', ...args);
     }

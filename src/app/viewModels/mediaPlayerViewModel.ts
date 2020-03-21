@@ -5,6 +5,7 @@ import { Service, SpotifyService } from '../service';
 import { IWebPlaybackState } from '../service/spotifyPlayer';
 import { assertNoErrors, asyncQueue, current } from '../utils';
 import { TrackViewModelItem } from './trackViewModelItem';
+import { SettingsService } from '../service/settings';
 
 
 const lockSection = asyncQueue();
@@ -19,7 +20,7 @@ class MediaPlayerViewModel extends ViewModel {
         trackName: '',
         albumName: '',
         artistName: '',
-        volume: 0,
+        volume: 50,
         thumbnailUrl: '',
         currentTrack: null as ITrack,
         currentTrackId: '',
@@ -49,7 +50,9 @@ class MediaPlayerViewModel extends ViewModel {
     constructor(private ss = current(Service)) {
         super();
 
-        _.delay(() => this.connect());
+        _.delay(() => {
+            this.connect();
+        });
     }
 
     queue(val?: TrackViewModelItem[]) {
@@ -218,8 +221,13 @@ class MediaPlayerViewModel extends ViewModel {
         if (assertNoErrors(playerResult, e => this.errors(e))) {
             return;
         }
-        const volume = await playerResult.val.getVolume();
-        this.volume(volume);
+        const settingsResult = await this.ss.settings('spotify');
+        if (settingsResult.isError) {
+            const volume = await playerResult.val.getVolume();
+            return this.volume(volume);
+        }
+        playerResult.val.setVolume(settingsResult.val.volume);
+        this.volume(settingsResult.val.volume);
     }
 
     async fetchDataInternal() {
@@ -312,6 +320,11 @@ class MediaPlayerViewModel extends ViewModel {
                 this.volume(percent);
                 playerResult.val.setVolume(percent);
             }
+            const settingsResult = await this.ss.service(SettingsService);
+            if (assertNoErrors(settingsResult, e => this.errors(e))) {
+                return;
+            }
+            this.volume(settingsResult.val.volume(percent));
 
             next();
         }, this));

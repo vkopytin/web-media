@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import * as _ from 'underscore';
 import { IDevice, IResponseResult, ITrack, IUserInfo } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
@@ -8,22 +9,26 @@ import { DeviceViewModelItem } from './deviceViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 
-class AppViewModel extends ViewModel {
+class AppViewModel extends ViewModel<AppViewModel['settings']> {
 
     settings = {
-        ...(this as ViewModel).settings,
+        ...(this as any as ViewModel).settings,
         openLogin: false,
         currentPanel: 'home' as 'home' | 'profile',
         currentDevice: null as DeviceViewModelItem,
         currentTrackId: '',
         devices: [] as DeviceViewModelItem[],
-        topTracks: [] as TrackViewModelItem[]
+        topTracks: [] as TrackViewModelItem[],
+        refreshTokenUrl: '',
+        autoRefreshUrl: ''
     };
 
     switchDeviceCommand = { exec: (device: DeviceViewModelItem) => this.switchDevice(device) };
+    refreshTokenCommand = { exec: () => this.refreshToken() };
     userInfo = {} as IUserInfo;
 
     isInit = _.delay(() => {
+        this.init();
         this.startSync();
         this.connect();
         this.fetchData();
@@ -96,6 +101,36 @@ class AppViewModel extends ViewModel {
         return this.settings.openLogin;
     }
 
+    async init() {
+        const redirectUri = `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
+            refreshTokenUrl = 'https://accounts.spotify.com/authorize?' + $.param({
+                client_id: '963f916fa62c4186a4b8370e16eef658',
+                redirect_uri: redirectUri,
+                scope: [
+                    'streaming', 'user-read-email', 'user-read-private',
+                    'user-modify-playback-state', 'user-top-read', 'user-library-read',
+                    'playlist-read-private'
+                ].join(' '),
+                response_type: 'token',
+                state: 1
+            });
+
+        this.prop('refreshTokenUrl', refreshTokenUrl);
+        if (window.parent === window) {
+            $(window).on('message', async evnt => {
+                const [eventName, value] = (evnt.originalEvent as any).data;
+                switch (eventName) {
+                    case 'accessToken':
+                        this.prop('autoRefreshUrl', '');
+                        await this.ss.refreshToken(value);
+                        this.openLogin(false);
+                    default:
+                        break;
+                }
+            });
+        }
+    }
+
     async startSync() {
         const syncServiceResult = await this.ss.service(SpotifySyncService);
         if (assertNoErrors(syncServiceResult, e => this.errors(e))) {
@@ -103,6 +138,11 @@ class AppViewModel extends ViewModel {
         }
         const syncService = syncServiceResult.val;
         syncService.syncData();
+    }
+
+    async refreshToken() {
+        this.prop('autoRefreshUrl', this.prop('refreshTokenUrl') + '23');
+        console.log('updating token');
     }
 
     async connect() {

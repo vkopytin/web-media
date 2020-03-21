@@ -18,7 +18,7 @@ class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['s
         duration: 1,
         timePlayed: 100,
         isPlaying: false,
-        volume: 80,
+        volume: 50,
         trackName: '',
         albumName: '',
         thumbnailUrl: '',
@@ -95,9 +95,13 @@ class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['s
         const rect = (evnt.currentTarget as HTMLDivElement).getBoundingClientRect();
         const x = evnt.clientX - rect.left; //x position within the element.
         const y = evnt.clientY - rect.top;  //y position within the element.
-        const progressPercent = x / rect.width * 100;
+        const progressPercent = this.logslider(x / rect.width * 100);
 
         this.volumeCommand.exec(Math.round(progressPercent));
+    }
+
+    getVolume() {
+        return this.logposition(this.prop('volume'));
     }
 
     timePlayed() {
@@ -117,6 +121,36 @@ class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['s
 
     showErrors(errors) {
         this.props.showErrors(errors);
+    }
+
+    logslider(position) {
+        // position will be between 0 and 100
+        var minp = 0;
+        var maxp = 100;
+      
+        // The result should be between 100 an 10000000
+        var minv = Math.log(1);
+        var maxv = Math.log(100);
+      
+        // calculate adjustment factor
+        var scale = (maxv - minv) / (maxp - minp);
+      
+        return Math.exp(minv + scale * (position - minp));
+    }
+
+    logposition(value) {
+        // position will be between 0 and 100
+        var minp = 0;
+        var maxp = 100;
+      
+        // The result should be between 100 an 10000000
+        var minv = Math.log(1);
+        var maxv = Math.log(100);
+      
+        // calculate adjustment factor
+        var scale = (maxv - minv) / (maxp - minp);
+
+        return (Math.log(value) - minv) / scale + minp;
     }
 
     render() {

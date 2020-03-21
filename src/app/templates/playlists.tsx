@@ -28,15 +28,15 @@ export const template = (view: PlaylistsView) => <>
         {_.map(view.prop('playlists'), (item, index) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media">
-                <a className="navigate-right"
-                    onClick={evnt => { view.selectPlaylistCommand.exec(item.id() === view.prop('currentPlaylistId') ? null : item.id()) }}
-                >
-                    <img className="media-object pull-left" height="60" src={item.thumbnailUrl()} alt={item.name()} />
-                    <div className="media-body">
-                        {item.name()}
-                        <p>{item.owner()}</p>
-                    </div>
-                    <span className="badge">{item.tracksTotal()}</span>
+                    <a className="navigate-right"
+                        onClick={evnt => { view.selectPlaylistCommand.exec(item.id() === view.prop('currentPlaylistId') ? null : item.id()) }}
+                    >
+                        <img className="media-object pull-left" height="60" src={item.thumbnailUrl()} alt={item.name()} />
+                        <div className="media-body">
+                            {item.name()}
+                            <p>{item.owner()}</p>
+                        </div>
+                        <span className="badge">{item.tracksTotal()}</span>
                     </a>
                 </div>
                 {item.id() === view.prop('currentPlaylistId') && <div className="card">
