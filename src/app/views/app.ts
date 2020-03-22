@@ -69,7 +69,7 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
     openDevices(show) {
         this.toggleSelectDevices(show ? 'hide' : 'show');
     }
-
+    
     isPlaying(track: TrackViewModelItem) {
         return this.prop('currentTrackId') === track.id();
     }

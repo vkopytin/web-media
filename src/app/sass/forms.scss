@@ -94,6 +94,7 @@ select {
   overflow: hidden;
   height: 35px; // Matches the height of inputs.
   border-bottom: $border-default;
+  background-color: $default-color;
 }
 
 // Labels get floated left with a set percentage width

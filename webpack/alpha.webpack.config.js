@@ -41,6 +41,7 @@ const newConfig = (function (options) {
 })({
   CDN: '/Scripts/',
   PUBLIC_DIR: 'spotify/',
+  PLAYER_NAME: 'WEB Player for Spotify',
   FILE_NAME_PATTERN: '[name].[hash].[ext]',
   ...process.env
 });

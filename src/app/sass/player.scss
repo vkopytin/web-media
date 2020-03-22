@@ -544,6 +544,12 @@ border-bottom-right-radius: 12px;
         filter: drop-shadow(2px 4px 6px black);
         .chips-list {
             padding-top: 0;
+            display: inline;
+
+            .chips {
+                padding: 0 6px 0 6px;
+                margin: 0 2px 0 2px;
+            }
         }
     }
 

@@ -9,4 +9,4 @@ export { PlaylistsViewModel } from './playlistsViewModel';
 export { PlaylistsViewModelItem } from './playlistsViewModelItem';
 export { SearchViewModel } from './searchViewModel';
 export { TrackViewModelItem } from './trackViewModelItem';
-
+export { UserProfileViewModel } from './userProfileViewModel';

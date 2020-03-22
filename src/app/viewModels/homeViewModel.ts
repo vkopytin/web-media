@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { IRecommendationsResult, IResponseResult, ISpotifySong } from '../adapter/spotify';
+import { IRecommendationsResult, IResponseResult, ISpotifySong, ITrack } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
 import { Service, SpotifyService } from '../service';
 import { assertNoErrors, current } from '../utils';
@@ -82,7 +82,15 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
         }
         const tracks = tracksResult.val as IResponseResult<ISpotifySong>;
         const artistIds = []; ///_.first(_.uniq(_.flatten(_.map(tracks.items, (song) => _.pluck(song.track.artists, 'id')))), 5);
-        const trackIds = _.first(_.uniq(_.map(tracks.items, (song) => song.track.id)), 5);
+        let trackIds = _.first(_.uniq(_.map(tracks.items, (song) => song.track.id)), 5);
+        if (!trackIds.length) {
+            const topTracksResult = await this.ss.listTopTracks();
+            if (assertNoErrors(topTracksResult, e => this.errors(e))) {
+                return;
+            }
+            const topTracks = topTracksResult.val as IResponseResult<ITrack>;
+            trackIds = _.first(_.uniq(_.map(topTracks.items, (song) => song.id)), 5);
+        }
         const res = await this.ss.fetchRecommendations('US', artistIds, trackIds);
         if (assertNoErrors(res, e => this.errors(e))) {
             return;

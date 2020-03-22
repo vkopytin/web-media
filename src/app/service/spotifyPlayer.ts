@@ -2,6 +2,7 @@ import { BaseService } from '../base/baseService';
 import { Service } from './index';
 import { ISettings } from './settings';
 import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult';
+import { SpotifyPlayerServiceError } from './errors/spotifyPlayerServiceError';
 import { SpotifyPlayerServiceUnexpectedError } from './errors/spotifyPlayerServiceUnexpectedError';
 import { withEvents } from 'databindjs';
 
@@ -109,13 +110,14 @@ class SpotifyPlayerService extends withEvents(BaseService) {
             cb(spotifySettings.accessToken);
         };
         const settingsResult = await connection.settings('spotify');
-        const name = 'WEB - Dev Player for Spotify';
+        const name = process.env.PLAYER_NAME || 'DEV Player for Spotify';
         if (settingsResult.isError) {
 
             return settingsResult;
         }
-
-        const spotifySettings = settingsResult.val as ISettings['spotify'];
+        if (!settingsResult.val) {
+            return SpotifyPlayerServiceError.create('Error getting access token from settings');
+        }
 
         try {
             if (window.Spotify) {
@@ -212,6 +214,7 @@ class SpotifyPlayerService extends withEvents(BaseService) {
     }
 
     async refreshToken(newToken: string) {
+        this.player.disconnect();
         this.player.connect();
         return SpotifyPlayerServiceResult.success(true);
     }

@@ -9,6 +9,10 @@ const cn = utils.className;
 export const template = (view: TracksView) => <>
     <ul className={cn(`${view.props.className} todo-list table-view`)}>
         {_.map(view.prop('tracks'), (item, index) => <li key={item.id()} className="table-view-cell media">
+            <div className="info-list">
+                <span className="info-item material-icons">delete</span>
+                <span className="info-item material-icons">receipt</span>
+            </div>
             <span className="media-object pull-left player-left--32"
                 onClick={evnt => item.play(view.uri())}
             >
@@ -28,10 +32,9 @@ export const template = (view: TracksView) => <>
                     &nbsp;-&nbsp;
                             <span className="author-title">{item.artist()}</span>
                 </div>
-                <div className="album-title">{item.album()}</div>
-                {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
+                <div className="album-title"><span>{item.album()}</span>{(view.prop('selectedItem')) !== item && <SelectPlaylistsView className="chips-list" track={item} active={true} />}</div>
             </div>
-            {(view.prop('selectedItem')) === item && <SelectPlaylistsView track={item} />}
+            {(view.prop('selectedItem')) === item && <SelectPlaylistsView className="chips-list" track={item} />}
             <span className="badge-region">
                 {item.isLiked() && <span className="badge badge-positive"
                     onClick={evnt => view.unlikeTrackCommand.exec(item)}
@@ -39,9 +42,6 @@ export const template = (view: TracksView) => <>
                 {item.isLiked() || <span className="badge"
                     onClick={evnt => view.likeTrackCommand.exec(item)}
                 >{item.duration()}</span>}
-                <span className="badge badge-negative">
-                    <span className="icon icon-trash"></span>
-                </span>
             </span>
         </li>
         )}

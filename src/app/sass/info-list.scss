@@ -1,0 +1,62 @@
+//
+// Chips
+// --------------------------------------------------
+
+.info-list {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-bottom-left-radius: 10px;
+
+  .info-item {
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    color: lighten($text-color, 20%);
+    cursor: pointer;
+    vertical-align: top;
+    margin: 0 0 0 6px;
+
+    // Inverted chips have no background.
+    &.info-item-inverted {
+      padding: 0 5px 0 0;
+      background-color: transparent;
+    }
+
+  }
+
+}
+
+
+// Chips modifiers
+// --------------------------------------------------
+
+// Main chips
+.info-item-primary {
+  color: $text-color;
+  background-color: $primary-color;
+
+  &.info-item-inverted {
+    color: $primary-color;
+  }
+}
+
+// Positive chips
+.info-item-positive {
+  color: $text-color;
+  background-color: $positive-color;
+
+  &.info-item-inverted {
+    color: $positive-color;
+  }
+}
+
+// Negative chips
+.info-item-negative {
+  color: $text-color;
+  background-color: $negative-color;
+
+  &.info-item-inverted {
+    color: $negative-color;
+  }
+}

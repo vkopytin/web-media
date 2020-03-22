@@ -99,14 +99,11 @@ class TrackViewModelItem extends ViewModel {
     }
 
     async play(playlistUri: string) {
-        const device = this.appViewModel.currentDevice();
-
-        this.ss.play(device?.id(), playlistUri, this.uri());
+        this.ss.play(null, playlistUri, this.uri());
     }
 
     async playTracks(tracks: TrackViewModelItem[]) {
-        const device = this.appViewModel.currentDevice();
-        const playResult = this.ss.play(device?.id(), _.map(tracks, item => item.uri()), this.uri());
+        const playResult = this.ss.play(null, _.map(tracks, item => item.uri()), this.uri());
         assertNoErrors(playResult, e => this.errors(e));
     }
 

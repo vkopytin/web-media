@@ -18,38 +18,44 @@ export const template = (view: HomeView) => <>
     </div>
     <ul className="todo-list table-view">
         {_.map(view.prop('items'), (item, index) => 
-            <li key={item.id()} className="table-view-cell">
-                <span className="media-object pull-left player-left--32"
-                    onClick={evnt => { item.playTracks(view.prop('items')) }}
-                >
-                    <div className="region">
-                        <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
-                            {view.isPlaying(item) || <button className="button-play icon icon-play"
-                            ></button>}
-                            {view.isPlaying(item) && <button className="button-play icon icon-pause"></button>}
-                        </div>
-                    </div>
-                </span>
-                <span className="list-item push-right">
-                    <div className="media-body"
-                        onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}
+            <li key={item.id()}>
+                <div className="table-view-cell media">
+                    <span className="media-object pull-left player-left--32"
+                        onClick={evnt => { item.playTracks(view.prop('items')) }}
                     >
-                        <div>
-                            <span className="song-title">{item.name()}</span>
-                            &nbsp;-&nbsp;
-                            <span className="author-title">{item.artist()}</span>
+                        <div className="region">
+                            <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
+                                {view.isPlaying(item) || <button className="button-play icon icon-play"
+                                ></button>}
+                                {view.isPlaying(item) && <button className="button-play icon icon-pause"></button>}
+                            </div>
                         </div>
-                        <div className="album-title">{item.album()}</div>
-                        {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
-                    </div>
-                </span>
-                {(view.prop('selectedItem')) === item && <SelectPlaylistsView track={item} />}
-                {item.isLiked() && <span className="badge badge-positive"
-                    onClick={evnt => view.unlikeTrackCommand.exec(item)}
-                >{item.duration()}</span>}
-                {item.isLiked() || <span className="badge"
-                    onClick={evnt => view.likeTrackCommand.exec(item)}
-                >{item.duration()}</span>}
+                    </span>
+                    <span className="list-item push-right">
+                        <div className="media-body"
+                            onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}
+                        >
+                            <div>
+                                <span className="song-title">{item.name()}</span>
+                                &nbsp;-&nbsp;
+                                <span className="author-title">{item.artist()}</span>
+                            </div>
+                            <div className="album-title"><span>{item.album()}</span>{(view.prop('selectedItem')) !== item && <SelectPlaylistsView
+                            className="chips-list"
+                            track={item}
+                            active={true} />}</div>
+                        </div>
+                    </span>
+                    {item.isLiked() && <span className="badge badge-positive"
+                        onClick={evnt => view.unlikeTrackCommand.exec(item)}
+                    >{item.duration()}</span>}
+                    {item.isLiked() || <span className="badge"
+                        onClick={evnt => view.likeTrackCommand.exec(item)}
+                    >{item.duration()}</span>}
+                </div>
+                {(view.prop('selectedItem')) === item && <SelectPlaylistsView 
+                className="chips-list"
+                track={item} />}
             </li>
         )}
     </ul>

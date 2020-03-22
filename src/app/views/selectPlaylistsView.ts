@@ -8,6 +8,7 @@ import { DeviceViewModelItem, PlaylistsViewModel, PlaylistsViewModelItem, TrackV
 
 
 export interface ISelectPlaylistsViewProps {
+    className?: string;
     track: TrackViewModelItem;
     active?: boolean;
 }

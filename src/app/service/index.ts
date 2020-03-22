@@ -11,6 +11,7 @@ import { ITrack, ISearchType } from '../adapter/spotify';
 import { IPlaylistRecord } from '../data/entities/interfaces';
 import { SettingsServiceResult } from './results/settingsServiceResult';
 import { SpotifyServiceResult } from './results/spotifyServiceResult';
+import { LoginService } from './loginService';
 
 
 const lockSpotifyService = asyncQueue();
@@ -18,6 +19,7 @@ const lockSettingsService = asyncQueue();
 const lockSpotifyPlayerService = asyncQueue();
 const lockSpotifySyncService = asyncQueue();
 const lockDataService = asyncQueue();
+const lockLoginService = asyncQueue();
 
 class Service {
     settingsService: ServiceResult<SettingsService, Error> = null;
@@ -26,7 +28,7 @@ class Service {
     spotifySyncService: ServiceResult<SpotifySyncService, Error> = null;
     dataService: ServiceResult<DataService, Error> = null;
 
-    async service<T extends {}, O extends {}>(
+    service<T extends {}, O extends {}>(
         ctor: { prototype: T },
         options = {} as O
     ): Promise<ServiceResult<T, Error>> {
@@ -40,7 +42,12 @@ class Service {
                             return;
                         }
 
-                        resolve(this.spotifyService = await SpotifyService.create(this) as any)
+                        const spotifyService = await SpotifyService.create(this);
+                        if (spotifyService.isError) {
+                            return resolve(spotifyService as any);
+                        }
+
+                        resolve(this.spotifyService = spotifyService as any)
                         next();
                     }, this));
                 });
@@ -53,7 +60,12 @@ class Service {
                             return;
                         }
 
-                        resolve(this.settingsService = await SettingsService.create(this) as any);
+                        const settingsService = await SettingsService.create(this);
+                        if (settingsService.isError) {
+                            return resolve(settingsService as any);
+                        }
+
+                        resolve(this.settingsService = settingsService as any);
                         next();
                     }, this));
                 });
@@ -66,7 +78,12 @@ class Service {
                             return;
                         }
 
-                        resolve(this.spotifyPlayerService = await SpotifyPlayerService.create(this) as any);
+                        const spotifyPlayerService = await SpotifyPlayerService.create(this);
+                        if (spotifyPlayerService.isError) {
+                            return resolve(spotifyPlayerService as any);
+                        }
+
+                        resolve(this.spotifyPlayerService = spotifyPlayerService as any);
                         next();
                     }, this));
                 });
@@ -79,7 +96,12 @@ class Service {
                             return;
                         }
 
-                        resolve(this.spotifySyncService = await SpotifySyncService.create(this) as any);
+                        const spotifySyncService = await SpotifySyncService.create(this);
+                        if (spotifySyncService.isError) {
+                            return resolve(spotifySyncService as any);
+                        }
+
+                        resolve(this.spotifySyncService = spotifySyncService as any);
                         next();
                     }, this));
                 });
@@ -91,8 +113,31 @@ class Service {
                             next();
                             return;
                         }
+
+                        const dataService = await DataService.create(this);
+                        if (dataService.isError) {
+                            return resolve(dataService as any);
+                        }
     
-                        resolve(this.dataService = await DataService.create(this) as any);
+                        resolve(this.dataService = dataService as any);
+                        next();
+                    }, this));
+                });
+            case LoginService as any:
+                return new Promise((resolve, reject) => {
+                    lockLoginService.push(_.bind(async function (this: Service, next) {
+                        if (this.dataService) {
+                            resolve(this.dataService as any);
+                            next();
+                            return;
+                        }
+    
+                        const loginService = await LoginService.create(this);
+                        if (loginService.isError) {
+                            return resolve(loginService as any);
+                        }
+        
+                        resolve(this.dataService = loginService as any);
                         next();
                     }, this));
                 });
@@ -102,6 +147,17 @@ class Service {
     }
 
     async isLoggedIn() {
+        const loginResult = await this.service(LoginService);
+        if (loginResult.isError) {
+            return loginResult;
+        }
+        const isLoggedInResult = await loginResult.val.isLoggedIn();
+        if (isLoggedInResult.isError) {
+            return isLoggedInResult;
+        }
+        if (!isLoggedInResult.val) {
+            return isLoggedInResult;
+        }
         const spotifyResult = await this.service(SpotifyService);
         if (spotifyResult.isError) {
             return spotifyResult;
@@ -193,6 +249,16 @@ class Service {
             return spotify;
         }
         const result = await spotify.val.recentlyPlayed();
+
+        return result;
+    }
+
+    async getRefreshTokenUrl() {
+        const spotify = await this.service(LoginService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.getRefreshTokenUrl();
 
         return result;
     }

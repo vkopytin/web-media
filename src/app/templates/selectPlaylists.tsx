@@ -6,7 +6,7 @@ import { SelectPlaylistsView } from '../views';
 
 const cn = utils.className;
 
-export const template = (view: SelectPlaylistsView) => <div className="chips-list">
+export const template = (view: SelectPlaylistsView) => <div className={cn(`${view.props.className}`)}>
     {_.map(view.prop('items'), (item) => {
         if (view.playlistHasTrack(item, view.prop('track'))) {
             return view.props.active

@@ -102,20 +102,6 @@ class AppViewModel extends ViewModel<AppViewModel['settings']> {
     }
 
     async init() {
-        const redirectUri = `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
-            refreshTokenUrl = 'https://accounts.spotify.com/authorize?' + $.param({
-                client_id: '963f916fa62c4186a4b8370e16eef658',
-                redirect_uri: redirectUri,
-                scope: [
-                    'streaming', 'user-read-email', 'user-read-private',
-                    'user-modify-playback-state', 'user-top-read', 'user-library-read',
-                    'playlist-read-private'
-                ].join(' '),
-                response_type: 'token',
-                state: 1
-            });
-
-        this.prop('refreshTokenUrl', refreshTokenUrl);
         if (window.parent === window) {
             $(window).on('message', async evnt => {
                 const [eventName, value] = (evnt.originalEvent as any).data;
@@ -141,7 +127,13 @@ class AppViewModel extends ViewModel<AppViewModel['settings']> {
     }
 
     async refreshToken() {
-        this.prop('autoRefreshUrl', this.prop('refreshTokenUrl') + '23');
+        const tokenUrlResult = await this.ss.getRefreshTokenUrl();
+        if (assertNoErrors(tokenUrlResult, e => this.errors(e))) {
+
+            return;
+        }
+        const refreshTokenUrl = tokenUrlResult.val as string;
+        this.prop('autoRefreshUrl', refreshTokenUrl + '23');
         console.log('updating token');
     }
 

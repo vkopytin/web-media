@@ -384,7 +384,7 @@ class SpotifyAdapter {
     }
 
     myTopTracks() {
-        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
+        return new Promise<IResponseResult<ITrack>>((resolve, reject) => {
             $.ajax({
                 url: `https://api.spotify.com/v1/me/top/tracks`,
                 headers: {
