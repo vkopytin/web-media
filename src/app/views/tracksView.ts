@@ -19,18 +19,22 @@ class TracksView extends BaseView<ITracksViewProps, TracksView['state']> {
         openLogin: false,
         tracks: [] as TrackViewModelItem[],
         likedTracks: [] as TrackViewModelItem[],
-        selectedItem: null as TrackViewModelItem
+        selectedItem: null as TrackViewModelItem,
+        trackLyrics: null as { trackId: string; lyrics: string }
     };
 
-    likeTrackCommand = { exec(track: TrackViewModelItem) { } };
-    unlikeTrackCommand = { exec(track: TrackViewModelItem) { } };
+    likeTrackCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
+    unlikeTrackCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
+    findTrackLyricsCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
 
     binding = bindTo(this, () => current(PlaylistsViewModel), {
+        'findTrackLyricsCommand': 'findTrackLyricsCommand',
         'likeTrackCommand': 'likeTrackCommand',
         'unlikeTrackCommand': 'unlikeTrackCommand',
         'prop(tracks)': 'tracks',
         'prop(likedTracks)': 'likedTracks',
-        'prop(selectedItem)': 'selectedItem'
+        'prop(selectedItem)': 'selectedItem',
+        'prop(trackLyrics)': 'prop(trackLyrics)'
     });
 
     constructor(props) {

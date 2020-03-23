@@ -19,7 +19,7 @@ class AppViewModel extends ViewModel<AppViewModel['settings']> {
         currentTrackId: '',
         devices: [] as DeviceViewModelItem[],
         topTracks: [] as TrackViewModelItem[],
-        refreshTokenUrl: '',
+        spotifyAuthUrl: '',
         autoRefreshUrl: ''
     };
 
@@ -127,13 +127,13 @@ class AppViewModel extends ViewModel<AppViewModel['settings']> {
     }
 
     async refreshToken() {
-        const tokenUrlResult = await this.ss.getRefreshTokenUrl();
+        const tokenUrlResult = await this.ss.getSpotifyAuthUrl();
         if (assertNoErrors(tokenUrlResult, e => this.errors(e))) {
 
             return;
         }
-        const refreshTokenUrl = tokenUrlResult.val as string;
-        this.prop('autoRefreshUrl', refreshTokenUrl + '23');
+        const spotifyAuthUrl = tokenUrlResult.val as string;
+        this.prop('autoRefreshUrl', spotifyAuthUrl + '23');
         console.log('updating token');
     }
 

@@ -18,7 +18,7 @@ export const template = (view: UserProfileView) => <div className={cn(`${view.pr
 
     <div className="content">
         <p className="content-padded">
-            <a className="btn btn-block btn-outlined" href={view.prop('refreshTokenUrl')}>
+            <a className="btn btn-block btn-outlined" href={view.prop('spotifyAuthUrl')}>
                 Login on Spotify
             </a>
         </p>

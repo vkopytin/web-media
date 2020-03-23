@@ -5,6 +5,10 @@ import { SettingsServiceUnexpectedError } from './errors/settingsServiceUnexpect
 
 
 export interface ISettings {
+    genius?: {
+        accessToken?: string;
+        code?: string;
+    };
     spotify?: {
         accessToken?: string;
         volume?: number;
@@ -20,7 +24,7 @@ const fromEntries = str => {
 };
 
 const getCookie = key => {
-    const cookieRx = new RegExp('(^' + key + '|[^\\w\\d\\s]*' + key + ')[\\s]*=[\\s]*([^;]+[^\\d\\w\\s]|[^;]+$)');
+    const cookieRx = new RegExp('(^' + key + '|[^\\w\\d\\s]*' + key + ')[\\s]*=[\\s]*([^;]+)');
     const [a, k, value] = cookieRx.exec(document.cookie) || [];
 
     return value;
@@ -29,39 +33,42 @@ const getCookie = key => {
 class SettingsService extends BaseService {
     static async create(connection: Service) {
         try {
-            let token = getCookie('access_token');
-            const volume = getCookie('lastVolume') || 50;
-            const authData = window.location.hash.replace(/^#/, ''),
-                authInfo = fromEntries(authData) as {
-                    access_token: string;
-                };
+            let sToken = getCookie('spat');
+            let gToken = getCookie('gsat');
+            let gCode = getCookie('gcode');
+            const volume = +(getCookie('lastVolume') || 50);
+            const urlParams = window.location.search.replace(/^\?/, '') || '';
+            const hashData = window.location.hash.replace(/^#/, '') || '';
+            const authInfo = fromEntries(hashData + '&' + urlParams) as {
+                access_token: string;
+                state: string;
+                code?: string;
+            };
+            const defaultSettings: ISettings = {
+                spotify: {
+                    accessToken: sToken && atob(sToken),
+                    volume: volume,
+                },
+                genius: {
+                    accessToken: gToken && atob(gToken),
+                    code: gCode && atob(gCode)
+                }
+            };
 
-            if ('access_token' in authInfo) {
-                document.cookie = 'access_token=' + btoa(authInfo.access_token);
-                token = btoa(authInfo.access_token);
+            if ('access_token' in authInfo && /onSpotify-1/.test(authInfo.state)) {
+                document.cookie = 'spat=' + btoa(authInfo.access_token);
+                defaultSettings.spotify.accessToken = authInfo.access_token;
 
                 window.location.replace(window.location.pathname);
-
-                return SettingsServiceResult.success(new SettingsService({
-                    spotify: {
-                        accessToken: atob(token),
-                        volume: volume
-                    }
-                }));
             }
 
-            if (token) {
-                return SettingsServiceResult.success(new SettingsService({
-                    spotify: {
-                        accessToken: atob(token),
-                        volume: volume
-                    }
-                }));
+            if ('code' in authInfo && /onGenius-1/.test(authInfo.state)) {
+                document.cookie = 'gcode=' + btoa(authInfo.code);
+                defaultSettings.genius.code = authInfo.code;
+                window.location.replace(window.location.pathname);
             }
 
-            return SettingsServiceResult.success(new SettingsService({
-                volume: volume
-            }));
+            return SettingsServiceResult.success(new SettingsService(defaultSettings));
         } catch (ex) {
             return SettingsServiceUnexpectedError.create('Unexpected settings fetch error', ex);
         }
@@ -69,7 +76,7 @@ class SettingsService extends BaseService {
 
     config: ISettings = {};
 
-    constructor(settings: {} = {}) {
+    constructor(settings: ISettings = {}) {
         super();
 
         this.config = settings;

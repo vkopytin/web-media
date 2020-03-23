@@ -12,6 +12,7 @@ import { IPlaylistRecord } from '../data/entities/interfaces';
 import { SettingsServiceResult } from './results/settingsServiceResult';
 import { SpotifyServiceResult } from './results/spotifyServiceResult';
 import { LoginService } from './loginService';
+import { GeniusService } from './geniusService';
 
 
 const lockSpotifyService = asyncQueue();
@@ -20,6 +21,7 @@ const lockSpotifyPlayerService = asyncQueue();
 const lockSpotifySyncService = asyncQueue();
 const lockDataService = asyncQueue();
 const lockLoginService = asyncQueue();
+const lockGeniusService = asyncQueue();
 
 class Service {
     settingsService: ServiceResult<SettingsService, Error> = null;
@@ -126,18 +128,24 @@ class Service {
             case LoginService as any:
                 return new Promise((resolve, reject) => {
                     lockLoginService.push(_.bind(async function (this: Service, next) {
-                        if (this.dataService) {
-                            resolve(this.dataService as any);
-                            next();
-                            return;
-                        }
-    
                         const loginService = await LoginService.create(this);
                         if (loginService.isError) {
                             return resolve(loginService as any);
                         }
         
-                        resolve(this.dataService = loginService as any);
+                        resolve(loginService as any);
+                        next();
+                    }, this));
+                });
+            case GeniusService as any:
+                return new Promise((resolve, reject) => {
+                    lockGeniusService.push(_.bind(async function (this: Service, next) {
+                        const geniusService = await GeniusService.create(this);
+                        if (geniusService.isError) {
+                            return resolve(geniusService as any);
+                        }
+            
+                        resolve(geniusService as any);
                         next();
                     }, this));
                 });
@@ -253,12 +261,22 @@ class Service {
         return result;
     }
 
-    async getRefreshTokenUrl() {
+    async getSpotifyAuthUrl() {
         const spotify = await this.service(LoginService);
         if (spotify.isError) {
             return spotify;
         }
-        const result = await spotify.val.getRefreshTokenUrl();
+        const result = await spotify.val.getSpotifyAuthUrl();
+
+        return result;
+    }
+
+    async getGeniusAuthUrl() {
+        const spotify = await this.service(LoginService);
+        if (spotify.isError) {
+            return spotify;
+        }
+        const result = await spotify.val.getGeniusAuthUrl();
 
         return result;
     }
@@ -622,6 +640,15 @@ class Service {
         const result = await spotify.val.removeTrackFromPlaylist(_.map([].concat(tracks), t => t.uri), playlistId);
 
         return result;
+    }
+
+    async findTrackLyrics(songInfo: { name: string; artist: string; }) {
+        const geniusService = await this.service(GeniusService);
+        if (geniusService.isError) {
+            return geniusService;
+        }
+        const lyricsResult = await geniusService.val.search([songInfo.artist, songInfo.name].join('/'));
+        return lyricsResult;
     }
 }
 

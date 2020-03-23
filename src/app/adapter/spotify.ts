@@ -1,6 +1,5 @@
 import * as $ from 'jquery';
 import { ErrorWithStatus } from './errors/errorWithStatus';
-import { resolve } from 'dns';
 
 export interface IImageInfo {
     width: number;

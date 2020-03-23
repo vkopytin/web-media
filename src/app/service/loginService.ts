@@ -14,10 +14,11 @@ class LoginService extends withEvents(BaseService) {
         super();
     }
 
-    async getRefreshTokenUrl() {
+    async getSpotifyAuthUrl() {
+        const clientId = '963f916fa62c4186a4b8370e16eef658';
         const redirectUri = `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
-            refreshTokenUrl = 'https://accounts.spotify.com/authorize?' + $.param({
-                client_id: '963f916fa62c4186a4b8370e16eef658',
+            authUrl = 'https://accounts.spotify.com/authorize?' + $.param({
+                client_id: clientId,
                 redirect_uri: redirectUri,
                 scope: [
                     'streaming', 'user-read-email', 'user-read-private',
@@ -25,10 +26,10 @@ class LoginService extends withEvents(BaseService) {
                     'playlist-read-private'
                 ].join(' '),
                 response_type: 'token',
-                state: 1
+                state: 'onSpotify-1'
             });
 
-        return LoginServiceResult.success(refreshTokenUrl);
+        return LoginServiceResult.success(authUrl);
     }
 
     async isLoggedIn() {
@@ -40,6 +41,20 @@ class LoginService extends withEvents(BaseService) {
             return LoginServiceResult.success(true);
         }
         return LoginServiceResult.success(false);
+    }
+
+    async getGeniusAuthUrl() {
+        const clientId = 'xJvzKWkHgMgOVTEoh4H3Jp3hhkUtTP3q9lQIGEwEZbPjp1r6-3kk9JQ6HiBHPEUq';
+        const redirectUri = `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
+        authUrl = 'https://api.genius.com/oauth/authorize?' + $.param({
+            client_id: clientId,
+            redirect_uri: redirectUri,
+            scope: ['me'].join(' '),
+            response_type: 'code',
+            state: 'onGenius-1'
+        });
+
+        return LoginServiceResult.success(authUrl);
     }
 }
 

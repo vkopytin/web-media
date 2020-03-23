@@ -12,8 +12,8 @@ class UserProfileViewModel extends ViewModel<UserProfileViewModel['settings']> {
         ...(this as any as ViewModel).settings,
         currentTrackId: '',
         topTracks: [] as TrackViewModelItem[],
-        refreshTokenUrl: '',
-        autoRefreshUrl: ''
+        spotifyAuthUrl: '',
+        geniusAuthUrl: ''
     };
 
     userInfo = {} as IUserInfo;
@@ -54,13 +54,20 @@ class UserProfileViewModel extends ViewModel<UserProfileViewModel['settings']> {
     }
 
     async fetchData() {
-        const tokenUrlResult = await this.ss.getRefreshTokenUrl();
-        if (assertNoErrors(tokenUrlResult, e => this.errors(e))) {
+        const spotifyTokenUrlResult = await this.ss.getSpotifyAuthUrl();
+        if (assertNoErrors(spotifyTokenUrlResult, e => this.errors(e))) {
 
             return;
         }
-        const refreshTokenUrl = tokenUrlResult.val as string;
-        this.prop('refreshTokenUrl', refreshTokenUrl);
+        const spotifyAuthUrl = spotifyTokenUrlResult.val as string;
+        this.prop('spotifyAuthUrl', spotifyAuthUrl);
+        const geniusTokenUrlResult = await this.ss.getGeniusAuthUrl();
+        if (assertNoErrors(geniusTokenUrlResult, e => this.errors(e))) {
+
+            return;
+        }
+        const geniusAuthUrl = geniusTokenUrlResult.val as string;
+        this.prop('geniusAuthUrl', geniusAuthUrl);
 
         const userInfoResult = await this.ss.profile();
 

@@ -8,10 +8,10 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 
-class PlaylistsViewModel extends ViewModel {
+class PlaylistsViewModel extends ViewModel<PlaylistsViewModel['settings']> {
 
     settings = {
-        ...(this as ViewModel).settings,
+        ...(this as any as ViewModel).settings,
         playlists: [] as PlaylistsViewModelItem[],
         tracks: [] as TrackViewModelItem[],
         openLogin: false,
@@ -29,7 +29,8 @@ class PlaylistsViewModel extends ViewModel {
         isLoading: false,
         likedTracks: [] as TrackViewModelItem[],
         selectedTrack: null as TrackViewModelItem,
-        newPlaylistName: ''
+        newPlaylistName: '',
+        trackLyrics: null as { trackId: string; lyrics: string }
     };
 
     selectPlaylistCommand = { exec: (playlistId: string) => this.currentPlaylistId(playlistId) };
@@ -38,6 +39,7 @@ class PlaylistsViewModel extends ViewModel {
     createPlaylistCommand = { exec: (isPublic: boolean) => this.createNewPlaylist(isPublic) };
     likeTrackCommand = { exec: (track: TrackViewModelItem) => this.likeTrack(track) };
     unlikeTrackCommand = { exec: (track: TrackViewModelItem) => this.unlikeTrack(track) };
+    findTrackLyricsCommand = { exec: (track: TrackViewModelItem) => this.findTrackLyrics(track) };
 
     isInit = _.delay(() => {
         this.connect();
@@ -246,6 +248,28 @@ class PlaylistsViewModel extends ViewModel {
     async unlikeTrack(track: TrackViewModelItem) {
         await track.unlikeTrack();
         this.checkTracks([track]);
+    }
+
+    async findTrackLyrics(track: TrackViewModelItem) {
+        if (this.prop('trackLyrics') && this.prop('trackLyrics').trackId === track.id()) {
+            return this.prop('trackLyrics', null);
+        }
+        const lyricsResult = await this.ss.findTrackLyrics({
+            name: track.name(),
+            artist: track.artist()
+        });
+        if (assertNoErrors(lyricsResult, e => { })) {
+            this.prop('trackLyrics', {
+                trackId: track.id(),
+                lyrics: lyricsResult.error.message
+            });
+            return;
+        }
+
+        this.prop('trackLyrics', {
+            trackId: track.id(),
+            lyrics: '' + lyricsResult.val
+        });
     }
 }
 

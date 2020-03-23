@@ -19,7 +19,8 @@ class UserProfileView extends BaseView<IUserProfileViewProps, UserProfileView['s
         tracks: [] as TrackViewModelItem[],
         profile: {} as IUserInfo,
         topTracks: [] as TrackViewModelItem[],
-        refreshTokenUrl: '',
+        spotifyAuthUrl: '',
+        geniusAuthUrl: '',
         currentTrackId: ''
     };
 
@@ -28,7 +29,8 @@ class UserProfileView extends BaseView<IUserProfileViewProps, UserProfileView['s
         'prop(profile)': 'profile',
         'prop(currentTrackId)': 'currentTrackId',
         'prop(topTracks)': 'topTracks',
-        'prop(refreshTokenUrl)': 'prop(refreshTokenUrl)'
+        'prop(spotifyAuthUrl)': 'prop(spotifyAuthUrl)',
+        'prop(geniusAuthUrl)': 'prop(geniusAuthUrl)'
     });
 
     constructor(props) {
