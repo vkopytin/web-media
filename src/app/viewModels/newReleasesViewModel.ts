@@ -1,10 +1,11 @@
 import * as _ from 'underscore';
 import { IAlbum, IResponseResult, ITrack } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
-import { Service, SpotifyService } from '../service';
+import { Service } from '../service';
 import { assertNoErrors, current } from '../utils';
 import { AlbumViewModelItem } from './albumViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
+import { SpotifyService } from '../service/spotify';
 
 
 class NewReleasesViewModel extends ViewModel {

@@ -25,6 +25,7 @@ class AppViewModel extends ViewModel<AppViewModel['settings']> {
 
     switchDeviceCommand = { exec: (device: DeviceViewModelItem) => this.switchDevice(device) };
     refreshTokenCommand = { exec: () => this.refreshToken() };
+    refreshDevicesCommand = { exec: () => this.updateDevices() };
     userInfo = {} as IUserInfo;
 
     isInit = _.delay(() => {
@@ -150,11 +151,11 @@ class AppViewModel extends ViewModel<AppViewModel['settings']> {
         if (assertNoErrors(playerResult, e => this.errors(e))) {
             return;
         }
-        const updateDevicesHandler = (eventName: string, device: { device_id: string; }) => {
+        const updateDevicesHandler = async (eventName: string, device: { device_id: string; }) => {
+            await this.updateDevices();
             if (!this.currentDevice()) {
                 this.ss.player(device.device_id, false);
             }
-            this.updateDevices();
             playerResult.val.off('ready', updateDevicesHandler);
         };
         playerResult.val.on('ready', updateDevicesHandler);

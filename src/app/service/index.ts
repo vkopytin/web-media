@@ -12,7 +12,7 @@ import { IPlaylistRecord } from '../data/entities/interfaces';
 import { SettingsServiceResult } from './results/settingsServiceResult';
 import { SpotifyServiceResult } from './results/spotifyServiceResult';
 import { LoginService } from './loginService';
-import { GeniusService } from './geniusService';
+import { LyricsService } from './lyricsService';
 
 
 const lockSpotifyService = asyncQueue();
@@ -21,7 +21,7 @@ const lockSpotifyPlayerService = asyncQueue();
 const lockSpotifySyncService = asyncQueue();
 const lockDataService = asyncQueue();
 const lockLoginService = asyncQueue();
-const lockGeniusService = asyncQueue();
+const lockLyricsServiceResult = asyncQueue();
 
 class Service {
     settingsService: ServiceResult<SettingsService, Error> = null;
@@ -137,15 +137,15 @@ class Service {
                         next();
                     }, this));
                 });
-            case GeniusService as any:
+            case LyricsService as any:
                 return new Promise((resolve, reject) => {
-                    lockGeniusService.push(_.bind(async function (this: Service, next) {
-                        const geniusService = await GeniusService.create(this);
-                        if (geniusService.isError) {
-                            return resolve(geniusService as any);
+                    lockLyricsServiceResult.push(_.bind(async function (this: Service, next) {
+                        const lyricsServiceResult = await LyricsService.create(this);
+                        if (lyricsServiceResult.isError) {
+                            return resolve(lyricsServiceResult as any);
                         }
             
-                        resolve(geniusService as any);
+                        resolve(lyricsServiceResult as any);
                         next();
                     }, this));
                 });
@@ -643,13 +643,13 @@ class Service {
     }
 
     async findTrackLyrics(songInfo: { name: string; artist: string; }) {
-        const geniusService = await this.service(GeniusService);
-        if (geniusService.isError) {
-            return geniusService;
+        const lyricsService = await this.service(LyricsService);
+        if (lyricsService.isError) {
+            return lyricsService;
         }
-        const lyricsResult = await geniusService.val.search([songInfo.artist, songInfo.name].join('/'));
+        const lyricsResult = await lyricsService.val.search(songInfo);
         return lyricsResult;
     }
 }
 
-export { Service, SpotifyService };
+export { Service };

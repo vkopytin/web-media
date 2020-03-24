@@ -1,11 +1,12 @@
 import * as _ from 'underscore';
 import { IPlayerResult, ITrack } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
-import { Service, SpotifyService } from '../service';
+import { Service } from '../service';
 import { IWebPlaybackState } from '../service/spotifyPlayer';
 import { assertNoErrors, asyncQueue, current } from '../utils';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { SettingsService } from '../service/settings';
+import { SpotifyService } from '../service/spotify';
 
 
 const lockSection = asyncQueue();

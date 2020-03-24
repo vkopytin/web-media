@@ -1,12 +1,13 @@
 import * as _ from 'underscore';
 import { IResponseResult, ISearchResult, ISearchType, ISpotifySong, ITrack } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
-import { Service, SpotifyService } from '../service';
+import { Service } from '../service';
 import { assertNoErrors, asyncQueue, current } from '../utils';
 import { AlbumViewModelItem } from './albumViewModelItem';
 import { ArtistViewModelItem } from './artistViewModelItem';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
+import { SpotifyService } from '../service/spotify';
 
 
 const searchQueue = asyncQueue();

@@ -32,10 +32,12 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
     };
     elScroller = null as HTMLElement;
     refreshTokenCommand = { exec() { throw new Error('Unbound command'); } };
+    refreshDevicesCommand = { exec() { throw new Error('Unbound command'); } };
     onPageScroll = _.debounce(evnt => this.onPageScrollInternal(evnt), 500);
 
     binding = bindTo(this, () => current(AppViewModel), {
         '-errors': 'errors',
+        'refreshDevicesCommand': 'refreshDevicesCommand',
         'refreshTokenCommand': 'refreshTokenCommand',
         'prop(openLogin)': 'openLogin',
         'prop(currentPanel)': 'currentPanel',
@@ -68,6 +70,9 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
 
     openDevices(show) {
         this.toggleSelectDevices(show ? 'hide' : 'show');
+        if (show === 'show') {
+            this.refreshDevicesCommand.exec();
+        }
     }
     
     isPlaying(track: TrackViewModelItem) {

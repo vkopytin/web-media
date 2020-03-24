@@ -40,7 +40,7 @@ export const template = (view: AppView) => <main>
         </div>
         <header className="bar bar-nav">
             <a className="icon icon-info pull-left"
-                onClick={evnt => view.toggleSelectDevices()}
+                onClick={evnt => view.openDevices('show')}
             >
             </a>
             <a className="icon icon-person pull-right"

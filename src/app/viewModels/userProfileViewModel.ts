@@ -4,6 +4,7 @@ import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
 import { assertNoErrors, current } from '../utils';
 import { TrackViewModelItem } from './trackViewModelItem';
+import { SettingsService } from '../service/settings';
 
 
 class UserProfileViewModel extends ViewModel<UserProfileViewModel['settings']> {
@@ -13,7 +14,8 @@ class UserProfileViewModel extends ViewModel<UserProfileViewModel['settings']> {
         currentTrackId: '',
         topTracks: [] as TrackViewModelItem[],
         spotifyAuthUrl: '',
-        geniusAuthUrl: ''
+        geniusAuthUrl: '',
+        musixmatchKey: ''
     };
 
     userInfo = {} as IUserInfo;
@@ -53,7 +55,21 @@ class UserProfileViewModel extends ViewModel<UserProfileViewModel['settings']> {
         return this.settings.topTracks;
     }
 
+    musixmatchKey(val?: string) {
+        if (arguments.length && val !== this.settings.musixmatchKey) {
+            this.settings.musixmatchKey = val;
+            this.trigger('change:musixmatchKey');
+            this.saveMusixmatchKey(val);
+        }
+
+        return this.settings.musixmatchKey;
+    }
+
     async fetchData() {
+        const settingsResult = await this.ss.service(SettingsService);
+        if (!settingsResult.isError) {
+            this.musixmatchKey(settingsResult.val.musixmatchKey());
+        }
         const spotifyTokenUrlResult = await this.ss.getSpotifyAuthUrl();
         if (assertNoErrors(spotifyTokenUrlResult, e => this.errors(e))) {
 
@@ -84,6 +100,14 @@ class UserProfileViewModel extends ViewModel<UserProfileViewModel['settings']> {
         this.topTracks(_.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index)));
     }
 
+    async saveMusixmatchKey(val: string) {
+        const settingsResult = await this.ss.service(SettingsService);
+        if (assertNoErrors(settingsResult, e => this.errors(e))) {
+            return;
+        }
+
+        settingsResult.val.musixmatchKey(val);
+    }
 }
 
 export { UserProfileViewModel };

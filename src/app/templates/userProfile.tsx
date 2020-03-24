@@ -47,6 +47,13 @@ export const template = (view: UserProfileView) => <div className={cn(`${view.pr
                     defaultValue={view.prop('profile').product}
                 />
             </div>
+            <div className="input-row">
+                <label>www.musixmatch.com API App Key</label>
+                <input type="text" placeholder="Product name"
+                    defaultValue={view.prop('musixmatchKey')}
+                    onChange={evnt => view.prop('musixmatchKey', evnt.target.value)}
+                />
+            </div>
         </form>
         <ul className="table-view">
             {_.map(view.prop('topTracks'), (item, index) => {

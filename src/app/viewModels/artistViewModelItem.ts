@@ -1,10 +1,11 @@
 import * as _ from 'underscore';
 import { IArtist } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
-import { Service, SpotifyService } from '../service';
+import { Service } from '../service';
 import { assertNoErrors, current } from '../utils';
 import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
+import { SpotifyService } from '../service/spotify';
 
 
 class ArtistViewModelItem extends ViewModel {

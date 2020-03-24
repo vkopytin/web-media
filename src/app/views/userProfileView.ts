@@ -21,7 +21,8 @@ class UserProfileView extends BaseView<IUserProfileViewProps, UserProfileView['s
         topTracks: [] as TrackViewModelItem[],
         spotifyAuthUrl: '',
         geniusAuthUrl: '',
-        currentTrackId: ''
+        currentTrackId: '',
+        musixmatchKey: ''
     };
 
     binding = bindTo(this, () => current(UserProfileViewModel), {
@@ -30,7 +31,8 @@ class UserProfileView extends BaseView<IUserProfileViewProps, UserProfileView['s
         'prop(currentTrackId)': 'currentTrackId',
         'prop(topTracks)': 'topTracks',
         'prop(spotifyAuthUrl)': 'prop(spotifyAuthUrl)',
-        'prop(geniusAuthUrl)': 'prop(geniusAuthUrl)'
+        'prop(geniusAuthUrl)': 'prop(geniusAuthUrl)',
+        'prop(musixmatchKey)': 'musixmatchKey'
     });
 
     constructor(props) {

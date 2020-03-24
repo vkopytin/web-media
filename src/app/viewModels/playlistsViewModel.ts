@@ -2,10 +2,11 @@ import * as _ from 'underscore';
 import { IResponseResult, ISpotifySong, IUserInfo, IUserPlaylistsResult } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
 import { listPlaylists } from '../data/useCases';
-import { Service, SpotifyService } from '../service';
+import { Service } from '../service';
 import { assertNoErrors, current } from '../utils';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
+import { SpotifyService } from '../service/spotify';
 
 
 class PlaylistsViewModel extends ViewModel<PlaylistsViewModel['settings']> {

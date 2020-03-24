@@ -9,17 +9,17 @@ export interface IGeniuseHit {
         api_path: string;
     };
 }
-export interface IGeniusSearchResult {
+export interface ILyricsSearchResult {
     lyrics: string;
 }
 
-class GeniusAdapter {
+class LyricsAdapter {
 
     constructor(public token: string) {
     }
 
     async search(term: string) {
-        return new Promise<IGeniusSearchResult>((resolve, reject) => {
+        return new Promise<ILyricsSearchResult>((resolve, reject) => {
             $.ajax({
                 url: 'https://api.lyrics.ovh/v1/' + term,
                 success(response) {
@@ -33,4 +33,4 @@ class GeniusAdapter {
     }
 }
 
-export { GeniusAdapter };
+export { LyricsAdapter };

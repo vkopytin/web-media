@@ -1,10 +1,11 @@
 import * as _ from 'underscore';
 import { IRecommendationsResult, IResponseResult, ISpotifySong, ITrack } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
-import { Service, SpotifyService } from '../service';
+import { Service } from '../service';
 import { assertNoErrors, current } from '../utils';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
+import { SpotifyService } from '../service/spotify';
 
 
 class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
