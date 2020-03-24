@@ -156,7 +156,8 @@ export function listTracksByPlaylist(playlistId: string) {
                     const track = await tracksStore.get(refTrack.trackId);
                     tracks.push({
                         track,
-                        added_at: refTrack.added_at
+                        added_at: refTrack.added_at,
+                        snapshot_id: refTrack.snapshot_id
                     });
                 }
 

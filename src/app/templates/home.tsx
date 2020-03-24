@@ -20,6 +20,11 @@ export const template = (view: HomeView) => <>
         {_.map(view.prop('items'), (item, index) => 
             <li key={item.id()}>
                 <div className="table-view-cell media">
+                    <div className="info-list">
+                        <span className="info-item material-icons"
+                            onClick={() => view.findTrackLyricsCommand.exec(item)}
+                        >receipt</span>
+                    </div>
                     <span className="media-object pull-left player-left--32"
                         onClick={evnt => { item.playTracks(view.prop('items')) }}
                     >
@@ -54,8 +59,12 @@ export const template = (view: HomeView) => <>
                     >{item.duration()}</span>}
                 </div>
                 {(view.prop('selectedItem')) === item && <SelectPlaylistsView 
-                className="chips-list"
-                track={item} />}
+                    className="chips-list"
+                    track={item} />}
+                {(view.prop('trackLyrics') && view.prop('trackLyrics').trackId === item.id())
+                    && <div className="card">{_.map(view.prop('trackLyrics').lyrics.split('\n'), (line, index) => {
+                        return <div key={index}>{line}</div>;
+                    })}</div>}
             </li>
         )}
     </ul>

@@ -56,10 +56,6 @@ module.exports = (options, workingDir) => {
       }
     },
     plugins: [
-      new webpack.DefinePlugin({
-        'process.env.NODE_ENV': `'${process.env.NODE_ENV}'`,
-        'process.env.PESDK_LICENSE': `'${process.env.PESDK_LICENSE}'`
-      }),
       // new HtmlWebpackPlugin({
       //   filename: '../public/index.html',
       //   template: path.resolve(workingDir, '..', 'src', 'html.mustache'),

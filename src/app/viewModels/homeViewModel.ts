@@ -17,13 +17,15 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
         likedTracks: [] as TrackViewModelItem[],
         selectedTrack: null as TrackViewModelItem,
         selectedPlaylist: null as PlaylistsViewModelItem,
-        isLoading: false
+        isLoading: false,
+        trackLyrics: null as { trackId: string; lyrics: string }
     };
 
     refreshCommand = { exec: () => this.fetchData() };
     selectTrackCommand = { exec: (track: TrackViewModelItem) => this.prop('selectedTrack', track) };
     likeTrackCommand = { exec: (track: TrackViewModelItem) => this.likeTrack(track) };
     unlikeTrackCommand = { exec: (track: TrackViewModelItem) => this.unlikeTrack(track) };
+    findTrackLyricsCommand = { exec: (track: TrackViewModelItem) => this.findTrackLyrics(track) };
 
     isInit = _.delay(() => {
         this.connect();
@@ -142,6 +144,28 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
     async unlikeTrack(track: TrackViewModelItem) {
         await track.unlikeTrack();
         this.checkTracks([track]);
+    }
+
+    async findTrackLyrics(track: TrackViewModelItem) {
+        if (this.prop('trackLyrics') && this.prop('trackLyrics').trackId === track.id()) {
+            return this.prop('trackLyrics', null);
+        }
+        const lyricsResult = await this.ss.findTrackLyrics({
+            name: track.name(),
+            artist: track.artist()
+        });
+        if (assertNoErrors(lyricsResult, e => { })) {
+            this.prop('trackLyrics', {
+                trackId: track.id(),
+                lyrics: lyricsResult.error.message
+            });
+            return;
+        }
+
+        this.prop('trackLyrics', {
+            trackId: track.id(),
+            lyrics: '' + lyricsResult.val
+        });
     }
 }
 

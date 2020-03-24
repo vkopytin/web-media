@@ -37,6 +37,10 @@ class PlaylistsViewModelItem extends ViewModel {
         return _.first(this.playlist.images)?.url;
     }
 
+    snapshotId() {
+        return this.playlist.snapshot_id;
+    }
+
     equals(inst: PlaylistsViewModelItem) {
         if (inst == null || inst == undefined) {
             return false;

@@ -110,7 +110,7 @@ class SpotifyPlayerService extends withEvents(BaseService) {
             cb(spotifySettings.accessToken);
         };
         const settingsResult = await connection.settings('spotify');
-        const name = process.env.PLAYER_NAME || 'DEV Player for Spotify';
+        const name = process.env.PLAYER_NAME || 'Dev Player for Spotify';
         if (settingsResult.isError) {
 
             return settingsResult;

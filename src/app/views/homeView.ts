@@ -19,13 +19,15 @@ class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
         isLoading: false,
         items: [] as TrackViewModelItem[],
         likedTracks: [] as TrackViewModelItem[],
-        selectedItem: null as TrackViewModelItem
+        selectedItem: null as TrackViewModelItem,
+        trackLyrics: null as { trackId: string; lyrics: string }
     };
 
-    refreshCommand = { exec() { } };
-    selectTrackCommand = { exec(track: TrackViewModelItem) { } };
-    likeTrackCommand = { exec(track: TrackViewModelItem) { } };
-    unlikeTrackCommand = { exec(track: TrackViewModelItem) { } };
+    refreshCommand = { exec() { throw new Error('Not bound command'); } };
+    selectTrackCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
+    likeTrackCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
+    unlikeTrackCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
+    findTrackLyricsCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
 
     binding = bindTo(this, () => current(HomeViewModel), {
         '-errors': 'errors',
@@ -33,10 +35,12 @@ class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
         'selectTrackCommand': 'selectTrackCommand',
         'likeTrackCommand': 'likeTrackCommand',
         'unlikeTrackCommand': 'unlikeTrackCommand',
+        'findTrackLyricsCommand': 'findTrackLyricsCommand',
         'prop(items)': 'tracks',
         'prop(likedTracks)': 'likedTracks',
         'prop(isLoading)': 'prop(isLoading)',
-        'prop(selectedItem)': 'prop(selectedTrack)'
+        'prop(selectedItem)': 'prop(selectedTrack)',
+        'prop(trackLyrics)': 'prop(trackLyrics)'
     });
 
     constructor(props) {

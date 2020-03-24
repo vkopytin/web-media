@@ -113,6 +113,9 @@ const RM = {
                 ...config,
                 plugins: [
                     ...config.plugins,
+                    new webpack.DefinePlugin({
+                        'process.env.PLAYER_NAME': `'${process.env.PLAYER_NAME}'`
+                    }),
                     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/), // https://stackoverflow.com/questions/25384360/how-to-prevent-moment-js-from-loading-locales-with-webpack
                     new MiniCssExtractPlugin({
                         // Options similar to the same options in webpackOptions.output

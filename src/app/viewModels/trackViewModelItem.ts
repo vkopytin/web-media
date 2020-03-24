@@ -7,14 +7,16 @@ import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModel } from './playlistsViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { SpotifyService } from '../service/spotify';
+import { ISongRecord } from '../data/entities/interfaces/iSongRecord';
 
 
-class TrackViewModelItem extends ViewModel {
+class TrackViewModelItem extends ViewModel<TrackViewModelItem['settings']> {
     appViewModel = current(AppViewModel);
     playlistsViewModel = current(PlaylistsViewModel);
     settings = {
-        ...(this as ViewModel).settings,
+        ...(this as any as ViewModel).settings,
         isLiked: false,
+        isCached: false,
         playlists: [] as PlaylistsViewModelItem[]
     };
 
@@ -26,13 +28,14 @@ class TrackViewModelItem extends ViewModel {
         this.loadData('playlistTracks');
     });
 
-    constructor(public song: ISpotifySong, private index: number, private ss = current(Service)) {
+    constructor(public song: ISongRecord, private index: number, private ss = current(Service)) {
         super();
     }
 
     playlists(val?: PlaylistsViewModelItem[]) {
         if (arguments.length && this.settings.playlists !== val) {
             this.settings.playlists = val;
+            this.updateIsCached(val);
             this.trigger('change:playlists');
         }
 
@@ -76,6 +79,10 @@ class TrackViewModelItem extends ViewModel {
     thumbnailUrl() {
         const image = _.last(this.song.track.album?.images);
         return image?.url;
+    }
+
+    snapshotId() {
+        return this.song.snapshot_id;
     }
 
     async connect() {
@@ -137,7 +144,13 @@ class TrackViewModelItem extends ViewModel {
             return;
         }
     }
+
+    updateIsCached(playlists: PlaylistsViewModelItem[]) {
+        if (playlists.length) {
+            const playlist = _.find(playlists, pl => pl.snapshotId() === this.song.snapshot_id);
+            this.prop('isCached', !playlist);
+        }
+    }
 }
 
 export { TrackViewModelItem };
-

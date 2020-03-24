@@ -11,7 +11,7 @@ export const template = (view: TracksView) => <>
         {_.map(view.prop('tracks'), (item, index) => <li key={item.id()}>
             <div className="table-view-cell media">
                 <div className="info-list">
-                    <span className="info-item material-icons">delete</span>
+                    {item.prop('isCached') && <span className="info-item material-icons">delete</span>}
                     <span className="info-item material-icons"
                         onClick={() => view.findTrackLyricsCommand.exec(item)}
                     >receipt</span>
