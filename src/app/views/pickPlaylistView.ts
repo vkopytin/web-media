@@ -7,7 +7,7 @@ import { HomeViewModel, PlaylistsViewModel, PlaylistsViewModelItem } from '../vi
 
 
 export interface IPickPlaylistsViewProps {
-
+    showErrors(errors: ServiceResult<any, Error>[]);
 }
 
 class PickPlaylistsView extends BaseView<IPickPlaylistsViewProps, PickPlaylistsView['state'], {}> {
@@ -42,6 +42,10 @@ class PickPlaylistsView extends BaseView<IPickPlaylistsViewProps, PickPlaylistsV
     }
 
     componentDidUpdate(prevProps: IPickPlaylistsViewProps, prevState, snapshot) {
+    }
+
+    showErrors(errors) {
+        this.props.showErrors(errors);
     }
 
     render() {

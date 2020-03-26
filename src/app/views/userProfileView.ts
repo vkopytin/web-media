@@ -65,6 +65,10 @@ class UserProfileView extends BaseView<IUserProfileViewProps, UserProfileView['s
         return this.prop('errors');
     }
 
+    showErrors(errors) {
+        this.props.showErrors(errors);
+    }
+
     render() {
         return template(this);
     }

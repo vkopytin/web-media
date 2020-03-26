@@ -7,19 +7,21 @@ import { TrackViewModelItem } from './trackViewModelItem';
 import { SpotifyService } from '../service/spotify';
 
 
-class MyTracksViewModel extends ViewModel {
+class MyTracksViewModel extends ViewModel<MyTracksViewModel['settings']> {
 
     settings = {
-        ...(this as ViewModel).settings,
+        ...(this as any as ViewModel).settings,
         total: 0,
         limit: 20,
         offset: 0,
         isLoading: false,
         likedTracks: [] as TrackViewModelItem[],
-        tracks: [] as TrackViewModelItem[]
+        tracks: [] as TrackViewModelItem[],
+        trackLyrics: null as { trackId: string; lyrics: string }
     };
 
     loadMoreCommand = { exec: () => this.loadMore() };
+    findTrackLyricsCommand = { exec: (track: TrackViewModelItem) => this.findTrackLyrics(track) };
 
     isInit = _.delay(() => {
         this.connect();
@@ -133,6 +135,28 @@ class MyTracksViewModel extends ViewModel {
 
     playInTracks(item: TrackViewModelItem) {
         item.playTracks(this.tracks());
+    }
+
+    async findTrackLyrics(track: TrackViewModelItem) {
+        if (this.prop('trackLyrics') && this.prop('trackLyrics').trackId === track.id()) {
+            return this.prop('trackLyrics', null);
+        }
+        const lyricsResult = await this.ss.findTrackLyrics({
+            name: track.name(),
+            artist: track.artist()
+        });
+        if (assertNoErrors(lyricsResult, e => { })) {
+            this.prop('trackLyrics', {
+                trackId: track.id(),
+                lyrics: lyricsResult.error.message
+            });
+            return;
+        }
+
+        this.prop('trackLyrics', {
+            trackId: track.id(),
+            lyrics: '' + lyricsResult.val
+        });
     }
 }
 

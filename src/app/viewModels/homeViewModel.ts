@@ -8,6 +8,28 @@ import { TrackViewModelItem } from './trackViewModelItem';
 import { SpotifyService } from '../service/spotify';
 
 
+function isLoading(target, key, descriptor) {
+    // save a reference to the original method this way we keep the values currently in the
+    // descriptor and don't overwrite what another decorator might have done to the descriptor.
+    if (descriptor === undefined) {
+        descriptor = Object.getOwnPropertyDescriptor(target, key);
+    }
+    const originalMethod = descriptor.value;
+   
+    //editing the descriptor/value parameter
+    descriptor.value = async function (this: HomeViewModel, ...args) {
+        try {
+            this.prop('isLoading', true);
+            return await originalMethod.apply(this, args);
+        } finally {
+            this.prop('isLoading', false);
+        }
+    };
+   
+    // return edited descriptor as opposed to overwriting the descriptor
+    return descriptor;
+}
+
 class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
 
     settings = {
@@ -75,8 +97,8 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
         spotify.on('change:state', (...args) => this.loadData(...args));
     }
 
+    @isLoading
     async fetchData() {
-        this.prop('isLoading', true);
         const tracksResult = this.selectedPlaylist()
             ? await this.ss.fetchPlaylistTracks(this.selectedPlaylist().id(), 0, 20)
             : await this.ss.fetchTracks(0, 20);
@@ -102,7 +124,6 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
         const newTracks = _.map(recomendations.tracks, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
         this.tracks(newTracks);
         this.checkTracks(newTracks);
-        this.prop('isLoading', false);
     }
 
     async loadData(...args) {

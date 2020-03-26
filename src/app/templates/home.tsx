@@ -9,7 +9,7 @@ const cn = utils.className;
 
 export const template = (view: HomeView) => <>
     <div className="center">
-        <PickPlaylistsView/>
+        <PickPlaylistsView showErrors={e => view.showErrors(e)} />
         {view.prop('isLoading') || <button className="button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
             onClick={evnt => view.refreshCommand.exec()}
         ></button>}
@@ -17,7 +17,7 @@ export const template = (view: HomeView) => <>
         ></button>}
     </div>
     <ul className="todo-list table-view">
-        {_.map(view.prop('items'), (item, index) => 
+        {_.map(view.prop('items'), (item, index) =>
             <li key={item.id()}>
                 <div className="table-view-cell media">
                     <div className="info-list">
@@ -46,9 +46,10 @@ export const template = (view: HomeView) => <>
                                 <span className="author-title">{item.artist()}</span>
                             </div>
                             <div className="album-title"><span>{item.album()}</span>{(view.prop('selectedItem')) !== item && <SelectPlaylistsView
-                            className="chips-list"
-                            track={item}
-                            active={true} />}</div>
+                                showErrors={e => view.showErrors(e)}
+                                className="chips-list"
+                                track={item}
+                                active={true} />}</div>
                         </div>
                     </span>
                     {item.isLiked() && <span className="badge badge-positive"
@@ -58,7 +59,8 @@ export const template = (view: HomeView) => <>
                         onClick={evnt => view.likeTrackCommand.exec(item)}
                     >{item.duration()}</span>}
                 </div>
-                {(view.prop('selectedItem')) === item && <SelectPlaylistsView 
+                {(view.prop('selectedItem')) === item && <SelectPlaylistsView
+                    showErrors={e => view.showErrors(e)}
                     className="chips-list"
                     track={item} />}
                 {(view.prop('trackLyrics') && view.prop('trackLyrics').trackId === item.id())

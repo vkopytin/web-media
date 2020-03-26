@@ -43,6 +43,7 @@ export const template = (view: NewReleasesView) => <>
         })}
     </ul>
     {view.prop('currentAlbum') && <AlbumsView
+        showErrors={e => view.showErrors(e)}
         currentTrackId={view.props.currentTrackId}
         uri={view.prop('currentAlbum')?.uri()}
         tracks={view.prop('tracks')}

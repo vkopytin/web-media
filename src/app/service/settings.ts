@@ -122,6 +122,9 @@ class SettingsService extends BaseService {
                 ...this.config[propName],
                 ...val
             };
+            if (propName === 'spotify' && 'accessToken' in val) {
+                document.cookie = 'spat=' + btoa((val as any).accessToken);
+            }
         }
 
         return SettingsServiceResult.success(this.config[propName]);

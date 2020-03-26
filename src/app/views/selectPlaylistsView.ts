@@ -8,6 +8,7 @@ import { DeviceViewModelItem, PlaylistsViewModel, PlaylistsViewModelItem, TrackV
 
 
 export interface ISelectPlaylistsViewProps {
+    showErrors(errors: ServiceResult<any, Error>[]);
     className?: string;
     track: TrackViewModelItem;
     active?: boolean;
@@ -70,6 +71,10 @@ class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, SelectPlay
 
     playlistHasTrack(playlist: PlaylistsViewModelItem, track: TrackViewModelItem) {
         return !!_.find(this.prop('playlists'), p => p.id() === playlist.id());
+    }
+
+    showErrors(errors) {
+        this.props.showErrors(errors);
     }
 
     render() {

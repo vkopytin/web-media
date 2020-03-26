@@ -9,7 +9,12 @@ const cn = utils.className;
 export const template = (view: TracksView) => <>
     <ul className={cn(`${view.props.className} todo-list table-view`)}>
         {_.map(view.prop('tracks'), (item, index) => <li key={item.id()}>
-            <div className="table-view-cell media">
+            <div className="table-view-cell media"
+            onTouchStart={e => view.onMouseDown(e)}>
+                <span className="material-icons handle"
+                    onMouseDown={e => view.onMouseDown(e)}
+                    
+                ></span>
                 <div className="info-list">
                     {item.prop('isCached') && <span className="info-item material-icons">delete</span>}
                     <span className="info-item material-icons"
@@ -35,9 +40,13 @@ export const template = (view: TracksView) => <>
                         &nbsp;-&nbsp;
                                 <span className="author-title">{item.artist()}</span>
                     </div>
-                    <div className="album-title"><span>{item.album()}</span>{(view.prop('selectedItem')) !== item && <SelectPlaylistsView className="chips-list" track={item} active={true} />}</div>
+                    <div className="album-title"><span>{item.album()}</span>{(view.prop('selectedItem')) !== item && <SelectPlaylistsView
+                        showErrors={e => view.showErrors(e)}
+                        className="chips-list" track={item} active={true} />}</div>
                 </div>
-                {(view.prop('selectedItem')) === item && <SelectPlaylistsView className="chips-list" track={item} />}
+                {(view.prop('selectedItem')) === item && <SelectPlaylistsView
+                    showErrors={e => view.showErrors(e)}
+                    className="chips-list" track={item} />}
                 <span className="badge-region">
                     {item.isLiked() && <span className="badge badge-positive"
                         onClick={evnt => view.unlikeTrackCommand.exec(item)}

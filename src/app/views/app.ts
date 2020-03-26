@@ -141,10 +141,17 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
         this.prop('errors', errors);
     }
 
+    clearErrors(evnt) {
+        evnt && evnt.preventDefault();
+        this.setState({
+            ...this.state,
+            errors: []
+        });
+    }
+
     render() {
         return template(this);
     }
 }
 
 export { AppView };
-

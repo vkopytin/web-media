@@ -52,9 +52,13 @@ export const template = (view: SearchView) => <>
                             <span className="author-title">{item.artist()}</span>
                     </div>
                     <div className="album-title">{item.album()}</div>
-                    {(view.prop('selectedItem')) !== item && <SelectPlaylistsView track={item} active={true} />}
+                    {(view.prop('selectedItem')) !== item && <SelectPlaylistsView
+                        showErrors={e => view.showErrors(e)}
+                        track={item} active={true} />}
                 </div>
-                {(view.prop('selectedItem')) === item && <SelectPlaylistsView track={item} />}
+                {(view.prop('selectedItem')) === item && <SelectPlaylistsView
+                    showErrors={e => view.showErrors(e)}
+                    track={item} />}
                 {item.isLiked() && <span className="badge badge-positive"
                     onClick={evnt => view.unlikeTrackCommand.exec(item)}
                 >{item.duration()}</span>}
@@ -83,6 +87,7 @@ export const template = (view: SearchView) => <>
                 </div>
                 {view.prop('currentArtist') === item && <div className="card" key={item.id() + '-3'}>
                     <AlbumsView
+                        showErrors={e => view.showErrors(e)}
                         currentTrackId={view.props.currentTrackId}
                         uri={null}
                         tracks={view.prop('currentTracks')}
@@ -112,6 +117,7 @@ export const template = (view: SearchView) => <>
                 </div>
                 {view.prop('currentAlbum') === item && <div className="card" key={item.id() + '-1'}>
                     <AlbumsView
+                        showErrors={e => view.showErrors(e)}
                         currentTrackId={view.props.currentTrackId}
                         uri={view.prop('currentAlbum')?.uri()}
                         tracks={view.prop('currentTracks')}
@@ -142,6 +148,7 @@ export const template = (view: SearchView) => <>
                 </div>
                 {view.prop('currentPlaylist') === item && <div className="card" key={item.id() + '-2'}>
                     <AlbumsView
+                        showErrors={e => view.showErrors(e)}
                         currentTrackId={view.props.currentTrackId}
                         uri={view.prop('currentPlaylist')?.uri()}
                         tracks={view.prop('currentTracks')}

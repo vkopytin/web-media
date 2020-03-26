@@ -78,7 +78,10 @@ class SpotifySyncService extends withEvents(BaseService) {
             total = offset + Math.min(this.limit + 1, response.items.length);
             offset = offset + Math.min(this.limit, response.items.length);
 
-            yield response.items;
+            yield _.map(response.items, (item, index) => ({
+                position: offset + index,
+                ...item
+            }));
         }
     }
 

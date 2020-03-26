@@ -10,9 +10,9 @@ const cn = utils.className;
 export const template = (view: AppView) => <main>
     <section className="todoapp device-content">
         <UserProfileView
+            showErrors={errors => view.showErrors(errors)}
             openLogin={(val) => view.prop('openLogin', val)}
             className={cn("modal ?active", view.prop('openLogin'))}
-            showErrors={errors => view.showErrors(errors)}
         />
         <div className={cn("popover ?visible", view.state.showSelectDevices === 'show')} style={{
             display: view.state.showSelectDevices !== 'hide' ? 'block' : 'none'
@@ -20,12 +20,18 @@ export const template = (view: AppView) => <main>
             <header className="bar bar-nav">
                 <h1 className="title">Devices</h1>
             </header>
-            <DevicesView openShowDevices={showHide => view.openDevices(showHide)} />
+            <DevicesView
+                showErrors={errors => view.showErrors(errors)}
+                openShowDevices={showHide => view.openDevices(showHide)}
+            />
         </div>
         <div className={cn("popover ?visible", view.prop('errors').length)} style={{
             display: view.prop('errors').length ? 'block' : 'none'
         }}>
             <header className="bar bar-nav">
+                <a className="icon icon-close pull-right" href="#"
+                    onClick={evnt => view.clearErrors(evnt)}
+                ></a>
                 <h1 className="title">Errors</h1>
             </header>
             <ul className="table-view">
@@ -115,6 +121,7 @@ export const template = (view: AppView) => <main>
                 ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}
             >
                 <MyTracksView
+                    showErrors={errors => view.showErrors(errors)}
                     loadMore={view.prop('scrolledToBottom')}
                     currentTrackId={view.prop('currentTrackId')}
                 />
@@ -123,13 +130,17 @@ export const template = (view: AppView) => <main>
                 ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}
             >
                 <SearchView
+                    showErrors={errors => view.showErrors(errors)}
                     loadMore={view.prop('scrolledToBottom')}
                     currentTrackId={view.prop('currentTrackId')}
                 />
             </section>
             <section key="releases" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
                 ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}>
-                <NewReleasesView currentTrackId={view.prop('currentTrackId')} />
+                <NewReleasesView
+                    showErrors={errors => view.showErrors(errors)}
+                    currentTrackId={view.prop('currentTrackId')}
+                />
             </section>
         </SwitchView>
     </section>

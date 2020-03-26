@@ -8,6 +8,7 @@ import { MyTracksViewModel, TrackViewModelItem } from '../viewModels';
 
 
 export interface IMyTracksViewProps {
+    showErrors(errors: ServiceResult<any, Error>[]);
     loadMore?: boolean;
     currentTrackId: string;
 }
@@ -20,17 +21,21 @@ class MyTracksView extends BaseView<IMyTracksViewProps, MyTracksView['state']> {
         isLoading: false,
         currentTrackId: '',
         likedTracks: [] as TrackViewModelItem[],
-        selectedItem: null as TrackViewModelItem
+        selectedItem: null as TrackViewModelItem,
+        trackLyrics: null as { trackId: string; lyrics: string },
     };
 
     loadMoreCommand = { exec() { } };
+    findTrackLyricsCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
     
     binding = bindTo(this, () => current(MyTracksViewModel), {
         'loadMoreCommand': 'loadMoreCommand',
+        'findTrackLyricsCommand': 'findTrackLyricsCommand',
         'prop(items)': 'tracks',
         'prop(likedTracks)': 'likedTracks',
         'prop(isLoading)': 'isLoading',
-        'prop(selectedItem)': 'selectedItem'
+        'prop(selectedItem)': 'selectedItem',
+        'prop(trackLyrics)': 'prop(trackLyrics)'
     });
 
     searchTracks = _.debounce(term => {
@@ -63,6 +68,10 @@ class MyTracksView extends BaseView<IMyTracksViewProps, MyTracksView['state']> {
 
     isPlaying(track: TrackViewModelItem) {
         return this.props.currentTrackId === track.id();
+    }
+
+    showErrors(errors) {
+        this.props.showErrors(errors);
     }
 
     render() {

@@ -81,6 +81,7 @@ export interface ISpotifySong {
     track: ITrack;
     played_at?: string;
     added_at: string;
+    position?: number;
 }
 
 export interface IDevicesResponse {

@@ -6,6 +6,7 @@ import { TrackViewModelItem } from '../viewModels';
 
 
 export interface IAlbumsViewProps {
+    showErrors(errors: ServiceResult<any, Error>[]);
     uri: string;
     currentTrackId: string;
     tracks: TrackViewModelItem[];
@@ -50,6 +51,10 @@ class AlbumsView extends BaseView<IAlbumsViewProps, AlbumsView['state']> {
 
     isPlaying(track: TrackViewModelItem) {
         return this.props.currentTrackId === track.id();
+    }
+
+    showErrors(errors) {
+        this.props.showErrors(errors);
     }
 
     render() {

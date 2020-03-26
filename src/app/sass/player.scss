@@ -567,3 +567,23 @@ border-bottom-right-radius: 12px;
     .center {
     }
 }
+
+.handle {
+    cursor: move;
+    position: absolute;
+    left: -4px;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+}
+
+.handle:before {
+    content: 'drag_indicator';
+    position: absolute;
+    top: 30%;
+    width: 20px;
+}
+
+.dragged-place {
+    border: 1px dotted grey;
+}

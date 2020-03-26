@@ -214,7 +214,6 @@ class SpotifyPlayerService extends withEvents(BaseService) {
     }
 
     async refreshToken(newToken: string) {
-        this.player.disconnect();
         this.player.connect();
         return SpotifyPlayerServiceResult.success(true);
     }

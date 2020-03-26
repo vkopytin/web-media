@@ -10,6 +10,7 @@ import { ArtistViewModelItem } from '../viewModels/artistViewModelItem';
 
 
 export interface ISearchViewProps {
+    showErrors(errors: ServiceResult<any, Error>[]);
     loadMore?: boolean;
     currentTrackId: string;
 }
@@ -78,6 +79,10 @@ class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
 
     isPlaying(track: TrackViewModelItem) {
         return track.id() === this.props.currentTrackId;
+    }
+
+    showErrors(errors) {
+        this.props.showErrors(errors);
     }
 
     render() {

@@ -7,6 +7,7 @@ import { AppViewModel, DeviceViewModelItem } from '../viewModels';
 
 
 export interface IDevicesViewProps {
+    showErrors(errors: ServiceResult<any, Error>[]);
     openShowDevices(showHide);
 }
 
@@ -47,6 +48,10 @@ class DevicesView extends BaseView<IDevicesViewProps, DevicesView['state']> {
     async switchDevice(device) {
         await this.switchDeviceCommand.exec(device);
         this.props.openShowDevices(false);
+    }
+
+    showErrors(errors) {
+        this.props.showErrors(errors);
     }
 
     render() {

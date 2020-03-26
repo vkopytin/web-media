@@ -8,6 +8,7 @@ import { AlbumViewModelItem, NewReleasesViewModel, TrackViewModelItem } from '..
 
 
 export interface INewReleasesViewProps {
+    showErrors(errors: ServiceResult<any, Error>[]);
     currentTrackId: string;
 }
 
@@ -62,6 +63,10 @@ class NewReleasesView extends BaseView<INewReleasesViewProps, NewReleasesView['s
 
     isLiked(album: AlbumViewModelItem) {
         return !!_.find(this.prop('likedAlbums'), item => item.id() === album.id());
+    }
+
+    showErrors(errors) {
+        this.props.showErrors(errors);
     }
 
     render() {
