@@ -166,6 +166,10 @@ export interface ICurrentlyPlayingResult {
     is_playing: boolean;
 }
 
+export interface IReorderTracksResult {
+    snapshot_id: string;
+}
+
 export type ISearchType = 'track' | 'album' | 'artist' | 'playlist';
 
 const delayWithin = (ms = 800) => new Promise((resolve) => {
@@ -851,6 +855,30 @@ class SpotifyAdapter {
                 },
                 success(response: boolean[]) {
                     ready.then(() => resolve(response));
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
+                }
+            });
+        });
+    }
+
+    reorderTracks(playlistId: string, rangeStart: number, insertBefore: number, rangeLength = 1) {
+        return new Promise<IReorderTracksResult>((resolve, reject) => {
+            $.ajax({
+                method: 'PUT',
+                url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    range_start: rangeStart,
+                    insert_before: insertBefore,
+                    range_length: rangeLength
+                }),
+                success(response) {
+                    resolve(response);
                 },
                 error(jqXHR, textStatus: string, errorThrown: string) {
                     reject(ErrorWithStatus.fromJqXhr(jqXHR));

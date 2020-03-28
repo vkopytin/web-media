@@ -402,6 +402,16 @@ class SpotifyService extends withEvents(BaseService) {
             return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
         }
     }
+
+    async reorderTracks(playlistId: string, rangeStart: number, insertBefore: number, rangeLength = 1) {
+        try {
+            const res = await this.adapter.reorderTracks(playlistId, rangeStart, insertBefore, rangeLength);
+
+            return SpotifyServiceResult.success(res);
+        } catch (ex) {
+            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+        }
+    }
 }
 
 export { SpotifyService };

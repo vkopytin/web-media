@@ -650,6 +650,26 @@ class Service {
         const lyricsResult = await lyricsService.val.search(songInfo);
         return lyricsResult;
     }
+
+    async reorderTrack(playlistId: string, oldPosition: number, newPosition: number) {
+        const spotifyResult = await this.service(SpotifyService);
+        if (spotifyResult.isError) {
+            return spotifyResult;
+        }
+        const reorderSResult = await spotifyResult.val.reorderTracks(playlistId, oldPosition, newPosition, 1);
+        if (reorderSResult.isError) {
+            return reorderSResult;
+        }
+        const dataResult = await this.service(DataService);
+        if (dataResult.isError) {
+            return dataResult;
+        }
+        const reorderDResult = await dataResult.val.reorderTrack(playlistId, oldPosition, newPosition);
+        if (reorderDResult.isError) {
+            return reorderDResult;
+        }
+        return reorderDResult;
+    }
 }
 
 export { Service };

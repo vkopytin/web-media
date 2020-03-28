@@ -157,7 +157,8 @@ export function listTracksByPlaylist(playlistId: string) {
                     tracks.push({
                         track,
                         added_at: refTrack.added_at,
-                        snapshot_id: refTrack.snapshot_id
+                        snapshot_id: refTrack.snapshot_id,
+                        position: refTrack.position
                     });
                 }
 

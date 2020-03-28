@@ -35,11 +35,13 @@ class TracksView extends BaseView<ITracksViewProps, TracksView['state']> {
     likeTrackCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
     unlikeTrackCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
     findTrackLyricsCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
+    reorderTrackCommand = { exec(track: TrackViewModelItem, beforeTrack: TrackViewModelItem) { throw new Error('Not bound command') } };
 
     binding = bindTo(this, () => current(PlaylistsViewModel), {
         'findTrackLyricsCommand': 'findTrackLyricsCommand',
         'likeTrackCommand': 'likeTrackCommand',
         'unlikeTrackCommand': 'unlikeTrackCommand',
+        'reorderTrackCommand': 'reorderTrackCommand',
         'prop(tracks)': 'tracks',
         'prop(likedTracks)': 'likedTracks',
         'prop(selectedItem)': 'selectedItem',
@@ -132,7 +134,11 @@ class TracksView extends BaseView<ITracksViewProps, TracksView['state']> {
         const rowIndex = elementIndex(target);
         console.log('onDragEnter TR index:', rowIndex - 1);
         this.prop('draggedIndex', target ? rowIndex - 1 : -1);
-        $(el).insertAfter(target);
+        if (this.prop('dragIndex') > this.prop('draggedIndex')) {
+            $(el).insertBefore(target);
+        } else {
+            $(el).insertAfter(target);
+        }
     }
 
     onDragLeave(e) {
@@ -167,11 +173,7 @@ class TracksView extends BaseView<ITracksViewProps, TracksView['state']> {
             dragIndex >= 0 &&
             dragIndex !== draggedIndex
         ) {
-            const tracks = this.prop('tracks');
-            const data = [...tracks];
-            const item = data.splice(dragIndex, 1)[0];
-            data.splice(draggedIndex, 0, item);
-            this.prop('tracks', data);
+            this.reorderTrackCommand.exec(this.prop('tracks')[dragIndex], this.prop('tracks')[draggedIndex]);
         }
         this.prop('dragIndex', -1);
         this.prop('draggedIndex', -1);

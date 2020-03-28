@@ -41,6 +41,9 @@ class PlaylistsViewModel extends ViewModel<PlaylistsViewModel['settings']> {
     likeTrackCommand = { exec: (track: TrackViewModelItem) => this.likeTrack(track) };
     unlikeTrackCommand = { exec: (track: TrackViewModelItem) => this.unlikeTrack(track) };
     findTrackLyricsCommand = { exec: (track: TrackViewModelItem) => this.findTrackLyrics(track) };
+    reorderTrackCommand = {
+        exec: (track: TrackViewModelItem, beforeTrack: TrackViewModelItem) => this.reorderTrack(track, beforeTrack)
+    };
 
     isInit = _.delay(() => {
         this.connect();
@@ -271,6 +274,25 @@ class PlaylistsViewModel extends ViewModel<PlaylistsViewModel['settings']> {
             trackId: track.id(),
             lyrics: '' + lyricsResult.val
         });
+    }
+
+    async reorderTrack(track: TrackViewModelItem, beforeTrack: TrackViewModelItem) {
+        const tracks = this.tracks();
+        const oldPosition = tracks.indexOf(track);
+        const newPosition = tracks.indexOf(beforeTrack);
+        const data = [...tracks];
+        const item = data.splice(oldPosition, 1)[0];
+        data.splice(newPosition, 0, item);
+        this.tracks(data);
+        let res;
+        if (oldPosition < newPosition) {
+            res = await this.ss.reorderTrack(this.currentPlaylistId(), oldPosition, newPosition + 1);
+        } else if (oldPosition > newPosition) {
+            res = await this.ss.reorderTrack(this.currentPlaylistId(), oldPosition, newPosition);
+        }
+        if (assertNoErrors(res, e => this.errors(e))) {
+            return;
+        }
     }
 }
 

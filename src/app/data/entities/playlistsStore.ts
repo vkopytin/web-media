@@ -27,6 +27,7 @@ class PlaylistsStore {
         trackId: string;
         added_at?: Date;
         snapshot_id?: string;
+        position?: number;
     }>(this.storage, {
         playlistId: '',
         trackId: ''
@@ -37,11 +38,11 @@ class PlaylistsStore {
             ...this.relation.storeConfig,
             index: {
                 ...this.relation.storeConfig.index,
-                added_at: {
-                    added_at: {}
+                position: {
+                    position: {}
                 }
             },
-            orderBy: 'added_at'
+            orderBy: 'position'
         };
     }
 
@@ -98,7 +99,8 @@ class PlaylistsStore {
                 playlistId: playlist.id,
                 trackId: track.track.id,
                 added_at: new Date(track.added_at),
-                snapshot_id: playlist.snapshot_id
+                snapshot_id: playlist.snapshot_id,
+                position: track.position
             });
         }
     }

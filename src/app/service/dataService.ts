@@ -9,6 +9,7 @@ import { DataStorage } from '../data/dataStorage';
 import { PlaylistsStore } from '../data/entities/playlistsStore';
 import { MyStore } from '../data/entities/myStore';
 import { IPlaylistRecord } from '../data/entities/interfaces';
+import * as useCases from '../data/useCases';
 
 
 class DataService extends withEvents(BaseService) {
@@ -46,6 +47,28 @@ class DataService extends withEvents(BaseService) {
             limit: limit,
             next: '',
             offset: offset,
+            previous: '',
+            total: total
+        });
+    }
+
+    async fetchPlaylistTracksFromPosition(playlistId: string, position = 0, limit?) {
+        const total = await this.playlistTracksTotal(playlistId);
+        const tracks = await listTracksByPlaylist(playlistId);
+
+        return  DataServiceResult.success({
+            href: '',
+            items: _.reduce(_.sortBy(tracks, 'position'), (res, track) => {
+                if (track.position < position) {
+                    return res;
+                } else if (track.position > (position + limit)) {
+                    return res;
+                }
+                return res.concat(track);
+            }, [] as typeof tracks),
+            limit: limit,
+            next: '',
+            offset: position,
             previous: '',
             total: total
         });
@@ -201,6 +224,45 @@ class DataService extends withEvents(BaseService) {
 
                     storage.complete();
                     resolve(count);
+                } catch (ex) {
+                    reject(ex);
+                }
+            });
+        });
+    }
+
+    reorderTrack(playlistId: string, rangeStart: number, insertBefore: number) {
+        return new Promise<DataServiceResult<boolean, Error>>((resolve, reject) => {
+            DataStorage.create(async (err, storage) => {
+                const playlists = new PlaylistsStore(storage);
+                const playlist = await playlists.get(playlistId);
+                try {
+                    if (rangeStart < insertBefore) {
+                        const tracks = await this.fetchPlaylistTracksFromPosition(playlistId, rangeStart, insertBefore);
+                        const newTracks = [...tracks.val.items];
+                        const itemStart = newTracks.shift();
+                        const itemBefore = newTracks.pop();
+                        newTracks.push(itemStart);
+                        newTracks.push(itemBefore);
+                        const result = _.map(newTracks, (track, index) => ({
+                            ...track,
+                            position: rangeStart + index
+                        }));
+                        return await useCases.addTrackToPlaylist(playlist, result);
+                    } else if (rangeStart > insertBefore) {
+                        const tracks = await this.fetchPlaylistTracksFromPosition(playlistId, insertBefore, rangeStart);
+                        const newTracks = [...tracks.val.items];
+                        const itemStart = newTracks.pop();
+                        const itemBefore = newTracks.shift();
+                        newTracks.unshift(itemBefore);
+                        newTracks.unshift(itemStart);
+                        const result = _.map(newTracks, (track, index) => ({
+                            ...track,
+                            position: insertBefore + index
+                        }));
+                        return await useCases.addTrackToPlaylist(playlist, result);
+                    }
+                    resolve(DataServiceResult.success(true));
                 } catch (ex) {
                     reject(ex);
                 }

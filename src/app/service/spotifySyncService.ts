@@ -70,7 +70,8 @@ class SpotifySyncService extends withEvents(BaseService) {
         let total = this.limit;
         let offset = 0;
         while (offset < total) {
-            const result = await this.spotify.fetchPlaylistTracks(playlistId, offset, this.limit + 1);
+            const currentOffset = offset,
+                result = await this.spotify.fetchPlaylistTracks(playlistId, offset, this.limit + 1);
             if (assertNoErrors(result, e => _.delay(() => { throw e; }))) {
                 return;
             }
@@ -79,7 +80,7 @@ class SpotifySyncService extends withEvents(BaseService) {
             offset = offset + Math.min(this.limit, response.items.length);
 
             yield _.map(response.items, (item, index) => ({
-                position: offset + index,
+                position: currentOffset + index,
                 ...item
             }));
         }
@@ -109,7 +110,8 @@ class SpotifySyncService extends withEvents(BaseService) {
         let total = this.limit;
         let offset = 0;
         while (offset < total) {
-            const result = await this.spotify.fetchTracks(offset, this.limit + 1);
+            const currentOffset = offset,
+                result = await this.spotify.fetchTracks(offset, this.limit + 1);
             if (assertNoErrors(result, e => _.delay(() => { throw e; }))) {
                 return;
             }
@@ -117,7 +119,10 @@ class SpotifySyncService extends withEvents(BaseService) {
             total = offset + Math.min(this.limit + 1, response.items.length);
             offset = offset + Math.min(this.limit, response.items.length);
 
-            yield response.items;
+            yield _.map(response.items, (item, index) => ({
+                position: currentOffset + index,
+                ...item
+            }));
         }
     }
 
