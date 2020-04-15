@@ -5,7 +5,6 @@ import { assertNoErrors } from '../utils';
 import * as _ from 'underscore';
 import { IResponseResult, ISpotifySong, IUserPlaylistsResult, IUserPlaylist } from '../adapter/spotify';
 import { SpotifySyncServiceResult } from './results/spotifySyncServiceResult';
-import { putMyTracks, putPlaylists, addTrackToPlaylist } from '../data/useCases';
 import { SpotifyService } from './spotify';
 import { DataService } from './dataService';
 
@@ -42,27 +41,17 @@ class SpotifySyncService extends withEvents(BaseService) {
     async syncMyPlaylists() {
         let res = [] as IUserPlaylist[];
         for await (const playlists of this.listMyPlaylists()) {
-            const uptatedPlaylists = await putPlaylists(playlists);
-            res = res.concat(uptatedPlaylists);
         }
         return res;
     }
 
     async syncTracksByPlaylist(playlist: IUserPlaylist) {
         for await (const tracks of this.listPlaylistTracks(playlist.id)) {
-            await addTrackToPlaylist(playlist, tracks);
         }
     }
 
     async syncMyTracks() {
         for await (const songs of this.listMyTracks()) {
-            const syncMore = await putMyTracks(_.map(songs, song => ({
-                added_at: new Date(song.added_at),
-                ...song.track
-            })));
-            if (!syncMore) {
-                break;
-            }
         }
     }
 

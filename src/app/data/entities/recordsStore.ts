@@ -1,22 +1,23 @@
 import * as _ from 'underscore';
 import { IStorage, IStorageConfig } from "../iStorage";
 import { asAsync, asAsyncOf } from '../../utils';
-import { ITrackRecord } from './interfaces';
+import { IRecord } from './interfaces/IRecord';
 
 
-class TracksStore {
-    tableName = 'tracks';
+class RecordsStore {
+    tableName = 'records';
     storeConfig: IStorageConfig = {
         name: this.tableName,
         options: {
-            keyPath: 'id'
+            keyPath: 'id',
+            autoIncrement: true
         },
         index: {
             id: {
                 id: { unique: true }
             },
             added_at: {
-                added_at: {}
+                added_at: { }
             }
         },
         orderBy: 'added_at',
@@ -27,44 +28,41 @@ class TracksStore {
 
     }
 
-    async createTable() {
+    createTable() {
         return asAsync(this.storage, this.storage.createTable, this.storeConfig);
     }
 
-    async create(track: ITrackRecord) {
-        const result = await asAsync(this.storage, this.storage.create, this.storeConfig, track);
-        return result;
+    create(myStore: IRecord) {
+        return asAsync(this.storage, this.storage.create, this.storeConfig, myStore);
     }
 
-    async update(track: ITrackRecord) {
-        const result = await asAsync(this.storage, this.storage.update, this.storeConfig, track.id, track);
-        return result;
+    update(myStore: IRecord) {
+        return asAsync(this.storage, this.storage.update, this.storeConfig, myStore.id, myStore);
     }
 
-    async delete(trackId: string) {
-        const result = await asAsync(this.storage, this.storage.delete, this.storeConfig, trackId);
-        return result;
+    delete(myStore: string) {
+        return asAsync(this.storage, this.storage.delete, this.storeConfig, myStore);
     }
 
-    async refresh(track: ITrackRecord) {
-        const record = await asAsync(this.storage, this.storage.getById, this.storeConfig, track.id);
+    async refresh(myStore: IRecord) {
+        const record = await asAsync(this.storage, this.storage.getById, this.storeConfig, myStore.id);
         if (record) {
             return await this.update({
                 ...record,
-                ...track
+                ...myStore
             });
         } else {
-            return await this.create(track);
+            return await this.create(myStore);
         }
     }
 
-    get(trackId: string): Promise<ITrackRecord> {
-        return asAsync(this.storage, this.storage.getById, this.storeConfig, trackId);
+    get(myStoreId: string) {
+        return asAsync(this.storage, this.storage.getById, this.storeConfig, myStoreId);
     }
-    
+
     list(offset = 0, limit?) {
-        return asAsyncOf(null, (cb: { (res?, result?, index?): boolean }) => {
-            this.storage.each(this.storeConfig, (...args) => {
+        return asAsyncOf(null, (cb: { (res?, result?: IRecord, index?): boolean }) => {
+            this.storage.each<IRecord>(this.storeConfig, (...args) => {
                 const index = args[2];
                 if (index < offset) {
                     return;
@@ -77,7 +75,7 @@ class TracksStore {
         });
     }
 
-    where(where: Partial<ITrackRecord>) {
+    where(where: { [key: string]: any }) {
         return asAsyncOf(this.storage, this.storage.where, this.storeConfig, where);
     }
 
@@ -86,4 +84,4 @@ class TracksStore {
     }
 }
 
-export { TracksStore };
+export { RecordsStore };

@@ -7,7 +7,6 @@ import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModel } from './playlistsViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { SpotifyService } from '../service/spotify';
-import { ISongRecord } from '../data/entities/interfaces/iSongRecord';
 
 
 class TrackViewModelItem extends ViewModel<TrackViewModelItem['settings']> {
@@ -25,10 +24,9 @@ class TrackViewModelItem extends ViewModel<TrackViewModelItem['settings']> {
 
     isInit = _.delay(() => {
         this.connect();
-        this.loadData('playlistTracks');
     });
 
-    constructor(public song: ISongRecord, private index: number, private ss = current(Service)) {
+    constructor(public song: ISpotifySong, private index: number, private ss = current(Service)) {
         super();
     }
 
@@ -81,29 +79,12 @@ class TrackViewModelItem extends ViewModel<TrackViewModelItem['settings']> {
         return image?.url;
     }
 
-    snapshotId() {
-        return this.song.snapshot_id;
-    }
-
     async connect() {
         const spotifyResult = await this.ss.service(SpotifyService);
         if (assertNoErrors(spotifyResult, e => this.errors(e))) {
             return;
         }
         const spotify = spotifyResult.val;
-        spotify.on('change:state', (...args) => this.loadData(...args));
-    }
-
-    async loadData(...args) {
-        if (!~args.indexOf('playlistTracks')) {
-            return;
-        }
-        const playlistsByTrackResult = await this.ss.listPlaylistsByTrack(this.id());
-        if (assertNoErrors(playlistsByTrackResult, e => this.errors(e))) {
-            return;
-        }
-        const playlists = playlistsByTrackResult.val as IUserPlaylist[];
-        this.playlists(_.map(playlists, playlist => new PlaylistsViewModelItem(playlist)));
     }
 
     async play(playlistUri: string) {
@@ -120,7 +101,6 @@ class TrackViewModelItem extends ViewModel<TrackViewModelItem['settings']> {
         if (assertNoErrors(result, e => this.errors(e))) {
             return;
         }
-        this.loadData('playlistTracks');
     }
 
     async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
@@ -128,7 +108,6 @@ class TrackViewModelItem extends ViewModel<TrackViewModelItem['settings']> {
         if (assertNoErrors(result, e => this.errors(e))) {
             return;
         }
-        this.loadData('playlistTracks');
     }
 
     async likeTrack() {
@@ -146,10 +125,6 @@ class TrackViewModelItem extends ViewModel<TrackViewModelItem['settings']> {
     }
 
     updateIsCached(playlists: PlaylistsViewModelItem[]) {
-        if (playlists.length) {
-            const playlist = _.find(playlists, pl => pl.snapshotId() === this.song.snapshot_id);
-            this.prop('isCached', !playlist);
-        }
     }
 }
 

@@ -7,8 +7,7 @@ import * as _ from 'underscore';
 import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult';
 import { SpotifySyncService } from './spotifySyncService';
 import { DataService } from './dataService';
-import { ITrack, ISearchType } from '../adapter/spotify';
-import { IPlaylistRecord } from '../data/entities/interfaces';
+import { ITrack, ISearchType, IUserPlaylist } from '../adapter/spotify';
 import { SettingsServiceResult } from './results/settingsServiceResult';
 import { SpotifyServiceResult } from './results/spotifyServiceResult';
 import { LoginService } from './loginService';
@@ -313,14 +312,6 @@ class Service {
 
     async addTracks(tracks: ITrack | ITrack[]) {
         tracks = [].concat(tracks);
-        const dataServiceResult = await this.service(DataService);
-        if (dataServiceResult.isError) {
-            return dataServiceResult;
-        }
-        const addTrackResult = await dataServiceResult.val.addTracks(tracks);
-        if (addTrackResult.isError) {
-            return addTrackResult;
-        }
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
@@ -332,11 +323,6 @@ class Service {
 
     async removeTracks(tracks: ITrack | ITrack[]) {
         tracks = [].concat(tracks);
-        const dataServiceResult = await this.service(DataService);
-        if (dataServiceResult.isError) {
-            return dataServiceResult;
-        }
-        dataServiceResult.val.removeTracks(tracks);
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
@@ -347,7 +333,7 @@ class Service {
     }
 
     async hasTracks(trackIds: string | string[]) {
-        const service = await this.service(DataService);
+        const service = await this.service(SpotifyService);
         if (service.isError) {
             return service;
         }
@@ -393,7 +379,7 @@ class Service {
     }
 
     async fetchMyPlaylists(offset = 0, limit = 20) {
-        const service = await this.service(DataService);
+        const service = await this.service(SpotifyService);
         if (service.isError) {
             return service;
         }
@@ -404,7 +390,7 @@ class Service {
     }
 
     async fetchPlaylistTracks(playlistId: string, offset=0, limit=20) {
-        const service = await this.service(DataService);
+        const service = await this.service(SpotifyService);
         if (service.isError) {
             return service;
         }
@@ -525,23 +511,12 @@ class Service {
     }
 
     async fetchTracks(offset = 0, limit = 20) {
-        const service = await this.service(DataService);
+        const service = await this.service(SpotifyService);
         if (service.isError) {
             return service;
         }
 
         const result = service.val.fetchTracks(offset, limit);
-
-        return result;
-    }
-
-    async listPlaylistsByTrack(trackId: string) {
-        const service = await this.service(DataService);
-        if (service.isError) {
-            return service;
-        }
-
-        const result = service.val.listPlaylistsByTrack(trackId);
 
         return result;
     }
@@ -606,15 +581,7 @@ class Service {
         return syncPlaylistsResult;
     }
 
-    async addTrackToPlaylist(tracks: ITrack | ITrack[], playlist: IPlaylistRecord) {
-        const data = await this.service(DataService);
-        if (data.isError) {
-            return data;
-        }
-        const addResult = await data.val.addTracksToPlaylist(playlist, tracks);
-        if (addResult.isError) {
-            return;
-        }
+    async addTrackToPlaylist(tracks: ITrack | ITrack[], playlist: IUserPlaylist) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
@@ -626,14 +593,6 @@ class Service {
 
     async removeTrackFromPlaylist(tracks: ITrack | ITrack[], playlistId: string) {
         tracks = [].concat(tracks);
-        const dataResult = await this.service(DataService);
-        if (dataResult.isError) {
-            return dataResult;
-        }
-        const removeResult = await dataResult.val.removeTrackFromPlaylist(playlistId, tracks);
-        if (removeResult.isError) {
-            return;
-        }
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
@@ -667,18 +626,7 @@ class Service {
             return spotifyResult;
         }
         const reorderSResult = await spotifyResult.val.reorderTracks(playlistId, oldPosition, newPosition, 1);
-        if (reorderSResult.isError) {
-            return reorderSResult;
-        }
-        const dataResult = await this.service(DataService);
-        if (dataResult.isError) {
-            return dataResult;
-        }
-        const reorderDResult = await dataResult.val.reorderTrack(playlistId, oldPosition, newPosition);
-        if (reorderDResult.isError) {
-            return reorderDResult;
-        }
-        return reorderDResult;
+        return reorderSResult;
     }
 }
 
