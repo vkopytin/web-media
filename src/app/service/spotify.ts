@@ -7,7 +7,7 @@ import { SpotifyServiceError } from './errors/spotifyServiceError';
 import { SpotifyServiceUnexpectedError } from './errors/spotifyServiceUnexpectedError';
 import * as _ from 'underscore';
 import * as $ from 'jquery';
-import { SpotifyAdapter, IUserInfo, IDevice, ISearchType } from '../adapter/spotify';
+import { SpotifyAdapter, IUserInfo, IDevice, ISearchType, IResponseResult, ISpotifySong } from '../adapter/spotify';
 import { ISettings } from './settings';
 import { withEvents } from 'databindjs';
 import { debounce } from '../utils';
@@ -18,9 +18,9 @@ function returnErrorResult<T>(message: string, ex: Error) {
         case ex instanceof ErrorWithStatus:
             const err = ex as ErrorWithStatus;
             if (err.status === 401) {
-                return TokenExpiredError.create(err.message, err);
+                return TokenExpiredError.create<T>(err.message, err);
             }
-            return SpotifyServiceError.create(err.message, err);
+            return SpotifyServiceError.create<T>(err.message, err);
         default:
             return SpotifyServiceUnexpectedError.create<T>(message, ex);
     }
@@ -210,7 +210,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting sptify recently played', ex);
         }
     }
 

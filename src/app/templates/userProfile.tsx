@@ -47,6 +47,13 @@ export const template = (view: UserProfileView) => <div className={cn(`${view.pr
                     defaultValue={view.prop('profile').product}
                 />
             </div>
+            <div className="input-row">
+                <label>ApiSeeds Key</label>
+                <input type="text" placeholder="API key"
+                    onChange={evnt => view.prop('apiseedsKey', evnt.target.value)}
+                    defaultValue={view.prop('apiseedsKey')}
+                />
+            </div>
         </form>
         <ul className="table-view">
             {_.map(view.prop('topTracks'), (item, index) => {

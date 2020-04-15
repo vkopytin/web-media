@@ -625,6 +625,7 @@ class Service {
     }
 
     async removeTrackFromPlaylist(tracks: ITrack | ITrack[], playlistId: string) {
+        tracks = [].concat(tracks);
         const dataResult = await this.service(DataService);
         if (dataResult.isError) {
             return dataResult;
@@ -637,9 +638,18 @@ class Service {
         if (spotify.isError) {
             return spotify;
         }
-        const result = await spotify.val.removeTrackFromPlaylist(_.map([].concat(tracks), t => t.uri), playlistId);
+        const plTracksResult = await spotify.val.fetchPlaylistTracks(playlistId);
+        if (plTracksResult.isError) {
+            return plTracksResult;
+        }
+        const trackIds = _.map(plTracksResult.val.items, item => item.track.id);
+        const same = _.intersection(_.map(tracks, t => t.id), trackIds);
+        if (same.length) {
+            const result = await spotify.val.removeTrackFromPlaylist(_.map([].concat(tracks), t => t.uri), playlistId);
 
-        return result;
+            return result;
+        }
+        return plTracksResult;
     }
 
     async findTrackLyrics(songInfo: { name: string; artist: string; }) {

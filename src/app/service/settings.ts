@@ -13,7 +13,7 @@ export interface ISettings {
         accessToken?: string;
         volume?: number;
     };
-    musixmatch?: {
+    apiseeds?: {
         key: string;
     }
 }
@@ -39,7 +39,7 @@ class SettingsService extends BaseService {
             let sToken = getCookie('spat');
             let gToken = getCookie('gsat');
             let gCode = getCookie('gcode');
-            const musixmatchKey = getCookie('mxmk');
+            const apiseesKey = getCookie('apsk');
             const volume = +(getCookie('lastVolume') || 50);
             const urlParams = window.location.search.replace(/^\?/, '') || '';
             const hashData = window.location.hash.replace(/^#/, '') || '';
@@ -57,8 +57,8 @@ class SettingsService extends BaseService {
                     accessToken: gToken && atob(gToken),
                     code: gCode && atob(gCode)
                 },
-                musixmatch: {
-                    key: musixmatchKey
+                apiseeds: {
+                    key: apiseesKey
                 }
             };
 
@@ -98,13 +98,13 @@ class SettingsService extends BaseService {
         return this.config.spotify.volume;
     }
 
-    musixmatchKey(val?: string) {
-        if (arguments.length && val !== this.config.musixmatch.key) {
-            this.config.musixmatch.key = val;
-            document.cookie = 'mxmk=' + val;
+    apiseedsKey(val?: string) {
+        if (arguments.length && val !== this.config.apiseeds.key) {
+            this.config.apiseeds.key = val;
+            document.cookie = 'apsk=' + val;
         }
 
-        return this.config.musixmatch.key;
+        return this.config.apiseeds.key;
     }
 
     get<K extends keyof SettingsService['config']>(

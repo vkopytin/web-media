@@ -2,26 +2,30 @@ import * as $ from 'jquery';
 import { ErrorWithStatus } from './errors/errorWithStatus';
 
 
-export interface IGeniuseHit {
-    result: {
-        url: string;
-        path: string;
-        api_path: string;
-    };
-}
 export interface ILyricsSearchResult {
-    lyrics: string;
+    result: {
+        track: {
+            text: string;
+        };
+        copyright: {
+            notice: string;
+            articst: string;
+            text: string;
+        }
+    };
 }
 
 class LyricsAdapter {
 
     constructor(public token: string) {
     }
-
     async search(term: string) {
         return new Promise<ILyricsSearchResult>((resolve, reject) => {
             $.ajax({
-                url: 'https://api.lyrics.ovh/v1/' + term,
+                url: 'https://orion.apiseeds.com/api/music/lyric/' + term,
+                data: {
+                    apikey: this.token
+                },
                 success(response) {
                     resolve(response);
                 },

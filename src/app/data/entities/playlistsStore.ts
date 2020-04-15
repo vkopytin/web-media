@@ -94,13 +94,14 @@ class PlaylistsStore {
     async addTracks(playlist: IPlaylistRecord, tracks: IPlaylistTrackRecord | IPlaylistTrackRecord[]) {
         const tracksStore = new TracksStore(this.storage);
         for (const track of [].concat(tracks) as IPlaylistTrackRecord[]) {
+            const count = await this.relation.count();
             await tracksStore.refresh(track.track);
             await this.relation.refresh({
                 playlistId: playlist.id,
                 trackId: track.track.id,
                 added_at: new Date(track.added_at),
                 snapshot_id: playlist.snapshot_id,
-                position: track.position
+                position: /\d+/.test('' + track.position) ? track.position : count
             });
         }
     }
