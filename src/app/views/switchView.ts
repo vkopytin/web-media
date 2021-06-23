@@ -3,9 +3,10 @@ import * as _ from 'underscore';
 import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 
+type PanelType = 'home' | 'playlists' | 'profile' | 'releases' | 'search' | 'tracks';
 
 export interface ISwitchViewProps {
-    currentView: 'home' | 'playlists' | 'releases' | 'search' | 'tracks';
+    currentView: PanelType;
     onClick?(evnt): void;
 }
 

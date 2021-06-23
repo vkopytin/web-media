@@ -7,16 +7,16 @@ import { PickPlaylistsView } from '../views';
 const cn = utils.className;
 
 export const template = (view: PickPlaylistsView) => <div className="chips-list">
-    {_.map(view.prop('items'), (item) => {
-        if (item && view.prop('selectedPlaylist') === item) {
+    {_.map(view.playlists, (item: PickPlaylistsView['playlists'][0]) => {
+        if (item && view.selectedPlaylist === item) {
             return <span className="chips chips-positive" key={item.id()}
-                onClick={evnt => view.prop('selectedPlaylist', null)}
+                onClick={evnt => view.selectedPlaylist = null}
             >
                 {item.name()}
             </span>
         }
         return <span className="chips" key={item.id()}
-            onClick={evnt => view.prop('selectedPlaylist', item)}
+            onClick={evnt => view.selectedPlaylist = item}
         >
             {item.name()}
         </span>

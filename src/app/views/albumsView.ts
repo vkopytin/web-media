@@ -3,7 +3,11 @@ import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/albums';
 import { TrackViewModelItem } from '../viewModels';
-
+import * as _ from 'underscore';
+import { BehaviorSubject, merge, of, Subject, Subscription } from 'rxjs';
+import { ViewModel } from '../base/viewModel';
+import { Binding, current, State } from '../utils';
+import { map, switchMap, takeUntil } from 'rxjs/operators';
 
 export interface IAlbumsViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
@@ -12,37 +16,56 @@ export interface IAlbumsViewProps {
     tracks: TrackViewModelItem[];
 }
 
+class AlbumsViewModel extends ViewModel<AlbumsViewModel['settings']> {
+    errors$: BehaviorSubject<AlbumsViewModel['errors']>;
+    @State errors = [] as ServiceResult<any, Error>[];
+
+    tracks$: BehaviorSubject<AlbumsViewModel['tracks']>;
+    @State tracks = [] as TrackViewModelItem[];
+
+    settings = {};
+}
+
 class AlbumsView extends BaseView<IAlbumsViewProps, AlbumsView['state']> {
+    vm = current(AlbumsViewModel);
+    
+    errors$ = this.vm.errors$;
+    @Binding errors = this.errors$.getValue();
+
+    tracks$ = this.vm.tracks$;
+    @Binding tracks = this.tracks$.getValue();
+    
     state = {
-        errors: [] as ServiceResult<any, Error>[],
-        openLogin: false,
-        tracks: [] as TrackViewModelItem[],
     };
-    binding = bindTo(this, () => {
-        tracks: [] as TrackViewModelItem[]
-    }, {
-        'prop(tracks)': 'tracks'
-    });
+    
+    dispose$ = new Subject<void>();
+    queue$: Subscription;
 
     constructor(props) {
         super(props);
-        subscribeToChange(this.binding, () => {
+    }
+
+    componentDidMount() {
+        this.queue$ = merge(
+            this.errors$.pipe(map(errors => ({ errors }))),
+            this.tracks$.pipe(map(tracks => ({ tracks }))),
+        ).pipe(
+            takeUntil(this.dispose$)
+        ).subscribe((v) => {
+            //console.log(v);
             this.setState({
                 ...this.state
             });
         });
     }
 
-    componentDidMount() {
-        updateLayout(this.binding);
-    }
-
     componentWillUnmount() {
-        unbindFrom(this.binding);
+        this.dispose$.next();
+        this.dispose$.complete();
     }
 
     componentDidUpdate(prevProps: IAlbumsViewProps, prevState, snapshot) {
-        this.prop('tracks', this.props.tracks);
+        this.tracks = this.props.tracks;
     }
 
     uri() {

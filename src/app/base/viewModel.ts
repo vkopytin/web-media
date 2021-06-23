@@ -18,7 +18,7 @@ class ViewModel<S extends IDefaultViewModelProps = IDefaultViewModelProps> exten
         return this.settings[propName];
     }
 
-    errors(val?: ServiceResult<any, Error>[]) {
+    errors2(val?: ServiceResult<any, Error>[]) {
         if (arguments.length && val !== this.settings.errors) {
             this.settings.errors = val;
             this.trigger('change:errors');

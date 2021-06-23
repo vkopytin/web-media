@@ -11,8 +11,8 @@ export const template = (view: AppView) => <main>
     <section className="todoapp device-content">
         <UserProfileView
             showErrors={errors => view.showErrors(errors)}
-            openLogin={(val) => view.prop('openLogin', val)}
-            className={cn("modal ?active", view.prop('openLogin'))}
+            openLogin$={view.openLogin$}
+            className={cn("modal ?active", view.openLogin)}
         />
         <div className={cn("popover ?visible", view.state.showSelectDevices === 'show')} style={{
             display: view.state.showSelectDevices !== 'hide' ? 'block' : 'none'
@@ -50,7 +50,7 @@ export const template = (view: AppView) => <main>
             >
             </a>
             <a className="icon icon-person pull-right"
-                onClick={evnt => view.prop('openLogin', true)}
+                onClick={evnt => view.openLogin = true}
             ></a>
             <h1 className="title">
                 <img className="spotify-logo" src={imgSrc.default} height="32"
@@ -62,50 +62,50 @@ export const template = (view: AppView) => <main>
             <div className="region">
                 <MediaPlayerView
                     showErrors={errors => view.showErrors(errors)}
-                    currentTrackId={(...args) => view.prop.apply(view, ['currentTrackId', ...args])}
+                    currentTrackId$={view.currentTrackId$}
                 />
             </div>
         </div>
         <nav className="footer bar bar-tab bar-footer">
-            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'home')} href="#"
-                onClick={evnt => view.prop('currentPanel', 'home')}
+            <a className={cn('tab-item ?active', view.currentPanel === 'home')} href="#"
+                onClick={evnt => view.currentPanel = 'home'}
             >
                 <span className="icon icon-home"></span>
                 <span className="tab-label">Home</span>
             </a>
-            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'playlists')} href="#"
-                onClick={evnt => view.prop('currentPanel', 'playlists')}
+            <a className={cn('tab-item ?active', view.currentPanel === 'playlists')} href="#"
+                onClick={evnt => view.currentPanel = 'playlists'}
             >
                 <span className="icon icon icon-list"></span>
                 <span className="tab-label">Playlists</span>
             </a>
-            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'tracks')} href="#"
-                onClick={evnt => view.prop('currentPanel', 'tracks')}
+            <a className={cn('tab-item ?active', view.currentPanel === 'tracks')} href="#"
+                onClick={evnt => view.currentPanel = 'tracks'}
             >
                 <span className="icon icon-star-filled"></span>
                 <span className="tab-label">Favorites</span>
             </a>
-            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'search')} href="#"
-                onClick={evnt => view.prop('currentPanel', 'search')}
+            <a className={cn('tab-item ?active', view.currentPanel === 'search')} href="#"
+                onClick={evnt => view.currentPanel = 'search'}
             >
                 <span className="icon icon-search"></span>
                 <span className="tab-label">Search</span>
             </a>
-            <a className={cn('tab-item ?active', view.prop('currentPanel') === 'releases')} href="#"
-                onClick={evnt => view.prop('currentPanel', 'releases')}
+            <a className={cn('tab-item ?active', view.currentPanel === 'releases')} href="#"
+                onClick={evnt => view.currentPanel = 'releases'}
             >
                 <span className="icon icon icon-info"></span>
                 <span className="tab-label">Releases</span>
             </a>
         </nav>
-        <SwitchView currentView={view.prop('currentPanel')} onClick={evnt => view.toggleSelectDevices('show')}>
+        <SwitchView currentView={view.currentPanel} onClick={evnt => view.toggleSelectDevices('show')}>
             <section key="home" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
                 ref={el => el && (view.elScroller = el)}
                 onScroll={evnt => view.onPageScroll(evnt)}
             >
                 <HomeView
                     showErrors={errors => view.showErrors(errors)}
-                    currentTrackId={view.prop('currentTrackId')}
+                    currentTrackId={view.currentTrackId}
                 />
             </section>
             <section key="playlists" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
@@ -114,7 +114,7 @@ export const template = (view: AppView) => <main>
             >
                 <PlaylistsView
                     showErrors={errors => view.showErrors(errors)}
-                    currentTrackId={view.prop('currentTrackId')}
+                    currentTrackId={view.currentTrackId}
                 />
             </section>
             <section key="tracks" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
@@ -123,7 +123,7 @@ export const template = (view: AppView) => <main>
                 <MyTracksView
                     showErrors={errors => view.showErrors(errors)}
                     loadMore={view.prop('scrolledToBottom')}
-                    currentTrackId={view.prop('currentTrackId')}
+                    currentTrackId={view.currentTrackId}
                 />
             </section>
             <section key="search" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
@@ -132,20 +132,20 @@ export const template = (view: AppView) => <main>
                 <SearchView
                     showErrors={errors => view.showErrors(errors)}
                     loadMore={view.prop('scrolledToBottom')}
-                    currentTrackId={view.prop('currentTrackId')}
+                    currentTrackId={view.currentTrackId}
                 />
             </section>
             <section key="releases" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
                 ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll(evnt)}>
                 <NewReleasesView
                     showErrors={errors => view.showErrors(errors)}
-                    currentTrackId={view.prop('currentTrackId')}
+                    currentTrackId={view.currentTrackId}
                 />
             </section>
         </SwitchView>
     </section>
-    {view.prop('autoRefreshUrl') && <iframe
-        src={view.prop('autoRefreshUrl')}
+    {view.autoRefreshUrl && <iframe
+        src={view.autoRefreshUrl}
         style={{ display: 'none' }}
     ></iframe>}
 </main>;

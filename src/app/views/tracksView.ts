@@ -1,11 +1,12 @@
 import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import $ from 'jquery';
+import { merge, of, Subject, Subscription } from 'rxjs';
+import { switchMap, takeUntil, map } from 'rxjs/operators';
 import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/tracks';
-import { current } from '../utils';
+import { Binding, current } from '../utils';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
-
+import * as _ from 'underscore';
 
 export interface ITracksViewProps {
     className?: string;
@@ -21,41 +22,45 @@ function elementIndex(el) {
 }
 
 class TracksView extends BaseView<ITracksViewProps, TracksView['state']> {
+    vm = current(PlaylistsViewModel);
+    
+    errors$ = this.vm.errors$;
+    @Binding errors = this.errors$.getValue();
+
+    tracks$ = this.vm.tracks$;
+    @Binding tracks = this.tracks$.getValue();
+
+    likedTracks$ = this.vm.likedTracks$;
+    @Binding likedTracks = this.likedTracks$.getValue();
+
+    selectedItem$ = this.vm.selectedItem$;
+    @Binding selectedItem = this.selectedItem$.getValue();
+
+    trackLyrics$ = this.vm.trackLyrics$;
+    @Binding trackLyrics = this.trackLyrics$.getValue();
+
     state = {
-        errors: [] as ServiceResult<any, Error>[],
-        openLogin: false,
-        tracks: [] as TrackViewModelItem[],
-        likedTracks: [] as TrackViewModelItem[],
-        selectedItem: null as TrackViewModelItem,
-        trackLyrics: null as { trackId: string; lyrics: string },
         draggedIndex: 0,
         dragIndex: 0
     };
 
-    likeTrackCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
-    unlikeTrackCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
-    findTrackLyricsCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
-    reorderTrackCommand = { exec(track: TrackViewModelItem, beforeTrack: TrackViewModelItem) { throw new Error('Not bound command') } };
+    likeTrackCommand$ = this.vm.likeTrackCommand$;
+    @Binding likeTrackCommand = this.likeTrackCommand$.getValue();
 
-    binding = bindTo(this, () => current(PlaylistsViewModel), {
-        'findTrackLyricsCommand': 'findTrackLyricsCommand',
-        'likeTrackCommand': 'likeTrackCommand',
-        'unlikeTrackCommand': 'unlikeTrackCommand',
-        'reorderTrackCommand': 'reorderTrackCommand',
-        'prop(tracks)': 'tracks',
-        'prop(likedTracks)': 'likedTracks',
-        'prop(selectedItem)': 'selectedItem',
-        'prop(trackLyrics)': 'prop(trackLyrics)'
-    });
+    unlikeTrackCommand$ = this.vm.unlikeTrackCommand$;
+    @Binding unlikeTrackCommand = this.unlikeTrackCommand$.getValue();
+
+    findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
+    @Binding findTrackLyricsCommand = this.findTrackLyricsCommand$.getValue();
+
+    reorderTrackCommand$ = this.vm.reorderTrackCommand$;
+    @Binding reorderTrackCommand = this.reorderTrackCommand$.getValue();
+
+    dispose$ = new Subject<void>();
+    disposeSubscription: Subscription;
 
     constructor(props) {
         super(props);
-        subscribeToChange(this.binding, () => {
-            this.setState({
-                ...this.state
-            });
-        });
-
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onDragStart = this.onDragStart.bind(this);
         this.onDragEnter = this.onDragEnter.bind(this);
@@ -63,24 +68,32 @@ class TracksView extends BaseView<ITracksViewProps, TracksView['state']> {
     }
 
     componentDidMount() {
-        updateLayout(this.binding);
+        this.disposeSubscription = merge(
+            this.errors$.pipe(map(errors => ({ errors }))),
+            this.tracks$.pipe(map(tracks => ({ tracks }))),
+            this.likedTracks$.pipe(map(likedTracks => ({ likedTracks }))),
+            this.selectedItem$.pipe(map(selectedItem => ({ selectedItem }))),
+            this.trackLyrics$.pipe(map(trackLyrics => ({ trackLyrics }))),
+            this.likedTracks$.pipe(map(likedTracks => ({ likedTracks }))),
+            this.likeTrackCommand$.pipe(map(likeTrackCommand => ({ likeTrackCommand }))),
+            this.unlikeTrackCommand$.pipe(map(unlikeTrackCommand => ({ unlikeTrackCommand }))),
+            this.findTrackLyricsCommand$.pipe(map(findTrackLyricsCommand => ({ findTrackLyricsCommand }))),
+            this.reorderTrackCommand$.pipe(map(reorderTrackCommand => ({ reorderTrackCommand }))),
+        ).pipe(takeUntil(this.dispose$)).subscribe((v) => {
+            //console.log(v);
+            this.setState({
+                ...this.state
+            });
+        });
     }
 
     componentWillUnmount() {
-        unbindFrom(this.binding);
+        this.dispose$.next();
+        this.dispose$.complete();
     }
 
     uri() {
         return this.props.playlist.uri();
-    }
-
-    errors(val?: ServiceResult<any, Error>[]) {
-        if (arguments.length && val !== this.prop('errors')) {
-            this.prop('errors', val);
-            this.props.showErrors(val);
-        }
-
-        return this.prop('errors');
     }
 
     isPlaying(track: TrackViewModelItem) {
@@ -173,7 +186,7 @@ class TracksView extends BaseView<ITracksViewProps, TracksView['state']> {
             dragIndex >= 0 &&
             dragIndex !== draggedIndex
         ) {
-            this.reorderTrackCommand.exec(this.prop('tracks')[dragIndex], this.prop('tracks')[draggedIndex]);
+            this.reorderTrackCommand.exec(this.tracks[dragIndex], this.tracks[draggedIndex]);
         }
         this.prop('dragIndex', -1);
         this.prop('draggedIndex', -1);

@@ -1,5 +1,6 @@
 import * as _ from 'underscore';
 import { utils } from 'databindjs';
+import { BehaviorSubject } from 'rxjs';
 
 
 export function formatTime(ms: number) {
@@ -168,4 +169,51 @@ export function debounce(func, wait = 0, cancelObj = 'canceled') {
         }
     }
 }
-  
+
+export function State<T, Y extends keyof T>(target: T, propName: Y) {
+    function ensureStore(v?) {
+        let store$ = new BehaviorSubject(v);
+        
+        Object.defineProperty(this, `${propName}$`, {
+            get() {
+                return store$;
+            },
+            set(v) {
+                if (v !== store$) {
+                    store$.complete();
+                    store$ = v;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        return this[`${propName}$`] = store$;
+    }
+
+    const opts = {
+        get: ensureStore,
+        set: ensureStore,
+        enumerable: true,
+        configurable: true
+    };
+    Object.defineProperty(target, `${propName}$`, opts);
+
+    Binding(target, propName);
+}
+
+export function Binding<T, Y extends keyof T>(target: T, propName: Y) {
+    const opts = {
+        get() {
+            return this[`${propName}$`].getValue();
+        },
+        set(val) {
+            if (this[propName] !== val) {
+                this[`${propName}$`].next(val);
+            }
+        },
+        enumerable: true,
+        configurable: true
+    };
+    Object.defineProperty(target, propName, opts);
+}

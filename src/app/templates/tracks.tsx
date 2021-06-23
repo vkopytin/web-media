@@ -8,7 +8,7 @@ const cn = utils.className;
 
 export const template = (view: TracksView) => <>
     <ul className={cn(`${view.props.className} todo-list table-view`)}>
-        {_.map(view.prop('tracks'), (item, index) => <li key={item.id()}>
+        {_.map(view.tracks, (item: TracksView['tracks'][0], index) => <li key={item.id()}>
             <div className="table-view-cell media"
             onTouchStart={e => view.onMouseDown(e)}>
                 <span className="material-icons handle"
@@ -33,31 +33,31 @@ export const template = (view: TracksView) => <>
                     </div>
                 </span>
                 <div className="media-body"
-                    onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}
+                    onClick={evnt => view.selectedItem = view.selectedItem === item ? null : item}
                 >
                     <div>
                         <span className="song-title">{item.name()}</span>
                         &nbsp;-&nbsp;
                                 <span className="author-title">{item.artist()}</span>
                     </div>
-                    <div className="album-title"><span>{item.album()}</span>{(view.prop('selectedItem')) !== item && <SelectPlaylistsView
+                    <div className="album-title"><span>{item.album()}</span>{view.selectedItem !== item && <SelectPlaylistsView
                         showErrors={e => view.showErrors(e)}
                         className="chips-list" track={item} active={true} />}</div>
                 </div>
-                {(view.prop('selectedItem')) === item && <SelectPlaylistsView
+                {(view.selectedItem) === item && <SelectPlaylistsView
                     showErrors={e => view.showErrors(e)}
                     className="chips-list" track={item} />}
                 <span className="badge-region">
-                    {item.isLiked() && <span className="badge badge-positive"
+                    {item.isLiked && <span className="badge badge-positive"
                         onClick={evnt => view.unlikeTrackCommand.exec(item)}
                     >{item.duration()}</span>}
-                    {item.isLiked() || <span className="badge"
+                    {item.isLiked || <span className="badge"
                         onClick={evnt => view.likeTrackCommand.exec(item)}
                     >{item.duration()}</span>}
                 </span>
             </div>
-            {(view.prop('trackLyrics') && view.prop('trackLyrics').trackId === item.id())
-                && <div className="card">{_.map(view.prop('trackLyrics').lyrics.split('\n'), (line, index) => {
+            {(view.trackLyrics && view.trackLyrics.trackId === item.id())
+                && <div className="card">{_.map(view.trackLyrics.lyrics.split('\n'), (line, index) => {
                     return <div key={index}>{line}</div>;
                 })}</div>}
         </li>

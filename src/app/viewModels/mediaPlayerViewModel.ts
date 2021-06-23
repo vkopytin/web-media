@@ -3,44 +3,82 @@ import { IPlayerResult, ITrack } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
 import { IWebPlaybackState } from '../service/spotifyPlayer';
-import { assertNoErrors, asyncQueue, current } from '../utils';
+import { assertNoErrors, asyncQueue, current, State } from '../utils';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { SettingsService } from '../service/settings';
 import { SpotifyService } from '../service/spotify';
+import { BehaviorSubject } from 'rxjs';
+import { ServiceResult } from '../base/serviceResult';
 
 
 const lockSection = asyncQueue();
 
 class MediaPlayerViewModel extends ViewModel {
+    errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
+    @State errors = [] as ServiceResult<any, Error>[];
 
+    currentTrackId$: BehaviorSubject<MediaPlayerViewModel['currentTrackId']>;
+    @State currentTrackId = '';
+
+    queue$: BehaviorSubject<MediaPlayerViewModel['queue']>;
+    @State queue = [] as TrackViewModelItem[];
+
+    timePlayed$: BehaviorSubject<MediaPlayerViewModel['timePlayed']>;
+    @State timePlayed = 1;
+
+    duration$: BehaviorSubject<MediaPlayerViewModel['duration']>;
+    @State duration = 3.14 * 60 * 1000;
+
+    isPlaying$: BehaviorSubject<MediaPlayerViewModel['isPlaying']>;
+    @State isPlaying = false;
+
+    trackName$: BehaviorSubject<MediaPlayerViewModel['trackName']>;
+    @State trackName = '';
+
+    albumName$: BehaviorSubject<MediaPlayerViewModel['albumName']>;
+    @State albumName = '';
+
+    artistName$: BehaviorSubject<MediaPlayerViewModel['artistName']>;
+    @State artistName = '';
+
+    volume$: BehaviorSubject<MediaPlayerViewModel['volume']>;
+    @State volume = 50;
+
+    thumbnailUrl$: BehaviorSubject<MediaPlayerViewModel['thumbnailUrl']>;
+    @State thumbnailUrl = '';
+
+    isLiked$: BehaviorSubject<MediaPlayerViewModel['isLiked']>;
+    @State isLiked = false;
+    
     settings = {
         ...(this as ViewModel).settings,
-        isPlaying: false,
-        timePlayed: 1,
-        duration: 3.14 * 60 * 1000,
-        trackName: '',
-        albumName: '',
-        artistName: '',
-        volume: 50,
-        thumbnailUrl: '',
         currentTrack: null as ITrack,
-        currentTrackId: '',
         currentTrackUri: '',
-        isLiked: false,
         tracks: [] as Array<TrackViewModelItem>
     };
 
-    resumeCommand = { exec: () => this.play() };
-    pauseCommand = { exec: () => this.pause() };
-    prevCommand = { exec: () => this.previous() };
-    nextCommand = { exec: () => this.next() };
-    volumeUpCommand = { exec: () => this.volumeUp() };
-    volumeCommand = { exec: (percent) => this.setVolume(percent) };
-    volumeDownCommand = { exec: () => this.volumeDown() };
-    refreshPlaybackCommand = { exec: () => this.fetchData() };
-    likeSongCommand = { exec: () => this.likeTrack() };
-    unlikeSongCommand = { exec: () => this.unlikeTrack() };
-    seekPlaybackCommand = { exec: (percent) => this.manualSeek(percent) };
+    resumeCommand$: BehaviorSubject<MediaPlayerViewModel['resumeCommand']>;
+    @State resumeCommand = { exec: () => this.play() };
+    pauseCommand$: BehaviorSubject<MediaPlayerViewModel['pauseCommand']>;
+    @State pauseCommand = { exec: () => this.pause() };
+    prevCommand$: BehaviorSubject<MediaPlayerViewModel['prevCommand']>;
+    @State prevCommand = { exec: () => this.previous() };
+    nextCommand$: BehaviorSubject<MediaPlayerViewModel['nextCommand']>;
+    @State nextCommand = { exec: () => this.next() };
+    volumeUpCommand$: BehaviorSubject<MediaPlayerViewModel['volumeUpCommand']>;
+    @State volumeUpCommand = { exec: () => this.volumeUp() };
+    volumeCommand$: BehaviorSubject<MediaPlayerViewModel['volumeCommand']>;
+    @State volumeCommand = { exec: (percent) => this.setVolume(percent) };
+    volumeDownCommand$: BehaviorSubject<MediaPlayerViewModel['volumeDownCommand']>;
+    @State volumeDownCommand = { exec: () => this.volumeDown() };
+    refreshPlaybackCommand$: BehaviorSubject<MediaPlayerViewModel['refreshPlaybackCommand']>;
+    @State refreshPlaybackCommand = { exec: () => this.fetchData() };
+    likeSongCommand$: BehaviorSubject<MediaPlayerViewModel['likeSongCommand']>;
+    @State likeSongCommand = { exec: () => this.likeTrack() };
+    unlikeSongCommand$: BehaviorSubject<MediaPlayerViewModel['unlikeSongCommand']>;
+    @State unlikeSongCommand = { exec: () => this.unlikeTrack() };
+    seekPlaybackCommand$: BehaviorSubject<MediaPlayerViewModel['seekPlaybackCommand']>;
+    @State seekPlaybackCommand = { exec: (percent) => this.manualSeek(percent) };
 
     monitorPlyback = _.debounce(this.monitorPlybackInternal, 5 * 1000);
     autoSeek = _.debounce(this.autoSeekInternal, 500);
@@ -54,96 +92,6 @@ class MediaPlayerViewModel extends ViewModel {
         _.delay(() => {
             this.connect();
         });
-    }
-
-    queue(val?: TrackViewModelItem[]) {
-        if (arguments.length && val !== this.settings.tracks) {
-            this.settings.tracks = val;
-            this.trigger('change:queue');
-        }
-
-        return this.settings.tracks;
-    }
-
-    isPlaying(val?: boolean) {
-        if (arguments.length && val !== this.settings.isPlaying) {
-            this.settings.isPlaying = val;
-            this.trigger('change:isPlaying');
-        }
-
-        return this.settings.isPlaying;
-    }
-
-    timePlayed(val?: number) {
-        if (arguments.length && val !== this.settings.timePlayed) {
-            this.settings.timePlayed = val;
-            this.trigger('change:timePlayed');
-        }
-
-        return this.settings.timePlayed;
-    }
-
-    duration(val?: number) {
-        if (arguments.length && val !== this.settings.duration) {
-            this.settings.duration = val;
-            this.trigger('change:duration');
-        }
-
-        return this.settings.duration;
-    }
-
-    trackName(val?: string) {
-        if (arguments.length && val !== this.settings.trackName) {
-            this.settings.trackName = val;
-            this.trigger('change:trackName');
-        }
-
-        return this.settings.trackName;
-    }
-
-    albumName(val?: string) {
-        if (arguments.length && val !== this.settings.albumName) {
-            this.settings.albumName = val;
-            this.trigger('change:albumName');
-        }
-
-        return this.settings.albumName;
-    }
-
-    artistName(val?: string) {
-        if (arguments.length && val !== this.settings.artistName) {
-            this.settings.artistName = val;
-            this.trigger('change:artistName');
-        }
-
-        return this.settings.artistName;
-    }
-
-    volume(val?: number) {
-        if (arguments.length && val !== this.settings.volume) {
-            this.settings.volume = val;
-            this.trigger('change:volume');
-        }
-
-        return this.settings.volume;
-    }
-
-    thumbnailUrl(val?) {
-        if (arguments.length && val !== this.settings.thumbnailUrl) {
-            this.settings.thumbnailUrl = val;
-            this.trigger('change:thumbnailUrl');
-        }
-
-        return this.settings.thumbnailUrl;
-    }
-
-    currentTrackId(val?) {
-        if (arguments.length && val !== this.settings.currentTrackId) {
-            this.settings.currentTrackId = val;
-            this.trigger('change:currentTrackId');
-        }
-
-        return this.settings.currentTrackId;
     }
 
     currentTrack(val?) {
@@ -164,22 +112,13 @@ class MediaPlayerViewModel extends ViewModel {
         return this.settings.currentTrackUri;
     }
 
-    isLiked(val?) {
-        if (arguments.length && val !== this.settings.isLiked) {
-            this.settings.isLiked = !!val;
-            this.trigger('change:isLiked');
-        }
-
-        return this.settings.isLiked;
-    }
-
     async connect() {
         const playerResult = await this.ss.spotifyPlayer();
         const spotifyResult = await this.ss.service(SpotifyService);
         if (spotifyResult.isError) {
-            this.errors([spotifyResult]);
+            this.errors = [spotifyResult];
         }
-        if (assertNoErrors(spotifyResult, playerResult, e => this.errors(e))) {
+        if (assertNoErrors(spotifyResult, playerResult, e => this.errors = e)) {
             return;
         }
         playerResult.val.on('playerStateChanged', (en, state) => this.updateFromPlayerState(state));
@@ -189,7 +128,7 @@ class MediaPlayerViewModel extends ViewModel {
 
     async currentPlayerState() {
         const stateResult = await this.ss.spotifyPlayerState();
-        if (assertNoErrors(stateResult, e => this.errors(e))) {
+        if (assertNoErrors(stateResult, e => this.errors = e)) {
             return;
         }
         const state = stateResult.val as IWebPlaybackState;
@@ -208,32 +147,32 @@ class MediaPlayerViewModel extends ViewModel {
         const [artist] = state.track_window.current_track.artists;
         this.currentTrack(state.track_window.current_track);
         this.currentTrackUri(state.track_window.current_track.uri);
-        this.currentTrackId(state.track_window.current_track.id);
-        this.duration(state.duration);
-        this.timePlayed(state.position);
-        this.isPlaying(!state.paused);
-        this.trackName(state.track_window.current_track.name);
-        this.albumName(state.track_window.current_track.album.name);
-        this.artistName(artist.name);
-        this.thumbnailUrl(_.last(state.track_window.current_track.album.images).url);
+        this.currentTrackId = state.track_window.current_track.id;
+        this.duration = state.duration;
+        this.timePlayed = state.position;
+        this.isPlaying = !state.paused;
+        this.trackName = state.track_window.current_track.name;
+        this.albumName = state.track_window.current_track.album.name;
+        this.artistName = artist.name;
+        this.thumbnailUrl = _.last(state.track_window.current_track.album.images).url;
         this.autoSeek();
         this.checkTrackExists();
         const playerResult = await this.ss.spotifyPlayer();
-        if (assertNoErrors(playerResult, e => this.errors(e))) {
+        if (assertNoErrors(playerResult, e => this.errors = e)) {
             return;
         }
         const settingsResult = await this.ss.settings('spotify');
         if (settingsResult.isError) {
             const volume = await playerResult.val.getVolume();
-            return this.volume(volume);
+            return this.volume = volume;
         }
         playerResult.val.setVolume(settingsResult.val.volume);
-        this.volume(settingsResult.val.volume);
+        this.volume = settingsResult.val.volume;
     }
 
     async fetchDataInternal() {
         const res = await this.ss.player();
-        if (assertNoErrors(res, e => this.errors(e))) {
+        if (assertNoErrors(res, e => this.errors = e)) {
             return res;
         }
         const currentlyPlaying = res.val as IPlayerResult;
@@ -243,33 +182,33 @@ class MediaPlayerViewModel extends ViewModel {
             const [artist] = currentlyPlaying.item.artists;
             this.currentTrack(currentlyPlaying.item);
             this.currentTrackUri(currentlyPlaying.item.uri);
-            this.currentTrackId(currentlyPlaying.item.id);
-            this.volume(currentlyPlaying.device.volume_percent);
-            this.duration(currentlyPlaying.item.duration_ms);
-            this.timePlayed(currentlyPlaying.progress_ms);
-            this.isPlaying(currentlyPlaying.is_playing);
-            this.trackName(currentlyPlaying.item.name)
-            this.albumName(currentlyPlaying.item.album.name)
-            this.artistName(artist.name);
-            this.thumbnailUrl(_.last(currentlyPlaying.item.album.images).url)
+            this.currentTrackId = currentlyPlaying.item.id;
+            this.volume = currentlyPlaying.device.volume_percent;
+            this.duration = currentlyPlaying.item.duration_ms;
+            this.timePlayed = currentlyPlaying.progress_ms;
+            this.isPlaying = currentlyPlaying.is_playing;
+            this.trackName = currentlyPlaying.item.name;
+            this.albumName = currentlyPlaying.item.album.name;
+            this.artistName = artist.name;
+            this.thumbnailUrl = _.last(currentlyPlaying.item.album.images).url;
             this.autoSeek();
             this.checkTrackExists();
         } else {
-            this.isPlaying(currentlyPlaying?.is_playing || false);
+            this.isPlaying = currentlyPlaying?.is_playing || false;
         }
     }
 
     async checkTrackExists() {
-        const trackExistsResult = await this.ss.hasTracks(this.currentTrackId());
-        if (assertNoErrors(trackExistsResult, e => this.errors(e))) {
+        const trackExistsResult = await this.ss.hasTracks(this.currentTrackId);
+        if (assertNoErrors(trackExistsResult, e => this.errors = e)) {
             return;
         }
         const likedResult = trackExistsResult.val as boolean[];
-        this.isLiked(_.first(likedResult));
+        this.isLiked = _.first(likedResult);
     }
 
     async monitorPlybackInternal() {
-        if (!this.isPlaying()) {
+        if (!this.isPlaying) {
             await this.fetchData();
             this.monitorPlyback();
         }
@@ -277,13 +216,13 @@ class MediaPlayerViewModel extends ViewModel {
 
     lastTime = +new Date();
     autoSeekInternal() {
-        if (this.isPlaying()) {
+        if (this.isPlaying) {
             const newTime = +new Date();
-            const lastPlayed = this.timePlayed() + newTime - this.lastTime;
-            if (this.duration() > lastPlayed) {
-                this.timePlayed(lastPlayed);
+            const lastPlayed = this.timePlayed + newTime - this.lastTime;
+            if (this.duration > lastPlayed) {
+                this.timePlayed = lastPlayed;
                 this.lastTime = newTime;
-                this.autoSeek();
+                _.delay(() => this.autoSeek());
             } else {
                 this.fetchData();
             }
@@ -293,39 +232,39 @@ class MediaPlayerViewModel extends ViewModel {
     }
 
     manualSeek(percent) {
-        const max = this.duration(),
+        const max = this.duration,
             timePlayed = max * percent / 100;
             
-        lockSection.push(_.bind(async function (next) {
-            this.timePlayed(timePlayed);
+        lockSection.push(async (next) => {
+            this.timePlayed = timePlayed;
             await this.ss.seek(timePlayed);
 
             next();
-        }, this));
+        });
     }
 
     async setVolume(percent: number) {
         lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors(e))) {
+            if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
             }
             if (_.isEmpty(stateResult.val)) {
-                this.volume(percent);
+                this.volume = percent;
                 await this.ss.volume(percent);
             } else {
                 const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                if (assertNoErrors(playerResult, e => this.errors = e)) {
                     return;
                 }
-                this.volume(percent);
+                this.volume = percent;
                 playerResult.val.setVolume(percent);
             }
             const settingsResult = await this.ss.service(SettingsService);
-            if (assertNoErrors(settingsResult, e => this.errors(e))) {
+            if (assertNoErrors(settingsResult, e => this.errors = e)) {
                 return;
             }
-            this.volume(settingsResult.val.volume(percent));
+            this.volume = settingsResult.val.volume(percent);
 
             next();
         }, this));
@@ -334,14 +273,14 @@ class MediaPlayerViewModel extends ViewModel {
     async play() {
         lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors(e))) {
+            if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
             }
             if (_.isEmpty(stateResult.val)) {
                 await this.ss.play();
             } else {
                 const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                if (assertNoErrors(playerResult, e => this.errors = e)) {
                     return;
                 }
                 playerResult.val.resume();
@@ -354,14 +293,14 @@ class MediaPlayerViewModel extends ViewModel {
     async pause() {
         lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors(e))) {
+            if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
             }
             if (_.isEmpty(stateResult.val)) {
                 await this.ss.pause();
             } else {
                 const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                if (assertNoErrors(playerResult, e => this.errors = e)) {
                     return;
                 }
                 playerResult.val.pause();
@@ -374,14 +313,14 @@ class MediaPlayerViewModel extends ViewModel {
     async previous() {
         lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors(e))) {
+            if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
             }
             if (_.isEmpty(stateResult.val)) {
                 await this.ss.previous();
             } else {
                 const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                if (assertNoErrors(playerResult, e => this.errors = e)) {
                     return;
                 }
                 playerResult.val.previouseTrack();
@@ -394,14 +333,14 @@ class MediaPlayerViewModel extends ViewModel {
     async next() {
         lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors(e))) {
+            if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
             }
             if (_.isEmpty(stateResult.val)) {
                 await this.ss.next();
             } else {
                 const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                if (assertNoErrors(playerResult, e => this.errors = e)) {
                     return;
                 }
                 playerResult.val.nextTrack();
@@ -414,19 +353,19 @@ class MediaPlayerViewModel extends ViewModel {
     async volumeUp() {
         lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors(e))) {
+            if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
             }
             if (_.isEmpty(stateResult.val)) {
-                const volume = this.volume();
+                const volume = this.volume;
                 await this.ss.volume(volume * 1.1);
             } else {
                 const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                if (assertNoErrors(playerResult, e => this.errors = e)) {
                     return;
                 }
                 const volume = await playerResult.val.getVolume();
-                this.volume(volume * 1.1);
+                this.volume = volume * 1.1;
             }
 
             next();
@@ -436,19 +375,19 @@ class MediaPlayerViewModel extends ViewModel {
     async volumeDown() {
         lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors(e))) {
+            if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
             }
             if (_.isEmpty(stateResult.val)) {
-                const volume = this.volume();
+                const volume = this.volume;
                 await this.ss.volume(volume * 0.9);
             } else {
                 const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors(e))) {
+                if (assertNoErrors(playerResult, e => this.errors = e)) {
                     return;
                 }
                 const volume = await playerResult.val.getVolume();
-                this.volume(volume * 0.9);
+                this.volume = volume * 0.9;
             }
 
             next();
@@ -458,7 +397,7 @@ class MediaPlayerViewModel extends ViewModel {
     async likeTrack() {
         lockSection.push(async (next) => {
             const stateResult = await this.ss.addTracks(this.currentTrack());
-            assertNoErrors(stateResult, e => this.errors(e));
+            assertNoErrors(stateResult, e => this.errors = e);
 
             next();
         });
@@ -467,14 +406,14 @@ class MediaPlayerViewModel extends ViewModel {
     async unlikeTrack() {
         lockSection.push(async (next) => {
             const stateResult = await this.ss.removeTracks(this.currentTrack());
-            assertNoErrors(stateResult, e => this.errors(e));
+            assertNoErrors(stateResult, e => this.errors = e);
 
             next();
         });
     }
 
     playInTracks(item: TrackViewModelItem) {
-        return item.playTracks(this.queue());
+        return item.playTracks(this.queue);
     }
 
     async resume() {

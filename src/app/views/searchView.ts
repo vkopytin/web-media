@@ -1,10 +1,12 @@
 import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
+import { BehaviorSubject, merge, of, Subject, Subscription } from 'rxjs';
+import { map, switchMap, takeUntil } from 'rxjs/operators';
 import * as _ from 'underscore';
 import { ISearchType } from '../adapter/spotify';
 import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/search';
-import { current } from '../utils';
+import { Binding, current } from '../utils';
 import { AlbumViewModelItem, PlaylistsViewModelItem, SearchViewModel, TrackViewModelItem } from '../viewModels';
 import { ArtistViewModelItem } from '../viewModels/artistViewModelItem';
 
@@ -15,60 +17,94 @@ export interface ISearchViewProps {
     currentTrackId: string;
 }
 
-class SearchView extends BaseView<ISearchViewProps, SearchView['state']> {
-    state = {
-        errors: [] as ServiceResult<any, Error>[],
-        term: '',
-        searchType: 'track' as ISearchType,
-        tracks: [] as TrackViewModelItem[],
-        artists: [] as ArtistViewModelItem[],
-        albums: [] as AlbumViewModelItem[],
-        playlists: [] as PlaylistsViewModelItem[],
-        currentAlbum: null as AlbumViewModelItem,
-        currentPlaylist: null as PlaylistsViewModelItem,
-        currentArtist: null as ArtistViewModelItem,
-        currentTracks: [] as TrackViewModelItem[],
-        selectedItem: null as TrackViewModelItem
-    };
-
-    loadMoreCommand = { exec() { } };
-    likeTrackCommand = { exec(track: TrackViewModelItem) { } };
-    unlikeTrackCommand = { exec(track: TrackViewModelItem) { } };
+class SearchView extends BaseView<ISearchViewProps> {
+    vm = current(SearchViewModel);
     
-    binding = bindTo(this, () => current(SearchViewModel), {
-        'loadMoreCommand': 'loadMoreCommand',
-        'prop(term)': 'term',
-        'prop(tracks)': 'tracks',
-        'prop(artists)': 'artists',
-        'prop(albums)': 'albums',
-        'prop(playlists)': 'playlists',
-        'prop(searchType)': 'searchType',
-        'prop(currentArtist)': 'currentArtist',
-        'prop(currentAlbum)': 'currentAlbum',
-        'prop(currentPlaylist)': 'currentPlaylist',
-        'prop(currentTracks)': 'currentTracks',
-        'prop(selectedItem)': 'selectedItem'
-    });
+    errors$ = this.vm.errors$;
+    @Binding errors = this.errors$.getValue();
+
+    term$ = this.vm.term$;
+    @Binding term = this.term$.getValue();
+
+    tracks$ = this.vm.tracks$;
+    @Binding tracks = this.tracks$.getValue();
+
+    artists$ = this.vm.artists$;
+    @Binding artists = this.artists$.getValue();
+
+    albums$ = this.vm.albums$;
+    @Binding albums = this.albums$.getValue();
+
+    playlists$ = this.vm.playlists$;
+    @Binding playlists = this.playlists$.getValue();
+
+    searchType$ = this.vm.searchType$;
+    @Binding searchType = this.searchType$.getValue();
+
+    currentAlbum$ = this.vm.currentAlbum$;
+    @Binding currentAlbum = this.currentAlbum$.getValue();
+
+    currentPlaylist$ = this.vm.currentPlaylist$;
+    @Binding currentPlaylist = this.currentPlaylist$.getValue();
+
+    currentArtist$ = this.vm.currentArtist$;
+    @Binding currentArtist = this.currentArtist$.getValue();
+
+    currentTracks$ = this.vm.currentTracks$;
+    @Binding currentTracks = this.currentTracks$.getValue();
+
+    selectedItem$ = this.vm.selectedItem$;
+    @Binding selectedItem = this.selectedItem$.getValue();
+
+    loadMoreCommand$ = this.vm.loadMoreCommand$;
+    @Binding loadMoreCommand = this.loadMoreCommand$.getValue();
+
+    likeTrackCommand$ = new BehaviorSubject({ exec(track: TrackViewModelItem) { } });
+    @Binding likeTrackCommand = this.likeTrackCommand$.getValue();
+    unlikeTrackCommand$ = new BehaviorSubject({ exec(track: TrackViewModelItem) { } });
+    @Binding unlikeTrackCommand = this.unlikeTrackCommand$.getValue();
+    
+    dispose$ = new Subject<void>();
+    disposeSubscription: Subscription;
 
     searchTracks = _.debounce(term => {
-        this.prop('term', term);
-    }, 500);
+        this.term = term;
+    }, 300);
 
     constructor(props) {
         super(props);
-        subscribeToChange(this.binding, () => {
+    }
+
+    componentDidMount() {
+        this.disposeSubscription = merge(
+            this.errors$.pipe(map(errors => ({ errors }))),
+            this.term$.pipe(map(term => ({ term }))),
+            this.tracks$.pipe(map(tracks => ({ tracks }))),
+            this.artists$.pipe(map(artists => ({ artists }))),
+            this.albums$.pipe(map(albums => ({ albums }))),
+            this.playlists$.pipe(map(playlists => ({ playlists }))),
+            this.searchType$.pipe(map(searchType => ({ searchType }))),
+            this.currentAlbum$.pipe(map(currentAlbum => ({ currentAlbum }))),
+            this.currentArtist$.pipe(map(currentArtist => ({ currentArtist }))),
+            this.currentPlaylist$.pipe(map(currentPlaylist => ({ currentPlaylist }))),
+            this.currentTracks$.pipe(map(currentTracks => ({ currentTracks }))),
+            this.selectedItem$.pipe(map(selectedItem => ({ selectedItem }))),
+            this.loadMoreCommand$.pipe(map(loadMoreCommand => ({ loadMoreCommand }))),
+            this.likeTrackCommand$.pipe(map(likeTrackCommand => ({ likeTrackCommand }))),
+            this.unlikeTrackCommand$.pipe(map(unlikeTrackCommand => ({ unlikeTrackCommand }))),
+        ).pipe(
+            takeUntil(this.dispose$)
+        ).subscribe((v) => {
+            //console.log(v);
             this.setState({
                 ...this.state
             });
         });
     }
 
-    componentDidMount() {
-        updateLayout(this.binding);
-    }
-
     componentWillUnmount() {
-        unbindFrom(this.binding);
+        this.dispose$.next();
+        this.dispose$.complete();
     }
 
     componentDidUpdate(prevProps: ISearchViewProps, prevState, snapshot) {

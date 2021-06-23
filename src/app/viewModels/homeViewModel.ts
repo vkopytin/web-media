@@ -2,10 +2,12 @@ import * as _ from 'underscore';
 import { IRecommendationsResult, IResponseResult, ISpotifySong, ITrack } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
-import { assertNoErrors, current } from '../utils';
+import { assertNoErrors, current, State } from '../utils';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { SpotifyService } from '../service/spotify';
+import { BehaviorSubject } from 'rxjs';
+import { ServiceResult } from '../base/serviceResult';
 
 
 function isLoading(target, key, descriptor) {
@@ -19,10 +21,10 @@ function isLoading(target, key, descriptor) {
     //editing the descriptor/value parameter
     descriptor.value = async function (this: HomeViewModel, ...args) {
         try {
-            this.prop('isLoading', true);
+            this.isLoading = true;
             return await originalMethod.apply(this, args);
         } finally {
-            this.prop('isLoading', false);
+            this.isLoading = false;
         }
     };
    
@@ -31,27 +33,52 @@ function isLoading(target, key, descriptor) {
 }
 
 class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
+    errors$: BehaviorSubject<HomeViewModel['errors']>;
+    @State errors = [] as ServiceResult<any, Error>[];
 
+    tracks$: BehaviorSubject<HomeViewModel['tracks']>;
+    @State tracks = [] as TrackViewModelItem[];
+
+    likedTracks$: BehaviorSubject<HomeViewModel['likedTracks']>;
+    @State likedTracks = [] as TrackViewModelItem[];
+
+    isLoading$: BehaviorSubject<HomeViewModel['isLoading']>;
+    @State isLoading = false;
+
+    selectedTrack$: BehaviorSubject<HomeViewModel['selectedTrack']>;
+    @State selectedTrack = null as TrackViewModelItem;
+
+    trackLyrics$: BehaviorSubject<HomeViewModel['trackLyrics']>;
+    @State trackLyrics = null as { trackId: string; lyrics: string };
+
+    selectedPlaylist$: BehaviorSubject<HomeViewModel['selectedPlaylist']>;
+    @State selectedPlaylist = null as PlaylistsViewModelItem;
+    
     settings = {
         ...(this as any as ViewModel).settings,
-        openLogin: false,
-        tracks: [] as Array<TrackViewModelItem>,
-        likedTracks: [] as TrackViewModelItem[],
-        selectedTrack: null as TrackViewModelItem,
-        selectedPlaylist: null as PlaylistsViewModelItem,
-        isLoading: false,
-        trackLyrics: null as { trackId: string; lyrics: string }
     };
 
-    refreshCommand = { exec: () => this.fetchData() };
-    selectTrackCommand = { exec: (track: TrackViewModelItem) => this.prop('selectedTrack', track) };
-    likeTrackCommand = { exec: (track: TrackViewModelItem) => this.likeTrack(track) };
-    unlikeTrackCommand = { exec: (track: TrackViewModelItem) => this.unlikeTrack(track) };
-    findTrackLyricsCommand = { exec: (track: TrackViewModelItem) => this.findTrackLyrics(track) };
+    refreshCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
+    @State refreshCommand = { exec: () => this.fetchData() };
+
+    selectTrackCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
+    @State selectTrackCommand = { exec: (track: TrackViewModelItem) => this.selectedTrack = track };
+
+    likeTrackCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
+    @State likeTrackCommand = { exec: (track: TrackViewModelItem) => this.likeTrack(track) };
+
+    unlikeTrackCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
+    @State unlikeTrackCommand = { exec: (track: TrackViewModelItem) => this.unlikeTrack(track) };
+    
+    findTrackLyricsCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
+    @State findTrackLyricsCommand = { exec: (track: TrackViewModelItem) => this.findTrackLyrics(track) };
 
     isInit = _.delay(() => {
         this.connect();
         this.fetchData();
+        this.selectedPlaylist$.subscribe(() => {
+            this.fetchData();
+        });
     }, 100);
 
     constructor(private ss = current(Service)) {
@@ -60,37 +87,9 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
         this.ss.spotifyPlayer();
     }
 
-    tracks(val?: any[]) {
-        if (arguments.length && val !== this.settings.tracks) {
-            this.settings.tracks = val;
-            this.trigger('change:tracks');
-        }
-
-        return this.settings.tracks;
-    }
-
-    selectedPlaylist(val?: PlaylistsViewModelItem) {
-        if (arguments.length && val !== this.settings.selectedPlaylist) {
-            this.settings.selectedPlaylist = val;
-            this.trigger('change:selectedPlaylist');
-            this.fetchData();
-        }
-
-        return this.settings.selectedPlaylist;
-    }
-
-    likedTracks(val?: TrackViewModelItem[]) {
-        if (arguments.length && this.settings.likedTracks !== val) {
-            this.settings.likedTracks = val;
-            this.trigger('change:likedTracks');
-        }
-
-        return this.settings.likedTracks;
-    }
-
     async connect() {
         const spotifyResult = await this.ss.service(SpotifyService);
-        if (assertNoErrors(spotifyResult, e => this.errors(e))) {
+        if (assertNoErrors(spotifyResult, e => this.errors = e)) {
             return;
         }
         const spotify = spotifyResult.val;
@@ -99,10 +98,10 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
 
     @isLoading
     async fetchData() {
-        const tracksResult = this.selectedPlaylist()
-            ? await this.ss.fetchPlaylistTracks(this.selectedPlaylist().id(), 0, 20)
+        const tracksResult = this.selectedPlaylist
+            ? await this.ss.fetchPlaylistTracks(this.selectedPlaylist.id(), 0, 20)
             : await this.ss.fetchTracks(0, 20);
-        if (assertNoErrors(tracksResult, e => this.errors(e))) {
+        if (assertNoErrors(tracksResult, e => this.errors = e)) {
             return;
         }
         const tracks = tracksResult.val as IResponseResult<ISpotifySong>;
@@ -110,19 +109,19 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
         let trackIds = _.first(_.uniq(_.map(tracks.items, (song) => song.track.id)), 5);
         if (!trackIds.length) {
             const topTracksResult = await this.ss.listTopTracks();
-            if (assertNoErrors(topTracksResult, e => this.errors(e))) {
+            if (assertNoErrors(topTracksResult, e => this.errors = e)) {
                 return;
             }
             const topTracks = topTracksResult.val as IResponseResult<ITrack>;
             trackIds = _.first(_.uniq(_.map(topTracks.items, (song) => song.id)), 5);
         }
         const res = await this.ss.fetchRecommendations('US', artistIds, trackIds);
-        if (assertNoErrors(res, e => this.errors(e))) {
+        if (assertNoErrors(res, e => this.errors = e)) {
             return;
         }
         const recomendations = res.val as IRecommendationsResult;
         const newTracks = _.map(recomendations.tracks, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
-        this.tracks(newTracks);
+        this.tracks = newTracks;
         this.checkTracks(newTracks);
     }
 
@@ -135,12 +134,12 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
     async checkTracks(tracks: TrackViewModelItem[]) {
         const tracksToCheck = tracks;
         const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
-        if (assertNoErrors(likedResult, e => this.errors(e))) {
+        if (assertNoErrors(likedResult, e => this.errors = e)) {
             return;
         }
         _.each(likedResult.val as boolean[], (liked, index) => {
-            tracksToCheck[index].isLiked(liked);
-            this.likedTracks(_.filter(this.tracks(), track => track.isLiked()));
+            tracksToCheck[index].isLiked = liked;
+            this.likedTracks = _.filter(this.tracks, track => track.isLiked);
         });
     }
 
@@ -149,7 +148,7 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
     }
 
     playInTracks(item: TrackViewModelItem) {
-        return item.playTracks(this.tracks());
+        return item.playTracks(this.tracks);
     }
 
     async resume() {
@@ -168,25 +167,25 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
     }
 
     async findTrackLyrics(track: TrackViewModelItem) {
-        if (this.prop('trackLyrics') && this.prop('trackLyrics').trackId === track.id()) {
-            return this.prop('trackLyrics', null);
+        if (this.trackLyrics && this.trackLyrics.trackId === track.id()) {
+            return this.trackLyrics = null;
         }
         const lyricsResult = await this.ss.findTrackLyrics({
             name: track.name(),
             artist: track.artist()
         });
         if (assertNoErrors(lyricsResult, e => { })) {
-            this.prop('trackLyrics', {
+            this.trackLyrics = {
                 trackId: track.id(),
                 lyrics: lyricsResult.error.message
-            });
+            };
             return;
         }
 
-        this.prop('trackLyrics', {
+        this.trackLyrics = {
             trackId: track.id(),
             lyrics: '' + lyricsResult.val
-        });
+        };
     }
 }
 

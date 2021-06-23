@@ -1,9 +1,13 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IAlbum } from '../adapter/spotify';
+import { ServiceResult } from '../base/serviceResult';
 import { ViewModel } from '../base/viewModel';
-
+import { State } from '../utils';
 
 class AlbumViewModelItem extends ViewModel {
+    errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
+    @State errors = [] as ServiceResult<any, Error>[];
 
     settings = {
         ...(this as ViewModel).settings,

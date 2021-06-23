@@ -1,8 +1,11 @@
 import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
+import * as _ from 'underscore';
+import { merge, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/pickPlaylist';
-import { current } from '../utils';
+import { Binding, current } from '../utils';
 import { HomeViewModel, PlaylistsViewModel, PlaylistsViewModelItem } from '../viewModels';
 
 
@@ -10,35 +13,42 @@ export interface IPickPlaylistsViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
 }
 
-class PickPlaylistsView extends BaseView<IPickPlaylistsViewProps, PickPlaylistsView['state'], {}> {
-    playlistsViewModel = current(PlaylistsViewModel);
+class PickPlaylistsView extends BaseView<IPickPlaylistsViewProps> {
+    vm = current(PlaylistsViewModel);
+    homeVm = current(HomeViewModel);
 
-    state = {
-        errors: [] as ServiceResult<any, Error>[],
-        items: [] as PlaylistsViewModelItem[],
-        selectedPlaylist: null as PlaylistsViewModelItem
-    };
+    errors$ = this.vm.errors$;
+    @Binding errors = this.errors$.getValue();
 
-    binding = bindTo(this, () => current(HomeViewModel), {
-        'prop(items)': '.playlistsViewModel.playlists',
-        'prop(selectedPlaylist)': 'selectedPlaylist'
-    });
+    playlists$ = this.vm.playlists$;
+    @Binding playlists = this.playlists$.getValue();
+
+    selectedPlaylist$ = this.homeVm.selectedPlaylist$;
+    @Binding selectedPlaylist = this.selectedPlaylist$.getValue();
+
+    dispose$ = new Subject<void>();
+    disposeSubscription: Subscription;
 
     constructor(props) {
         super(props);
-        subscribeToChange(this.binding, () => {
+    }
+
+    componentDidMount() {
+        this.disposeSubscription = merge(
+            this.playlists$.pipe(map(playlists => ({ playlists }))),
+            this.selectedPlaylist$.pipe(map(selectedPlaylist => ({ selectedPlaylist }))),
+            this.errors$.pipe(map(errors => ({ errors }))),
+        ).pipe(takeUntil(this.dispose$)).subscribe((v) => {
+            //console.log(v);
             this.setState({
                 ...this.state
             });
         });
     }
 
-    componentDidMount() {
-        updateLayout(this.binding);
-    }
-
     componentWillUnmount() {
-        unbindFrom(this.binding);
+        this.dispose$.next();
+        this.dispose$.complete();
     }
 
     componentDidUpdate(prevProps: IPickPlaylistsViewProps, prevState, snapshot) {

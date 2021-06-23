@@ -11,29 +11,29 @@ export const template = (view: SearchView) => <>
         <form onSubmit={e => e.preventDefault()}>
             <input className="new-todo" type="search" placeholder="Enter search title..."
                 onChange={evnt => view.searchTracks(evnt.target.value)}
-                defaultValue={view.prop('term')}
+                defaultValue={view.term}
             />
         </form>
     </section>
     <div className="segmented-control">
-        <a className={cn("control-item ?active", view.prop('searchType') === 'track')} href="#create-public"
-            onClick={evnt => { evnt.preventDefault(); view.prop('searchType', 'track') }}
+        <a className={cn("control-item ?active", view.searchType === 'track')} href="#create-public"
+            onClick={evnt => { evnt.preventDefault(); view.searchType = 'track' }}
         >Tracks</a>
-        <a className={cn("control-item ?active", view.prop('searchType') === 'artist')} href="#crate-private"
-            onClick={evnt => { evnt.preventDefault(); view.prop('searchType', 'artist') }}
+        <a className={cn("control-item ?active", view.searchType === 'artist')} href="#crate-private"
+            onClick={evnt => { evnt.preventDefault(); view.searchType = 'artist' }}
         >Artist</a>
-        <a className={cn("control-item ?active", view.prop('searchType') === 'album')} href="#crate-private"
-            onClick={evnt => { evnt.preventDefault(); view.prop('searchType', 'album') }}
+        <a className={cn("control-item ?active", view.searchType === 'album')} href="#crate-private"
+            onClick={evnt => { evnt.preventDefault(); view.searchType = 'album' }}
         >Albums</a>
-        <a className={cn("control-item ?active", view.prop('searchType') === 'playlist')} href="#crate-private"
-            onClick={evnt => { evnt.preventDefault(); view.prop('searchType', 'playlist') }}
+        <a className={cn("control-item ?active", view.searchType === 'playlist')} href="#crate-private"
+            onClick={evnt => { evnt.preventDefault(); view.searchType = 'playlist' }}
         >Playlists</a>
     </div>
     <ul className="todo-list table-view">
-        {_.map(view.prop('tracks'), (item, index) => {
+        {_.map(view.tracks, (item: SearchView['tracks'][0], index) => {
             return <li key={item.id()} className="table-view-cell media">
                 <span className="media-object pull-left player-left--32"
-                    onClick={evnt => item.playTracks(view.prop('tracks'))}
+                    onClick={evnt => item.playTracks(view.tracks)}
                 >
                     <div className="region">
                         <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
@@ -44,7 +44,7 @@ export const template = (view: SearchView) => <>
                     </div>
                 </span>
                 <div className="media-body"
-                    onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}
+                    onClick={evnt => view.selectedItem = view.selectedItem === item ? null : item}
                 >
                     <div>
                         <span className="song-title">{item.name()}</span>
@@ -52,25 +52,25 @@ export const template = (view: SearchView) => <>
                             <span className="author-title">{item.artist()}</span>
                     </div>
                     <div className="album-title">{item.album()}</div>
-                    {(view.prop('selectedItem')) !== item && <SelectPlaylistsView
+                    {view.selectedItem !== item && <SelectPlaylistsView
                         showErrors={e => view.showErrors(e)}
                         track={item} active={true} />}
                 </div>
-                {(view.prop('selectedItem')) === item && <SelectPlaylistsView
+                {view.selectedItem === item && <SelectPlaylistsView
                     showErrors={e => view.showErrors(e)}
                     track={item} />}
-                {item.isLiked() && <span className="badge badge-positive"
+                {item.isLiked && <span className="badge badge-positive"
                     onClick={evnt => view.unlikeTrackCommand.exec(item)}
                 >{item.duration()}</span>}
-                {item.isLiked() || <span className="badge"
+                {item.isLiked || <span className="badge"
                     onClick={evnt => view.likeTrackCommand.exec(item)}
                 >{item.duration()}</span>}
             </li>
         })}
-        {_.map(view.prop('artists'), (item, index) => {
+        {_.map(view.artists, (item: SearchView['artists'][0], index) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media"
-                    onClick={evnt => view.prop('currentArtist', view.prop('currentArtist')?.id() === item.id() ? null : item)}
+                    onClick={evnt => view.currentArtist = view.currentArtist?.id() === item.id() ? null : item}
                 >
                     <span className="media-object pull-left player-left--32"
                     >
@@ -85,20 +85,20 @@ export const template = (view: SearchView) => <>
                         </div>
                     </div>
                 </div>
-                {view.prop('currentArtist') === item && <div className="card" key={item.id() + '-3'}>
+                {view.currentArtist === item && <div className="card" key={item.id() + '-3'}>
                     <AlbumsView
                         showErrors={e => view.showErrors(e)}
                         currentTrackId={view.props.currentTrackId}
                         uri={null}
-                        tracks={view.prop('currentTracks')}
+                        tracks={view.currentTracks}
                     />
                 </div>}
             </li>
         })}
-        {_.map(view.prop('albums'), (item, index) => {
+        {_.map(view.albums, (item: SearchView['albums'][0], index) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media"
-                    onClick={evnt => view.prop('currentAlbum', view.prop('currentAlbum')?.id() === item.id() ? null : item)}
+                    onClick={evnt => view.currentAlbum = view.currentAlbum?.id() === item.id() ? null : item}
                 >
                     <span className="media-object pull-left player-left--32"
                     >
@@ -115,20 +115,20 @@ export const template = (view: SearchView) => <>
                     </div>
                     <span className="badge">{item.totalTracks()}</span>
                 </div>
-                {view.prop('currentAlbum') === item && <div className="card" key={item.id() + '-1'}>
+                {view.currentAlbum === item && <div className="card" key={item.id() + '-1'}>
                     <AlbumsView
                         showErrors={e => view.showErrors(e)}
                         currentTrackId={view.props.currentTrackId}
-                        uri={view.prop('currentAlbum')?.uri()}
-                        tracks={view.prop('currentTracks')}
+                        uri={view.currentAlbum?.uri()}
+                        tracks={view.currentTracks}
                     />
                 </div>}
             </li>
         })}
-        {_.map(view.prop('playlists'), (item, index) => {
+        {_.map(view.playlists, (item: SearchView['playlists'][0], index) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media"
-                    onClick={evnt => view.prop('currentPlaylist', view.prop('currentPlaylist')?.id() === item.id() ? null : item)}
+                    onClick={evnt => view.currentPlaylist = view.currentPlaylist?.id() === item.id() ? null : item}
                 >
                     <span className="media-object pull-left player-left--32"
                     >
@@ -146,12 +146,12 @@ export const template = (view: SearchView) => <>
                     </div>
                     <span className="badge">{item.tracksTotal()}</span>
                 </div>
-                {view.prop('currentPlaylist') === item && <div className="card" key={item.id() + '-2'}>
+                {view.currentPlaylist === item && <div className="card" key={item.id() + '-2'}>
                     <AlbumsView
                         showErrors={e => view.showErrors(e)}
                         currentTrackId={view.props.currentTrackId}
-                        uri={view.prop('currentPlaylist')?.uri()}
-                        tracks={view.prop('currentTracks')}
+                        uri={view.currentPlaylist?.uri()}
+                        tracks={view.currentTracks}
                     />
                 </div>}
             </li>

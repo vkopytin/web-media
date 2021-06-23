@@ -9,11 +9,11 @@ const cn = utils.className;
 export const template = (view: MediaPlayerView) => <div className="player-playback">
     <div className="player-left">
         <div className="region">
-            <div className="album-media" style={{backgroundImage: `url(${view.prop('thumbnailUrl')})`}}>
-                {view.prop('isPlaying') || <button className="button-play icon icon-play"
+            <div className="album-media" style={{backgroundImage: `url(${view.thumbnailUrl})`}}>
+                {view.isPlaying || <button className="button-play icon icon-play"
                     onClick={evnt => view.resumeCommand.exec()}
                 ></button>}
-                {view.prop('isPlaying') && <button className="button-play icon icon-pause"
+                {view.isPlaying && <button className="button-play icon icon-pause"
                     onClick={evnt => view.pauseCommand.exec()}
                 ></button>}
             </div>
@@ -24,10 +24,10 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
             <div className="playback-info">
                 <a className="track-info">
                     <div className="song-title">
-                        <span>{view.prop('trackName')} - {view.prop('artistName')}</span>
+                        <span>{view.trackName} - {view.artistName}</span>
                     </div>
                     <div className="album-title">
-                        <span>{view.prop('albumName')}</span>
+                        <span>{view.albumName}</span>
                     </div>
                 </a>
                 <div className="playback-controls">
@@ -38,7 +38,7 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
                         <div className="progress-max"
                             onClick={evnt => view.seekTrack(evnt)}
                         >
-                            <div className="progress" style={{width: `${view.timePlayed()}%`}}></div>
+                            <div className="progress" style={{width: `${view.timePlayed / view.duration * 100}%`}}></div>
                         </div>
                         <div className="time-played">{view.titlePlayed()}</div>
                     </div>
@@ -63,10 +63,10 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
                 </div>
             </div>
             <div className="extra-controls">
-                {view.prop('isLiked') && <button className="track-more icon icon-star-filled"
+                {view.isLiked && <button className="track-more icon icon-star-filled"
                     onClick={evnt => view.unlikeSongCommand.exec()}
                 ></button>}
-                {view.prop('isLiked') || <button className="track-more icon icon-star"
+                {view.isLiked || <button className="track-more icon icon-star"
                     onClick={evnt => view.likeSongCommand.exec()}
                 ></button>}
                 <button className="track-more icon icon-refresh"

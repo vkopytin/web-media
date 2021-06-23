@@ -34,7 +34,7 @@ const devConfig = (app: express.Application) => {
                 publicPath: webpackConfig.output.publicPath
             })
         );
-        compiler.plugin('done', stats => {
+        (compiler as any).plugin('done', stats => {
             const version = {
                 channel: process.env.NODE_ENV,
                 css: `app.${stats.hash}.css`,

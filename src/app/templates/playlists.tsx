@@ -12,8 +12,8 @@ export const template = (view: PlaylistsView) => <>
         <input
             type="text"
             placeholder="Enter new playlist name..."
-            defaultValue={view.prop('newPlaylistName')}
-            onChange={evnt => view.prop('newPlaylistName', evnt.target.value)}
+            defaultValue={view.newPlaylistName}
+            onChange={evnt => view.newPlaylistName = evnt.target.value}
         />
     </form>
     <div className="segmented-control">
@@ -25,11 +25,11 @@ export const template = (view: PlaylistsView) => <>
         >Create private</a>
     </div>
     <ul className="todo-list table-view">
-        {_.map(view.prop('playlists'), (item, index) => {
+        {_.map(view.playlists, (item: PlaylistsView['playlists'][0], index) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media">
                     <a className="navigate-right"
-                        onClick={evnt => { view.selectPlaylistCommand.exec(item.id() === view.prop('currentPlaylistId') ? null : item.id()) }}
+                        onClick={evnt => { view.selectPlaylistCommand.exec(item.id() === view.currentPlaylistId ? null : item.id()) }}
                     >
                         <img className="media-object pull-left" height="60" src={item.thumbnailUrl()} alt={item.name()} />
                         <div className="media-body">
@@ -39,7 +39,7 @@ export const template = (view: PlaylistsView) => <>
                         <span className="badge">{item.tracksTotal()}</span>
                     </a>
                 </div>
-                {item.id() === view.prop('currentPlaylistId') && <div className="card">
+                {item.id() === view.currentPlaylistId && <div className="card">
                     <TracksView
                         showErrors={e => view.props.showErrors(e)}
                         key={1}
@@ -47,20 +47,20 @@ export const template = (view: PlaylistsView) => <>
                         currentTrackId={view.props.currentTrackId}
                     />
                     <div key={2} className="center">
-                        {view.prop('isLoading') || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
+                        {view.isLoading || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
                             onClick={evnt => view.loadMoreTracksCommand.exec()}
                         ></button>}
-                        {view.prop('isLoading') && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
+                        {view.isLoading && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
                     </div>
                 </div>}
             </li>
         })}
     </ul>
     <div className="center">
-        {view.prop('isLoading') || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
+        {view.isLoading || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
             onClick={evnt => view.loadMoreCommand.exec()}
         ></button>}
-        {view.prop('isLoading') && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
+        {view.isLoading && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
     </div>
     <footer className="info content-padded">
         <p>Media Player</p>

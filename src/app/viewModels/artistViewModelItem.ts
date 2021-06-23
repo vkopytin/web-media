@@ -2,14 +2,19 @@ import * as _ from 'underscore';
 import { IArtist } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
-import { assertNoErrors, current } from '../utils';
+import { assertNoErrors, current, State } from '../utils';
 import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { SpotifyService } from '../service/spotify';
+import { BehaviorSubject } from 'rxjs';
+import { ServiceResult } from '../base/serviceResult';
 
 
 class ArtistViewModelItem extends ViewModel {
     appViewModel = current(AppViewModel);
+    errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
+    @State errors = [] as ServiceResult<any, Error>[];
+    
     settings = {
         ...(this as ViewModel).settings,
         isLiked: false
@@ -61,7 +66,7 @@ class ArtistViewModelItem extends ViewModel {
 
     async connect() {
         const spotifyResult = await this.ss.service(SpotifyService);
-        if (assertNoErrors(spotifyResult, e => this.errors(e))) {
+        if (assertNoErrors(spotifyResult, e => this.errors = e)) {
             return;
         }
         const spotify = spotifyResult.val;
@@ -74,15 +79,15 @@ class ArtistViewModelItem extends ViewModel {
     }
 
     async play() {
-        const device = this.appViewModel.currentDevice();
+        const device = this.appViewModel.currentDevice;
 
         this.ss.play(device?.id(), this.uri());
     }
 
     async playTracks() {
-        const device = this.appViewModel.currentDevice();
+        const device = this.appViewModel.currentDevice;
         const playResult = this.ss.play(device?.id(), this.uri());
-        assertNoErrors(playResult, e => this.errors(e));
+        assertNoErrors(playResult, e => this.errors = e);
     }
 }
 

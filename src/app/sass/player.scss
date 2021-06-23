@@ -2,420 +2,415 @@
    Player CSS
 */
 
-$default-color:  #22222222 !default;
+$default-color: #22222222 !default;
 $text-color: #999 !default;
 
 .spotify-logo {
-    display: inline-block;
-    margin: 5px;
-    height: 32px;
+  display: inline-block;
+  margin: 5px;
+  height: 32px;
 }
 
 .content.shadow::before {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 11;
-    content: '';
-    background-color: rgba(0,0,0,.3);
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 11;
+  content: "";
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .content {
-    height: 100vh;
+  height: 100vh;
 }
 .bar-header-playback ~ .content {
-    padding-top: 135px;
+  padding-top: 135px;
 }
 
 .bar-header-playback ~ .content .bar + * {
-    padding-top: 50px;
+  padding-top: 50px;
 }
 
 footer:before {
-    background-color: #222;
+  background-color: #222;
 }
 
 @keyframes rotate {
-    from {
-      -webkit-transform: rotate(0deg);
-    }
-    to { 
-      -webkit-transform: rotate(360deg);
-    }
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
 }
 
-.loading
-{
-      -webkit-animation-name:             rotate;
-      animation-name: rotate;
-      animation-duration:         0.5s; 
-      -webkit-animation-duration:         0.5s; 
-      animation-iteration-count:  infinite;
-      -webkit-animation-iteration-count:  infinite;
-      transition-timing-function: linear;
-      -webkit-transition-timing-function: linear;
+.loading {
+  -webkit-animation-name: rotate;
+  animation-name: rotate;
+  animation-duration: 0.5s;
+  -webkit-animation-duration: 0.5s;
+  animation-iteration-count: infinite;
+  -webkit-animation-iteration-count: infinite;
+  transition-timing-function: linear;
+  -webkit-transition-timing-function: linear;
 }
 
 .region {
-    margin: 3px 0;
+  margin: 3px 0;
 }
 
 .center {
-    padding: 10px;
-    text-align: center;
+  padding: 10px;
+  text-align: center;
 }
 
 .button-round:focus {
-    outline: none;
+  outline: none;
 }
 .button-round {
-        vertical-align: middle;
-        border-radius: 25px;
-        width: 50px;
-        height: 50px;
-        margin: 0 auto;
-        -webkit-tap-highlight-color: transparent;
-        display: -webkit-inline-box;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        position: relative;
-        -webkit-box-pack: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        overflow: hidden;
-        -webkit-box-shadow: 0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12);
-        box-shadow: 0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12);
+  vertical-align: middle;
+  border-radius: 25px;
+  width: 50px;
+  height: 50px;
+  margin: 0 auto;
+  -webkit-tap-highlight-color: transparent;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  position: relative;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  overflow: hidden;
+  -webkit-box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2),
+    0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2),
+    0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12);
 }
 
 .hidden {
-    display: none;
+  display: none;
 }
 
 .player-playback .icon {
-    font-size: 16px;
+  font-size: 16px;
 }
 
 .player-playback {
-    text-shadow: rgba(0, 0, 0, 0.4) 0px 0px 2px;
-    -webkit-box-orient: horizontal;
-    -webkit-box-direction: normal;
-    flex-direction: row;
-    display: flex;
-    position: relative;
+  text-shadow: rgba(0, 0, 0, 0.4) 0px 0px 2px;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  flex-direction: row;
+  display: flex;
+  position: relative;
 }
 
 .player-right {
-    min-width: 66.6666vw;
-    flex: 2 1 0%;
-    position: relative;
+  min-width: 66.6666vw;
+  flex: 2 1 0%;
+  position: relative;
 }
 
 .player-left {
-    width: 80px;
-    height: 80px;
-    position: relative;
+  width: 80px;
+  height: 80px;
+  position: relative;
 }
 
 .player-left .region {
-    min-height: 80px;
-    min-width: 80px;
-    height: 100%;
-    width: 100%;
-    position: relative;
+  min-height: 80px;
+  min-width: 80px;
+  height: 100%;
+  width: 100%;
+  position: relative;
 }
 
 .player-left--32 {
-    width: 40px;
-    height: 40px;
+  width: 40px;
+  height: 40px;
+  position: relative;
+
+  .region {
+    min-height: 40px;
+    min-width: 40px;
+    height: 100%;
+    width: 100%;
     position: relative;
+  }
 
-    .region {
-        min-height: 40px;
-        min-width: 40px;
-        height: 100%;
-        width: 100%;
-        position: relative;
-    }
+  .button-play {
+    width: 80%;
+    height: 80%;
+    left: 10%;
+    top: 10%;
+  }
 
-    .button-play {
-        width: 80%;
-        height: 80%;
-        left: 10%;
-        top: 10%;
-    }
-
-    .album-media .button-play {
-        font-size: 18px;
-    }
+  .album-media .button-play {
+    font-size: 18px;
+  }
 }
 
 .player-left--64 {
-    width: 60px;
-    height: 60px;
-    position: relative;
+  width: 60px;
+  height: 60px;
+  position: relative;
 
-    .region {
-        min-height: 60px;
-        min-width: 60px;
-        height: 100%;
-        width: 100%;
-        position: relative;
-    }
-    .button-play {
-        width: 80%;
-        height: 80%;
-        left: 10%;
-        top: 10%;
-    }
-    .album-media .button-play {
-        font-size: 20px;
-    }
+  .region {
+    min-height: 60px;
+    min-width: 60px;
+    height: 100%;
+    width: 100%;
+    position: relative;
+  }
+  .button-play {
+    width: 80%;
+    height: 80%;
+    left: 10%;
+    top: 10%;
+  }
+  .album-media .button-play {
+    font-size: 20px;
+  }
 }
 
 .album-media {
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-image: url(https://mosaic.scdn.co/640/ab67616d0000b27326a3ebdb4e994b45773488edab67616d0000b2734cd2daf399c4b20bbb1af2a0ab67616d0000b2736c81650e70bf2679e1fa03f7ab67616d0000b27389c3692370b29d8fd4bab431);
-    height: 100%;
-    position: relative;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-image: url(https://mosaic.scdn.co/640/ab67616d0000b27326a3ebdb4e994b45773488edab67616d0000b2734cd2daf399c4b20bbb1af2a0ab67616d0000b2736c81650e70bf2679e1fa03f7ab67616d0000b27389c3692370b29d8fd4bab431);
+  height: 100%;
+  position: relative;
 }
 
 .track-playback {
-    display: flex;
+  display: flex;
 }
 
 .album-media .button-play {
-    font-size: 24px;
-    padding-top: 0;
-    padding-bottom: 0;
+  font-size: 24px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .button-play {
-    color: lighten($text-color, 20%);
-    cursor: pointer;
-    transition: transform 0.1s ease 0s;
-    box-shadow: rgba(0, 0, 0, 0.4) 0px 0px 10px;
-    outline: none;
-    width: 50%;
-    height: 50%;
-    left: 25%;
-    top: 25%;
-    border-radius: 50%;
-    border: 1px;
-    border-style: solid;
-    border-color: lighten($text-color, 20%);
-    border-image: initial;
-    background: rgba(0, 0, 0, 0.5);
-    position: absolute;
+  color: lighten($text-color, 20%);
+  cursor: pointer;
+  transition: transform 0.1s ease 0s;
+  box-shadow: rgba(0, 0, 0, 0.4) 0px 0px 10px;
+  outline: none;
+  width: 50%;
+  height: 50%;
+  left: 25%;
+  top: 25%;
+  border-radius: 50%;
+  border: 1px;
+  border-style: solid;
+  border-color: lighten($text-color, 20%);
+  border-image: initial;
+  background: rgba(0, 0, 0, 0.5);
+  position: absolute;
 }
 
 .playback-info {
-    min-width: 0px;
-    flex: 100 1 0%;
-    min-height: 80px;
-    position: relative;
+  min-width: 0px;
+  flex: 100 1 0%;
+  min-height: 80px;
+  position: relative;
 }
 
 .track-info {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    text-decoration: none;
-    margin: 8px;
-    display: block;
-    cursor: pointer;
-    font-weight: 200;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-decoration: none;
+  margin: 8px;
+  display: block;
+  cursor: pointer;
+  font-weight: 200;
 }
 
 .album-title {
-    line-height: 19px;
-    font-size: 14px;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  line-height: 19px;
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .song-title {
-    overflow: hidden;
-    text-overflow: ellipsis;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .playback-controls {
-    position: absolute;
-    bottom: 0px;
-    width: 100%;
-    display: flex;
-    -webkit-box-orient: horizontal;
-    -webkit-box-direction: normal;
-    flex-direction: row;
-    -webkit-box-align: center;
-    align-items: center;
-    -webkit-box-pack: justify;
-    justify-content: space-between;
-    flex-wrap: nowrap;
-    margin: 0;
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  flex-direction: row;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: justify;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  margin: 0;
 }
 
 .extra-controls {
-    -webkit-box-pack: justify;
-    justify-content: space-between;
-    -webkit-box-align: center;
-    align-items: center;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    flex-direction: column;
-    display: flex;
+  -webkit-box-pack: justify;
+  justify-content: space-between;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  flex-direction: column;
+  display: flex;
 }
 
 .track-more {
-    padding: 10px 4px 10px 4px;
-    box-sizing: content-box;
-    height: 16px;
-    width: 16px;
-    background: transparent;
-    border: initial;
-    border-style: none;
-    border-color: initial;
-    border-image: initial;
-    cursor: pointer;
-    outline: none;
+  padding: 10px 4px 10px 4px;
+  box-sizing: content-box;
+  height: 16px;
+  width: 16px;
+  background: transparent;
+  border: initial;
+  border-style: none;
+  border-color: initial;
+  border-image: initial;
+  cursor: pointer;
+  outline: none;
 }
 
 .button-next,
 .button-previous {
-    padding: 2px 0;
-    width: 22px;
-    height: 22px;
-    box-sizing: content-box;
-    background: transparent;
-    border: initial;
-    border-style: none;
-    border-color: initial;
-    border-image: initial;
-    outline: none;
-    cursor: pointer;
+  padding: 2px 0;
+  width: 22px;
+  height: 22px;
+  box-sizing: content-box;
+  background: transparent;
+  border: initial;
+  border-style: none;
+  border-color: initial;
+  border-image: initial;
+  outline: none;
+  cursor: pointer;
 }
 
 .playback {
-    padding: 16px 0px;
-    position: relative;
-    -webkit-box-flex: 1;
-    flex-grow: 4;
-    margin: 0px;
+  padding: 16px 0px;
+  position: relative;
+  -webkit-box-flex: 1;
+  flex-grow: 4;
+  margin: 0px;
 }
 
 .playback-volume {
-    padding: 16px 0px;
-    position: relative;
-    -webkit-box-flex: 1;
-    flex-grow: 1;
-    margin: 0px;
+  padding: 16px 0px;
+  position: relative;
+  -webkit-box-flex: 1;
+  flex-grow: 1;
+  margin: 0px;
 }
 
 .progress-max {
-    flex: 4 1 0%;
-    height: 4px;
-    background-color: mediumorchid;
-    cursor: pointer;
-    outline: none;
+  flex: 4 1 0%;
+  height: 4px;
+  background-color: mediumorchid;
+  cursor: pointer;
+  outline: none;
 
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .progress {
-    width: 47%;
-    height: 4px;
-    background-color: mediumslateblue;
+  width: 47%;
+  height: 4px;
+  background-color: mediumslateblue;
 }
 
 .volume-marker,
 .time-played {
-    position: absolute;
-    left: calc(50% - 8px);
-    display: block;
-    padding: 2px 5px;
-    text-align: center;
-    font-size: 10px;
+  position: absolute;
+  left: calc(50% - 8px);
+  display: block;
+  padding: 2px 5px;
+  text-align: center;
+  font-size: 10px;
 }
 
 .time-next {
-    display: inline-block;
-    font-feature-settings: "tnum";
-    font-size: 10px;
-    vertical-align: top;
-    margin: 0px 4px;
-    white-space: nowrap;
+  display: inline-block;
+  font-feature-settings: "tnum";
+  font-size: 10px;
+  vertical-align: top;
+  margin: 0px 4px;
+  white-space: nowrap;
 }
 
 .stack {
-    margin: 8px 0px 0px 8px;
-    padding: 0px;
-    overflow-x: scroll;
-    overflow-y: hidden;
-    white-space: nowrap;
-    scroll-snap-type: x mandatory;
+  margin: 8px 0px 0px 8px;
+  padding: 0px;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
 }
 
 .stack .stack__card {
-    scroll-snap-align: start;
-    border: 1px solid silver;
-    display: inline-block;
-    width: 44vw;
-    position: -webkit-sticky;
-    position: sticky;
-    left: 0;
-    right: 0;
-    background-color: $default-color;
-    margin: 8px 0 0 8px;
-    transition: all .4s cubic-bezier(0.175, 0.885, 0, 1);
-    border-radius: 12px;
-    box-shadow: 0px 13px 10px -7px rgba(0, 0, 0,0.1);  
+  border: 1px solid silver;
+  display: inline-block;
+  width: 44vw;
+  background-color: $default-color;
+  margin: 8px 0 0 8px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0, 1);
+  border-radius: 12px;
+  box-shadow: 0px 13px 10px -7px rgba(0, 0, 0, 0.1);
+  transform: scale(1, 1);
 }
 
 .card__like {
-    width: 40px;
+  width: 40px;
 }
 
 .card__clock {
-    width: 15px;
+  width: 15px;
   vertical-align: middle;
-    fill: #AD7D52;
+  fill: #ad7d52;
 }
 .card__time {
-    font-size: 12px;
-    color: #AD7D52;
-    vertical-align: middle;
-    margin-left: 5px;
+  font-size: 12px;
+  color: #ad7d52;
+  vertical-align: middle;
+  margin-left: 5px;
 }
 
 .card__clock-info {
-    float: right;
+  float: right;
 }
 
 .card__img {
   visibility: hidden;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    width: 100%;
-    height: 235px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 235px;
   border-top-left-radius: 12px;
-border-top-right-radius: 12px;
-  
+  border-top-right-radius: 12px;
 }
 
 .card__info-hover {
-    position: absolute;
-    padding: 16px;
+  position: absolute;
+  padding: 16px;
   width: 100%;
   opacity: 0;
   top: 0;
@@ -423,167 +418,167 @@ border-top-right-radius: 12px;
 
 .card__img--hover {
   transition: 0.2s all ease-out;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    width: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
   position: absolute;
-    height: 100%;
+  height: 100%;
   border-top-left-radius: 12px;
-border-top-right-radius: 12px;
-top: 0;
-border-bottom-left-radius: 12px;
-border-bottom-right-radius: 12px;
+  border-top-right-radius: 12px;
+  top: 0;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 
 .stack__card:hover {
-  box-shadow: 0px 30px 18px -8px rgba(0, 0, 0,0.1);
-    transform: scale(1.01, 1.01);
+  box-shadow: 0px 30px 18px -8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.01, 1.01);
 }
 
 .card__info {
-    position: relative;
-    z-index: 2;
-    background-color: #bbbc;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-    padding: 12px 8px 12px 8px;
+  position: relative;
+  z-index: 2;
+  background-color: #bbbc;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  padding: 12px 8px 12px 8px;
 }
 
 .card__category {
-    text-transform: uppercase;
-    font-size: 13px;
-    letter-spacing: 2px;
-    font-weight: 500;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 2px;
+  font-weight: 500;
   color: #868686;
 }
 
 .card__title {
-    margin-top: 5px;
-    margin-bottom: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .stack__card h3,
 .stack__card .h3 {
-    font-size: 12px;
+  font-size: 12px;
 }
 
 .card__by {
-    font-size: 12px;
-    font-weight: 500;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .card__author {
-    font-weight: 600;
-    text-decoration: none;
-    color: #AD7D52;
+  font-weight: 600;
+  text-decoration: none;
+  color: #ad7d52;
 }
 
 .stack__card:hover .card__img--hover {
-    height: 235px;
-    opacity: 0.3;
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
+  height: 235px;
+  opacity: 0.3;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
 }
 
 .stack__card:hover .card__info {
-    background-color: transparent;
-    position: relative;
+  background-color: transparent;
+  position: relative;
 }
 
 .stack__card:hover .card__info-hover {
-    opacity: 1;
+  opacity: 1;
 }
 
 .stack__card .table-view {
-    margin-bottom: 0px;
-    overflow: auto;
+  margin-bottom: 0px;
+  overflow: auto;
 }
 
 .stack__card .table-view-cell {
-    padding: 2px;
-    font-size: 10px;
+  padding: 2px;
+  font-size: 10px;
 }
 
 .stack__card .table-view .media-object.pull-left {
-    margin-right: 5px;
+  margin-right: 5px;
 }
 
 .stack__card .table-view-cell p {
-    font-size: 10px;
+  font-size: 10px;
 }
 
 .stack__card .table-view-cell .badge {
-    font-size: 9px;
+  font-size: 9px;
 }
 
 .stack__card .toggle {
-    width: 30px;
-    height: 16px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
+  width: 30px;
+  height: 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
 }
 
 .stack__card .toggle .toggle-handle {
-    width: 16px;
-    height: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 .table-view-cell {
-    > .list-item:not(.btn) {
-        position: relative;
-        display: block;
-        padding: inherit;
-        margin: -11px -65px -11px -15px;
-        overflow: hidden;
-        color: inherit;
-    }
+  > .list-item:not(.btn) {
+    position: relative;
+    display: block;
+    padding: inherit;
+    margin: -11px -65px -11px -15px;
+    overflow: hidden;
+    color: inherit;
+  }
 
-    .media-body {
-        filter: drop-shadow(2px 4px 6px black);
-        .chips-list {
-            padding-top: 0;
-            display: inline;
-
-            .chips {
-                padding: 0 6px 0 6px;
-                margin: 0 2px 0 2px;
-            }
-        }
-    }
-
-    .media-object {
-    }
-
-    .navigate-right {
-        margin-right: 8px;
-    }
-
+  .media-body {
+    filter: drop-shadow(2px 4px 6px black);
     .chips-list {
-        padding-top: 10px;
-        display: block;
-    }
+      padding-top: 0;
+      display: inline;
 
-    .center {
+      .chips {
+        padding: 0 6px 0 6px;
+        margin: 0 2px 0 2px;
+      }
     }
+  }
+
+  .media-object {
+  }
+
+  .navigate-right {
+    margin-right: 8px;
+  }
+
+  .chips-list {
+    padding-top: 10px;
+    display: block;
+  }
+
+  .center {
+  }
 }
 
 .handle {
-    cursor: move;
-    position: absolute;
-    left: -4px;
-    top: 0;
-    bottom: 0;
-    width: 20px;
+  cursor: move;
+  position: absolute;
+  left: -4px;
+  top: 0;
+  bottom: 0;
+  width: 20px;
 }
 
 .handle:before {
-    content: 'drag_indicator';
-    position: absolute;
-    top: 30%;
-    width: 20px;
+  content: "drag_indicator";
+  position: absolute;
+  top: 30%;
+  width: 20px;
 }
 
 .dragged-place {
-    border: 1px dotted grey;
+  border: 1px dotted grey;
 }

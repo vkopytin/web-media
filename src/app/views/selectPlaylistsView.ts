@@ -1,9 +1,11 @@
 import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
+import { merge, of, Subject, Subscription } from 'rxjs';
+import { map, switchMap, takeUntil } from 'rxjs/operators';
 import * as _ from 'underscore';
 import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/selectPlaylists';
-import { current } from '../utils';
+import { Binding, current } from '../utils';
 import { DeviceViewModelItem, PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 
@@ -14,55 +16,63 @@ export interface ISelectPlaylistsViewProps {
     active?: boolean;
 }
 
-class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, SelectPlaylistsView['state']> {
+class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps> {
     playlistsViewModel = current(PlaylistsViewModel);
+    vm = this.props.track;
+    
+    errors$ = this.vm.errors$;
+    @Binding errors = this.errors$.getValue();
 
-    state = {
-        errors: [] as ServiceResult<any, Error>[],
-        items: [] as PlaylistsViewModelItem[],
-        playlists: [] as PlaylistsViewModelItem[],
-        track: (this as any).props.track as TrackViewModelItem
-    };
+    // playlists
+    allPlaylists$ = this.vm.allPlaylists$;
+    @Binding allPlaylists = this.allPlaylists$.getValue();
 
-    switchDeviceCommand = {
-        exec(device: DeviceViewModelItem) { }
-    };
-    addToPlaylistCommand = {
-        exec(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) { }
-    };
-    removeFromPlaylistCommand = {
-        exec(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) { }
-    };
+    //items
+    playlists$ = this.playlistsViewModel.playlists$;
+    @Binding playlists = this.playlists$.getValue();
 
-    fetchData = () => { };
+    fetchData = () => this.playlistsViewModel.fetchData();
 
-    binding = bindTo(this, () => this.state.track, {
-        'addToPlaylistCommand': 'addToPlaylistCommand',
-        'removeFromPlaylistCommand': 'removeFromPlaylistCommand',
-        'prop(items)': '.playlistsViewModel.playlists',
-        '-fetchData': '.playlistsViewModel.bind(fetchData)',
-        'prop(playlists)': 'playlists'
-    });
+    addToPlaylistCommand$ = this.vm.addToPlaylistCommand$;
+    @Binding addToPlaylistCommand = this.addToPlaylistCommand$.getValue();
+
+    removeFromPlaylistCommand$ = this.vm.removeFromPlaylistCommand$;
+    @Binding removeFromPlaylistCommand = this.removeFromPlaylistCommand$.getValue();
+
+    dispose$ = new Subject<void>();
+    disposeSubscription: Subscription;
 
     constructor(props) {
         super(props);
-        subscribeToChange(this.binding, () => {
+    }
+
+    componentDidMount() {
+        this.disposeSubscription = merge(
+            this.errors$.pipe(map(errors => ({ errors }))),
+            this.allPlaylists$.pipe(map(allPlaylists => ({ allPlaylists }))),
+            this.playlists$.pipe(map(playlists => ({ playlists }))),
+            this.addToPlaylistCommand$.pipe(map(addToPlaylistCommand => ({ addToPlaylistCommand }))),
+            this.removeFromPlaylistCommand$.pipe(map(removeFromPlaylistCommand => ({ removeFromPlaylistCommand }))),
+        ).pipe(
+            takeUntil(this.dispose$)
+        ).subscribe((v) => {
+            //console.log(v);
             this.setState({
                 ...this.state
             });
         });
     }
 
-    componentDidMount() {
-        updateLayout(this.binding);
-    }
-
     componentWillUnmount() {
-        unbindFrom(this.binding);
+        this.dispose$.next();
+        this.dispose$.complete();
     }
 
     componentDidUpdate(prevProps: ISelectPlaylistsViewProps, prevState, snapshot) {
-        this.prop('track', this.props.track);
+        if (this.props.track !== prevProps.track) {
+            this.componentWillUnmount();
+            this.componentDidMount();
+        }
     }
 
     addToPlaylist(playlist: PlaylistsViewModelItem) {
@@ -70,7 +80,8 @@ class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps, SelectPlay
     }
 
     playlistHasTrack(playlist: PlaylistsViewModelItem, track: TrackViewModelItem) {
-        return !!_.find(this.prop('playlists'), p => p.id() === playlist.id());
+        const res = _.find(this.allPlaylists, (p: PlaylistsViewModelItem) => p.id() === playlist.id());
+        return !!res;
     }
 
     showErrors(errors) {

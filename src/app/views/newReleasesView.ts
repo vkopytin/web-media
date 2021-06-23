@@ -1,9 +1,11 @@
 import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
+import { merge, of, Subject, Subscription } from 'rxjs';
+import { map, switchMap, takeUntil } from 'rxjs/operators';
 import * as _ from 'underscore';
 import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/newReleases';
-import { current } from '../utils';
+import { Binding, current } from '../utils';
 import { AlbumViewModelItem, NewReleasesViewModel, TrackViewModelItem } from '../viewModels';
 
 
@@ -12,57 +14,67 @@ export interface INewReleasesViewProps {
     currentTrackId: string;
 }
 
-class NewReleasesView extends BaseView<INewReleasesViewProps, NewReleasesView['state']> {
-    state = {
-        errors: [] as ServiceResult<any, Error>[],
-        openLogin: false,
-        releases: [] as AlbumViewModelItem[],
-        currentAlbum: null as AlbumViewModelItem,
-        likedAlbums: [] as AlbumViewModelItem[],
-        tracks: [] as TrackViewModelItem[]
-    };
+class NewReleasesView extends BaseView<INewReleasesViewProps> {
+    vm = current(NewReleasesViewModel);
     
-    selectAlbumCommand = {
-        exec(album: AlbumViewModelItem) { }
-    };
+    errors$ = this.vm.errors$;
+    @Binding errors = this.errors$.getValue();
 
-    likeAlbumCommand = {
-        exec(album: AlbumViewModelItem) { }
-    };
+    newReleases$ = this.vm.newReleases$;
+    @Binding newReleases = this.newReleases$.getValue();
 
-    unlikeAlbumCommand = {
-        exec(album: AlbumViewModelItem) { }
-    };
+    currentAlbum$ = this.vm.currentAlbum$;
+    @Binding currentAlbum = this.vm.currentAlbum$.getValue();
 
-    binding = bindTo(this, () => current(NewReleasesViewModel), {
-        'selectAlbumCommand': 'selectAlbumCommand',
-        'likeAlbumCommand': 'likeAlbumCommand',
-        'unlikeAlbumCommand': 'unlikeAlbumCommand',
-        'prop(releases)': 'newReleases',
-        'prop(currentAlbum)': 'currentAlbum',
-        'prop(tracks)': 'tracks',
-        'prop(likedAlbums)': 'likedAlbums'
-    });
+    tracks$ = this.vm.tracks$;
+    @Binding tracks = this.tracks$.getValue();
+
+    likedAlbums$ = this.vm.likedAlbums$;
+    @Binding likedAlbums = this.likedAlbums$.getValue();
+
+    selectAlbumCommand$ = this.vm.selectAlbumCommand$;
+    @Binding selectAlbumCommand = this.selectAlbumCommand$.getValue();
+
+    likeAlbumCommand$ = this.vm.likeAlbumCommand$;
+    @Binding likeAlbumCommand = this.likeAlbumCommand$.getValue();
+
+    unlikeAlbumCommand$ = this.vm.unlikeAlbumCommand$;
+    @Binding unlikeAlbumCommand = this.unlikeAlbumCommand$.getValue();
+
+    dispose$ = new Subject<void>();
+    disposeSubscription: Subscription;
 
     constructor(props) {
         super(props);
-        subscribeToChange(this.binding, () => {
+    }
+
+    componentDidMount() {
+        this.disposeSubscription = merge(
+            this.errors$.pipe(map(errors => ({ errors }))),
+            this.newReleases$.pipe(map(newReleases => ({ newReleases }))),
+            this.currentAlbum$.pipe(map(currentAlbum => ({ currentAlbum }))),
+            this.tracks$.pipe(map(tracks => ({ tracks }))),
+            this.likedAlbums$.pipe(map(likedAlbums => ({ likedAlbums }))),
+            this.selectAlbumCommand$.pipe(map(selectAlbumCommand => ({ selectAlbumCommand }))),
+            this.likeAlbumCommand$.pipe(map(likeAlbumCommand => ({ likeAlbumCommand }))),
+            this.unlikeAlbumCommand$.pipe(map(unlikeAlbumCommand => ({ unlikeAlbumCommand }))),
+        ).pipe(
+            takeUntil(this.dispose$)
+        ).subscribe((v) => {
+            //console.log(v);
             this.setState({
                 ...this.state
             });
         });
     }
 
-    componentDidMount() {
-        updateLayout(this.binding);
-    }
-
     componentWillUnmount() {
-        unbindFrom(this.binding);
+        this.dispose$.next();
+        this.dispose$.complete();
     }
 
     isLiked(album: AlbumViewModelItem) {
-        return !!_.find(this.prop('likedAlbums'), item => item.id() === album.id());
+        return !!_.find(this.likedAlbums, (item: AlbumViewModelItem) => item.id() === album.id());
     }
 
     showErrors(errors) {

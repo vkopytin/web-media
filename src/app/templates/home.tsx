@@ -10,14 +10,14 @@ const cn = utils.className;
 export const template = (view: HomeView) => <>
     <div className="center">
         <PickPlaylistsView showErrors={e => view.showErrors(e)} />
-        {view.prop('isLoading') || <button className="button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
+        {view.isLoading || <button className="button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
             onClick={evnt => view.refreshCommand.exec()}
         ></button>}
-        {view.prop('isLoading') && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
+        {view.isLoading && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
         ></button>}
     </div>
     <ul className="todo-list table-view">
-        {_.map(view.prop('items'), (item, index) =>
+        {_.map(view.tracks, (item: HomeView['tracks'][0], index) =>
             <li key={item.id()}>
                 <div className="table-view-cell media">
                     <div className="info-list">
@@ -26,7 +26,7 @@ export const template = (view: HomeView) => <>
                         >receipt</span>
                     </div>
                     <span className="media-object pull-left player-left--32"
-                        onClick={evnt => { item.playTracks(view.prop('items')) }}
+                        onClick={evnt => { item.playTracks(view.tracks) }}
                     >
                         <div className="region">
                             <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
@@ -38,33 +38,33 @@ export const template = (view: HomeView) => <>
                     </span>
                     <span className="list-item push-right">
                         <div className="media-body"
-                            onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}
+                            onClick={evnt => view.selectedTrack = view.selectedTrack === item ? null : item}
                         >
                             <div>
                                 <span className="song-title">{item.name()}</span>
                                 &nbsp;-&nbsp;
                                 <span className="author-title">{item.artist()}</span>
                             </div>
-                            <div className="album-title"><span>{item.album()}</span>{(view.prop('selectedItem')) !== item && <SelectPlaylistsView
+                            <div className="album-title"><span>{item.album()}</span>{view.selectedTrack !== item && <SelectPlaylistsView
                                 showErrors={e => view.showErrors(e)}
                                 className="chips-list"
                                 track={item}
                                 active={true} />}</div>
                         </div>
                     </span>
-                    {item.isLiked() && <span className="badge badge-positive"
+                    {item.isLiked && <span className="badge badge-positive"
                         onClick={evnt => view.unlikeTrackCommand.exec(item)}
                     >{item.duration()}</span>}
-                    {item.isLiked() || <span className="badge"
+                    {item.isLiked || <span className="badge"
                         onClick={evnt => view.likeTrackCommand.exec(item)}
                     >{item.duration()}</span>}
                 </div>
-                {(view.prop('selectedItem')) === item && <SelectPlaylistsView
+                {(view.selectedTrack) === item && <SelectPlaylistsView
                     showErrors={e => view.showErrors(e)}
                     className="chips-list"
                     track={item} />}
-                {(view.prop('trackLyrics') && view.prop('trackLyrics').trackId === item.id())
-                    && <div className="card">{_.map(view.prop('trackLyrics').lyrics.split('\n'), (line, index) => {
+                {(view.trackLyrics && view.trackLyrics.trackId === item.id())
+                    && <div className="card">{_.map(view.trackLyrics.lyrics.split('\n'), (line, index) => {
                         return <div key={index}>{line}</div>;
                     })}</div>}
             </li>

@@ -8,11 +8,11 @@ const cn = utils.className;
 
 export const template = (view: NewReleasesView) => <>
     <ul className="stack">
-        {_.map(view.prop('releases'), (item, index) => {
+        {_.map(view.newReleases, (item: NewReleasesView['newReleases'][0], index) => {
             return <li key={item.id()} className="stack__card">
                 <div className="card__img" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}></div>
                 <a href="#" className="card_link"
-                    onClick={evnt => { view.selectAlbumCommand.exec(view.prop('currentAlbum') === item ? null : item) }}
+                    onClick={evnt => { view.selectAlbumCommand.exec(view.currentAlbum === item ? null : item) }}
                 >
                     <div className="card__img--hover" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
                     </div>
@@ -42,11 +42,11 @@ export const template = (view: NewReleasesView) => <>
             </li>
         })}
     </ul>
-    {view.prop('currentAlbum') && <AlbumsView
+    {view.currentAlbum && <AlbumsView
         showErrors={e => view.showErrors(e)}
         currentTrackId={view.props.currentTrackId}
-        uri={view.prop('currentAlbum')?.uri()}
-        tracks={view.prop('tracks')}
+        uri={view.currentAlbum?.uri()}
+        tracks={view.tracks}
     />}
     <footer className="info content-padded">
         <p>Media Player</p>

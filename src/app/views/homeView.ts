@@ -1,10 +1,12 @@
 import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
+import { merge, of, Subject, Subscription } from 'rxjs';
+import { map, switchMap, takeUntil } from 'rxjs/operators';
 import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/home';
-import { current } from '../utils';
+import { Binding, current } from '../utils';
 import { HomeViewModel, TrackViewModelItem } from '../viewModels';
-
+import * as _ from 'underscore';
 
 export interface IHomeViewProps {
     currentTrackId: string;
@@ -12,52 +14,75 @@ export interface IHomeViewProps {
 }
 
 
-class HomeView extends BaseView<IHomeViewProps, HomeView['state']> {
-    state = {
-        errors: [] as ServiceResult<any, Error>[],
-        openLogin: false,
-        isLoading: false,
-        items: [] as TrackViewModelItem[],
-        likedTracks: [] as TrackViewModelItem[],
-        selectedItem: null as TrackViewModelItem,
-        trackLyrics: null as { trackId: string; lyrics: string }
-    };
+class HomeView extends BaseView<IHomeViewProps> {
+    vm = current(HomeViewModel);
+    
+    errors$ = this.vm.errors$;
+    @Binding errors = this.errors$.getValue();
 
-    refreshCommand = { exec() { throw new Error('Not bound command'); } };
-    selectTrackCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
-    likeTrackCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
-    unlikeTrackCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
-    findTrackLyricsCommand = { exec(track: TrackViewModelItem) { throw new Error('Not bound command'); } };
+    tracks$ = this.vm.tracks$;
+    @Binding tracks = this.tracks$.getValue();
 
-    binding = bindTo(this, () => current(HomeViewModel), {
-        '-errors': 'errors',
-        'refreshCommand': 'refreshCommand',
-        'selectTrackCommand': 'selectTrackCommand',
-        'likeTrackCommand': 'likeTrackCommand',
-        'unlikeTrackCommand': 'unlikeTrackCommand',
-        'findTrackLyricsCommand': 'findTrackLyricsCommand',
-        'prop(items)': 'tracks',
-        'prop(likedTracks)': 'likedTracks',
-        'prop(isLoading)': 'prop(isLoading)',
-        'prop(selectedItem)': 'prop(selectedTrack)',
-        'prop(trackLyrics)': 'prop(trackLyrics)'
-    });
+    likedTracks$ = this.vm.likedTracks$;
+    @Binding likedTracks = this.likedTracks$.getValue();
+
+    isLoading$ = this.vm.isLoading$;
+    @Binding isLoading = this.isLoading$.getValue();
+
+    selectedTrack$ = this.vm.selectedTrack$;
+    @Binding selectedTrack = this.selectedTrack$.getValue();
+
+    trackLyrics$ = this.vm.trackLyrics$;
+    @Binding trackLyrics = this.trackLyrics$.getValue();
+
+    refreshCommand$ = this.vm.refreshCommand$;
+    @Binding refreshCommand = this.refreshCommand$.getValue();
+
+    selectTrackCommand$ = this.vm.selectTrackCommand$;
+    @Binding selectTrackCommand = this.selectTrackCommand$.getValue();
+
+    likeTrackCommand$ = this.vm.likeTrackCommand$;
+    @Binding likeTrackCommand = this.likeTrackCommand$.getValue();
+
+    unlikeTrackCommand$ = this.vm.unlikeTrackCommand$;
+    @Binding unlikeTrackCommand = this.unlikeTrackCommand$.getValue();
+
+    findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
+    @Binding findTrackLyricsCommand = this.findTrackLyricsCommand$.getValue();
+
+    dispose$ = new Subject<void>();
+    queue$: Subscription;
 
     constructor(props) {
         super(props);
-        subscribeToChange(this.binding, () => {
+    }
+
+    componentDidMount() {
+        this.queue$ = merge(
+            this.tracks$.pipe(map(tracks => ({ tracks }))),
+            this.likedTracks$.pipe(map(likedTracks => ({ likedTracks }))),
+            this.selectedTrack$.pipe(map(selectedTrack => [{ selectedTrack }])),
+            this.trackLyrics$.pipe(map(trackLyrics => ({ trackLyrics }))),
+            this.isLoading$.pipe(map(isLoading => ({ isLoading }))),
+            this.refreshCommand$.pipe(map(refreshCommand => ({ refreshCommand }))),
+            this.selectTrackCommand$.pipe(map(selectTrackCommand => ({ selectTrackCommand }))),
+            this.likeTrackCommand$.pipe(map(likeTrackCommand => ({ likeTrackCommand }))),
+            this.unlikeTrackCommand$.pipe(map(unlikeTrackCommand => ({ unlikeTrackCommand }))),
+            this.findTrackLyricsCommand$.pipe(map(findTrackLyricsCommand => ({ findTrackLyricsCommand }))),
+            this.errors$.pipe(map(errors => ({ errors }))),
+        ).pipe(
+            takeUntil(this.dispose$)
+        ).subscribe((v) => {
+            //console.log(v)
             this.setState({
                 ...this.state
             });
         });
     }
 
-    componentDidMount() {
-        updateLayout(this.binding);
-    }
-
     componentWillUnmount() {
-        unbindFrom(this.binding);
+        this.dispose$.next();
+        this.dispose$.complete();
     }
 
     isPlaying(track: TrackViewModelItem) {

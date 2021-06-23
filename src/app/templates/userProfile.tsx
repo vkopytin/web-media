@@ -9,7 +9,7 @@ const cn = utils.className;
 export const template = (view: UserProfileView) => <div className={cn(`${view.props.className}`)}>
     <header className="bar bar-nav">
         <a className="icon icon-close pull-right" href="#"
-            onClick={evnt => view.props.openLogin(false)}
+            onClick={evnt => view.openLogin = false}
         ></a>
         <h1 className="title">
             <img className="spotify-logo" src={imgSrc.default} height="32" />
@@ -18,7 +18,7 @@ export const template = (view: UserProfileView) => <div className={cn(`${view.pr
 
     <div className="content">
         <p className="content-padded">
-            <a className="btn btn-block btn-outlined" href={view.prop('spotifyAuthUrl')}>
+            <a className="btn btn-block btn-outlined" href={view.spotifyAuthUrl}>
                 Login on Spotify
             </a>
         </p>
@@ -26,40 +26,40 @@ export const template = (view: UserProfileView) => <div className={cn(`${view.pr
             <div className="input-row">
                 <label>Full name</label>
                 <input type="text" placeholder="Enter your Fulll name"
-                    defaultValue={view.prop('profile').display_name}
+                    defaultValue={view.profile.display_name}
                 />
             </div>
             <div className="input-row">
                 <label>Email</label>
                 <input type="email" placeholder="<example>@<mail>.<com>"
-                    defaultValue={view.prop('profile').email}
+                    defaultValue={view.profile.email}
                 />
             </div>
             <div className="input-row">
                 <label>Birthday</label>
                 <input type="text" placeholder="Product name"
-                    defaultValue={view.prop('profile').birthdate}
+                    defaultValue={view.profile.birthdate}
                 />
             </div>
             <div className="input-row">
                 <label>Product</label>
                 <input type="text" placeholder="Product name"
-                    defaultValue={view.prop('profile').product}
+                    defaultValue={view.profile.product}
                 />
             </div>
             <div className="input-row">
                 <label>ApiSeeds Key</label>
                 <input type="text" placeholder="API key"
-                    onChange={evnt => view.prop('apiseedsKey', evnt.target.value)}
-                    defaultValue={view.prop('apiseedsKey')}
+                    onChange={evnt => view.apiseedsKey = evnt.target.value}
+                    defaultValue={view.apiseedsKey}
                 />
             </div>
         </form>
         <ul className="table-view">
-            {_.map(view.prop('topTracks'), (item, index) => {
+            {_.map(view.topTracks, (item, index) => {
                 return <li key={item.id()} className="table-view-cell media">
                     <span className="media-object pull-left player-left--32"
-                        onClick={evnt => item.playTracks(view.prop('topTracks'))}
+                        onClick={evnt => item.playTracks(view.topTracks)}
                     >
                         <div className="region">
                             <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>

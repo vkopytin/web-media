@@ -2,51 +2,52 @@ import * as _ from 'underscore';
 import { ISpotifySong, IUserPlaylist } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
-import { assertNoErrors, current, formatTime } from '../utils';
+import { assertNoErrors, current, formatTime, State } from '../utils';
 import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModel } from './playlistsViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { SpotifyService } from '../service/spotify';
+import { BehaviorSubject } from 'rxjs';
+import { ServiceResult } from '../base/serviceResult';
 
 
 class TrackViewModelItem extends ViewModel<TrackViewModelItem['settings']> {
     appViewModel = current(AppViewModel);
     playlistsViewModel = current(PlaylistsViewModel);
+
+    errors$: BehaviorSubject<TrackViewModelItem['errors']>;
+    @State errors = [] as ServiceResult<any, Error>[];
+
+    isLiked$: BehaviorSubject<TrackViewModelItem['isLiked']>;
+    @State isLiked = false;
+
+    isCached$: BehaviorSubject<TrackViewModelItem['isCached']>;
+    @State isCached = false;
+
+    allPlaylists$: BehaviorSubject<TrackViewModelItem['allPlaylists']>;
+    @State allPlaylists = [] as PlaylistsViewModelItem[];
+    
     settings = {
         ...(this as any as ViewModel).settings,
         isLiked: false,
         isCached: false,
-        playlists: [] as PlaylistsViewModelItem[]
     };
 
-    addToPlaylistCommand = { exec: (track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.addToPlaylist(track, playlist) };
-    removeFromPlaylistCommand = { exec: (track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist) };
+    addToPlaylistCommand$: BehaviorSubject<TrackViewModelItem['addToPlaylistCommand']>;
+    @State addToPlaylistCommand = { exec: (track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.addToPlaylist(track, playlist) };
+
+    removeFromPlaylistCommand$: BehaviorSubject<TrackViewModelItem['removeFromPlaylistCommand']>;
+    @State removeFromPlaylistCommand = { exec: (track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist) };
 
     isInit = _.delay(() => {
         this.connect();
+        this.allPlaylists$.subscribe((val) => {
+            this.updateIsCached(val);
+        })
     });
 
     constructor(public song: ISpotifySong, private index: number, private ss = current(Service)) {
         super();
-    }
-
-    playlists(val?: PlaylistsViewModelItem[]) {
-        if (arguments.length && this.settings.playlists !== val) {
-            this.settings.playlists = val;
-            this.updateIsCached(val);
-            this.trigger('change:playlists');
-        }
-
-        return this.settings.playlists;
-    }
-
-    isLiked(val?) {
-        if (arguments.length && val !== this.settings.isLiked) {
-            this.settings.isLiked = val;
-            this.trigger('change:isLiked');
-        }
-
-        return this.settings.isLiked;
     }
 
     id() {
@@ -81,7 +82,7 @@ class TrackViewModelItem extends ViewModel<TrackViewModelItem['settings']> {
 
     async connect() {
         const spotifyResult = await this.ss.service(SpotifyService);
-        if (assertNoErrors(spotifyResult, e => this.errors(e))) {
+        if (assertNoErrors(spotifyResult, e => this.errors = e)) {
             return;
         }
         const spotify = spotifyResult.val;
@@ -93,33 +94,33 @@ class TrackViewModelItem extends ViewModel<TrackViewModelItem['settings']> {
 
     async playTracks(tracks: TrackViewModelItem[]) {
         const playResult = this.ss.play(null, _.map(tracks, item => item.uri()), this.uri());
-        assertNoErrors(playResult, e => this.errors(e));
+        assertNoErrors(playResult, e => this.errors = e);
     }
 
     async addToPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
         const result = await this.ss.addTrackToPlaylist(track.song.track, playlist.playlist);
-        if (assertNoErrors(result, e => this.errors(e))) {
+        if (assertNoErrors(result, e => this.errors = e)) {
             return;
         }
     }
 
     async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
         const result = await this.ss.removeTrackFromPlaylist(track.song.track, playlist.id());
-        if (assertNoErrors(result, e => this.errors(e))) {
+        if (assertNoErrors(result, e => this.errors = e)) {
             return;
         }
     }
 
     async likeTrack() {
         const result = await this.ss.addTracks(this.song.track);
-        if (assertNoErrors(result, e => this.errors(e))) {
+        if (assertNoErrors(result, e => this.errors = e)) {
             return;
         }
     }
 
     async unlikeTrack() {
         const result = await this.ss.removeTracks(this.song.track);
-        if (assertNoErrors(result, e => this.errors(e))) {
+        if (assertNoErrors(result, e => this.errors = e)) {
             return;
         }
     }

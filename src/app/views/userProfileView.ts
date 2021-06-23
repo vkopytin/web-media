@@ -5,64 +5,81 @@ import { template } from '../templates/userProfile';
 import { current } from '../utils';
 import { TrackViewModelItem, UserProfileViewModel } from '../viewModels';
 import { IUserInfo } from '../adapter/spotify';
+import { BehaviorSubject, merge, of, Subject, Subscription } from 'rxjs';
+import { Binding } from '../utils';
+import { map, switchMap, takeUntil } from 'rxjs/operators';
 
 
 export interface IUserProfileViewProps {
     className?: string;
     showErrors(errors: ServiceResult<any, Error>[]);
-    openLogin(open): void
+    openLogin$: BehaviorSubject<boolean>;
 }
 
-class UserProfileView extends BaseView<IUserProfileViewProps, UserProfileView['state']> {
-    state = {
-        errors: [] as ServiceResult<any, Error>[],
-        tracks: [] as TrackViewModelItem[],
-        profile: {} as IUserInfo,
-        topTracks: [] as TrackViewModelItem[],
-        spotifyAuthUrl: '',
-        geniusAuthUrl: '',
-        currentTrackId: '',
-        apiseedsKey: ''
-    };
+class UserProfileView extends BaseView<IUserProfileViewProps> {
+    vm = current(UserProfileViewModel);
 
-    binding = bindTo(this, () => current(UserProfileViewModel), {
-        'prop(tracks)': 'tracks',
-        'prop(profile)': 'profile',
-        'prop(currentTrackId)': 'currentTrackId',
-        'prop(topTracks)': 'topTracks',
-        'prop(spotifyAuthUrl)': 'prop(spotifyAuthUrl)',
-        'prop(geniusAuthUrl)': 'prop(geniusAuthUrl)',
-        'prop(apiseedsKey)': 'apiseedsKey'
-    });
+    errors$ = this.vm.errors$;
+    @Binding errors = this.errors$.getValue();
+
+    openLogin$ = this.props.openLogin$;
+    @Binding openLogin = this.openLogin$.getValue();
+
+    profile$ = this.vm.profile$;
+    @Binding profile = this.profile$.getValue();
+
+    currentTrackId$ = this.vm.currentTrackId$;
+    @Binding currentTrackId = this.currentTrackId$.getValue();
+
+    topTracks$ = this.vm.topTracks$;
+    @Binding topTracks = [] as TrackViewModelItem[];
+
+    tracks$ = this.vm.tracks$;
+    @Binding tracks = [] as TrackViewModelItem[];
+
+    spotifyAuthUrl$ = this.vm.spotifyAuthUrl$;
+    @Binding spotifyAuthUrl = this.spotifyAuthUrl$.getValue();
+
+    geniusAuthUrl$ = this.vm.geniusAuthUrl$;
+    @Binding geniusAuthUrl = this.geniusAuthUrl$.getValue();
+
+    apiseedsKey$ = this.vm.apiseedsKey$;
+    @Binding apiseedsKey = this.apiseedsKey$.getValue();
+
+    dispose$ = new Subject<void>();
+    queue$: Subscription;
 
     constructor(props) {
         super(props);
-        subscribeToChange(this.binding, () => {
+    }
+
+    componentDidMount() {
+        this.queue$ = merge(
+            this.openLogin$.pipe(map(openLogin => ({openLogin}))),
+            this.profile$.pipe(map(profile => ({profile}))),
+            this.currentTrackId$.pipe(map(currentTrackId => ({currentTrackId}))),
+            this.topTracks$.pipe(map(topTracks => ({topTracks}))),
+            this.tracks$.pipe(map(tracks => ({tracks}))),
+            this.spotifyAuthUrl$.pipe(map(spotifyAuthUrl => ({spotifyAuthUrl}))),
+            this.geniusAuthUrl$.pipe(map(geniusAuthUrl => ({geniusAuthUrl}))),
+            this.apiseedsKey$.pipe(map(apiseedsKey => ({ apiseedsKey }))),
+        ).pipe(
+            takeUntil(this.dispose$)
+        ).subscribe((v) => {
+            //console.log(v);
             this.setState({
                 ...this.state
             });
         });
     }
 
-    componentDidMount() {
-        updateLayout(this.binding);
-    }
-
     componentWillUnmount() {
-        unbindFrom(this.binding);
+        this.dispose$.next();
+        this.dispose$.complete();
     }
 
     isPlaying(track: TrackViewModelItem) {
-        return this.prop('currentTrackId') === track.id();
-    }
-
-    errors(val?: ServiceResult<any, Error>[]) {
-        if (arguments.length && val !== this.prop('errors')) {
-            this.prop('errors', val);
-            this.props.showErrors(val);
-        }
-
-        return this.prop('errors');
+        return this.currentTrackId === track.id();
     }
 
     showErrors(errors) {

@@ -8,7 +8,7 @@ const cn = utils.className;
 
 export const template = (view: MyTracksView) => <>
     <ul className="todo-list table-view">
-        {_.map(view.prop('items'), (item, index) => {
+        {_.map(view.tracks, (item: MyTracksView['tracks'][0], index) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media">
                     <div className="info-list">
@@ -18,7 +18,7 @@ export const template = (view: MyTracksView) => <>
                         >receipt</span>
                     </div>
                     <span className="media-object pull-left player-left--32"
-                        onClick={evnt => item.playTracks(view.prop('items'))}
+                        onClick={evnt => item.playTracks(view.tracks)}
                     >
                         <div className="region">
                             <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
@@ -29,7 +29,7 @@ export const template = (view: MyTracksView) => <>
                         </div>
                     </span>
                     <div className="media-body"
-                        onClick={evnt => view.prop('selectedItem', view.prop('selectedItem') === item ? null : item)}
+                        onClick={evnt => view.selectedItem = view.selectedItem === item ? null : item}
                     >
                         <div>
                             <span className="song-title">{item.name()}</span>
@@ -37,27 +37,27 @@ export const template = (view: MyTracksView) => <>
                                 <span className="author-title">{item.artist()}</span>
                         </div>
                         <div className="album-title">{item.album()}</div>
-                        {(view.prop('selectedItem')) !== item && <SelectPlaylistsView
+                        {view.selectedItem !== item && <SelectPlaylistsView
                             showErrors={e => view.showErrors(e)}
                             track={item} active={true} />}
                     </div>
-                    {(view.prop('selectedItem')) === item && <SelectPlaylistsView
+                    {view.selectedItem === item && <SelectPlaylistsView
                         showErrors={e => view.showErrors(e)}
                         track={item} />}
-                    {item.isLiked() && <span className="badge badge-positive">{item.duration()}</span>}
-                    {item.isLiked() || <span className="badge">{item.duration()}</span>}
+                    {item.isLiked && <span className="badge badge-positive">{item.duration()}</span>}
+                    {item.isLiked || <span className="badge">{item.duration()}</span>}
                 </div>
-                {(view.prop('trackLyrics') && view.prop('trackLyrics').trackId === item.id())
-                && <div className="card">{_.map(view.prop('trackLyrics').lyrics.split('\n'), (line, index) => {
+                {(view.trackLyrics && view.trackLyrics.trackId === item.id())
+                && <div className="card">{_.map(view.trackLyrics.lyrics.split('\n'), (line, index) => {
                     return <div key={index}>{line}</div>;
                 })}</div>}
             </li>
         })}
     </ul>
     <div className="center">
-        {view.prop('isLoading') || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
+        {view.isLoading || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
             onClick={evnt => view.loadMoreCommand.exec()}
         ></button>}
-        {view.prop('isLoading') && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
+        {view.isLoading && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
     </div>
 </>;

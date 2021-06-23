@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IDevice, IResponseResult, ITrack, IUserInfo } from '../adapter/spotify';
 import { ViewModel } from '../base/viewModel';
@@ -7,26 +8,52 @@ import { SpotifySyncService } from '../service/spotifySyncService';
 import { assertNoErrors, current } from '../utils';
 import { DeviceViewModelItem } from './deviceViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
+import { State } from '../utils';
+import { ServiceResult } from '../base/serviceResult';
 
+
+type PanelType = 'home' | 'playlists' | 'profile' | 'releases' | 'search' | 'tracks';
 
 class AppViewModel extends ViewModel<AppViewModel['settings']> {
+    openLogin$: BehaviorSubject<boolean>;
+    @State openLogin = false;
+
+    currentPanel$: BehaviorSubject<PanelType>;
+    @State currentPanel: PanelType = 'home';
+
+    devices$: BehaviorSubject<DeviceViewModelItem[]>;
+    @State devices: DeviceViewModelItem[] = [];
+
+    profile$: BehaviorSubject<IUserInfo>;
+    @State profile: IUserInfo = {};
+
+    refreshDevicesCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
+    @State refreshDevicesCommand = { exec: () => this.updateDevices() };
+
+    switchDeviceCommand$: BehaviorSubject<{ exec: (a) => Promise<void> }>;
+    @State switchDeviceCommand = { exec: (device: DeviceViewModelItem) => this.switchDevice(device) };
+
+    refreshTokenCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
+    @State refreshTokenCommand = { exec: () => this.refreshToken() };
+
+    currentTrackId$: BehaviorSubject<string>;
+    @State currentTrackId = '';
+
+    topTracks$: BehaviorSubject<TrackViewModelItem[]>;
+    @State topTracks = [] as TrackViewModelItem[];
+
+    currentDevice$: BehaviorSubject<DeviceViewModelItem>;
+    @State currentDevice = null as DeviceViewModelItem;
+
+    autoRefreshUrl$: BehaviorSubject<string>;
+    @State autoRefreshUrl = '';
+
+    errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
+    @State errors = [] as ServiceResult<any, Error>[];
 
     settings = {
         ...(this as any as ViewModel).settings,
-        openLogin: false,
-        currentPanel: 'home' as 'home' | 'profile',
-        currentDevice: null as DeviceViewModelItem,
-        currentTrackId: '',
-        devices: [] as DeviceViewModelItem[],
-        topTracks: [] as TrackViewModelItem[],
-        spotifyAuthUrl: '',
-        autoRefreshUrl: ''
     };
-
-    switchDeviceCommand = { exec: (device: DeviceViewModelItem) => this.switchDevice(device) };
-    refreshTokenCommand = { exec: () => this.refreshToken() };
-    refreshDevicesCommand = { exec: () => this.updateDevices() };
-    userInfo = {} as IUserInfo;
 
     isInit = _.delay(() => {
         this.init();
@@ -39,78 +66,15 @@ class AppViewModel extends ViewModel<AppViewModel['settings']> {
         super();
     }
 
-    currentPanel(val?) {
-        if (arguments.length) {
-            this.settings.currentPanel = val;
-            this.trigger('change:currentPanel');
-        }
-
-        return this.settings.currentPanel;
-    }
-
-    currentDevice(val?: DeviceViewModelItem) {
-        if (arguments.length) {
-            this.settings.currentDevice = val;
-            this.trigger('change:currentDevice');
-        }
-
-        return this.settings.currentDevice;
-    }
-
-    devices(val?: DeviceViewModelItem[]) {
-        if (arguments.length && this.settings.devices !== val) {
-            this.settings.devices = val;
-            this.trigger('change:devices');
-        }
-
-        return this.settings.devices;
-    }
-
-    profile(val?) {
-        if (arguments.length && this.userInfo !== val) {
-            this.userInfo = val;
-            this.trigger('change:profile');
-        }
-
-        return this.userInfo;
-    }
-
-    currentTrackId(val?) {
-        if (arguments.length && val !== this.settings.currentTrackId) {
-            this.settings.currentTrackId = val;
-            this.trigger('change:currentTrackId');
-        }
-
-        return this.settings.currentTrackId;
-    }
-
-    topTracks(val?) {
-        if (arguments.length && val !== this.settings.topTracks) {
-            this.settings.topTracks = val;
-            this.trigger('change:topTracks');
-        }
-
-        return this.settings.topTracks;
-    }
-
-    openLogin(val?) {
-        if (arguments.length) {
-            this.settings.openLogin = !!val;
-            this.trigger('change:openLogin');
-        }
-
-        return this.settings.openLogin;
-    }
-
     async init() {
         if (window.parent === window) {
             $(window).on('message', async evnt => {
                 const [eventName, value] = (evnt.originalEvent as any).data;
                 switch (eventName) {
                     case 'accessToken':
-                        this.prop('autoRefreshUrl', '');
+                        this.autoRefreshUrl = '';
                         await this.ss.refreshToken(value);
-                        this.openLogin(false);
+                        this.openLogin = false;
                     default:
                         break;
                 }
@@ -120,7 +84,7 @@ class AppViewModel extends ViewModel<AppViewModel['settings']> {
 
     async startSync() {
         const syncServiceResult = await this.ss.service(SpotifySyncService);
-        if (assertNoErrors(syncServiceResult, e => this.errors(e))) {
+        if (assertNoErrors(syncServiceResult, e => this.errors = e)) {
             return;
         }
         const syncService = syncServiceResult.val;
@@ -129,31 +93,31 @@ class AppViewModel extends ViewModel<AppViewModel['settings']> {
 
     async refreshToken() {
         const tokenUrlResult = await this.ss.getSpotifyAuthUrl();
-        if (assertNoErrors(tokenUrlResult, e => this.errors(e))) {
+        if (assertNoErrors(tokenUrlResult, e => this.errors = e)) {
 
             return;
         }
         const spotifyAuthUrl = tokenUrlResult.val as string;
-        this.prop('autoRefreshUrl', spotifyAuthUrl + '23');
+        this.autoRefreshUrl = spotifyAuthUrl + '23';
         console.log('updating token');
     }
 
     async connect() {
         const isLoggedInResult = await this.ss.isLoggedIn();
 
-        if (assertNoErrors(isLoggedInResult, e => this.errors(e))) {
+        if (assertNoErrors(isLoggedInResult, e => this.errors = e)) {
             return;
         }
 
-        this.openLogin(!isLoggedInResult.val);
+        this.openLogin = !isLoggedInResult.val;
 
         const playerResult = await this.ss.spotifyPlayer();
-        if (assertNoErrors(playerResult, e => this.errors(e))) {
+        if (assertNoErrors(playerResult, e => this.errors = e)) {
             return;
         }
         const updateDevicesHandler = async (eventName: string, device: { device_id: string; }) => {
             await this.updateDevices();
-            if (!this.currentDevice()) {
+            if (!this.currentDevice) {
                 this.ss.player(device.device_id, false);
             }
             playerResult.val.off('ready', updateDevicesHandler);
@@ -164,18 +128,18 @@ class AppViewModel extends ViewModel<AppViewModel['settings']> {
     async fetchData() {
         const userInfoResult = await this.ss.profile();
 
-        if (assertNoErrors(userInfoResult, e => this.errors(e))) {
+        if (assertNoErrors(userInfoResult, e => this.errors = e)) {
             return;
         }
-        this.profile(userInfoResult.val);
+        this.profile = userInfoResult.val;
 
         await this.updateDevices();
         const topTracksResult = await this.ss.listTopTracks();
-        if (assertNoErrors(topTracksResult, e => this.errors(e))) {
+        if (assertNoErrors(topTracksResult, e => this.errors = e)) {
             return;
         }
         const topTracks = topTracksResult.val as IResponseResult<ITrack>;
-        this.topTracks(_.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index)));
+        this.topTracks = _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index));
     }
 
     async updateDevices() {
@@ -183,11 +147,11 @@ class AppViewModel extends ViewModel<AppViewModel['settings']> {
 
         if (!devicesResult.isError) {
             const devices = devicesResult.val as IDevice[];
-            this.devices(_.map(devices, item => new DeviceViewModelItem(item)));
+            this.devices = _.map(devices, item => new DeviceViewModelItem(item));
         }
 
-        const currentDevice = _.find<DeviceViewModelItem>(this.devices(), d => d.isActive()) || null;
-        this.currentDevice(currentDevice);
+        const currentDevice = _.find<DeviceViewModelItem>(this.devices, d => d.isActive()) || null;
+        this.currentDevice = currentDevice;
     }
 
     switchDevice(device: DeviceViewModelItem) {
