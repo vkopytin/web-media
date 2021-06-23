@@ -1,13 +1,12 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IRecommendationsResult, IResponseResult, ISpotifySong, ITrack } from '../adapter/spotify';
-import { ViewModel } from '../base/viewModel';
+import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
+import { SpotifyService } from '../service/spotify';
 import { assertNoErrors, current, State } from '../utils';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
-import { SpotifyService } from '../service/spotify';
-import { BehaviorSubject } from 'rxjs';
-import { ServiceResult } from '../base/serviceResult';
 
 
 function isLoading(target, key, descriptor) {
@@ -32,7 +31,7 @@ function isLoading(target, key, descriptor) {
     return descriptor;
 }
 
-class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
+class HomeViewModel {
     errors$: BehaviorSubject<HomeViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
@@ -54,10 +53,6 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
     selectedPlaylist$: BehaviorSubject<HomeViewModel['selectedPlaylist']>;
     @State selectedPlaylist = null as PlaylistsViewModelItem;
     
-    settings = {
-        ...(this as any as ViewModel).settings,
-    };
-
     refreshCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
     @State refreshCommand = { exec: () => this.fetchData() };
 
@@ -82,8 +77,6 @@ class HomeViewModel extends ViewModel<HomeViewModel['settings']> {
     }, 100);
 
     constructor(private ss = current(Service)) {
-        super();
-
         this.ss.spotifyPlayer();
     }
 

@@ -1,27 +1,19 @@
-import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import { merge, of, Subject, Subscription } from 'rxjs';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
-import { BaseView } from '../base/baseView';
+import React from 'react';
+import { merge, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/devices';
-import { current } from '../utils';
+import { Binding, current } from '../utils';
 import { AppViewModel, DeviceViewModelItem } from '../viewModels';
-import { Binding } from '../utils';
-import * as _ from 'underscore';
 
 export interface IDevicesViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
     openShowDevices(showHide);
 }
 
-class DevicesView extends BaseView<IDevicesViewProps, DevicesView['state']> {
+class DevicesView extends React.Component<IDevicesViewProps> {
     vm = current(AppViewModel);
     
-    state = {
-        errors: [] as ServiceResult<any, Error>[],
-        devices: [] as DeviceViewModelItem[],
-    };
-
     switchDeviceCommand$ = this.vm.switchDeviceCommand$;
     @Binding switchDeviceCommand = this.switchDeviceCommand$.getValue();
 
@@ -33,10 +25,6 @@ class DevicesView extends BaseView<IDevicesViewProps, DevicesView['state']> {
 
     dispose$ = new Subject<void>();
     queue$: Subscription;
-
-    constructor(props) {
-        super(props);
-    }
 
     componentDidMount() {
         this.queue$ = merge(

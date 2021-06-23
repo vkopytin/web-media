@@ -1,13 +1,10 @@
-import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import { BaseView } from '../base/baseView';
+import React from 'react';
+import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/albums';
-import { TrackViewModelItem } from '../viewModels';
-import * as _ from 'underscore';
-import { BehaviorSubject, merge, of, Subject, Subscription } from 'rxjs';
-import { ViewModel } from '../base/viewModel';
 import { Binding, current, State } from '../utils';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
+import { TrackViewModelItem } from '../viewModels';
 
 export interface IAlbumsViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
@@ -16,17 +13,16 @@ export interface IAlbumsViewProps {
     tracks: TrackViewModelItem[];
 }
 
-class AlbumsViewModel extends ViewModel<AlbumsViewModel['settings']> {
+class AlbumsViewModel {
     errors$: BehaviorSubject<AlbumsViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
     tracks$: BehaviorSubject<AlbumsViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
 
-    settings = {};
 }
 
-class AlbumsView extends BaseView<IAlbumsViewProps, AlbumsView['state']> {
+class AlbumsView extends React.Component<IAlbumsViewProps> {
     vm = current(AlbumsViewModel);
     
     errors$ = this.vm.errors$;
@@ -40,10 +36,6 @@ class AlbumsView extends BaseView<IAlbumsViewProps, AlbumsView['state']> {
     
     dispose$ = new Subject<void>();
     queue$: Subscription;
-
-    constructor(props) {
-        super(props);
-    }
 
     componentDidMount() {
         this.queue$ = merge(

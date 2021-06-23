@@ -1,12 +1,11 @@
-import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import { merge, of, Subject, Subscription } from 'rxjs';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
+import React from 'react';
+import { merge, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import * as _ from 'underscore';
-import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/selectPlaylists';
 import { Binding, current } from '../utils';
-import { DeviceViewModelItem, PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
+import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 
 export interface ISelectPlaylistsViewProps {
@@ -16,7 +15,7 @@ export interface ISelectPlaylistsViewProps {
     active?: boolean;
 }
 
-class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps> {
+class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
     playlistsViewModel = current(PlaylistsViewModel);
     vm = this.props.track;
     
@@ -41,10 +40,6 @@ class SelectPlaylistsView extends BaseView<ISelectPlaylistsViewProps> {
 
     dispose$ = new Subject<void>();
     disposeSubscription: Subscription;
-
-    constructor(props) {
-        super(props);
-    }
 
     componentDidMount() {
         this.disposeSubscription = merge(

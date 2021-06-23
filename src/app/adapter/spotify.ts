@@ -47,8 +47,8 @@ export interface ITrack {
     album: IAlbum;
     artists: IArtist[];
     uri: string;
-    duration_ms: number;
-    track_number: number;
+    duration_ms?: number;
+    track_number?: number;
 }
 
 export interface IArtist {

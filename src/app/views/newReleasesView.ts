@@ -1,12 +1,11 @@
-import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import { merge, of, Subject, Subscription } from 'rxjs';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
+import React from 'react';
+import { merge, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import * as _ from 'underscore';
-import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/newReleases';
 import { Binding, current } from '../utils';
-import { AlbumViewModelItem, NewReleasesViewModel, TrackViewModelItem } from '../viewModels';
+import { AlbumViewModelItem, NewReleasesViewModel } from '../viewModels';
 
 
 export interface INewReleasesViewProps {
@@ -14,7 +13,7 @@ export interface INewReleasesViewProps {
     currentTrackId: string;
 }
 
-class NewReleasesView extends BaseView<INewReleasesViewProps> {
+class NewReleasesView extends React.Component<INewReleasesViewProps> {
     vm = current(NewReleasesViewModel);
     
     errors$ = this.vm.errors$;
@@ -43,10 +42,6 @@ class NewReleasesView extends BaseView<INewReleasesViewProps> {
 
     dispose$ = new Subject<void>();
     disposeSubscription: Subscription;
-
-    constructor(props) {
-        super(props);
-    }
 
     componentDidMount() {
         this.disposeSubscription = merge(

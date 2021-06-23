@@ -16,7 +16,7 @@ export const template = (view: TracksView) => <>
                     
                 ></span>
                 <div className="info-list">
-                    {item.prop('isCached') && <span className="info-item material-icons">delete</span>}
+                    {item.isCached && <span className="info-item material-icons">delete</span>}
                     <span className="info-item material-icons"
                         onClick={() => view.findTrackLyricsCommand.exec(item)}
                     >receipt</span>

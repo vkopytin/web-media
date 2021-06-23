@@ -1,13 +1,10 @@
-import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import * as _ from 'underscore';
-import { BaseView } from '../base/baseView';
+import React from 'react';
+import { merge, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/myTracks';
-import { current } from '../utils';
+import { Binding, current } from '../utils';
 import { MyTracksViewModel, TrackViewModelItem } from '../viewModels';
-import { Binding } from '../utils';
-import { merge, of, Subject, Subscription } from 'rxjs';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
 
 export interface IMyTracksViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
@@ -15,7 +12,7 @@ export interface IMyTracksViewProps {
     currentTrackId: string;
 }
 
-class MyTracksView extends BaseView<IMyTracksViewProps, MyTracksView['state']> {
+class MyTracksView extends React.Component<IMyTracksViewProps> {
     vm = current(MyTracksViewModel);
 
     errors$ = this.vm.errors$;
@@ -48,14 +45,6 @@ class MyTracksView extends BaseView<IMyTracksViewProps, MyTracksView['state']> {
 
     dispose$ = new Subject<void>();
     disposeSubscription: Subscription;
-
-    searchTracks = _.debounce(term => {
-        this.prop('term', term);
-    }, 500);
-
-    constructor(props) {
-        super(props);
-    }
 
     componentDidMount() {
         this.disposeSubscription = merge(

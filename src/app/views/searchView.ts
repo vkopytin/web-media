@@ -1,14 +1,11 @@
-import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import { BehaviorSubject, merge, of, Subject, Subscription } from 'rxjs';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
+import React from 'react';
+import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import * as _ from 'underscore';
-import { ISearchType } from '../adapter/spotify';
-import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/search';
 import { Binding, current } from '../utils';
-import { AlbumViewModelItem, PlaylistsViewModelItem, SearchViewModel, TrackViewModelItem } from '../viewModels';
-import { ArtistViewModelItem } from '../viewModels/artistViewModelItem';
+import { SearchViewModel, TrackViewModelItem } from '../viewModels';
 
 
 export interface ISearchViewProps {
@@ -17,7 +14,7 @@ export interface ISearchViewProps {
     currentTrackId: string;
 }
 
-class SearchView extends BaseView<ISearchViewProps> {
+class SearchView extends React.Component<ISearchViewProps> {
     vm = current(SearchViewModel);
     
     errors$ = this.vm.errors$;
@@ -70,10 +67,6 @@ class SearchView extends BaseView<ISearchViewProps> {
     searchTracks = _.debounce(term => {
         this.term = term;
     }, 300);
-
-    constructor(props) {
-        super(props);
-    }
 
     componentDidMount() {
         this.disposeSubscription = merge(

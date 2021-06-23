@@ -1,19 +1,17 @@
-import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import { BehaviorSubject, of, Subject, Subscription, merge } from 'rxjs';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
-import { BaseView } from '../base/baseView';
+import React from 'react';
+import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/mediaPlayer';
 import { Binding, current, formatTime } from '../utils';
-import { MediaPlayerViewModel, TrackViewModelItem } from '../viewModels';
-import *as _ from 'underscore';
+import { MediaPlayerViewModel } from '../viewModels';
 
 export interface IMediaPlayerViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
     currentTrackId$: BehaviorSubject<string>;
 }
 
-class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['state']> {
+class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     vm = current(MediaPlayerViewModel);
 
     errors$ = this.vm.errors$;
@@ -51,9 +49,6 @@ class MediaPlayerView extends BaseView<IMediaPlayerViewProps, MediaPlayerView['s
 
     isLiked$ = this.vm.isLiked$;
     @Binding isLiked = this.isLiked$.getValue();
-
-    state = {
-    };
 
     resumeCommand$ = this.vm.resumeCommand$;
     @Binding resumeCommand = this.resumeCommand$.getValue();

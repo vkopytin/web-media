@@ -2,19 +2,17 @@ import $ from 'jquery';
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IDevice, IResponseResult, ITrack, IUserInfo } from '../adapter/spotify';
-import { ViewModel } from '../base/viewModel';
+import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifySyncService } from '../service/spotifySyncService';
-import { assertNoErrors, current } from '../utils';
+import { assertNoErrors, current, State } from '../utils';
 import { DeviceViewModelItem } from './deviceViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
-import { State } from '../utils';
-import { ServiceResult } from '../base/serviceResult';
 
 
 type PanelType = 'home' | 'playlists' | 'profile' | 'releases' | 'search' | 'tracks';
 
-class AppViewModel extends ViewModel<AppViewModel['settings']> {
+class AppViewModel {
     openLogin$: BehaviorSubject<boolean>;
     @State openLogin = false;
 
@@ -51,10 +49,6 @@ class AppViewModel extends ViewModel<AppViewModel['settings']> {
     errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    settings = {
-        ...(this as any as ViewModel).settings,
-    };
-
     isInit = _.delay(() => {
         this.init();
         this.startSync();
@@ -63,7 +57,7 @@ class AppViewModel extends ViewModel<AppViewModel['settings']> {
     });
 
     constructor(private ss = current(Service)) {
-        super();
+
     }
 
     async init() {

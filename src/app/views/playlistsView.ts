@@ -1,12 +1,10 @@
-import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import { merge, of, Subject, Subscription } from 'rxjs';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
-import { BaseView } from '../base/baseView';
+import React from 'react';
+import { merge, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/playlists';
 import { Binding, current } from '../utils';
-import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
-import * as _ from 'underscore';
+import { PlaylistsViewModel } from '../viewModels';
 
 
 export interface IPlaylistsViewProps {
@@ -14,7 +12,7 @@ export interface IPlaylistsViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
 }
 
-class PlaylistsView extends BaseView<IPlaylistsViewProps, PlaylistsView['state']> {
+class PlaylistsView extends React.Component<IPlaylistsViewProps> {
     vm = current(PlaylistsViewModel);
     
     errors$ = this.vm.errors$;
@@ -38,9 +36,6 @@ class PlaylistsView extends BaseView<IPlaylistsViewProps, PlaylistsView['state']
     newPlaylistName$ = this.vm.newPlaylistName$;
     @Binding newPlaylistName = this.newPlaylistName$.getValue();
 
-    state = {
-    };
-
     selectPlaylistCommand$ = this.vm.selectPlaylistCommand$;
     @Binding selectPlaylistCommand = this.selectPlaylistCommand$.getValue();
     loadMoreCommand$ = this.vm.loadMoreCommand$;
@@ -52,10 +47,6 @@ class PlaylistsView extends BaseView<IPlaylistsViewProps, PlaylistsView['state']
 
     dispose$ = new Subject<void>();
     disposeSubscription: Subscription;
-
-    constructor(props) {
-        super(props);
-    }
 
     componentDidMount() {
         this.disposeSubscription = merge(

@@ -1,50 +1,33 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IArtist } from '../adapter/spotify';
-import { ViewModel } from '../base/viewModel';
+import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
+import { SpotifyService } from '../service/spotify';
 import { assertNoErrors, current, State } from '../utils';
 import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
-import { SpotifyService } from '../service/spotify';
-import { BehaviorSubject } from 'rxjs';
-import { ServiceResult } from '../base/serviceResult';
 
 
-class ArtistViewModelItem extends ViewModel {
+class ArtistViewModelItem {
     appViewModel = current(AppViewModel);
-    errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
-    @State errors = [] as ServiceResult<any, Error>[];
-    
-    settings = {
-        ...(this as ViewModel).settings,
-        isLiked: false
-    };
 
+    errors$: BehaviorSubject<ArtistViewModelItem['errors']>;
+    @State errors = [] as ServiceResult<any, Error>[];
+
+    playlists$: BehaviorSubject<ArtistViewModelItem['playlists']>;
+    @State playlists = [] as PlaylistsViewModelItem[];
+
+    isLiked$: BehaviorSubject<ArtistViewModelItem['playlists']>;
+    @State isLiked = false;
+    
     isInit = _.delay(() => {
         this.connect();
         this.loadData('playlistTracks');
     });
 
     constructor(public artist: IArtist, private index: number, private ss = current(Service)) {
-        super();
-    }
-
-    playlists(val?: PlaylistsViewModelItem[]) {
-        if (arguments.length && this.settings.playlists !== val) {
-            this.settings.playlists = val;
-            this.trigger('change:playlists');
-        }
-
-        return this.settings.playlists;
-    }
-
-    isLiked(val?) {
-        if (arguments.length && val !== this.settings.isLiked) {
-            this.settings.isLiked = val;
-            this.trigger('change:isLiked');
-        }
-
-        return this.settings.isLiked;
+        
     }
 
     id() {

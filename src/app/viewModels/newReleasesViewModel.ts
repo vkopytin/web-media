@@ -1,16 +1,15 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IAlbum, IResponseResult, ITrack } from '../adapter/spotify';
-import { ViewModel } from '../base/viewModel';
+import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
+import { SpotifyService } from '../service/spotify';
 import { assertNoErrors, current, State } from '../utils';
 import { AlbumViewModelItem } from './albumViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
-import { SpotifyService } from '../service/spotify';
-import { BehaviorSubject } from 'rxjs';
-import { ServiceResult } from '../base/serviceResult';
 
 
-class NewReleasesViewModel extends ViewModel {
+class NewReleasesViewModel {
     errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
     @State errors = [] as ServiceResult<any, Error>[];
 
@@ -26,12 +25,6 @@ class NewReleasesViewModel extends ViewModel {
     likedAlbums$: BehaviorSubject<NewReleasesViewModel['likedAlbums']>;
     @State likedAlbums = [] as AlbumViewModelItem[];
 
-    settings = {
-        ...(this as ViewModel).settings,
-        releases: [] as AlbumViewModelItem[],
-        myAlbums: [] as AlbumViewModelItem[]
-    };
-
     selectAlbumCommand$: BehaviorSubject<NewReleasesViewModel['selectAlbumCommand']>;
     @State selectAlbumCommand = { exec: (album: AlbumViewModelItem) => this.currentAlbum = album };
 
@@ -44,8 +37,6 @@ class NewReleasesViewModel extends ViewModel {
     isInit = _.delay(() => this.fetchData(), 100);
 
     constructor(private ss = current(Service)) {
-        super();
-
         _.delay(() => this.connect());
     }
 
@@ -106,7 +97,7 @@ class NewReleasesViewModel extends ViewModel {
 
         const likedAlbums = [];
         _.each(likedResult.val as boolean[], (liked, index) => {
-            albums[index].isLiked(liked);
+            albums[index].isLiked = liked;
             liked && likedAlbums.push(albums[index]);
         });
         this.likedAlbums = likedAlbums;

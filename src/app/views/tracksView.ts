@@ -7,6 +7,7 @@ import { template } from '../templates/tracks';
 import { Binding, current } from '../utils';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 import * as _ from 'underscore';
+import React from 'react';
 
 export interface ITracksViewProps {
     className?: string;
@@ -21,7 +22,7 @@ function elementIndex(el) {
     return index + 1;
 }
 
-class TracksView extends BaseView<ITracksViewProps, TracksView['state']> {
+class TracksView extends React.Component<ITracksViewProps, TracksView['state']> {
     vm = current(PlaylistsViewModel);
     
     errors$ = this.vm.errors$;
@@ -136,8 +137,8 @@ class TracksView extends BaseView<ITracksViewProps, TracksView['state']> {
             const rowIndex = elementIndex(target);
             const dragIndex = rowIndex - 1;
             console.log('dragIndex:', dragIndex);
-            this.prop('dragIndex', dragIndex);
-            this.prop('draggedIndex', dragIndex);
+            this.state.dragIndex = dragIndex;
+            this.state.draggedIndex = dragIndex;
         }
     }
     
@@ -146,8 +147,8 @@ class TracksView extends BaseView<ITracksViewProps, TracksView['state']> {
         $(target).toggleClass('dragged-place', true);
         const rowIndex = elementIndex(target);
         console.log('onDragEnter TR index:', rowIndex - 1);
-        this.prop('draggedIndex', target ? rowIndex - 1 : -1);
-        if (this.prop('dragIndex') > this.prop('draggedIndex')) {
+        this.state.draggedIndex = target ? rowIndex - 1 : -1;
+        if (this.state.dragIndex > this.state.draggedIndex) {
             $(el).insertBefore(target);
         } else {
             $(el).insertAfter(target);
@@ -180,16 +181,16 @@ class TracksView extends BaseView<ITracksViewProps, TracksView['state']> {
     }
     
     changeRowIndex() {
-        const dragIndex = this.prop('dragIndex');
-        const draggedIndex = this.prop('draggedIndex');
+        const dragIndex = this.state.dragIndex;
+        const draggedIndex = this.state.draggedIndex;
         if (
             dragIndex >= 0 &&
             dragIndex !== draggedIndex
         ) {
             this.reorderTrackCommand.exec(this.tracks[dragIndex], this.tracks[draggedIndex]);
         }
-        this.prop('dragIndex', -1);
-        this.prop('draggedIndex', -1);
+        this.state.dragIndex = -1;
+        this.state.draggedIndex = -1;
     }
 }
 

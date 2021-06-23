@@ -1,16 +1,14 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IResponseResult, ITrack, IUserInfo } from '../adapter/spotify';
-import { ViewModel } from '../base/viewModel';
-import { Service } from '../service';
-import { assertNoErrors, current } from '../utils';
-import { TrackViewModelItem } from './trackViewModelItem';
-import { SettingsService } from '../service/settings';
-import { State } from '../utils';
-import { BehaviorSubject } from 'rxjs';
 import { ServiceResult } from '../base/serviceResult';
+import { Service } from '../service';
+import { SettingsService } from '../service/settings';
+import { assertNoErrors, current, State } from '../utils';
+import { TrackViewModelItem } from './trackViewModelItem';
 
 
-class UserProfileViewModel extends ViewModel<UserProfileViewModel['settings']> {
+class UserProfileViewModel {
     errors$: BehaviorSubject<UserProfileViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
     
@@ -36,7 +34,6 @@ class UserProfileViewModel extends ViewModel<UserProfileViewModel['settings']> {
     @State apiseedsKey = '';
 
     settings = {
-        ...(this as any as ViewModel).settings,
         currentTrackId: '',
         spotifyAuthUrl: '',
         geniusAuthUrl: '',
@@ -51,7 +48,6 @@ class UserProfileViewModel extends ViewModel<UserProfileViewModel['settings']> {
     });
 
     constructor(private ss = current(Service)) {
-        super();
     }
 
     async fetchData() {

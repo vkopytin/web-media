@@ -1,20 +1,17 @@
-import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import { merge, of, Subject, Subscription } from 'rxjs';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
-import { BaseView } from '../base/baseView';
+import React from 'react';
+import { merge, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/home';
 import { Binding, current } from '../utils';
 import { HomeViewModel, TrackViewModelItem } from '../viewModels';
-import * as _ from 'underscore';
 
 export interface IHomeViewProps {
     currentTrackId: string;
     showErrors(errors: ServiceResult<any, Error>[]);
 }
 
-
-class HomeView extends BaseView<IHomeViewProps> {
+class HomeView extends React.Component<IHomeViewProps> {
     vm = current(HomeViewModel);
     
     errors$ = this.vm.errors$;
@@ -52,10 +49,6 @@ class HomeView extends BaseView<IHomeViewProps> {
 
     dispose$ = new Subject<void>();
     queue$: Subscription;
-
-    constructor(props) {
-        super(props);
-    }
 
     componentDidMount() {
         this.queue$ = merge(

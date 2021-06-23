@@ -1,21 +1,19 @@
-import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import { BehaviorSubject, merge, of, Subject, Subscription } from 'rxjs';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
+import React from 'react';
+import { merge, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import * as _ from 'underscore';
-import { IDevice, IUserInfo } from '../adapter/spotify';
-import { BaseView } from '../base/baseView';
+import { IDevice } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
 import { template } from '../templates/app';
-import { current } from '../utils';
-import { AppViewModel, TrackViewModelItem, DeviceViewModelItem } from '../viewModels';
-import { Binding } from '../utils';
+import { Binding, current } from '../utils';
+import { AppViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IAppViewProps {
 
 }
 
-class AppView extends BaseView<IAppViewProps, AppView['state']> {
+class AppView extends React.Component<IAppViewProps> {
     vm = current(AppViewModel);
 
     openLogin$ = this.vm.openLogin$;
@@ -64,10 +62,6 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
 
     dispose$ = new Subject<void>();
     queue$: Subscription;
-
-    constructor(props) {
-        super(props);
-    }
 
     componentDidMount() {
         this.queue$ = merge(
@@ -167,7 +161,7 @@ class AppView extends BaseView<IAppViewProps, AppView['state']> {
         if (errors.length) {
             console.log(errors);
         }
-        this.prop('errors', errors);
+        this.errors = errors;
     }
 
     clearErrors(evnt) {

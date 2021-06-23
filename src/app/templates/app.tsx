@@ -25,8 +25,8 @@ export const template = (view: AppView) => <main>
                 openShowDevices={showHide => view.openDevices(showHide)}
             />
         </div>
-        <div className={cn("popover ?visible", view.prop('errors').length)} style={{
-            display: view.prop('errors').length ? 'block' : 'none'
+        <div className={cn("popover ?visible", view.errors.length)} style={{
+            display: view.errors.length ? 'block' : 'none'
         }}>
             <header className="bar bar-nav">
                 <a className="icon icon-close pull-right" href="#"
@@ -35,7 +35,7 @@ export const template = (view: AppView) => <main>
                 <h1 className="title">Errors</h1>
             </header>
             <ul className="table-view">
-                {_.map(view.prop('errors'), (error, index) => {
+                {_.map(view.errors, (error: any, index) => {
                     return <li key={index} className="table-view-cell"
                         onClick={evnt => console.log(error.error)}
                     >
@@ -122,7 +122,7 @@ export const template = (view: AppView) => <main>
             >
                 <MyTracksView
                     showErrors={errors => view.showErrors(errors)}
-                    loadMore={view.prop('scrolledToBottom')}
+                    loadMore={view.state.scrolledToBottom}
                     currentTrackId={view.currentTrackId}
                 />
             </section>
@@ -131,7 +131,7 @@ export const template = (view: AppView) => <main>
             >
                 <SearchView
                     showErrors={errors => view.showErrors(errors)}
-                    loadMore={view.prop('scrolledToBottom')}
+                    loadMore={view.state.scrolledToBottom}
                     currentTrackId={view.currentTrackId}
                 />
             </section>

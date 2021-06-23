@@ -12,7 +12,7 @@ export interface ISwitchViewProps {
 
 const panels = ['home', 'playlists', 'tracks', 'search', 'releases'];
 
-class SwitchView extends BaseView<ISwitchViewProps, {}> {
+class SwitchView extends React.Component<ISwitchViewProps, {}> {
     state = {
         errors: [] as ServiceResult<any, Error>[],
         prevPanel: this.props.currentView,

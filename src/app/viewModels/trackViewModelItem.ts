@@ -1,17 +1,16 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
-import { ISpotifySong, IUserPlaylist } from '../adapter/spotify';
-import { ViewModel } from '../base/viewModel';
+import { ISpotifySong } from '../adapter/spotify';
+import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
+import { SpotifyService } from '../service/spotify';
 import { assertNoErrors, current, formatTime, State } from '../utils';
 import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModel } from './playlistsViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
-import { SpotifyService } from '../service/spotify';
-import { BehaviorSubject } from 'rxjs';
-import { ServiceResult } from '../base/serviceResult';
 
 
-class TrackViewModelItem extends ViewModel<TrackViewModelItem['settings']> {
+class TrackViewModelItem {
     appViewModel = current(AppViewModel);
     playlistsViewModel = current(PlaylistsViewModel);
 
@@ -28,7 +27,6 @@ class TrackViewModelItem extends ViewModel<TrackViewModelItem['settings']> {
     @State allPlaylists = [] as PlaylistsViewModelItem[];
     
     settings = {
-        ...(this as any as ViewModel).settings,
         isLiked: false,
         isCached: false,
     };
@@ -47,7 +45,7 @@ class TrackViewModelItem extends ViewModel<TrackViewModelItem['settings']> {
     });
 
     constructor(public song: ISpotifySong, private index: number, private ss = current(Service)) {
-        super();
+ 
     }
 
     id() {

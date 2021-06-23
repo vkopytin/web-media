@@ -1,20 +1,19 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IResponseResult, ISearchResult, ISearchType, ISpotifySong, ITrack } from '../adapter/spotify';
-import { ViewModel } from '../base/viewModel';
+import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
+import { SpotifyService } from '../service/spotify';
 import { assertNoErrors, asyncQueue, current, State } from '../utils';
 import { AlbumViewModelItem } from './albumViewModelItem';
 import { ArtistViewModelItem } from './artistViewModelItem';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
-import { SpotifyService } from '../service/spotify';
-import { BehaviorSubject } from 'rxjs';
-import { ServiceResult } from '../base/serviceResult';
 
 
 const searchQueue = asyncQueue();
 
-class SearchViewModel extends ViewModel {
+class SearchViewModel {
     errors$: BehaviorSubject<SearchViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
@@ -45,15 +44,10 @@ class SearchViewModel extends ViewModel {
     @State selectedItem = null as TrackViewModelItem;
     
     settings = {
-        ...(this as ViewModel).settings,
-        searchType: 'track' as ISearchType,
         offset: 0,
         total: 0,
         limit: 20,
         currentMediaUri: null,
-        currentAlbum: null as AlbumViewModelItem,
-        currentPlaylist: null as PlaylistsViewModelItem,
-        currentArtist: null as ArtistViewModelItem,
     };
 
     loadMoreCommand$: BehaviorSubject<SearchViewModel['loadMoreCommand']>;
@@ -87,8 +81,6 @@ class SearchViewModel extends ViewModel {
     }, 100);
 
     constructor(private ss = current(Service)) {
-        super();
-
         this.ss.spotifyPlayer();
     }
 
@@ -198,22 +190,22 @@ class SearchViewModel extends ViewModel {
     }
 
     tracksAddRange(value: TrackViewModelItem[]) {
-        const array = [...this.settings.tracks, ...value];
+        const array = [...this.tracks, ...value];
         this.tracks = array;
     }
 
     artistsAddRange(value: ArtistViewModelItem[]) {
-        const array = [...this.settings.artists, ...value];
+        const array = [...this.artists, ...value];
         this.artists = array;
     }
 
     albumsAddRange(value: AlbumViewModelItem[]) {
-        const array = [...this.settings.albums, ...value];
+        const array = [...this.albums, ...value];
         this.albums = array;
     }
 
     playlistsAddRange(value: PlaylistsViewModelItem[]) {
-        const array = [...this.settings.playlists, ...value];
+        const array = [...this.playlists, ...value];
         this.playlists = array;
     }
 

@@ -1,12 +1,10 @@
 import * as _ from 'underscore';
 import { IUserPlaylist } from '../adapter/spotify';
-import { ViewModel } from '../base/viewModel';
 import sanitizeHtml = require('sanitize-html');
 
 
-class PlaylistsViewModelItem extends ViewModel {
+class PlaylistsViewModelItem {
     constructor(public playlist: IUserPlaylist) {
-        super();
     }
 
     id() {

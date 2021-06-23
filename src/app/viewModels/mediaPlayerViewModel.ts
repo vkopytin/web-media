@@ -1,19 +1,18 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IPlayerResult, ITrack } from '../adapter/spotify';
-import { ViewModel } from '../base/viewModel';
+import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
+import { SettingsService } from '../service/settings';
+import { SpotifyService } from '../service/spotify';
 import { IWebPlaybackState } from '../service/spotifyPlayer';
 import { assertNoErrors, asyncQueue, current, State } from '../utils';
 import { TrackViewModelItem } from './trackViewModelItem';
-import { SettingsService } from '../service/settings';
-import { SpotifyService } from '../service/spotify';
-import { BehaviorSubject } from 'rxjs';
-import { ServiceResult } from '../base/serviceResult';
 
 
 const lockSection = asyncQueue();
 
-class MediaPlayerViewModel extends ViewModel {
+class MediaPlayerViewModel {
     errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
     @State errors = [] as ServiceResult<any, Error>[];
 
@@ -49,13 +48,15 @@ class MediaPlayerViewModel extends ViewModel {
 
     isLiked$: BehaviorSubject<MediaPlayerViewModel['isLiked']>;
     @State isLiked = false;
-    
-    settings = {
-        ...(this as ViewModel).settings,
-        currentTrack: null as ITrack,
-        currentTrackUri: '',
-        tracks: [] as Array<TrackViewModelItem>
-    };
+
+    currentTrack$: BehaviorSubject<MediaPlayerViewModel['currentTrack']>;
+    @State currentTrack = null as ITrack;
+
+    currentTrackUri$: BehaviorSubject<MediaPlayerViewModel['currentTrackUri']>;
+    @State currentTrackUri = '';
+
+    tracks$: BehaviorSubject<MediaPlayerViewModel['tracks']>;
+    @State tracks = null as TrackViewModelItem[];
 
     resumeCommand$: BehaviorSubject<MediaPlayerViewModel['resumeCommand']>;
     @State resumeCommand = { exec: () => this.play() };
@@ -87,29 +88,9 @@ class MediaPlayerViewModel extends ViewModel {
     isInit = _.delay(() => this.fetchData(), 100);
 
     constructor(private ss = current(Service)) {
-        super();
-
         _.delay(() => {
             this.connect();
         });
-    }
-
-    currentTrack(val?) {
-        if (arguments.length && val !== this.settings.currentTrack) {
-            this.settings.currentTrack = val;
-            this.trigger('change:currentTrack');
-        }
-
-        return this.settings.currentTrack;
-    }
-
-    currentTrackUri(val?) {
-        if (arguments.length && val !== this.settings.currentTrackUri) {
-            this.settings.currentTrackUri = val;
-            this.trigger('change:currentTrackUri');
-        }
-
-        return this.settings.currentTrackUri;
     }
 
     async connect() {
@@ -145,8 +126,8 @@ class MediaPlayerViewModel extends ViewModel {
             return;
         }
         const [artist] = state.track_window.current_track.artists;
-        this.currentTrack(state.track_window.current_track);
-        this.currentTrackUri(state.track_window.current_track.uri);
+        this.currentTrack = state.track_window.current_track as any;
+        this.currentTrackUri = state.track_window.current_track.uri;
         this.currentTrackId = state.track_window.current_track.id;
         this.duration = state.duration;
         this.timePlayed = state.position;
@@ -180,8 +161,8 @@ class MediaPlayerViewModel extends ViewModel {
         this.lastTime = +new Date();
         if (currentlyPlaying && currentlyPlaying.item) {
             const [artist] = currentlyPlaying.item.artists;
-            this.currentTrack(currentlyPlaying.item);
-            this.currentTrackUri(currentlyPlaying.item.uri);
+            this.currentTrack = currentlyPlaying.item;
+            this.currentTrackUri = currentlyPlaying.item.uri;
             this.currentTrackId = currentlyPlaying.item.id;
             this.volume = currentlyPlaying.device.volume_percent;
             this.duration = currentlyPlaying.item.duration_ms;
@@ -396,7 +377,7 @@ class MediaPlayerViewModel extends ViewModel {
 
     async likeTrack() {
         lockSection.push(async (next) => {
-            const stateResult = await this.ss.addTracks(this.currentTrack());
+            const stateResult = await this.ss.addTracks(this.currentTrack);
             assertNoErrors(stateResult, e => this.errors = e);
 
             next();
@@ -405,7 +386,7 @@ class MediaPlayerViewModel extends ViewModel {
 
     async unlikeTrack() {
         lockSection.push(async (next) => {
-            const stateResult = await this.ss.removeTracks(this.currentTrack());
+            const stateResult = await this.ss.removeTracks(this.currentTrack);
             assertNoErrors(stateResult, e => this.errors = e);
 
             next();

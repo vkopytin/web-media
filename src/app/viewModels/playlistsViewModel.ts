@@ -1,16 +1,16 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IResponseResult, ISpotifySong, IUserInfo, IUserPlaylistsResult } from '../adapter/spotify';
+import { ServiceResult } from '../base/serviceResult';
 import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
+import { SpotifyService } from '../service/spotify';
 import { assertNoErrors, current, State } from '../utils';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
-import { SpotifyService } from '../service/spotify';
-import { BehaviorSubject } from 'rxjs';
-import { ServiceResult } from '../base/serviceResult';
 
 
-class PlaylistsViewModel extends ViewModel<PlaylistsViewModel['settings']> {
+class PlaylistsViewModel {
     errors$: BehaviorSubject<PlaylistsViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
@@ -86,7 +86,7 @@ class PlaylistsViewModel extends ViewModel<PlaylistsViewModel['settings']> {
     });
 
     constructor(private ss = current(Service)) {
-        super();
+        
     }
 
     async connect() {

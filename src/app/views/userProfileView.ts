@@ -8,6 +8,7 @@ import { IUserInfo } from '../adapter/spotify';
 import { BehaviorSubject, merge, of, Subject, Subscription } from 'rxjs';
 import { Binding } from '../utils';
 import { map, switchMap, takeUntil } from 'rxjs/operators';
+import React from 'react';
 
 
 export interface IUserProfileViewProps {
@@ -16,7 +17,7 @@ export interface IUserProfileViewProps {
     openLogin$: BehaviorSubject<boolean>;
 }
 
-class UserProfileView extends BaseView<IUserProfileViewProps> {
+class UserProfileView extends React.Component<IUserProfileViewProps> {
     vm = current(UserProfileViewModel);
 
     errors$ = this.vm.errors$;
