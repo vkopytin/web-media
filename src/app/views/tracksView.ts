@@ -1,13 +1,11 @@
-import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import { merge, of, Subject, Subscription } from 'rxjs';
-import { switchMap, takeUntil, map } from 'rxjs/operators';
-import { BaseView } from '../base/baseView';
+import $ = require('jquery');
+import React from 'react';
+import { merge, Subject, Subscription } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/tracks';
 import { Binding, current } from '../utils';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
-import * as _ from 'underscore';
-import React from 'react';
 
 export interface ITracksViewProps {
     className?: string;
@@ -86,6 +84,10 @@ class TracksView extends React.Component<ITracksViewProps, TracksView['state']> 
                 ...this.state
             });
         });
+        this.errors$.pipe(
+            takeUntil(this.dispose$),
+            map(errors => this.showErrors(errors))
+        ).subscribe();
     }
 
     componentWillUnmount() {

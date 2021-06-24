@@ -84,6 +84,10 @@ class AppView extends React.Component<IAppViewProps> {
                 ...this.state
             });
         });
+        this.errors$.pipe(
+            takeUntil(this.dispose$),
+            map((errors: any) => this.showErrors(errors))
+        ).subscribe();
     }
 
     componentWillUnmount() {

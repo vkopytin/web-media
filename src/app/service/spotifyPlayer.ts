@@ -214,28 +214,28 @@ class SpotifyPlayerService extends withEvents(BaseService) {
     }
 
     async refreshToken(newToken: string) {
-        this.player.connect();
+        await this.player.connect();
         return SpotifyPlayerServiceResult.success(true);
     }
 
     resume() {
-        this.player.resume();
+        return this.player.resume();
     }
 
     togglePlay() {
-        this.player.togglePlay();
+        return this.player.togglePlay();
     }
 
     pause() {
-        this.player.pause();
+        return this.player.pause();
     }
 
     nextTrack() {
-        this.player.nextTrack();
+        return this.player.nextTrack();
     }
 
     previouseTrack() {
-        this.player.previousTrack();
+        return this.player.previousTrack();
     }
 
     async getCurrentState() {

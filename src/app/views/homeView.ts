@@ -71,6 +71,10 @@ class HomeView extends React.Component<IHomeViewProps> {
                 ...this.state
             });
         });
+        this.errors$.pipe(
+            takeUntil(this.dispose$),
+            map(errors => this.showErrors(errors))
+        ).subscribe();
     }
 
     componentWillUnmount() {

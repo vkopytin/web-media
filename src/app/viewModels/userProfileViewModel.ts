@@ -48,6 +48,7 @@ class UserProfileViewModel {
     });
 
     constructor(private ss = current(Service)) {
+        
     }
 
     async fetchData() {

@@ -69,6 +69,10 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
                 ...this.state
             });
         });
+        this.errors$.pipe(
+            takeUntil(this.dispose$),
+            map(errors => this.showErrors(errors))
+        ).subscribe();
     }
 
     componentWillUnmount() {

@@ -1,6 +1,7 @@
 import * as _ from 'underscore';
 import { utils } from 'databindjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 
 export function formatTime(ms: number) {
@@ -180,7 +181,6 @@ export function State<T, Y extends keyof T>(target: T, propName: Y) {
             },
             set(v) {
                 if (v !== store$) {
-                    store$.complete();
                     store$ = v;
                 }
             },
@@ -188,7 +188,7 @@ export function State<T, Y extends keyof T>(target: T, propName: Y) {
             configurable: true
         });
 
-        return this[`${propName}$`] = store$;
+        return store$;
     }
 
     const opts = {
@@ -203,6 +203,52 @@ export function State<T, Y extends keyof T>(target: T, propName: Y) {
 }
 
 export function Binding<T, Y extends keyof T>(target: T, propName: Y) {
+    const desc = Object.getOwnPropertyDescriptor(target, `${propName}$`);
+    function ensureStore(v) {
+        let store$ = v;
+        const assignedSubjects = [] as [any, Subscription, Subscription][];
+        Object.defineProperty(this, `${propName}$`, {
+            get() {
+                return store$;
+            },
+            set(v$) {
+                if (!(v$ instanceof BehaviorSubject)) {
+                    throw new Error('Please, provide BehaviorSubject');
+                }
+                if (v$ !== store$) {
+                    let current = assignedSubjects.find(([a]) => a === v$);
+                    if (current) {
+                        current[1].unsubscribe();
+                        current[2].unsubscribe();
+                    }
+
+                    current = [
+                        v$,
+                        store$.pipe(distinctUntilChanged()).subscribe(v$),
+                        v$.pipe(distinctUntilChanged()).subscribe(store$)
+                    ];
+                    assignedSubjects.push(current);
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        return store$;
+    }
+
+    if (!desc) {
+        const opts = {
+            get() {
+                throw new Error('There is no assigned subscriber to the binding property');
+            },
+            set: ensureStore,
+            enumerable: true,
+            configurable: true
+        };
+        Object.defineProperty(target, `${propName}$`, opts);
+    }
+
     const opts = {
         get() {
             return this[`${propName}$`].getValue();

@@ -225,7 +225,7 @@ class MediaPlayerViewModel {
     }
 
     async setVolume(percent: number) {
-        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+        lockSection.push(async next => {
             const stateResult = await this.ss.spotifyPlayerState();
             if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
@@ -239,7 +239,7 @@ class MediaPlayerViewModel {
                     return;
                 }
                 this.volume = percent;
-                playerResult.val.setVolume(percent);
+                await playerResult.val.setVolume(percent);
             }
             const settingsResult = await this.ss.service(SettingsService);
             if (assertNoErrors(settingsResult, e => this.errors = e)) {
@@ -248,31 +248,35 @@ class MediaPlayerViewModel {
             this.volume = settingsResult.val.volume(percent);
 
             next();
-        }, this));
+        });
     }
 
     async play() {
-        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+        lockSection.push(async next => {
             const stateResult = await this.ss.spotifyPlayerState();
             if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
             }
             if (_.isEmpty(stateResult.val)) {
-                await this.ss.play();
+                const playResult = await this.ss.play();
+                if (assertNoErrors(playResult, e => this.errors = e)) {
+                    return;
+                }
             } else {
                 const playerResult = await this.ss.spotifyPlayer();
                 if (assertNoErrors(playerResult, e => this.errors = e)) {
                     return;
                 }
-                playerResult.val.resume();
+                await playerResult.val.resume();
             }
+            this.isPlaying = true;
 
             next();
-        }, this));
+        });
     }
 
     async pause() {
-        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+        lockSection.push(async next => {
             const stateResult = await this.ss.spotifyPlayerState();
             if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
@@ -284,15 +288,16 @@ class MediaPlayerViewModel {
                 if (assertNoErrors(playerResult, e => this.errors = e)) {
                     return;
                 }
-                playerResult.val.pause();
+                await playerResult.val.pause();
             }
+            this.isPlaying = false;
 
             next();
-        }, this));
+        });
     }
 
     async previous() {
-        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+        lockSection.push(async next => {
             const stateResult = await this.ss.spotifyPlayerState();
             if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
@@ -304,15 +309,15 @@ class MediaPlayerViewModel {
                 if (assertNoErrors(playerResult, e => this.errors = e)) {
                     return;
                 }
-                playerResult.val.previouseTrack();
+                await playerResult.val.previouseTrack();
             }
 
             next();
-        }, this));
+        });
     }
 
     async next() {
-        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+        lockSection.push(async next => {
             const stateResult = await this.ss.spotifyPlayerState();
             if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
@@ -324,15 +329,15 @@ class MediaPlayerViewModel {
                 if (assertNoErrors(playerResult, e => this.errors = e)) {
                     return;
                 }
-                playerResult.val.nextTrack();
+                await playerResult.val.nextTrack();
             }
 
             next();
-        }, this));
+        });
     }
 
     async volumeUp() {
-        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+        lockSection.push(async (next) => {
             const stateResult = await this.ss.spotifyPlayerState();
             if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
@@ -350,11 +355,11 @@ class MediaPlayerViewModel {
             }
 
             next();
-        }, this));
+        });
     }
 
     async volumeDown() {
-        lockSection.push(_.bind(async function (this: MediaPlayerViewModel, next) {
+        lockSection.push(async next => {
             const stateResult = await this.ss.spotifyPlayerState();
             if (assertNoErrors(stateResult, e => this.errors = e)) {
                 return;
@@ -372,7 +377,7 @@ class MediaPlayerViewModel {
             }
 
             next();
-        }, this));
+        });
     }
 
     async likeTrack() {

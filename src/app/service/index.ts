@@ -532,7 +532,6 @@ class Service {
         return result;
     }
 
-
     async addAlbums(albumIds: string | string[]) {
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil, distinctUntilChanged } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/mediaPlayer';
 import { Binding, current, formatTime } from '../utils';
@@ -79,11 +79,10 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     constructor(props) {
         super(props);
         // toDO: Find better solution
-        this.props.currentTrackId$.pipe(
-            map(trackId => this.currentTrackId = trackId)
-        ).subscribe();
-        this.currentTrackId$.pipe(
-            map(trackId => this.props.currentTrackId$.next(trackId))
+        this.currentTrackId$ = this.props.currentTrackId$;
+        this.errors$.pipe(
+            takeUntil(this.dispose$),
+            map(errors => this.showErrors(errors))
         ).subscribe();
     }
 
@@ -94,6 +93,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
             this.queue$.pipe(map(queue => ({ queue }))),
             this.timePlayed$.pipe(map(timePlayed => ({ timePlayed }))),
             this.duration$.pipe(map(duration => ({ duration }))),
+            this.isPlaying$.pipe(map(isPlaying => ({ isPlaying }))),
             this.trackName$.pipe(map(trackName => ({ trackName }))),
             this.albumName$.pipe(map(albumName => ({ albumName }))),
             this.artistName$.pipe(map(artistName => ({ artistName }))),

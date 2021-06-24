@@ -14,6 +14,9 @@ export interface IDevicesViewProps {
 class DevicesView extends React.Component<IDevicesViewProps> {
     vm = current(AppViewModel);
     
+    errors$ = this.vm.errors$;
+    @Binding errors = this.errors$.getValue();
+
     switchDeviceCommand$ = this.vm.switchDeviceCommand$;
     @Binding switchDeviceCommand = this.switchDeviceCommand$.getValue();
 
@@ -39,6 +42,10 @@ class DevicesView extends React.Component<IDevicesViewProps> {
                 ...this.state
             });
         });
+        this.errors$.pipe(
+            takeUntil(this.dispose$),
+            map(errors => this.showErrors(errors))
+        ).subscribe();
     }
 
     componentWillUnmount() {

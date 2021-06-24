@@ -93,6 +93,10 @@ class SearchView extends React.Component<ISearchViewProps> {
                 ...this.state
             });
         });
+        this.errors$.pipe(
+            takeUntil(this.dispose$),
+            map(errors => this.showErrors(errors))
+        ).subscribe();
     }
 
     componentWillUnmount() {
