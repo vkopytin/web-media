@@ -26,11 +26,12 @@ class DevicesView extends React.Component<IDevicesViewProps> {
     currentDevice$ = this.vm.currentDevice$;
     @Binding currentDevice = this.currentDevice$.getValue();
 
-    dispose$ = new Subject<void>();
-    queue$: Subscription;
+    dispose$: Subject<void>;
+    disposeSubscription: Subscription;
 
     componentDidMount() {
-        this.queue$ = merge(
+        this.dispose$ = new Subject<void>();
+        this.disposeSubscription = merge(
             this.switchDeviceCommand$.pipe(map(switchDeviceCommand => ({ switchDeviceCommand }))),
             this.devices$.pipe(map(devices => ({ devices }))),
             this.currentDevice$.pipe(map(currentDevice => ({ currentDevice }))),

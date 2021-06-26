@@ -40,10 +40,11 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
     unlikeAlbumCommand$ = this.vm.unlikeAlbumCommand$;
     @Binding unlikeAlbumCommand = this.unlikeAlbumCommand$.getValue();
 
-    dispose$ = new Subject<void>();
+    dispose$: Subject<void>;
     disposeSubscription: Subscription;
 
     componentDidMount() {
+        this.dispose$ = new Subject<void>();
         this.disposeSubscription = merge(
             this.errors$.pipe(map(errors => ({ errors }))),
             this.newReleases$.pipe(map(newReleases => ({ newReleases }))),

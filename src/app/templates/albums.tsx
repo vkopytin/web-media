@@ -2,7 +2,7 @@ import { utils } from 'databindjs';
 import * as React from 'react';
 import * as _ from 'underscore';
 import { AlbumsView } from '../views';
-
+import { SelectPlaylistsView } from '../views';
 
 const cn = utils.className;
 
@@ -21,10 +21,16 @@ export const template = (view: AlbumsView) => <>
                         </div>
                     </div>
                 </span>
-                <div className="media-body">
+                <div className="media-body"
+                    onClick={evnt => view.selectedItem = view.selectedItem === item ? null : item}
+                >
                     <span>{item.name()}&nbsp;-&nbsp;{item.artist()}</span>
                     <p>{item.album()}</p>
                 </div>
+                {view.selectedItem === item && <SelectPlaylistsView
+                    showErrors={e => view.showErrors(e)}
+                    className="chips-list"
+                    track={item} />}
                 {item.isLiked && <span className="badge badge-positive">{item.duration()}</span>}
                 {item.isLiked || <span className="badge">{item.duration()}</span>}
             </li>

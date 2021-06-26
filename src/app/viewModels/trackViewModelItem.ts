@@ -3,6 +3,7 @@ import * as _ from 'underscore';
 import { ISpotifySong } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
+import { DataService } from '../service/dataService';
 import { SpotifyService } from '../service/spotify';
 import { assertNoErrors, current, formatTime, State } from '../utils';
 import { AppViewModel } from './appViewModel';
@@ -23,8 +24,11 @@ class TrackViewModelItem {
     isCached$: BehaviorSubject<TrackViewModelItem['isCached']>;
     @State isCached = false;
 
-    allPlaylists$: BehaviorSubject<TrackViewModelItem['allPlaylists']>;
-    @State allPlaylists = [] as PlaylistsViewModelItem[];
+    trackPlaylists$: BehaviorSubject<TrackViewModelItem['trackPlaylists']>;
+    @State trackPlaylists = [] as PlaylistsViewModelItem[];
+
+    isBanned$: BehaviorSubject<TrackViewModelItem['isBanned']>;
+    @State isBanned = false;
     
     settings = {
         isLiked: false,
@@ -39,12 +43,16 @@ class TrackViewModelItem {
 
     isInit = _.delay(() => {
         this.connect();
-        this.allPlaylists$.subscribe((val) => {
+        this.trackPlaylists$.subscribe((val) => {
             this.updateIsCached(val);
         })
     });
 
-    constructor(public song: ISpotifySong, private index: number, private ss = current(Service)) {
+    constructor(
+        public song: ISpotifySong,
+        private index: number,
+        private ss = current(Service)
+    ) {
  
     }
 
@@ -84,14 +92,30 @@ class TrackViewModelItem {
             return;
         }
         const spotify = spotifyResult.val;
+        this.trackPlaylists = await this.listPlaylists();
+
+        this.isBanned = await this.ss.isBannedTrack(this.song.track.id);
+    }
+
+    async listPlaylists() {
+        const dataResult = await this.ss.service(DataService);
+        if (assertNoErrors(dataResult, e => this.errors = e)) {
+            return;
+        }
+        const playlists = await dataResult.val.listPlaylistsByTrack(this.song.track);
+        if (assertNoErrors(playlists, e => this.errors = e)) {
+            return;
+        }
+        return playlists.map(playlist => new PlaylistsViewModelItem(playlist));
     }
 
     async play(playlistUri: string) {
-        this.ss.play(null, playlistUri, this.uri());
+        await this.ss.play(null, playlistUri, this.uri());
     }
 
     async playTracks(tracks: TrackViewModelItem[]) {
-        const playResult = this.ss.play(null, _.map(tracks, item => item.uri()), this.uri());
+        const allowedTracks = _.filter(tracks, track => !track.isBanned);
+        const playResult = await this.ss.play(null, _.map(allowedTracks, item => item.uri()), this.uri());
         assertNoErrors(playResult, e => this.errors = e);
     }
 

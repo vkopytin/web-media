@@ -93,6 +93,10 @@ export interface IRecommendationsResult {
     seeds: Array<{}>;
 }
 
+export interface ITopTracksResult {
+    tracks: ITrack[];
+}
+
 export interface IAlbum {
     album_type: string;
     id: string;
@@ -405,7 +409,7 @@ class SpotifyAdapter {
     }
 
     artistTopTracks(artistId: string, country = 'US') {
-        return new Promise<IResponseResult<ITrack>>((resolve, reject) => {
+        return new Promise<ITopTracksResult>((resolve, reject) => {
             $.ajax({
                 url: `https://api.spotify.com/v1/artists/${artistId}/top-tracks`,
                 headers: {

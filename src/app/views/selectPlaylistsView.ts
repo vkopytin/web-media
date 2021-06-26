@@ -23,8 +23,8 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
     @Binding errors = this.errors$.getValue();
 
     // playlists
-    allPlaylists$ = this.vm.allPlaylists$;
-    @Binding allPlaylists = this.allPlaylists$.getValue();
+    trackPlaylists$ = this.vm.trackPlaylists$;
+    @Binding trackPlaylists = this.trackPlaylists$.getValue();
 
     //items
     playlists$ = this.playlistsViewModel.playlists$;
@@ -38,13 +38,14 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
     removeFromPlaylistCommand$ = this.vm.removeFromPlaylistCommand$;
     @Binding removeFromPlaylistCommand = this.removeFromPlaylistCommand$.getValue();
 
-    dispose$ = new Subject<void>();
+    dispose$: Subject<void>;
     disposeSubscription: Subscription;
 
     componentDidMount() {
+        this.dispose$ = new Subject<void>();
         this.disposeSubscription = merge(
             this.errors$.pipe(map(errors => ({ errors }))),
-            this.allPlaylists$.pipe(map(allPlaylists => ({ allPlaylists }))),
+            this.trackPlaylists$.pipe(map(trackPlaylists => ({ trackPlaylists }))),
             this.playlists$.pipe(map(playlists => ({ playlists }))),
             this.addToPlaylistCommand$.pipe(map(addToPlaylistCommand => ({ addToPlaylistCommand }))),
             this.removeFromPlaylistCommand$.pipe(map(removeFromPlaylistCommand => ({ removeFromPlaylistCommand }))),
@@ -79,7 +80,7 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
     }
 
     playlistHasTrack(playlist: PlaylistsViewModelItem, track: TrackViewModelItem) {
-        const res = _.find(this.allPlaylists, (p: PlaylistsViewModelItem) => p.id() === playlist.id());
+        const res = _.find(this.trackPlaylists, (p: PlaylistsViewModelItem) => p.id() === playlist.id());
         return !!res;
     }
 

@@ -8,7 +8,11 @@ class RemoteStorage implements IStorage {
 
     initializeStructure(cb: { (err?, res?): void }) {
         cb(null, false);
-	}
+    }
+    
+    hasTable(config: IStorageConfig, cb: { (err, res?): void }) {
+        cb(null, false);
+    }
 
     createTable(config: IStorageConfig, cb: { (err, res?): void }) {
         try {

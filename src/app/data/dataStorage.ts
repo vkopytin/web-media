@@ -25,7 +25,7 @@ class DataStorage {
 			case 'indexedDb':
 				try {
 					const { IndexedDbStorage } = await import('./indexedDbStorage');
-					const connection = indexedDB.open(serviceId, 6);
+					const connection = indexedDB.open(serviceId, 18);
 					const uow = new IndexedDbStorage(connection);
 					await callback(null, uow);
 

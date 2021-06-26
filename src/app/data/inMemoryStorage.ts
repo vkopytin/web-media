@@ -11,7 +11,13 @@ class InMemoryStorage implements IStorage {
 
     initializeStructure(cb: { (err?, res?): void }) {
         cb(null, true);
-	}
+    }
+    
+    hasTable(config: IStorageConfig, cb: { (err, res?): void }) {
+        const tableName = config.name;
+
+        cb(null, tableName in this.db);
+    }
 
     createTable(config: IStorageConfig, cb: { (err, res?): void }) {
         const tableName = config.name;

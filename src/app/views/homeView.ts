@@ -47,11 +47,18 @@ class HomeView extends React.Component<IHomeViewProps> {
     findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
     @Binding findTrackLyricsCommand = this.findTrackLyricsCommand$.getValue();
 
-    dispose$ = new Subject<void>();
-    queue$: Subscription;
+    bannTrackCommand$ = this.vm.bannTrackCommand$;
+    @Binding bannTrackCommand = this.bannTrackCommand$.getValue();
+
+    removeBannFromTrackCommand$ = this.vm.removeBannFromTrackCommand$;
+    @Binding removeBannFromTrackCommand = this.removeBannFromTrackCommand$.getValue();
+
+    dispose$: Subject<void>;
+    disposeSubscription: Subscription;
 
     componentDidMount() {
-        this.queue$ = merge(
+        this.dispose$ = new Subject<void>();
+        this.disposeSubscription = merge(
             this.tracks$.pipe(map(tracks => ({ tracks }))),
             this.likedTracks$.pipe(map(likedTracks => ({ likedTracks }))),
             this.selectedTrack$.pipe(map(selectedTrack => [{ selectedTrack }])),
@@ -62,6 +69,8 @@ class HomeView extends React.Component<IHomeViewProps> {
             this.likeTrackCommand$.pipe(map(likeTrackCommand => ({ likeTrackCommand }))),
             this.unlikeTrackCommand$.pipe(map(unlikeTrackCommand => ({ unlikeTrackCommand }))),
             this.findTrackLyricsCommand$.pipe(map(findTrackLyricsCommand => ({ findTrackLyricsCommand }))),
+            this.bannTrackCommand$.pipe(map(bannTrackCommand => ({ bannTrackCommand }))),
+            this.removeBannFromTrackCommand$.pipe(map(removeBannFromTrackCommand => ({ removeBannFromTrackCommand }))),
             this.errors$.pipe(map(errors => ({ errors }))),
         ).pipe(
             takeUntil(this.dispose$)

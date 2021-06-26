@@ -1,27 +1,23 @@
 import * as _ from 'underscore';
 import { IStorage, IStorageConfig } from "../iStorage";
 import { asAsync, asAsyncOf } from '../../utils';
-import { IRecord } from './interfaces/IRecord';
+import { IImage } from './interfaces/iImage';
 
 
-class RecordsStore {
-    tableName = 'records';
+export class ImagesStore {
+    tableName = 'images';
     storeConfig: IStorageConfig = {
         name: this.tableName,
         options: {
-            keyPath: 'id',
-            autoIncrement: true
+            keyPath: 'url'
         },
         index: {
-            id: {
-                id: { unique: true }
-            },
-            added_at: {
-                added_at: { }
+            url: {
+                url: { unique: true }
             }
         },
-        orderBy: 'added_at',
-        orderDesk: true
+        orderBy: 'url',
+        orderDesk: false
     };
 
     constructor(public storage: IStorage) {
@@ -42,20 +38,20 @@ class RecordsStore {
         });
     }
 
-    create(myStore: IRecord) {
+    create(myStore: IImage) {
         return asAsync(this.storage, this.storage.create, this.storeConfig, myStore);
     }
 
-    update(myStore: IRecord) {
-        return asAsync(this.storage, this.storage.update, this.storeConfig, myStore.id, myStore);
+    update(myStore: IImage) {
+        return asAsync(this.storage, this.storage.update, this.storeConfig, myStore.url, myStore);
     }
 
     delete(myStore: string) {
         return asAsync(this.storage, this.storage.delete, this.storeConfig, myStore);
     }
 
-    async refresh(myStore: IRecord) {
-        const record = await asAsync(this.storage, this.storage.getById, this.storeConfig, myStore.id);
+    async refresh(myStore: IImage) {
+        const record = await asAsync(this.storage, this.storage.getById, this.storeConfig, myStore.url);
         if (record) {
             return await this.update({
                 ...record,
@@ -71,8 +67,8 @@ class RecordsStore {
     }
 
     list(offset = 0, limit?) {
-        return asAsyncOf(null, (cb: { (res?, result?: IRecord, index?): boolean }) => {
-            this.storage.each<IRecord>(this.storeConfig, (...args) => {
+        return asAsyncOf(null, (cb: { (res?, result?: IImage, index?): boolean }) => {
+            this.storage.each<IImage>(this.storeConfig, (...args) => {
                 const index = args[2];
                 if (index < offset) {
                     return;
@@ -93,5 +89,3 @@ class RecordsStore {
         return asAsync(this.storage, this.storage.getCount, this.storeConfig);
     }
 }
-
-export { RecordsStore };

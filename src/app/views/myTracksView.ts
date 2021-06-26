@@ -43,10 +43,11 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
     findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
     @Binding findTrackLyricsCommand = this.findTrackLyricsCommand$.getValue();
 
-    dispose$ = new Subject<void>();
+    dispose$: Subject<void>;
     disposeSubscription: Subscription;
 
     componentDidMount() {
+        this.dispose$ = new Subject<void>();
         this.disposeSubscription = merge(
             this.errors$.pipe(map(errors => ({ errors }))),
             this.tracks$.pipe(map(tracks => ({ tracks }))),

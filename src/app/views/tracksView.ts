@@ -55,7 +55,7 @@ class TracksView extends React.Component<ITracksViewProps, TracksView['state']> 
     reorderTrackCommand$ = this.vm.reorderTrackCommand$;
     @Binding reorderTrackCommand = this.reorderTrackCommand$.getValue();
 
-    dispose$ = new Subject<void>();
+    dispose$: Subject<void>;
     disposeSubscription: Subscription;
 
     constructor(props) {
@@ -67,6 +67,7 @@ class TracksView extends React.Component<ITracksViewProps, TracksView['state']> 
     }
 
     componentDidMount() {
+        this.dispose$ = new Subject<void>();
         this.disposeSubscription = merge(
             this.errors$.pipe(map(errors => ({ errors }))),
             this.tracks$.pipe(map(tracks => ({ tracks }))),

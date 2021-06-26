@@ -61,7 +61,7 @@ class SearchView extends React.Component<ISearchViewProps> {
     unlikeTrackCommand$ = new BehaviorSubject({ exec(track: TrackViewModelItem) { } });
     @Binding unlikeTrackCommand = this.unlikeTrackCommand$.getValue();
     
-    dispose$ = new Subject<void>();
+    dispose$: Subject<void>;
     disposeSubscription: Subscription;
 
     searchTracks = _.debounce(term => {
@@ -69,6 +69,7 @@ class SearchView extends React.Component<ISearchViewProps> {
     }, 300);
 
     componentDidMount() {
+        this.dispose$ = new Subject<void>();
         this.disposeSubscription = merge(
             this.errors$.pipe(map(errors => ({ errors }))),
             this.term$.pipe(map(term => ({ term }))),

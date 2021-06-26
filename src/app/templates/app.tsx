@@ -45,6 +45,9 @@ export const template = (view: AppView) => <main>
             </ul>
         </div>
         <header className="bar bar-nav">
+            {view.isSyncing === 0 ? false
+                : <div className="meter animate"><span style={{ width: `${view.isSyncing}%` }}></span></div>
+            }
             <a className="icon icon-info pull-left"
                 onClick={evnt => view.openDevices('show')}
             >

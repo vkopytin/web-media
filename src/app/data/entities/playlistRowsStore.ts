@@ -1,11 +1,11 @@
 import * as _ from 'underscore';
 import { IStorage, IStorageConfig } from "../iStorage";
 import { asAsync, asAsyncOf } from '../../utils';
-import { IRecord } from './interfaces/IRecord';
+import { IPlaylistRow } from './interfaces/iPlaylistRow';
 
 
-class RecordsStore {
-    tableName = 'records';
+export class PlaylistRowsStore {
+    tableName = 'playlistRows';
     storeConfig: IStorageConfig = {
         name: this.tableName,
         options: {
@@ -16,12 +16,12 @@ class RecordsStore {
             id: {
                 id: { unique: true }
             },
-            added_at: {
-                added_at: { }
+            position: {
+                position: { }
             }
         },
-        orderBy: 'added_at',
-        orderDesk: true
+        orderBy: 'position',
+        orderDesk: false
     };
 
     constructor(public storage: IStorage) {
@@ -42,11 +42,11 @@ class RecordsStore {
         });
     }
 
-    create(myStore: IRecord) {
+    create(myStore: IPlaylistRow) {
         return asAsync(this.storage, this.storage.create, this.storeConfig, myStore);
     }
 
-    update(myStore: IRecord) {
+    update(myStore: IPlaylistRow) {
         return asAsync(this.storage, this.storage.update, this.storeConfig, myStore.id, myStore);
     }
 
@@ -54,7 +54,7 @@ class RecordsStore {
         return asAsync(this.storage, this.storage.delete, this.storeConfig, myStore);
     }
 
-    async refresh(myStore: IRecord) {
+    async refresh(myStore: IPlaylistRow) {
         const record = await asAsync(this.storage, this.storage.getById, this.storeConfig, myStore.id);
         if (record) {
             return await this.update({
@@ -71,8 +71,8 @@ class RecordsStore {
     }
 
     list(offset = 0, limit?) {
-        return asAsyncOf(null, (cb: { (res?, result?: IRecord, index?): boolean }) => {
-            this.storage.each<IRecord>(this.storeConfig, (...args) => {
+        return asAsyncOf(null, (cb: { (res?, result?: IPlaylistRow, index?): boolean }) => {
+            this.storage.each<IPlaylistRow>(this.storeConfig, (...args) => {
                 const index = args[2];
                 if (index < offset) {
                     return;
@@ -93,5 +93,3 @@ class RecordsStore {
         return asAsync(this.storage, this.storage.getCount, this.storeConfig);
     }
 }
-
-export { RecordsStore };

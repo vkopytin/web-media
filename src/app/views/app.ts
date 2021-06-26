@@ -49,22 +49,24 @@ class AppView extends React.Component<IAppViewProps> {
     errors$ = this.vm.errors$;
     @Binding errors = this.errors$.getValue();
 
+    isSyncing$ = this.vm.isSyncing$;
+    @Binding isSyncing = this.isSyncing$.getValue();
+
     state = {
-        errors: [] as ServiceResult<any, Error>[],
         transition: ['', ''],
         prevPanel: 'home',
         showSelectDevices: 'hide' as 'show' | 'hide' | '',
-        devices: [] as IDevice[],
         scrolledToBottom: false
     };
     elScroller = null as HTMLElement;
     onPageScroll = _.debounce(evnt => this.onPageScrollInternal(evnt), 500);
 
-    dispose$ = new Subject<void>();
-    queue$: Subscription;
+    dispose$: Subject<void>;
+    disposeSubscription: Subscription;
 
     componentDidMount() {
-        this.queue$ = merge(
+        this.dispose$ = new Subject<void>();
+        this.disposeSubscription = merge(
             this.openLogin$.pipe(map(openLogin => ({ openLogin }))),
             this.currentPanel$.pipe(map(currentPanel => ({ currentPanel }))),
             this.devices$.pipe(map(devices => ({ devices }))),
@@ -74,6 +76,7 @@ class AppView extends React.Component<IAppViewProps> {
             this.currentDevice$.pipe(map(currentDevice => ({ currentDevice }))),
             this.autoRefreshUrl$.pipe(map(autoRefreshUrl => ({ autoRefreshUrl }))),
             this.errors$.pipe(map(errors => ({ errors }))),
+            this.isSyncing$.pipe(map(isSyncing => ({ isSyncing }))),
             this.refreshDevicesCommand$.pipe(map(refreshDevicesCommand => ({ refreshDevicesCommand }))),
             this.refreshTokenCommand$.pipe(map(refreshTokenCommand => ({ refreshTokenCommand }))),
         ).pipe(
@@ -170,9 +173,9 @@ class AppView extends React.Component<IAppViewProps> {
 
     clearErrors(evnt) {
         evnt && evnt.preventDefault();
+        this.errors = [];
         this.setState({
-            ...this.state,
-            errors: []
+            ...this.state
         });
     }
 

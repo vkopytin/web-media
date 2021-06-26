@@ -47,15 +47,12 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
     apiseedsKey$ = this.vm.apiseedsKey$;
     @Binding apiseedsKey = this.apiseedsKey$.getValue();
 
-    dispose$ = new Subject<void>();
-    queue$: Subscription;
-
-    constructor(props) {
-        super(props);
-    }
+    dispose$: Subject<void>;
+    disposeSubscription: Subscription;
 
     componentDidMount() {
-        this.queue$ = merge(
+        this.dispose$ = new Subject<void>();
+        this.disposeSubscription = merge(
             this.openLogin$.pipe(map(openLogin => ({openLogin}))),
             this.profile$.pipe(map(profile => ({profile}))),
             this.currentTrackId$.pipe(map(currentTrackId => ({currentTrackId}))),

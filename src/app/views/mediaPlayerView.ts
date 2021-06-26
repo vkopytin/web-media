@@ -73,7 +73,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     volumeCommand$ = this.vm.volumeCommand$;
     @Binding volumeCommand = this.volumeCommand$.getValue();
     
-    dispose$ = new Subject<void>();
+    dispose$: Subject<void>;
     disposeSubscription: Subscription;
 
     constructor(props) {
@@ -87,6 +87,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     }
 
     componentDidMount() {
+        this.dispose$ = new Subject<void>();
         this.disposeSubscription = merge(
             this.errors$.pipe(map(errors => ({ errors }))),
             this.currentTrackId$.pipe(map(currentTrackId => ({ currentTrackId }))),

@@ -68,6 +68,12 @@ class HomeViewModel {
     findTrackLyricsCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
     @State findTrackLyricsCommand = { exec: (track: TrackViewModelItem) => this.findTrackLyrics(track) };
 
+    bannTrackCommand$: BehaviorSubject<HomeViewModel['bannTrackCommand']>;
+    @State bannTrackCommand = { exec: (track: TrackViewModelItem) => this.bannTrack(track) };
+
+    removeBannFromTrackCommand$: BehaviorSubject<HomeViewModel['removeBannFromTrackCommand']>;
+    @State removeBannFromTrackCommand = { exec: (track: TrackViewModelItem) => this.removeBannFromTrack(track) };
+
     isInit = _.delay(() => {
         this.connect();
         this.fetchData();
@@ -157,6 +163,16 @@ class HomeViewModel {
     async unlikeTrack(track: TrackViewModelItem) {
         await track.unlikeTrack();
         this.checkTracks([track]);
+    }
+
+    async bannTrack(track: TrackViewModelItem) {
+        await this.ss.bannTrack(track.id());
+        track.isBanned = true;
+    }
+
+    async removeBannFromTrack(track: TrackViewModelItem) {
+        await this.ss.removeBannFromTrak(track.id());
+        track.isBanned = false;
     }
 
     async findTrackLyrics(track: TrackViewModelItem) {

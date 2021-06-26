@@ -26,13 +26,16 @@ export const template = (view: HomeView) => <>
                         >receipt</span>
                     </div>
                     <span className="media-object pull-left player-left--32"
-                        onClick={evnt => { item.playTracks(view.tracks) }}
+                        onClick={evnt => { item.isBanned || item.playTracks(view.tracks) }}
                     >
                         <div className="region">
                             <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
-                                {view.isPlaying(item) || <button className="button-play icon icon-play"
+                                {!item.isBanned && view.isPlaying(item) || <button className="button-play icon icon-play"
                                 ></button>}
-                                {view.isPlaying(item) && <button className="button-play icon icon-pause"></button>}
+                                {!item.isBanned && view.isPlaying(item) && <button className="button-play icon icon-pause">
+                                </button>}
+                                {item.isBanned && <button className="button-play icon block"
+                                ></button>}
                             </div>
                         </div>
                     </span>
@@ -45,12 +48,23 @@ export const template = (view: HomeView) => <>
                                 &nbsp;-&nbsp;
                                 <span className="author-title">{item.artist()}</span>
                             </div>
-                            <div className="album-title"><span>{item.album()}</span>{view.selectedTrack !== item && <SelectPlaylistsView
-                                showErrors={e => view.showErrors(e)}
-                                className="chips-list"
-                                track={item}
-                                active={true} />}</div>
+                            <div className="album-title">
+                                <span>{item.album()}</span>
+                                {view.selectedTrack !== item && <SelectPlaylistsView
+                                    showErrors={e => view.showErrors(e)}
+                                    className="chips-list"
+                                    track={item}
+                                    active={true} />}
+                            </div>
                         </div>
+                        {item.isBanned ? <button className="action chips btn btn-negative btn-outlined material-icons"
+                            title="Banned, tap to remove Bann"
+                            onClick={evnt => view.removeBannFromTrackCommand.exec(item)}
+                        >block</button>
+                            : <button className="action chips btn btn-positive btn-outlined material-icons"
+                            title="Allowed, tab to set a bann"
+                            onClick={evnt => view.bannTrackCommand.exec(item)}
+                        >done</button>}
                     </span>
                     {item.isLiked && <span className="badge badge-positive"
                         onClick={evnt => view.unlikeTrackCommand.exec(item)}
@@ -59,7 +73,7 @@ export const template = (view: HomeView) => <>
                         onClick={evnt => view.likeTrackCommand.exec(item)}
                     >{item.duration()}</span>}
                 </div>
-                {(view.selectedTrack) === item && <SelectPlaylistsView
+                {!item.isBanned && (view.selectedTrack) === item && <SelectPlaylistsView
                     showErrors={e => view.showErrors(e)}
                     className="chips-list"
                     track={item} />}

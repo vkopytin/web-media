@@ -24,10 +24,11 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
     selectedPlaylist$ = this.homeVm.selectedPlaylist$;
     @Binding selectedPlaylist = this.selectedPlaylist$.getValue();
 
-    dispose$ = new Subject<void>();
+    dispose$: Subject<void>;
     disposeSubscription: Subscription;
 
     componentDidMount() {
+        this.dispose$ = new Subject<void>();
         this.disposeSubscription = merge(
             this.playlists$.pipe(map(playlists => ({ playlists }))),
             this.selectedPlaylist$.pipe(map(selectedPlaylist => ({ selectedPlaylist }))),

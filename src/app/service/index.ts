@@ -296,6 +296,9 @@ class Service {
             return spotify;
         }
         const result = await spotify.val.listTopTracks();
+        if (result.isError) {
+            return result;
+        }
 
         return result;
     }
@@ -306,6 +309,9 @@ class Service {
             return spotify;
         }
         const result = await spotify.val.fetchArtistTopTracks(artistId, country);
+        if (result.isError) {
+            return result;
+        }
 
         return result;
     }
@@ -384,7 +390,10 @@ class Service {
             return service;
         }
 
-        const result = service.val.fetchMyPlaylists(offset, limit);
+        const result = await service.val.fetchMyPlaylists(offset, limit);
+        if (result.isError) {
+            return result;
+        }
 
         return result;
     }
@@ -395,7 +404,10 @@ class Service {
             return service;
         }
 
-        const result = service.val.fetchPlaylistTracks(playlistId, offset, limit);
+        const result = await service.val.fetchPlaylistTracks(playlistId, offset, limit);
+        if (result.isError) {
+            return result;
+        }
 
         return result;
     }
@@ -406,7 +418,10 @@ class Service {
             return spotify;
         }
 
-        const result = spotify.val.listAlbumTracks(albumId);
+        const result = await spotify.val.listAlbumTracks(albumId);
+        if (result.isError) {
+            return result;
+        }
 
         return result;
     }
@@ -516,7 +531,10 @@ class Service {
             return service;
         }
 
-        const result = service.val.fetchTracks(offset, limit);
+        const result = await service.val.fetchTracks(offset, limit);
+        if (result.isError) {
+            return result;
+        }
 
         return result;
     }
@@ -593,20 +611,26 @@ class Service {
     async removeTrackFromPlaylist(tracks: ITrack | ITrack[], playlistId: string) {
         tracks = [].concat(tracks);
         const spotify = await this.service(SpotifyService);
+
         if (spotify.isError) {
+
             return spotify;
         }
+
         const plTracksResult = await spotify.val.fetchPlaylistTracks(playlistId);
         if (plTracksResult.isError) {
             return plTracksResult;
         }
+
         const trackIds = _.map(plTracksResult.val.items, item => item.track.id);
         const same = _.intersection(_.map(tracks, t => t.id), trackIds);
+
         if (same.length) {
             const result = await spotify.val.removeTrackFromPlaylist(_.map([].concat(tracks), t => t.uri), playlistId);
 
             return result;
         }
+
         return plTracksResult;
     }
 
@@ -626,6 +650,30 @@ class Service {
         }
         const reorderSResult = await spotifyResult.val.reorderTracks(playlistId, oldPosition, newPosition, 1);
         return reorderSResult;
+    }
+
+    async bannTrack(trackId: string) {
+        const dataResult = await this.service(DataService);
+        if (dataResult.isError) {
+            return false;
+        }
+        return await dataResult.val.bannTrack(trackId);
+    }
+
+    async removeBannFromTrak(trackId: string) {
+        const dataResult = await this.service(DataService);
+        if (dataResult.isError) {
+            return false;
+        }
+        return await dataResult.val.removeBannFromTrack(trackId);
+    }
+
+    async isBannedTrack(trackId: string) {
+        const dataResult = await this.service(DataService);
+        if (dataResult.isError) {
+            return false;
+        }
+        return await dataResult.val.isBannedTrack(trackId);
     }
 }
 

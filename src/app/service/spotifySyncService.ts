@@ -20,12 +20,12 @@ class SpotifySyncService extends withEvents(BaseService) {
             return spotifyResult;
         }
         const spotify = spotifyResult.val;
-        return SpotifySyncServiceResult.success(new SpotifySyncService(connection, spotify));
+        return SpotifySyncServiceResult.success(new SpotifySyncService(connection, spotify, dataServiceResult.val));
     }
 
     limit = 49;
 
-    constructor(public ss: Service, public spotify: SpotifyService) {
+    constructor(public ss: Service, public spotify: SpotifyService, private data: DataService) {
         super();
     }
 
@@ -41,17 +41,44 @@ class SpotifySyncService extends withEvents(BaseService) {
     async syncMyPlaylists() {
         let res = [] as IUserPlaylist[];
         for await (const playlists of this.listMyPlaylists()) {
+            for (const playlist of playlists) {
+                await this.data.createPlaylist(playlist);
+            }
+            res = [...res, ...playlists];
         }
         return res;
     }
 
     async syncTracksByPlaylist(playlist: IUserPlaylist) {
-        for await (const tracks of this.listPlaylistTracks(playlist.id)) {
+        let index = 0;
+        for await (const songs of this.listPlaylistTracks(playlist.id)) {
+            for (const song of songs) {
+                await this.data.createTrack(song.track);
+                await this.data.addTrackToPlaylist(playlist, song, index++);
+            }
         }
     }
 
     async syncMyTracks() {
+        let index = 0;
+        const myPlaylist: IUserPlaylist = {
+            id: 'myTracks',
+            name: 'my Tracks',
+            description: '',
+            images: [],
+            uri: 'my:playlist:myTracks',
+            owner: {},
+            snapshot_id: '0',
+            tracks: {
+                total: 0
+            }
+        };
+        await this.data.createPlaylist(myPlaylist);
         for await (const songs of this.listMyTracks()) {
+            for (const song of songs) {
+                await this.data.createTrack(song.track);
+                await this.data.addTrackToPlaylist(myPlaylist, song, index++);
+            }
         }
     }
 
@@ -59,8 +86,8 @@ class SpotifySyncService extends withEvents(BaseService) {
         let total = this.limit;
         let offset = 0;
         while (offset < total) {
-            const currentOffset = offset,
-                result = await this.spotify.fetchPlaylistTracks(playlistId, offset, this.limit + 1);
+            const currentOffset = offset;
+            const result = await this.spotify.fetchPlaylistTracks(playlistId, offset, this.limit + 1);
             if (assertNoErrors(result, e => _.delay(() => { throw e; }))) {
                 return;
             }

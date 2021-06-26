@@ -20,6 +20,8 @@ class AlbumsViewModel {
     tracks$: BehaviorSubject<AlbumsViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
 
+    selectedItem$: BehaviorSubject<AlbumsViewModel['selectedItem']>;
+    @State selectedItem = null as TrackViewModelItem;
 }
 
 class AlbumsView extends React.Component<IAlbumsViewProps> {
@@ -30,17 +32,22 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
 
     tracks$ = this.vm.tracks$;
     @Binding tracks = this.tracks$.getValue();
+
+    selectedItem$ = this.vm.selectedItem$;
+    @Binding selectedItem = this.selectedItem$.getValue();
     
     state = {
     };
     
-    dispose$ = new Subject<void>();
-    queue$: Subscription;
+    dispose$: Subject<void>;
+    disposeSubscription: Subscription;
 
     componentDidMount() {
-        this.queue$ = merge(
+        this.dispose$ = new Subject<void>();
+        this.disposeSubscription = merge(
             this.errors$.pipe(map(errors => ({ errors }))),
             this.tracks$.pipe(map(tracks => ({ tracks }))),
+            this.selectedItem$.pipe(map(selectedItem => ({ selectedItem }))),
         ).pipe(
             takeUntil(this.dispose$)
         ).subscribe((v) => {

@@ -12,22 +12,21 @@
 // Colors
 //
 // Main theme colors
-$primary-color:  #007aff !global;
-$chrome-color:   rgba(247,247,247,.98) !global;
+$primary-color: #007aff !global;
+$chrome-color: rgba(247, 247, 247, 0.98) !global;
 
 // Action colors
-$default-color:  #929292 !global;
+$default-color: #929292 !global;
 $positive-color: #4cd964 !global;
 $negative-color: #dd524d !global;
 $text-color: #777;
 
 // Bars
 $bar-base-height: 44px !global;
-$bar-tab-height:  50px !global;
+$bar-tab-height: 50px !global;
 
 // iOS style transitions
-$timing-fuction: cubic-bezier(.1, .5, .1, 1) !global; // Inspired by @c2prods
-
+$timing-fuction: cubic-bezier(0.1, 0.5, 0.1, 1) !global; // Inspired by @c2prods
 
 // Base
 // --------------------------------------------------
@@ -45,21 +44,23 @@ a {
 .content {
 }
 
-
 // Typography
 // --------------------------------------------------
 
-.h5, h5,
-.h6, h6,
+.h5,
+h5,
+.h6,
+h6,
 p {
   color: #8f8f94;
 }
-.h5, h5,
-.h6, h6 {
+.h5,
+h5,
+.h6,
+h6 {
   font-weight: normal;
   text-transform: uppercase;
 }
-
 
 // Buttons
 // --------------------------------------------------
@@ -69,7 +70,7 @@ p {
   background-color: $chrome-color;
   border: 1px solid $default-color;
   @include transition(all);
-  @include transition-duration(.2s);
+  @include transition-duration(0.2s);
   @include transition-timing-function(linear);
 
   // Active & filled button styles
@@ -79,7 +80,6 @@ p {
     background-color: $default-color;
   }
 }
-
 
 // Other button types
 // --------------------------------------------------
@@ -160,7 +160,7 @@ p {
 // Buttons with badges
 .btn {
   .badge {
-    background-color: rgba(0,0,0,.15);
+    background-color: rgba(0, 0, 0, 0.15);
 
     &.badge-inverted {
       background-color: transparent;
@@ -173,14 +173,13 @@ p {
   }
 }
 
-
 // Bars
 // --------------------------------------------------
 
 // Default bar
 .bar {
   border-bottom: 0;
-  @include box-shadow(0 0 1px rgba(0,0,0,.85));
+  @include box-shadow(0 0 1px rgba(0, 0, 0, 0.85));
 
   // Modifier class to dock any bar below .bar-nav
   &.bar-header-secondary {
@@ -226,12 +225,10 @@ p {
 
     &:active {
       color: $primary-color;
-      opacity: .6;
+      opacity: 0.6;
     }
   }
 }
-
-
 
 // Badges
 // --------------------------------------------------
@@ -242,7 +239,6 @@ p {
     background-color: transparent;
   }
 }
-
 
 // Badge modifiers
 //
@@ -279,7 +275,6 @@ p {
   }
 }
 
-
 // Cards
 // --------------------------------------------------
 
@@ -301,7 +296,11 @@ p {
 
   .table-view-cell {
     border-bottom: 0;
-    @include hairline(single, #c8c7cc, 15px); // Single grey border with 15px offset.
+    @include hairline(
+      single,
+      #c8c7cc,
+      15px
+    ); // Single grey border with 15px offset.
 
     // Remove the border from the last table view item
     &:last-child {
@@ -316,10 +315,13 @@ p {
   .table-view-divider {
     border-top: 0;
     border-bottom: 0;
-    @include hairline(double, #c8c7cc, 0);  // Double (top and bottom) grey border with no offset.
+    @include hairline(
+      double,
+      #c8c7cc,
+      0
+    ); // Double (top and bottom) grey border with no offset.
   }
 }
-
 
 // Forms
 // --------------------------------------------------
@@ -343,14 +345,14 @@ input[type="color"],
 .input-group {
   height: 40px;
   padding: 10px 15px;
-  border: 1px solid rgba(0, 0, 0, .2);
+  border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 // Rounded search input
 input[type="search"] {
   height: 34px;
-  text-align: center;
-  background-color: rgba(0,0,0,.1);
+  text-align: left;
+  background-color: rgba(0, 0, 0, 0.1);
   border: 0;
   border-radius: 6px;
 }
@@ -385,14 +387,17 @@ textarea,
 // To use labels with input groups, wrap a label and an input in an .input-row
 .input-row {
   border-bottom: 0;
-  @include hairline(single, #c8c7cc, 15px); // Single grey border with a 15px offset.
+  @include hairline(
+    single,
+    #c8c7cc,
+    15px
+  ); // Single grey border with a 15px offset.
 }
 // Remove bottom border on last input-row to avoid double bottom border
 .input-row:last-child,
 .input-row label + input {
   background-image: none;
 }
-
 
 // Segmented controls
 // --------------------------------------------------
@@ -404,7 +409,7 @@ textarea,
   .control-item {
     color: $default-color;
     border-color: $default-color;
-    @include transition(background-color .1s linear);
+    @include transition(background-color 0.1s linear);
 
     &:active {
       background-color: lighten($default-color, 35%);
@@ -472,13 +477,15 @@ textarea,
   }
 }
 
-
 // Popovers
 // --------------------------------------------------
 
 .popover {
   border-radius: 12px;
-  @include transition(-webkit-transform 0.2s ease-in-out, opacity 0.2s ease-in-out);
+  @include transition(
+    -webkit-transform 0.2s ease-in-out,
+    opacity 0.2s ease-in-out
+  );
 
   &:before {
     border-bottom: 15px solid $chrome-color;
@@ -492,7 +499,7 @@ textarea,
 
 // Popovers with `bar-nav`
 .popover .bar-nav {
-  border-bottom: 1px solid rgba(0,0,0,.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
 }
 
 // Popovers with `table-views`
@@ -500,7 +507,6 @@ textarea,
   background-image: none;
   border-radius: 12px;
 }
-
 
 // Modal styles
 // --------------------------------------------------
@@ -514,7 +520,6 @@ textarea,
   }
 }
 
-
 // Toggles styles
 // --------------------------------------------------
 .toggle {
@@ -522,15 +527,15 @@ textarea,
   border: 2px solid #e6e6e6;
   @include box-shadow(inset 0 0 0 0 #e1e1e1);
   @include transition-property(box-shadow, border);
-  @include transition-duration(.2s);
+  @include transition-duration(0.2s);
 
   // Sliding handle
   .toggle-handle {
-    border: 1px solid rgba(0, 0, 0, .2);
+    border: 1px solid rgba(0, 0, 0, 0.2);
     -webkit-transition-property: -webkit-transform, border, width;
-       -moz-transition-property: -moz-transform, border, width;
-            transition-property: transform, border, width;
-    @include box-shadow(0 3px 3px rgba(0,0,0,.08));
+    -moz-transition-property: -moz-transform, border, width;
+    transition-property: transform, border, width;
+    @include box-shadow(0 3px 3px rgba(0, 0, 0, 0.08));
   }
   &:before {
     display: none;
@@ -542,7 +547,7 @@ textarea,
     @include box-shadow(inset 0 0 0 13px $positive-color);
 
     .toggle-handle {
-      @include transform(translate3d(17px,0,0));
+      @include transform(translate3d(17px, 0, 0));
     }
 
     .toggle-handle {
@@ -551,23 +556,22 @@ textarea,
   }
 }
 
-
 // Push styles
 // --------------------------------------------------
 .content {
   // Fade animation
   &.fade {
-    @include transition(opacity .2s ease-in-out);
+    @include transition(opacity 0.2s ease-in-out);
   }
   // Slide animation
   &.sliding {
-    @include transition-timing-function ($timing-fuction);
+    @include transition-timing-function($timing-fuction);
 
     // Adding the overlay
     &.sliding-in,
     &.right:not([class*="sliding-in"]) {
       @include animation-name(fadeOverlay);
-      @include animation-duration(.4s);
+      @include animation-duration(0.4s);
     }
 
     &.right:not([class*="sliding-in"]) {
@@ -575,15 +579,89 @@ textarea,
     }
 
     &.left {
-      @include transform(translate3d(-20%, 0, 0)); // Creates the parallax effect
+      @include transform(
+        translate3d(-20%, 0, 0)
+      ); // Creates the parallax effect
     }
+  }
+}
+
+.meter {
+  position: absolute;
+  height: 4px;
+  position: relative;
+  background: #555;
+  padding: 0;
+  box-shadow: inset 0 -1px 1px rgba(255, 255, 255, 0.3);
+}
+
+.orange > span {
+  background-color: #f1a165;
+  background-image: linear-gradient(to bottom, #f1a165, #f36d0a);
+}
+
+.meter > span:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-image: linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 75%,
+    transparent
+  );
+  z-index: 1;
+  background-size: 50px 50px;
+  animation: move 2s linear infinite;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  overflow: hidden;
+}
+
+.meter > span::after,
+.animate > span > span {
+  animation: move 2s linear infinite;
+}
+
+.action {
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  display: inline-block;
+}
+
+@keyframes move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
   }
 }
 
 // Overlay animation for the slide transition
 @at-root {
   @-webkit-keyframes fadeOverlay {
-    from { @include box-shadow(0 0 10px rgba(0,0,0,0), -320px 0 0 rgba(0,0,0,0)); }
-    to   { @include box-shadow(0 0 10px rgba(0,0,0,.3), -320px 0 0 rgba(0,0,0,.1)); }
+    from {
+      @include box-shadow(
+        0 0 10px rgba(0, 0, 0, 0),
+        -320px 0 0 rgba(0, 0, 0, 0)
+      );
+    }
+    to {
+      @include box-shadow(
+        0 0 10px rgba(0, 0, 0, 0.3),
+        -320px 0 0 rgba(0, 0, 0, 0.1)
+      );
+    }
   }
 }

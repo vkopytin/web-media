@@ -16,7 +16,8 @@ export interface IStorageConfig {
 }
 
 export interface IStorage {
-	initializeStructure(cb: { (err, res?): void });
+    initializeStructure(cb: { (err, res?): void });
+    hasTable(config: IStorageConfig, cb: { (err, res?): void });
     createTable(config: IStorageConfig, cb: { (err, res?): void });
     getById(config: IStorageConfig, id, cb: { (err?, id?): void });
     where(config: IStorageConfig, where: { [key: string]: any }, cb: { (err?, result?): boolean });

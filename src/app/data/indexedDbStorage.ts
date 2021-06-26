@@ -17,6 +17,20 @@ class IndexedDbStorage implements IStorage {
 		this.connection.onerror = () => cb(this.connection.error);
 	}
 
+	hasTable(config: IStorageConfig, cb: { (err, res?): void }) {
+		const tableName = config.name;
+		try {
+			const res = this.connection.result;
+			const tr = this.connection.transaction;
+			const store = tr.objectStore(tableName);
+
+			cb(null, !!store);
+		}
+		catch (e) {
+			cb(null, false);
+		}
+	}
+
 	createTable(config: IStorageConfig, cb: { (err, res?): void }) {
 		try {
 			const tableName = config.name;

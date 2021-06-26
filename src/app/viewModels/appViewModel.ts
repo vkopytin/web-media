@@ -46,8 +46,11 @@ class AppViewModel {
     autoRefreshUrl$: BehaviorSubject<string>;
     @State autoRefreshUrl = '';
 
-    errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
+    errors$: BehaviorSubject<AppViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
+
+    isSyncing$: BehaviorSubject<AppViewModel['isSyncing']>;
+    @State isSyncing = 0;
 
     isInit = _.delay(() => {
         this.init();
@@ -82,7 +85,12 @@ class AppViewModel {
             return;
         }
         const syncService = syncServiceResult.val;
-        syncService.syncData();
+        this.isSyncing = 1;
+        try {
+            await syncService.syncData();
+        } finally {
+            this.isSyncing = 0;
+        }
     }
 
     async refreshToken() {

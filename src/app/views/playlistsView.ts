@@ -45,10 +45,11 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
     createPlaylistCommand$ = this.vm.createPlaylistCommand$;
     @Binding createPlaylistCommand = this.vm.createPlaylistCommand$.getValue();
 
-    dispose$ = new Subject<void>();
+    dispose$: Subject<void>;
     disposeSubscription: Subscription;
 
     componentDidMount() {
+        this.dispose$ = new Subject<void>();
         this.disposeSubscription = merge(
             this.errors$.pipe(map(errors => ({ errors }))),
             this.playlists$.pipe(map(playlists => ({ playlists }))),
