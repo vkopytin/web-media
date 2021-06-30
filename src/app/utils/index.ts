@@ -253,10 +253,7 @@ export function Binding({ didSet }: { didSet?: (view, val) => void } = {}) {
 
                         current = [
                             v$,
-                            store$.pipe(
-                                distinctUntilChanged(),
-                                map(val => descriptor?.set.call(this, val))
-                            ).subscribe(v$),
+                            store$.pipe(distinctUntilChanged()).subscribe(v$),
                             v$.pipe(distinctUntilChanged()).subscribe(store$)
                         ];
                         assignedSubjects.push(current);

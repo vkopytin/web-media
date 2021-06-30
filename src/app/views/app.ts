@@ -43,7 +43,7 @@ class AppView extends React.Component<IAppViewProps> {
     profile: AppView['vm']['profile'];
 
     currentTrackId$ = this.vm.currentTrackId$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding({ didSet: (view, currentTrackId) => view.didRefresh({ currentTrackId }) })
     currentTrackId: AppView['vm']['currentTrackId'];
     
     topTracks$ = this.vm.topTracks$;
@@ -87,9 +87,10 @@ class AppView extends React.Component<IAppViewProps> {
         this.didRefresh = () => { };
     }
 
-    refresh() {
+    refresh(newState?) {
         this.setState({
             ...this.state,
+            ...newState,
         });
     }
 
