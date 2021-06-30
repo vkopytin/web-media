@@ -21,22 +21,37 @@ function elementIndex(el) {
 }
 
 class TracksView extends React.Component<ITracksViewProps, TracksView['state']> {
+    didRefresh: TracksView['refresh'] = () => { };
     vm = current(PlaylistsViewModel);
     
     errors$ = this.vm.errors$;
-    @Binding errors = this.errors$.getValue();
+    @Binding({
+        didSet: (view, errors) => {
+            view.didRefresh();
+            view.showErrors(errors);
+        }
+    })
+    errors: TracksView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
-    @Binding tracks = this.tracks$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    tracks: TracksView['vm']['tracks'];
 
     likedTracks$ = this.vm.likedTracks$;
-    @Binding likedTracks = this.likedTracks$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    likedTracks: TracksView['vm']['likedTracks'];
 
     selectedItem$ = this.vm.selectedItem$;
-    @Binding selectedItem = this.selectedItem$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    selectedItem: TracksView['vm']['selectedItem'];
 
     trackLyrics$ = this.vm.trackLyrics$;
-    @Binding trackLyrics = this.trackLyrics$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    trackLyrics: TracksView['vm']['trackLyrics'];
+
+    bannedTrackIds$ = this.vm.bannedTrackIds$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    bannedTrackIds: TracksView['vm']['bannedTrackIds'];
 
     state = {
         draggedIndex: 0,
@@ -44,19 +59,28 @@ class TracksView extends React.Component<ITracksViewProps, TracksView['state']> 
     };
 
     likeTrackCommand$ = this.vm.likeTrackCommand$;
-    @Binding likeTrackCommand = this.likeTrackCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    likeTrackCommand: TracksView['vm']['likeTrackCommand'];
 
     unlikeTrackCommand$ = this.vm.unlikeTrackCommand$;
-    @Binding unlikeTrackCommand = this.unlikeTrackCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    unlikeTrackCommand: TracksView['vm']['unlikeTrackCommand'];
 
     findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
-    @Binding findTrackLyricsCommand = this.findTrackLyricsCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    findTrackLyricsCommand: TracksView['vm']['findTrackLyricsCommand'];
 
     reorderTrackCommand$ = this.vm.reorderTrackCommand$;
-    @Binding reorderTrackCommand = this.reorderTrackCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    reorderTrackCommand: TracksView['vm']['reorderTrackCommand'];
 
-    dispose$: Subject<void>;
-    disposeSubscription: Subscription;
+    bannTrackCommand$ = this.vm.bannTrackCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    bannTrackCommand: TracksView['vm']['bannTrackCommand'];
+
+    removeBannFromTrackCommand$ = this.vm.removeBannFromTrackCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    removeBannFromTrackCommand: TracksView['vm']['removeBannFromTrackCommand'];
 
     constructor(props) {
         super(props);
@@ -67,33 +91,17 @@ class TracksView extends React.Component<ITracksViewProps, TracksView['state']> 
     }
 
     componentDidMount() {
-        this.dispose$ = new Subject<void>();
-        this.disposeSubscription = merge(
-            this.errors$.pipe(map(errors => ({ errors }))),
-            this.tracks$.pipe(map(tracks => ({ tracks }))),
-            this.likedTracks$.pipe(map(likedTracks => ({ likedTracks }))),
-            this.selectedItem$.pipe(map(selectedItem => ({ selectedItem }))),
-            this.trackLyrics$.pipe(map(trackLyrics => ({ trackLyrics }))),
-            this.likedTracks$.pipe(map(likedTracks => ({ likedTracks }))),
-            this.likeTrackCommand$.pipe(map(likeTrackCommand => ({ likeTrackCommand }))),
-            this.unlikeTrackCommand$.pipe(map(unlikeTrackCommand => ({ unlikeTrackCommand }))),
-            this.findTrackLyricsCommand$.pipe(map(findTrackLyricsCommand => ({ findTrackLyricsCommand }))),
-            this.reorderTrackCommand$.pipe(map(reorderTrackCommand => ({ reorderTrackCommand }))),
-        ).pipe(takeUntil(this.dispose$)).subscribe((v) => {
-            //console.log(v);
-            this.setState({
-                ...this.state
-            });
-        });
-        this.errors$.pipe(
-            takeUntil(this.dispose$),
-            map(errors => this.showErrors(errors))
-        ).subscribe();
+        this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
-        this.dispose$.next();
-        this.dispose$.complete();
+        this.didRefresh = () => { };
+    }
+
+    refresh() {
+        this.setState({
+            ...this.state,
+        });
     }
 
     uri() {
@@ -194,6 +202,12 @@ class TracksView extends React.Component<ITracksViewProps, TracksView['state']> 
         }
         this.state.dragIndex = -1;
         this.state.draggedIndex = -1;
+    }
+
+    isBanned(track: TrackViewModelItem) {
+        const res = this.bannedTrackIds.find(trackId => trackId === track.id());
+
+        return !!res;
     }
 }
 

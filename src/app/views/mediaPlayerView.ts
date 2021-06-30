@@ -12,119 +12,124 @@ export interface IMediaPlayerViewProps {
 }
 
 class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
+    didRefresh: MediaPlayerView['refresh'] = () => { };
     vm = current(MediaPlayerViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding errors = this.errors$.getValue();
+    @Binding({
+        didSet: (view, errors) => {
+            view.didRefresh();
+            view.showErrors(errors);
+        }
+    })
+    errors: MediaPlayerView['vm']['errors'];
 
     currentTrackId$ = this.vm.currentTrackId$;
-    @Binding currentTrackId = this.currentTrackId$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentTrackId: MediaPlayerView['vm']['currentTrackId'];
 
     queue$ = this.vm.queue$;
-    @Binding queue = this.queue$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    queue: MediaPlayerView['vm']['queue'];
 
     timePlayed$ = this.vm.timePlayed$;
-    @Binding timePlayed = this.timePlayed$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    timePlayed: MediaPlayerView['vm']['timePlayed'];
 
     duration$ = this.vm.duration$;
-    @Binding duration = this.duration$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    duration: MediaPlayerView['vm']['duration'];
 
     isPlaying$ = this.vm.isPlaying$;
-    @Binding isPlaying = this.isPlaying$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    isPlaying: MediaPlayerView['vm']['isPlaying'];
 
     trackName$ = this.vm.trackName$;
-    @Binding trackName = this.trackName$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    trackName: MediaPlayerView['vm']['trackName'];
 
     albumName$ = this.vm.albumName$;
-    @Binding albumName = this.albumName$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    albumName: MediaPlayerView['vm']['albumName'];
 
     artistName$ = this.vm.artistName$;
-    @Binding artistName = this.artistName$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    artistName: MediaPlayerView['vm']['artistName'];
 
     volume$ = this.vm.volume$;
-    @Binding volume = this.volume$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    volume: MediaPlayerView['vm']['volume'];
 
     thumbnailUrl$ = this.vm.thumbnailUrl$;
-    @Binding thumbnailUrl = this.thumbnailUrl$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    thumbnailUrl: MediaPlayerView['vm']['thumbnailUrl'];
 
     isLiked$ = this.vm.isLiked$;
-    @Binding isLiked = this.isLiked$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    isLiked: MediaPlayerView['vm']['isLiked'];
 
     resumeCommand$ = this.vm.resumeCommand$;
-    @Binding resumeCommand = this.resumeCommand$.getValue();
-    pauseCommand$ = this.vm.pauseCommand$;
-    @Binding pauseCommand = this.pauseCommand$.getValue();
-    prevCommand$ = this.vm.prevCommand$;
-    @Binding prevCommand = this.prevCommand$.getValue();
-    nextCommand$ = this.vm.nextCommand$;
-    @Binding nextCommand = this.nextCommand$.getValue();
-    volumeUpCommand$ = this.vm.volumeUpCommand$;
-    @Binding volumeUpCommand = this.volumeUpCommand$.getValue();
-    volumeDownCommand$ = this.vm.volumeDownCommand$;
-    @Binding volumeDownCommand = this.volumeDownCommand$.getValue();
-    refreshPlaybackCommand$ = this.vm.refreshPlaybackCommand$;
-    @Binding refreshPlaybackCommand = this.refreshPlaybackCommand$.getValue();
-    likeSongCommand$ = this.vm.likeSongCommand$;
-    @Binding likeSongCommand = this.likeSongCommand$.getValue();
-    unlikeSongCommand$ = this.vm.unlikeSongCommand$;
-    @Binding unlikeSongCommand = this.unlikeSongCommand$.getValue();
-    seekPlaybackCommand$ = this.vm.seekPlaybackCommand$;
-    @Binding seekPlaybackCommand = this.seekPlaybackCommand$.getValue();
-    volumeCommand$ = this.vm.volumeCommand$;
-    @Binding volumeCommand = this.volumeCommand$.getValue();
-    
-    dispose$: Subject<void>;
-    disposeSubscription: Subscription;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    resumeCommand: MediaPlayerView['vm']['resumeCommand'];
 
+    pauseCommand$ = this.vm.pauseCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    pauseCommand: MediaPlayerView['vm']['pauseCommand'];
+
+    prevCommand$ = this.vm.prevCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    prevCommand: MediaPlayerView['vm']['prevCommand'];
+
+    nextCommand$ = this.vm.nextCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    nextCommand: MediaPlayerView['vm']['nextCommand'];
+
+    volumeUpCommand$ = this.vm.volumeUpCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    volumeUpCommand: MediaPlayerView['vm']['volumeUpCommand'];
+
+    volumeDownCommand$ = this.vm.volumeDownCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    volumeDownCommand : MediaPlayerView['vm']['volumeDownCommand'];
+
+    refreshPlaybackCommand$ = this.vm.refreshPlaybackCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    refreshPlaybackCommand: MediaPlayerView['vm']['refreshPlaybackCommand'];
+
+    likeSongCommand$ = this.vm.likeSongCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    likeSongCommand: MediaPlayerView['vm']['likeSongCommand'];
+
+    unlikeSongCommand$ = this.vm.unlikeSongCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    unlikeSongCommand: MediaPlayerView['vm']['unlikeSongCommand'];
+
+    seekPlaybackCommand$ = this.vm.seekPlaybackCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    seekPlaybackCommand: MediaPlayerView['vm']['seekPlaybackCommand'];
+
+    volumeCommand$ = this.vm.volumeCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    volumeCommand: MediaPlayerView['vm']['volumeCommand'];
+    
     constructor(props) {
         super(props);
         // toDO: Find better solution
         this.currentTrackId$ = this.props.currentTrackId$;
-        this.errors$.pipe(
-            takeUntil(this.dispose$),
-            map(errors => this.showErrors(errors))
-        ).subscribe();
     }
 
     componentDidMount() {
-        this.dispose$ = new Subject<void>();
-        this.disposeSubscription = merge(
-            this.errors$.pipe(map(errors => ({ errors }))),
-            this.currentTrackId$.pipe(map(currentTrackId => ({ currentTrackId }))),
-            this.queue$.pipe(map(queue => ({ queue }))),
-            this.timePlayed$.pipe(map(timePlayed => ({ timePlayed }))),
-            this.duration$.pipe(map(duration => ({ duration }))),
-            this.isPlaying$.pipe(map(isPlaying => ({ isPlaying }))),
-            this.trackName$.pipe(map(trackName => ({ trackName }))),
-            this.albumName$.pipe(map(albumName => ({ albumName }))),
-            this.artistName$.pipe(map(artistName => ({ artistName }))),
-            this.volume$.pipe(map(volume => ({ volume }))),
-            this.thumbnailUrl$.pipe(map(thumbnailUrl => ({ thumbnailUrl }))),
-            this.isLiked$.pipe(map(isLiked => ({ isLiked }))),
-            this.refreshPlaybackCommand$.pipe(map(refreshPlaybackCommand => ({ refreshPlaybackCommand }))),
-            this.pauseCommand$.pipe(map(pauseCommand => ({ pauseCommand }))),
-            this.prevCommand$.pipe(map(prevCommand => ({ prevCommand }))),
-            this.nextCommand$.pipe(map(nextCommand => ({ nextCommand }))),
-            this.volumeUpCommand$.pipe(map(volumeUpCommand => ({ volumeUpCommand }))),
-            this.volumeDownCommand$.pipe(map(volumeDownCommand => ({ volumeDownCommand }))),
-            this.refreshPlaybackCommand$.pipe(map(refreshPlaybackCommand => ({ refreshPlaybackCommand }))),
-            this.likeSongCommand$.pipe(map(likeSongCommand => ({ likeSongCommand }))),
-            this.unlikeSongCommand$.pipe(map(unlikeSongCommand => ({ unlikeSongCommand }))),
-            this.seekPlaybackCommand$.pipe(map(seekPlaybackCommand => ({ seekPlaybackCommand }))),
-            this.volumeCommand$.pipe(map(volumeCommand => ({ volumeCommand }))),
-        ).pipe(
-            takeUntil(this.dispose$)
-        ).subscribe((v) => {
-            //console.log(v);
-            this.setState({
-                ...this.state
-            });
-        });
+        this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
-        this.dispose$.next();
-        this.dispose$.complete();
+        this.didRefresh = () => { };
+    }
+
+    refresh() {
+        this.setState({
+            ...this.state,
+        });
     }
 
     seekTrack(evnt: React.MouseEvent<HTMLDivElement, MouseEvent>) {

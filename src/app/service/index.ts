@@ -599,11 +599,27 @@ class Service {
     }
 
     async addTrackToPlaylist(tracks: ITrack | ITrack[], playlist: IUserPlaylist) {
+        tracks = [].concat(tracks);
         const spotify = await this.service(SpotifyService);
         if (spotify.isError) {
             return spotify;
         }
         const result = await spotify.val.addTrackToPlaylist(_.map([].concat(tracks), t => t.uri), playlist.id);
+        if (result.isError) {
+            return;
+        }
+
+        const dataResult = await this.service(DataService);
+        if (dataResult.isError) {
+            return dataResult;
+        }
+        for (const track of tracks) {
+            await dataResult.val.createTrack(track);
+            await dataResult.val.addTrackToPlaylist(playlist, {
+                added_at: new Date().toISOString(),
+                track
+            });
+        };
 
         return result;
     }
@@ -617,21 +633,23 @@ class Service {
             return spotify;
         }
 
-        const plTracksResult = await spotify.val.fetchPlaylistTracks(playlistId);
-        if (plTracksResult.isError) {
-            return plTracksResult;
-        }
-
-        const trackIds = _.map(plTracksResult.val.items, item => item.track.id);
-        const same = _.intersection(_.map(tracks, t => t.id), trackIds);
-
-        if (same.length) {
-            const result = await spotify.val.removeTrackFromPlaylist(_.map([].concat(tracks), t => t.uri), playlistId);
-
+        const result = await spotify.val.removeTrackFromPlaylist(_.map(tracks, t => t.uri), playlistId);
+        if (result.isError) {
             return result;
         }
 
-        return plTracksResult;
+        const dataResult = await this.service(DataService);
+        if (dataResult.isError) {
+            return dataResult;
+        }
+        for (const track of tracks) {
+            const res = await dataResult.val.removeTrackFromPlaylist(playlistId, {
+                added_at: new Date().toISOString(),
+                track
+            });
+        }
+
+        return result;
     }
 
     async findTrackLyrics(songInfo: { name: string; artist: string; }) {
@@ -674,6 +692,14 @@ class Service {
             return false;
         }
         return await dataResult.val.isBannedTrack(trackId);
+    }
+
+    async listBannedTracks(byTrackIds: string[]) {
+        const dataResult = await this.service(DataService);
+        if (dataResult.isError) {
+            return [] as string[];
+        }
+        return await dataResult.val.listBannedTracks(byTrackIds);
     }
 }
 

@@ -13,72 +13,70 @@ export interface IPlaylistsViewProps {
 }
 
 class PlaylistsView extends React.Component<IPlaylistsViewProps> {
+    didRefresh: PlaylistsView['refresh'] = () => { };
     vm = current(PlaylistsViewModel);
     
     errors$ = this.vm.errors$;
-    @Binding errors = this.errors$.getValue();
+    @Binding({
+        didSet: (view, errors) => {
+            view.didRefresh();
+            view.showErrors(errors);
+        }
+    })
+    errors: PlaylistsView['vm']['errors'];
 
     playlists$ = this.vm.playlists$;
-    @Binding playlists = this.playlists$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    playlists: PlaylistsView['vm']['playlists'];
 
     tracks$ = this.vm.tracks$;
-    @Binding tracks = this.tracks$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    tracks: PlaylistsView['vm']['tracks'];
 
     isLoading$ = this.vm.isLoading$;
-    @Binding isLoading = this.isLoading$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    isLoading: PlaylistsView['vm']['isLoading'];
 
     likedTracks$ = this.vm.likedTracks$;
-    @Binding likedTracks = this.likedTracks$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    likedTracks: PlaylistsView['vm']['likedTracks'];
 
     currentPlaylistId$ = this.vm.currentPlaylistId$;
-    @Binding currentPlaylistId = this.currentPlaylistId$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentPlaylistId: PlaylistsView['vm']['currentPlaylistId'];
 
     newPlaylistName$ = this.vm.newPlaylistName$;
-    @Binding newPlaylistName = this.newPlaylistName$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    newPlaylistName: PlaylistsView['vm']['newPlaylistName'];
 
     selectPlaylistCommand$ = this.vm.selectPlaylistCommand$;
-    @Binding selectPlaylistCommand = this.selectPlaylistCommand$.getValue();
-    loadMoreCommand$ = this.vm.loadMoreCommand$;
-    @Binding loadMoreCommand = this.loadMoreCommand$.getValue();
-    loadMoreTracksCommand$ = this.vm.loadMoreTracksCommand$;
-    @Binding loadMoreTracksCommand = this.loadMoreTracksCommand$.getValue();
-    createPlaylistCommand$ = this.vm.createPlaylistCommand$;
-    @Binding createPlaylistCommand = this.vm.createPlaylistCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    selectPlaylistCommand: PlaylistsView['vm']['selectPlaylistCommand'];
 
-    dispose$: Subject<void>;
-    disposeSubscription: Subscription;
+    loadMoreCommand$ = this.vm.loadMoreCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    loadMoreCommand: PlaylistsView['vm']['loadMoreCommand'];
+
+    loadMoreTracksCommand$ = this.vm.loadMoreTracksCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    loadMoreTracksCommand: PlaylistsView['vm']['loadMoreTracksCommand'];
+
+    createPlaylistCommand$ = this.vm.createPlaylistCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    createPlaylistCommand: PlaylistsView['vm']['createPlaylistCommand'];
 
     componentDidMount() {
-        this.dispose$ = new Subject<void>();
-        this.disposeSubscription = merge(
-            this.errors$.pipe(map(errors => ({ errors }))),
-            this.playlists$.pipe(map(playlists => ({ playlists }))),
-            this.tracks$.pipe(map(tracks => ({ tracks }))),
-            this.isLoading$.pipe(map(isLoading => ({ isLoading }))),
-            this.likedTracks$.pipe(map(likedTracks => ({ likedTracks }))),
-            this.currentPlaylistId$.pipe(map(currentPlaylistId => ({ currentPlaylistId }))),
-            this.newPlaylistName$.pipe(map(newPlaylistName => ({ newPlaylistName }))),
-            this.selectPlaylistCommand$.pipe(map(selectPlaylistCommand => ({ selectPlaylistCommand }))),
-            this.loadMoreCommand$.pipe(map(loadMoreCommand => ({ loadMoreCommand }))),
-            this.loadMoreTracksCommand$.pipe(map(loadMoreTracksCommand => ({ loadMoreTracksCommand }))),
-            this.createPlaylistCommand$.pipe(map(createPlaylistCommand => ({ createPlaylistCommand }))),
-        ).pipe(
-            takeUntil(this.dispose$)
-        ).subscribe((v) => {
-            //console.log(v);
-            this.setState({
-                ...this.state
-            });
-        });
-        this.errors$.pipe(
-            takeUntil(this.dispose$),
-            map(errors => this.showErrors(errors))
-        ).subscribe();
+        this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
-        this.dispose$.next();
-        this.dispose$.complete();
+        this.didRefresh = () => { };
+    }
+
+    refresh() {
+        this.setState({
+            ...this.state,
+        });
     }
 
     showErrors(errors) {

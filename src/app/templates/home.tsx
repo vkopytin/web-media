@@ -9,6 +9,9 @@ const cn = utils.className;
 
 export const template = (view: HomeView) => <>
     <div className="center">
+        <div className="chips-list" style={{float: 'left'}}>
+            <span className="chips chips-positive" onClick={evnt => view.refreshCommand.exec(view.props.currentTrackId)}>Current Song</span>
+        </div>
         <PickPlaylistsView showErrors={e => view.showErrors(e)} />
         {view.isLoading || <button className="button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
             onClick={evnt => view.refreshCommand.exec()}
@@ -26,16 +29,15 @@ export const template = (view: HomeView) => <>
                         >receipt</span>
                     </div>
                     <span className="media-object pull-left player-left--32"
-                        onClick={evnt => { item.isBanned || item.playTracks(view.tracks) }}
+                        onClick={evnt => { view.isBanned(item) || item.playTracks(view.tracks) }}
                     >
                         <div className="region">
                             <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
-                                {!item.isBanned && view.isPlaying(item) || <button className="button-play icon icon-play"
+                                {!view.isBanned(item) && view.isPlaying(item) || <button className="button-play icon icon-play"
                                 ></button>}
-                                {!item.isBanned && view.isPlaying(item) && <button className="button-play icon icon-pause">
+                                {!view.isBanned(item) && view.isPlaying(item) && <button className="button-play icon icon-pause">
                                 </button>}
-                                {item.isBanned && <button className="button-play icon block"
-                                ></button>}
+                                {view.isBanned(item) && <button className="button-play material-icons">block</button>}
                             </div>
                         </div>
                     </span>
@@ -57,7 +59,7 @@ export const template = (view: HomeView) => <>
                                     active={true} />}
                             </div>
                         </div>
-                        {item.isBanned ? <button className="action chips btn btn-negative btn-outlined material-icons"
+                        {view.isBanned(item) ? <button className="action chips btn btn-negative btn-outlined material-icons"
                             title="Banned, tap to remove Bann"
                             onClick={evnt => view.removeBannFromTrackCommand.exec(item)}
                         >block</button>
@@ -73,7 +75,7 @@ export const template = (view: HomeView) => <>
                         onClick={evnt => view.likeTrackCommand.exec(item)}
                     >{item.duration()}</span>}
                 </div>
-                {!item.isBanned && (view.selectedTrack) === item && <SelectPlaylistsView
+                {!view.isBanned(item) && view.selectedTrack === item && <SelectPlaylistsView
                     showErrors={e => view.showErrors(e)}
                     className="chips-list"
                     track={item} />}

@@ -5,11 +5,10 @@ import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { DataService } from '../service/dataService';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, current, formatTime, State } from '../utils';
+import { assertNoErrors, current, formatTime, isLoading, State } from '../utils';
 import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModel } from './playlistsViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
-
 
 class TrackViewModelItem {
     appViewModel = current(AppViewModel);
@@ -30,6 +29,9 @@ class TrackViewModelItem {
     isBanned$: BehaviorSubject<TrackViewModelItem['isBanned']>;
     @State isBanned = false;
     
+    isLoading$: BehaviorSubject<PlaylistsViewModel['isLoading']>;
+    @State isLoading = false;
+
     settings = {
         isLiked: false,
         isCached: false,
@@ -89,11 +91,11 @@ class TrackViewModelItem {
     async connect() {
         const spotifyResult = await this.ss.service(SpotifyService);
         if (assertNoErrors(spotifyResult, e => this.errors = e)) {
+
             return;
         }
-        const spotify = spotifyResult.val;
-        this.trackPlaylists = await this.listPlaylists();
 
+        this.trackPlaylists = await this.listPlaylists();
         this.isBanned = await this.ss.isBannedTrack(this.song.track.id);
     }
 
@@ -119,18 +121,24 @@ class TrackViewModelItem {
         assertNoErrors(playResult, e => this.errors = e);
     }
 
+    @isLoading
     async addToPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
         const result = await this.ss.addTrackToPlaylist(track.song.track, playlist.playlist);
         if (assertNoErrors(result, e => this.errors = e)) {
             return;
         }
+        setTimeout(() => {
+            this.connect();
+        }, 2000);
     }
 
+    @isLoading
     async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
         const result = await this.ss.removeTrackFromPlaylist(track.song.track, playlist.id());
         if (assertNoErrors(result, e => this.errors = e)) {
             return;
         }
+        await this.connect();
     }
 
     async likeTrack() {
@@ -149,6 +157,17 @@ class TrackViewModelItem {
 
     updateIsCached(playlists: PlaylistsViewModelItem[]) {
     }
+
+    async bannTrack() {
+        await this.ss.bannTrack(this.id());
+        this.isBanned = true;
+    }
+
+    async removeBannFromTrack() {
+        await this.ss.removeBannFromTrak(this.id());
+        this.isBanned = false;
+    }
+
 }
 
 export { TrackViewModelItem };

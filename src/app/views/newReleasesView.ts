@@ -14,63 +14,58 @@ export interface INewReleasesViewProps {
 }
 
 class NewReleasesView extends React.Component<INewReleasesViewProps> {
+    didRefresh: NewReleasesView['refresh'] = () => { };
     vm = current(NewReleasesViewModel);
     
     errors$ = this.vm.errors$;
-    @Binding errors = this.errors$.getValue();
+    @Binding({
+        didSet: (view, errors) => {
+            view.didRefresh();
+            view.showErrors(errors);
+        }
+    })
+    errors: NewReleasesView['vm']['errors'];
 
     newReleases$ = this.vm.newReleases$;
-    @Binding newReleases = this.newReleases$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    newReleases: NewReleasesView['vm']['newReleases'];
 
     currentAlbum$ = this.vm.currentAlbum$;
-    @Binding currentAlbum = this.vm.currentAlbum$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentAlbum: NewReleasesView['vm']['currentAlbum'];
 
     tracks$ = this.vm.tracks$;
-    @Binding tracks = this.tracks$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    tracks: NewReleasesView['vm']['tracks'];
 
     likedAlbums$ = this.vm.likedAlbums$;
-    @Binding likedAlbums = this.likedAlbums$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    likedAlbums: NewReleasesView['vm']['likedAlbums'];
 
     selectAlbumCommand$ = this.vm.selectAlbumCommand$;
-    @Binding selectAlbumCommand = this.selectAlbumCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    selectAlbumCommand: NewReleasesView['vm']['selectAlbumCommand'];
 
     likeAlbumCommand$ = this.vm.likeAlbumCommand$;
-    @Binding likeAlbumCommand = this.likeAlbumCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    likeAlbumCommand: NewReleasesView['vm']['likeAlbumCommand'];
 
     unlikeAlbumCommand$ = this.vm.unlikeAlbumCommand$;
-    @Binding unlikeAlbumCommand = this.unlikeAlbumCommand$.getValue();
-
-    dispose$: Subject<void>;
-    disposeSubscription: Subscription;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    unlikeAlbumCommand: NewReleasesView['vm']['unlikeAlbumCommand'];
 
     componentDidMount() {
-        this.dispose$ = new Subject<void>();
-        this.disposeSubscription = merge(
-            this.errors$.pipe(map(errors => ({ errors }))),
-            this.newReleases$.pipe(map(newReleases => ({ newReleases }))),
-            this.currentAlbum$.pipe(map(currentAlbum => ({ currentAlbum }))),
-            this.tracks$.pipe(map(tracks => ({ tracks }))),
-            this.likedAlbums$.pipe(map(likedAlbums => ({ likedAlbums }))),
-            this.selectAlbumCommand$.pipe(map(selectAlbumCommand => ({ selectAlbumCommand }))),
-            this.likeAlbumCommand$.pipe(map(likeAlbumCommand => ({ likeAlbumCommand }))),
-            this.unlikeAlbumCommand$.pipe(map(unlikeAlbumCommand => ({ unlikeAlbumCommand }))),
-        ).pipe(
-            takeUntil(this.dispose$)
-        ).subscribe((v) => {
-            //console.log(v);
-            this.setState({
-                ...this.state
-            });
-        });
-        this.errors$.pipe(
-            takeUntil(this.dispose$),
-            map(errors => this.showErrors(errors))
-        ).subscribe();
+        this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
-        this.dispose$.next();
-        this.dispose$.complete();
+        this.didRefresh = () => { };
+    }
+
+    refresh() {
+        this.setState({
+            ...this.state,
+        });
     }
 
     isLiked(album: AlbumViewModelItem) {

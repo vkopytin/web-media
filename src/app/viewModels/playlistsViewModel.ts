@@ -5,10 +5,9 @@ import { ServiceResult } from '../base/serviceResult';
 import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, current, State } from '../utils';
+import { assertNoErrors, current, isLoading, State } from '../utils';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
-
 
 class PlaylistsViewModel {
     errors$: BehaviorSubject<PlaylistsViewModel['errors']>;
@@ -37,6 +36,9 @@ class PlaylistsViewModel {
 
     trackLyrics$: BehaviorSubject<PlaylistsViewModel['trackLyrics']>;
     @State trackLyrics = null as { trackId: string; lyrics: string };
+
+    bannedTrackIds$: BehaviorSubject<PlaylistsViewModel['bannedTrackIds']>;
+    @State bannedTrackIds = [] as string[];
 
     settings = {
         ...(this as any as ViewModel).settings,
@@ -75,6 +77,11 @@ class PlaylistsViewModel {
     @State reorderTrackCommand = {
         exec: (track: TrackViewModelItem, beforeTrack: TrackViewModelItem) => this.reorderTrack(track, beforeTrack)
     };
+
+    bannTrackCommand$: BehaviorSubject<PlaylistsViewModel['bannTrackCommand']>;
+    @State bannTrackCommand = { exec: (track: TrackViewModelItem) => this.bannTrack(track) };
+    removeBannFromTrackCommand$: BehaviorSubject<PlaylistsViewModel['removeBannFromTrackCommand']>;
+    @State removeBannFromTrackCommand = { exec: (track: TrackViewModelItem) => this.removeBannFromTrack(track) };
 
     isInit = _.delay(() => {
         this.connect();
@@ -180,6 +187,7 @@ class PlaylistsViewModel {
             tracksToCheck[index].isLiked = liked;
         });
         this.likedTracks = _.filter(this.tracks, track => track.isLiked);
+        this.bannedTrackIds = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
     }
 
     playlistsAddRange(value: PlaylistsViewModelItem[]) {
@@ -257,6 +265,18 @@ class PlaylistsViewModel {
         if (assertNoErrors(res, e => this.errors = e)) {
             return;
         }
+    }
+
+    @isLoading
+    async bannTrack(track: TrackViewModelItem) {
+        await track.bannTrack();
+        this.bannedTrackIds = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
+    }
+
+    @isLoading
+    async removeBannFromTrack(track: TrackViewModelItem) {
+        await track.removeBannFromTrack();
+        this.bannedTrackIds = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
     }
 }
 

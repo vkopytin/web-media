@@ -22,13 +22,14 @@ export const template = (view: TracksView) => <>
                     >receipt</span>
                 </div>
                 <span className="media-object pull-left player-left--32"
-                    onClick={evnt => item.play(view.uri())}
+                    onClick={evnt => view.isBanned(item) || item.play(view.uri())}
                 >
                     <div className="region">
                         <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
-                            {view.isPlaying(item) || <button className="button-play icon icon-play"
+                            {!view.isBanned(item) && view.isPlaying(item) || <button className="button-play icon icon-play"
                             ></button>}
-                            {view.isPlaying(item) && <button className="button-play icon icon-pause"></button>}
+                            {!view.isBanned(item) && view.isPlaying(item) && <button className="button-play icon icon-pause"></button>}
+                            {view.isBanned(item) && <button className="button-play material-icons">block</button>}
                         </div>
                     </div>
                 </span>
@@ -44,10 +45,18 @@ export const template = (view: TracksView) => <>
                         showErrors={e => view.showErrors(e)}
                         className="chips-list" track={item} active={true} />}</div>
                 </div>
-                {(view.selectedItem) === item && <SelectPlaylistsView
+                {!view.isBanned(item) && view.selectedItem === item && <SelectPlaylistsView
                     showErrors={e => view.showErrors(e)}
                     className="chips-list" track={item} />}
                 <span className="badge-region">
+                    {view.isBanned(item) ? <button className="badge badge-negative badge-outlined material-icons"
+                        title="Banned, tap to remove Bann"
+                        onClick={evnt => view.removeBannFromTrackCommand.exec(item)}
+                    >block</button>
+                        : <button className="badge badge-positive badge-outlined material-icons"
+                        title="Allowed, tab to set a bann"
+                        onClick={evnt => view.bannTrackCommand.exec(item)}
+                    >done</button>}
                     {item.isLiked && <span className="badge badge-positive"
                         onClick={evnt => view.unlikeTrackCommand.exec(item)}
                     >{item.duration()}</span>}

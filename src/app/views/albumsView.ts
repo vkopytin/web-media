@@ -25,50 +25,45 @@ class AlbumsViewModel {
 }
 
 class AlbumsView extends React.Component<IAlbumsViewProps> {
+    didRefresh: AlbumsView['refresh'] = () => {};
     vm = current(AlbumsViewModel);
     
     errors$ = this.vm.errors$;
-    @Binding errors = this.errors$.getValue();
+    @Binding({
+        didSet: (view, errors) => {
+            view.didRefresh();
+            view.showErrors(errors);
+        }
+    })
+    errors: AlbumsView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
-    @Binding tracks = this.tracks$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    tracks: AlbumsView['vm']['tracks'];
 
     selectedItem$ = this.vm.selectedItem$;
-    @Binding selectedItem = this.selectedItem$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    selectedItem: AlbumsView['vm']['selectedItem'];
     
     state = {
     };
-    
-    dispose$: Subject<void>;
-    disposeSubscription: Subscription;
 
     componentDidMount() {
-        this.dispose$ = new Subject<void>();
-        this.disposeSubscription = merge(
-            this.errors$.pipe(map(errors => ({ errors }))),
-            this.tracks$.pipe(map(tracks => ({ tracks }))),
-            this.selectedItem$.pipe(map(selectedItem => ({ selectedItem }))),
-        ).pipe(
-            takeUntil(this.dispose$)
-        ).subscribe((v) => {
-            //console.log(v);
-            this.setState({
-                ...this.state
-            });
-        });
-        this.errors$.pipe(
-            takeUntil(this.dispose$),
-            map(errors => this.showErrors(errors))
-        ).subscribe();
+        this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
-        this.dispose$.next();
-        this.dispose$.complete();
+        this.didRefresh = () => { };
     }
 
     componentDidUpdate(prevProps: IAlbumsViewProps, prevState, snapshot) {
         this.tracks = this.props.tracks;
+    }
+
+    refresh() {
+        this.setState({
+            ...this.state,
+        });
     }
 
     uri() {

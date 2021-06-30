@@ -12,87 +12,92 @@ export interface IHomeViewProps {
 }
 
 class HomeView extends React.Component<IHomeViewProps> {
+    didRefresh: HomeView['refresh'] = () => { };
     vm = current(HomeViewModel);
-    
+
     errors$ = this.vm.errors$;
-    @Binding errors = this.errors$.getValue();
+    @Binding({
+        didSet: (view, errors) => {
+            view.didRefresh();
+            view.showErrors(errors);
+        }
+    })
+    errors: HomeView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
-    @Binding tracks = this.tracks$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    tracks: HomeView['vm']['tracks'];
 
     likedTracks$ = this.vm.likedTracks$;
-    @Binding likedTracks = this.likedTracks$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    likedTracks: HomeView['vm']['likedTracks'];
 
     isLoading$ = this.vm.isLoading$;
-    @Binding isLoading = this.isLoading$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    isLoading: HomeView['vm']['isLoading'];
 
     selectedTrack$ = this.vm.selectedTrack$;
-    @Binding selectedTrack = this.selectedTrack$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    selectedTrack: HomeView['vm']['selectedTrack'];
 
     trackLyrics$ = this.vm.trackLyrics$;
-    @Binding trackLyrics = this.trackLyrics$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    trackLyrics: HomeView['vm']['trackLyrics'];
+
+    bannedTrackIds$ = this.vm.bannedTrackIds$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    bannedTrackIds: HomeView['vm']['bannedTrackIds'];
 
     refreshCommand$ = this.vm.refreshCommand$;
-    @Binding refreshCommand = this.refreshCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    refreshCommand: HomeView['vm']['refreshCommand'];
 
     selectTrackCommand$ = this.vm.selectTrackCommand$;
-    @Binding selectTrackCommand = this.selectTrackCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    selectTrackCommand: HomeView['vm']['selectTrackCommand'];
 
     likeTrackCommand$ = this.vm.likeTrackCommand$;
-    @Binding likeTrackCommand = this.likeTrackCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    likeTrackCommand: HomeView['vm']['likeTrackCommand'];
 
     unlikeTrackCommand$ = this.vm.unlikeTrackCommand$;
-    @Binding unlikeTrackCommand = this.unlikeTrackCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    unlikeTrackCommand: HomeView['vm']['unlikeTrackCommand'];
 
     findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
-    @Binding findTrackLyricsCommand = this.findTrackLyricsCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    findTrackLyricsCommand: HomeView['vm']['findTrackLyricsCommand'];
 
     bannTrackCommand$ = this.vm.bannTrackCommand$;
-    @Binding bannTrackCommand = this.bannTrackCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    bannTrackCommand: HomeView['vm']['bannTrackCommand'];
 
     removeBannFromTrackCommand$ = this.vm.removeBannFromTrackCommand$;
-    @Binding removeBannFromTrackCommand = this.removeBannFromTrackCommand$.getValue();
-
-    dispose$: Subject<void>;
-    disposeSubscription: Subscription;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    removeBannFromTrackCommand: HomeView['vm']['removeBannFromTrackCommand'];
 
     componentDidMount() {
-        this.dispose$ = new Subject<void>();
-        this.disposeSubscription = merge(
-            this.tracks$.pipe(map(tracks => ({ tracks }))),
-            this.likedTracks$.pipe(map(likedTracks => ({ likedTracks }))),
-            this.selectedTrack$.pipe(map(selectedTrack => [{ selectedTrack }])),
-            this.trackLyrics$.pipe(map(trackLyrics => ({ trackLyrics }))),
-            this.isLoading$.pipe(map(isLoading => ({ isLoading }))),
-            this.refreshCommand$.pipe(map(refreshCommand => ({ refreshCommand }))),
-            this.selectTrackCommand$.pipe(map(selectTrackCommand => ({ selectTrackCommand }))),
-            this.likeTrackCommand$.pipe(map(likeTrackCommand => ({ likeTrackCommand }))),
-            this.unlikeTrackCommand$.pipe(map(unlikeTrackCommand => ({ unlikeTrackCommand }))),
-            this.findTrackLyricsCommand$.pipe(map(findTrackLyricsCommand => ({ findTrackLyricsCommand }))),
-            this.bannTrackCommand$.pipe(map(bannTrackCommand => ({ bannTrackCommand }))),
-            this.removeBannFromTrackCommand$.pipe(map(removeBannFromTrackCommand => ({ removeBannFromTrackCommand }))),
-            this.errors$.pipe(map(errors => ({ errors }))),
-        ).pipe(
-            takeUntil(this.dispose$)
-        ).subscribe((v) => {
-            //console.log(v)
-            this.setState({
-                ...this.state
-            });
-        });
-        this.errors$.pipe(
-            takeUntil(this.dispose$),
-            map(errors => this.showErrors(errors))
-        ).subscribe();
+        this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
-        this.dispose$.next();
-        this.dispose$.complete();
+        this.didRefresh = () => { };
+    }
+
+    refresh() {
+        this.setState({
+            ...this.state,
+        });
     }
 
     isPlaying(track: TrackViewModelItem) {
         return this.props.currentTrackId === track.id();
+    }
+
+    isBanned(track: TrackViewModelItem) {
+        const res = this.bannedTrackIds.find(trackId => trackId === track.id());
+
+        return !!res;
     }
 
     showErrors(errors) {

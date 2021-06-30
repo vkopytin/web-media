@@ -16,56 +16,49 @@ export interface ISelectPlaylistsViewProps {
 }
 
 class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
+    didRefresh: SelectPlaylistsView['refresh'] = () => { };
     playlistsViewModel = current(PlaylistsViewModel);
     vm = this.props.track;
     
     errors$ = this.vm.errors$;
-    @Binding errors = this.errors$.getValue();
+    @Binding({
+        didSet: (view, errors) => {
+            view.didRefresh();
+            view.showErrors(errors);
+        }
+    })
+    errors: SelectPlaylistsView['vm']['errors'];
 
     // playlists
     trackPlaylists$ = this.vm.trackPlaylists$;
-    @Binding trackPlaylists = this.trackPlaylists$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    trackPlaylists: SelectPlaylistsView['vm']['trackPlaylists'];
 
     //items
     playlists$ = this.playlistsViewModel.playlists$;
-    @Binding playlists = this.playlists$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    playlists: SelectPlaylistsView['playlistsViewModel']['playlists'];
+
+    isLoading$ = this.playlistsViewModel.isLoading$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    isLoading: SelectPlaylistsView['playlistsViewModel']['isLoading'];
 
     fetchData = () => this.playlistsViewModel.fetchData();
 
     addToPlaylistCommand$ = this.vm.addToPlaylistCommand$;
-    @Binding addToPlaylistCommand = this.addToPlaylistCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    addToPlaylistCommand: SelectPlaylistsView['vm']['removeFromPlaylistCommand'];
 
     removeFromPlaylistCommand$ = this.vm.removeFromPlaylistCommand$;
-    @Binding removeFromPlaylistCommand = this.removeFromPlaylistCommand$.getValue();
-
-    dispose$: Subject<void>;
-    disposeSubscription: Subscription;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    removeFromPlaylistCommand: SelectPlaylistsView['vm']['removeFromPlaylistCommand'];
 
     componentDidMount() {
-        this.dispose$ = new Subject<void>();
-        this.disposeSubscription = merge(
-            this.errors$.pipe(map(errors => ({ errors }))),
-            this.trackPlaylists$.pipe(map(trackPlaylists => ({ trackPlaylists }))),
-            this.playlists$.pipe(map(playlists => ({ playlists }))),
-            this.addToPlaylistCommand$.pipe(map(addToPlaylistCommand => ({ addToPlaylistCommand }))),
-            this.removeFromPlaylistCommand$.pipe(map(removeFromPlaylistCommand => ({ removeFromPlaylistCommand }))),
-        ).pipe(
-            takeUntil(this.dispose$)
-        ).subscribe((v) => {
-            //console.log(v);
-            this.setState({
-                ...this.state
-            });
-        });
-        this.errors$.pipe(
-            takeUntil(this.dispose$),
-            map(errors => this.showErrors(errors))
-        ).subscribe();
+        this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
-        this.dispose$.next();
-        this.dispose$.complete();
+        this.didRefresh = () => { };
     }
 
     componentDidUpdate(prevProps: ISelectPlaylistsViewProps, prevState, snapshot) {
@@ -75,8 +68,10 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
         }
     }
 
-    addToPlaylist(playlist: PlaylistsViewModelItem) {
-
+    refresh() {
+        this.setState({
+            ...this.state,
+        });
     }
 
     playlistHasTrack(playlist: PlaylistsViewModelItem, track: TrackViewModelItem) {

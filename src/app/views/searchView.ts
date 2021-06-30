@@ -15,100 +15,96 @@ export interface ISearchViewProps {
 }
 
 class SearchView extends React.Component<ISearchViewProps> {
+    didRefresh: SearchView['refresh'] = () => { };
     vm = current(SearchViewModel);
     
     errors$ = this.vm.errors$;
-    @Binding errors = this.errors$.getValue();
+    @Binding({
+        didSet: (view, errors) => {
+            view.didRefresh();
+            view.showErrors(errors);
+        }
+    })
+    errors: SearchView['vm']['errors'];
 
     term$ = this.vm.term$;
-    @Binding term = this.term$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    term: SearchView['vm']['term'];
 
     tracks$ = this.vm.tracks$;
-    @Binding tracks = this.tracks$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    tracks: SearchView['vm']['tracks'];
 
     artists$ = this.vm.artists$;
-    @Binding artists = this.artists$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    artists: SearchView['vm']['artists'];
 
     albums$ = this.vm.albums$;
-    @Binding albums = this.albums$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    albums: SearchView['vm']['albums'];
 
     playlists$ = this.vm.playlists$;
-    @Binding playlists = this.playlists$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    playlists: SearchView['vm']['playlists'];
 
     searchType$ = this.vm.searchType$;
-    @Binding searchType = this.searchType$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    searchType: SearchView['vm']['searchType'];
 
     currentAlbum$ = this.vm.currentAlbum$;
-    @Binding currentAlbum = this.currentAlbum$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentAlbum: SearchView['vm']['currentAlbum'];
 
     currentPlaylist$ = this.vm.currentPlaylist$;
-    @Binding currentPlaylist = this.currentPlaylist$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentPlaylist: SearchView['vm']['currentPlaylist'];
 
     currentArtist$ = this.vm.currentArtist$;
-    @Binding currentArtist = this.currentArtist$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentArtist: SearchView['vm']['currentArtist'];
 
     currentTracks$ = this.vm.currentTracks$;
-    @Binding currentTracks = this.currentTracks$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentTracks: SearchView['vm']['currentTracks'];
 
     selectedItem$ = this.vm.selectedItem$;
-    @Binding selectedItem = this.selectedItem$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    selectedItem: SearchView['vm']['selectedItem'];
 
     loadMoreCommand$ = this.vm.loadMoreCommand$;
-    @Binding loadMoreCommand = this.loadMoreCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    loadMoreCommand: SearchView['vm']['loadMoreCommand'];
 
     likeTrackCommand$ = new BehaviorSubject({ exec(track: TrackViewModelItem) { } });
-    @Binding likeTrackCommand = this.likeTrackCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    likeTrackCommand: SearchView['likeTrackCommand$'];
+
     unlikeTrackCommand$ = new BehaviorSubject({ exec(track: TrackViewModelItem) { } });
-    @Binding unlikeTrackCommand = this.unlikeTrackCommand$.getValue();
-    
-    dispose$: Subject<void>;
-    disposeSubscription: Subscription;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    unlikeTrackCommand: SearchView['unlikeTrackCommand$'];
 
     searchTracks = _.debounce(term => {
         this.term = term;
     }, 300);
 
     componentDidMount() {
-        this.dispose$ = new Subject<void>();
-        this.disposeSubscription = merge(
-            this.errors$.pipe(map(errors => ({ errors }))),
-            this.term$.pipe(map(term => ({ term }))),
-            this.tracks$.pipe(map(tracks => ({ tracks }))),
-            this.artists$.pipe(map(artists => ({ artists }))),
-            this.albums$.pipe(map(albums => ({ albums }))),
-            this.playlists$.pipe(map(playlists => ({ playlists }))),
-            this.searchType$.pipe(map(searchType => ({ searchType }))),
-            this.currentAlbum$.pipe(map(currentAlbum => ({ currentAlbum }))),
-            this.currentArtist$.pipe(map(currentArtist => ({ currentArtist }))),
-            this.currentPlaylist$.pipe(map(currentPlaylist => ({ currentPlaylist }))),
-            this.currentTracks$.pipe(map(currentTracks => ({ currentTracks }))),
-            this.selectedItem$.pipe(map(selectedItem => ({ selectedItem }))),
-            this.loadMoreCommand$.pipe(map(loadMoreCommand => ({ loadMoreCommand }))),
-            this.likeTrackCommand$.pipe(map(likeTrackCommand => ({ likeTrackCommand }))),
-            this.unlikeTrackCommand$.pipe(map(unlikeTrackCommand => ({ unlikeTrackCommand }))),
-        ).pipe(
-            takeUntil(this.dispose$)
-        ).subscribe((v) => {
-            //console.log(v);
-            this.setState({
-                ...this.state
-            });
-        });
-        this.errors$.pipe(
-            takeUntil(this.dispose$),
-            map(errors => this.showErrors(errors))
-        ).subscribe();
+        this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
-        this.dispose$.next();
-        this.dispose$.complete();
+        this.didRefresh = () => { };
     }
 
     componentDidUpdate(prevProps: ISearchViewProps, prevState, snapshot) {
         if (this.props.loadMore) {
             this.loadMoreCommand.exec();
         }
+    }
+
+    refresh() {
+        this.setState({
+            ...this.state,
+        });
     }
 
     isPlaying(track: TrackViewModelItem) {

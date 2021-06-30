@@ -12,45 +12,42 @@ export interface IPickPlaylistsViewProps {
 }
 
 class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
+    didRefresh: PickPlaylistsView['refresh'] = () => { };
     vm = current(PlaylistsViewModel);
     homeVm = current(HomeViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding errors = this.errors$.getValue();
+    @Binding({
+        didSet: (view, errors) => {
+            view.didRefresh();
+            view.showErrors(errors);
+        }
+    })
+    errors: PickPlaylistsView['vm']['errors'];
 
     playlists$ = this.vm.playlists$;
-    @Binding playlists = this.playlists$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    playlists: PickPlaylistsView['vm']['playlists'];
 
     selectedPlaylist$ = this.homeVm.selectedPlaylist$;
-    @Binding selectedPlaylist = this.selectedPlaylist$.getValue();
-
-    dispose$: Subject<void>;
-    disposeSubscription: Subscription;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    selectedPlaylist: PickPlaylistsView['homeVm']['selectedPlaylist'];
 
     componentDidMount() {
-        this.dispose$ = new Subject<void>();
-        this.disposeSubscription = merge(
-            this.playlists$.pipe(map(playlists => ({ playlists }))),
-            this.selectedPlaylist$.pipe(map(selectedPlaylist => ({ selectedPlaylist }))),
-            this.errors$.pipe(map(errors => ({ errors }))),
-        ).pipe(takeUntil(this.dispose$)).subscribe((v) => {
-            //console.log(v);
-            this.setState({
-                ...this.state
-            });
-        });
-        this.errors$.pipe(
-            takeUntil(this.dispose$),
-            map(errors => this.showErrors(errors))
-        ).subscribe();
+        this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
-        this.dispose$.next();
-        this.dispose$.complete();
+        this.didRefresh = () => { };
     }
 
     componentDidUpdate(prevProps: IPickPlaylistsViewProps, prevState, snapshot) {
+    }
+
+    refresh() {
+        this.setState({
+            ...this.state,
+        });
     }
 
     showErrors(errors) {

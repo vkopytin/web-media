@@ -18,66 +18,62 @@ export interface IUserProfileViewProps {
 }
 
 class UserProfileView extends React.Component<IUserProfileViewProps> {
+    didRefresh: UserProfileView['refresh'] = () => { };
     vm = current(UserProfileViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding errors = this.errors$.getValue();
+    @Binding({
+        didSet: (view, errors) => {
+            view.didRefresh();
+            view.showErrors(errors);
+        }
+    })
+    errors: UserProfileView['vm']['errors'];
 
     openLogin$ = this.props.openLogin$;
-    @Binding openLogin = this.openLogin$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    openLogin: boolean;
 
     profile$ = this.vm.profile$;
-    @Binding profile = this.profile$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    profile: UserProfileView['vm']['profile'];
 
     currentTrackId$ = this.vm.currentTrackId$;
-    @Binding currentTrackId = this.currentTrackId$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentTrackId: UserProfileView['vm']['currentTrackId'];
 
     topTracks$ = this.vm.topTracks$;
-    @Binding topTracks = [] as TrackViewModelItem[];
+    @Binding({ didSet: (view) => view.didRefresh() })
+    topTracks: UserProfileView['vm']['topTracks'];
 
     tracks$ = this.vm.tracks$;
-    @Binding tracks = [] as TrackViewModelItem[];
+    @Binding({ didSet: (view) => view.didRefresh() })
+    tracks: UserProfileView['vm']['tracks'];
 
     spotifyAuthUrl$ = this.vm.spotifyAuthUrl$;
-    @Binding spotifyAuthUrl = this.spotifyAuthUrl$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    spotifyAuthUrl: UserProfileView['vm']['spotifyAuthUrl'];
 
     geniusAuthUrl$ = this.vm.geniusAuthUrl$;
-    @Binding geniusAuthUrl = this.geniusAuthUrl$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    geniusAuthUrl: UserProfileView['vm']['geniusAuthUrl'];
 
     apiseedsKey$ = this.vm.apiseedsKey$;
-    @Binding apiseedsKey = this.apiseedsKey$.getValue();
-
-    dispose$: Subject<void>;
-    disposeSubscription: Subscription;
-
+    @Binding({ didSet: (view) => view.didRefresh() })
+    apiseedsKey: UserProfileView['vm']['apiseedsKey'];
+  
     componentDidMount() {
-        this.dispose$ = new Subject<void>();
-        this.disposeSubscription = merge(
-            this.openLogin$.pipe(map(openLogin => ({openLogin}))),
-            this.profile$.pipe(map(profile => ({profile}))),
-            this.currentTrackId$.pipe(map(currentTrackId => ({currentTrackId}))),
-            this.topTracks$.pipe(map(topTracks => ({topTracks}))),
-            this.tracks$.pipe(map(tracks => ({tracks}))),
-            this.spotifyAuthUrl$.pipe(map(spotifyAuthUrl => ({spotifyAuthUrl}))),
-            this.geniusAuthUrl$.pipe(map(geniusAuthUrl => ({geniusAuthUrl}))),
-            this.apiseedsKey$.pipe(map(apiseedsKey => ({ apiseedsKey }))),
-        ).pipe(
-            takeUntil(this.dispose$)
-        ).subscribe((v) => {
-            //console.log(v);
-            this.setState({
-                ...this.state
-            });
-        });
-        this.errors$.pipe(
-            takeUntil(this.dispose$),
-            map(errors => this.showErrors(errors))
-        ).subscribe();
+        this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
-        this.dispose$.next();
-        this.dispose$.complete();
+        this.didRefresh = () => { };
+    }
+
+    refresh() {
+        this.setState({
+            ...this.state,
+        });
     }
 
     isPlaying(track: TrackViewModelItem) {

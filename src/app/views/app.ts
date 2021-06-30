@@ -14,43 +14,61 @@ export interface IAppViewProps {
 }
 
 class AppView extends React.Component<IAppViewProps> {
+    didRefresh: AppView['refresh'] = () => { };
     vm = current(AppViewModel);
 
+    errors$ = this.vm.errors$;
+    @Binding({
+        didSet: (view, errors) => {
+            view.didRefresh();
+            view.showErrors(errors);
+        }
+    })
+    errors: AppView['vm']['errors'];
+
     openLogin$ = this.vm.openLogin$;
-    @Binding openLogin = this.openLogin$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    openLogin: AppView['vm']['openLogin'];
 
     currentPanel$ = this.vm.currentPanel$;
-    @Binding currentPanel = this.currentPanel$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentPanel: AppView['vm']['currentPanel'];
 
     devices$ = this.vm.devices$;
-    @Binding devices = this.devices$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    devices: AppView['vm']['devices'];
 
     profile$ = this.vm.profile$;
-    @Binding profile = this.profile$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    profile: AppView['vm']['profile'];
 
     currentTrackId$ = this.vm.currentTrackId$;
-    @Binding currentTrackId = this.currentTrackId$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentTrackId: AppView['vm']['currentTrackId'];
     
     topTracks$ = this.vm.topTracks$;
-    @Binding topTracks = this.topTracks$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    topTracks: AppView['vm']['topTracks'];
 
     currentDevice$ = this.vm.currentDevice$;
-    @Binding currentDevice = this.currentDevice$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentDevice: AppView['vm']['currentDevice'];
 
     refreshDevicesCommand$ = this.vm.refreshDevicesCommand$;
-    @Binding refreshDevicesCommand = this.refreshDevicesCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    refreshDevicesCommand: AppView['vm']['refreshDevicesCommand'];
 
     refreshTokenCommand$ = this.vm.refreshTokenCommand$;
-    @Binding refreshTokenCommand = this.refreshTokenCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    refreshTokenCommand: AppView['vm']['refreshDevicesCommand'];
 
     autoRefreshUrl$ = this.vm.autoRefreshUrl$;
-    @Binding autoRefreshUrl = this.autoRefreshUrl$.getValue();
-
-    errors$ = this.vm.errors$;
-    @Binding errors = this.errors$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    autoRefreshUrl: AppView['vm']['autoRefreshUrl'];
 
     isSyncing$ = this.vm.isSyncing$;
-    @Binding isSyncing = this.isSyncing$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    isSyncing: AppView['vm']['isSyncing'];
 
     state = {
         transition: ['', ''],
@@ -61,41 +79,18 @@ class AppView extends React.Component<IAppViewProps> {
     elScroller = null as HTMLElement;
     onPageScroll = _.debounce(evnt => this.onPageScrollInternal(evnt), 500);
 
-    dispose$: Subject<void>;
-    disposeSubscription: Subscription;
-
     componentDidMount() {
-        this.dispose$ = new Subject<void>();
-        this.disposeSubscription = merge(
-            this.openLogin$.pipe(map(openLogin => ({ openLogin }))),
-            this.currentPanel$.pipe(map(currentPanel => ({ currentPanel }))),
-            this.devices$.pipe(map(devices => ({ devices }))),
-            this.profile$.pipe(map(profile => ({ profile }))),
-            this.currentTrackId$.pipe(map(currentTrackId => ({ currentTrackId }))),
-            this.topTracks$.pipe(map(topTracks => ({ topTracks }))),
-            this.currentDevice$.pipe(map(currentDevice => ({ currentDevice }))),
-            this.autoRefreshUrl$.pipe(map(autoRefreshUrl => ({ autoRefreshUrl }))),
-            this.errors$.pipe(map(errors => ({ errors }))),
-            this.isSyncing$.pipe(map(isSyncing => ({ isSyncing }))),
-            this.refreshDevicesCommand$.pipe(map(refreshDevicesCommand => ({ refreshDevicesCommand }))),
-            this.refreshTokenCommand$.pipe(map(refreshTokenCommand => ({ refreshTokenCommand }))),
-        ).pipe(
-            takeUntil(this.dispose$)
-        ).subscribe((v) => {
-            //console.log(v);
-            this.setState({
-                ...this.state
-            });
-        });
-        this.errors$.pipe(
-            takeUntil(this.dispose$),
-            map((errors: any) => this.showErrors(errors))
-        ).subscribe();
+        this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
-        this.dispose$.next();
-        this.dispose$.complete();
+        this.didRefresh = () => { };
+    }
+
+    refresh() {
+        this.setState({
+            ...this.state,
+        });
     }
 
     openDevices(show) {

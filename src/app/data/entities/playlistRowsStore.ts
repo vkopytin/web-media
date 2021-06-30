@@ -46,12 +46,12 @@ export class PlaylistRowsStore {
         return asAsync(this.storage, this.storage.create, this.storeConfig, myStore);
     }
 
-    update(myStore: IPlaylistRow) {
-        return asAsync(this.storage, this.storage.update, this.storeConfig, myStore.id, myStore);
+    update(record: IPlaylistRow) {
+        return asAsync(this.storage, this.storage.update, this.storeConfig, record.id, record);
     }
 
-    delete(myStore: string) {
-        return asAsync(this.storage, this.storage.delete, this.storeConfig, myStore);
+    delete(id: string) {
+        return asAsync(this.storage, this.storage.delete, this.storeConfig, id);
     }
 
     async refresh(myStore: IPlaylistRow) {
@@ -85,7 +85,7 @@ export class PlaylistRowsStore {
         });
     }
 
-    where(where: { [key: string]: any }) {
+    where(where: Partial<IPlaylistRow>) {
         return asAsyncOf(this.storage, this.storage.where, this.storeConfig, where);
     }
 

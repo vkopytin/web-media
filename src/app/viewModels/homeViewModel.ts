@@ -3,33 +3,12 @@ import * as _ from 'underscore';
 import { IRecommendationsResult, IResponseResult, ISpotifySong, ITrack } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
+import { DataService } from '../service/dataService';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, current, State } from '../utils';
+import { assertNoErrors, current, isLoading, State } from '../utils';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
-
-function isLoading(target, key, descriptor) {
-    // save a reference to the original method this way we keep the values currently in the
-    // descriptor and don't overwrite what another decorator might have done to the descriptor.
-    if (descriptor === undefined) {
-        descriptor = Object.getOwnPropertyDescriptor(target, key);
-    }
-    const originalMethod = descriptor.value;
-   
-    //editing the descriptor/value parameter
-    descriptor.value = async function (this: HomeViewModel, ...args) {
-        try {
-            this.isLoading = true;
-            return await originalMethod.apply(this, args);
-        } finally {
-            this.isLoading = false;
-        }
-    };
-   
-    // return edited descriptor as opposed to overwriting the descriptor
-    return descriptor;
-}
 
 class HomeViewModel {
     errors$: BehaviorSubject<HomeViewModel['errors']>;
@@ -53,8 +32,8 @@ class HomeViewModel {
     selectedPlaylist$: BehaviorSubject<HomeViewModel['selectedPlaylist']>;
     @State selectedPlaylist = null as PlaylistsViewModelItem;
     
-    refreshCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
-    @State refreshCommand = { exec: () => this.fetchData() };
+    refreshCommand$: BehaviorSubject<HomeViewModel['refreshCommand']>;
+    @State refreshCommand = { exec: (trackId?: string) => this.fetchData(trackId) };
 
     selectTrackCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
     @State selectTrackCommand = { exec: (track: TrackViewModelItem) => this.selectedTrack = track };
@@ -67,6 +46,9 @@ class HomeViewModel {
     
     findTrackLyricsCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
     @State findTrackLyricsCommand = { exec: (track: TrackViewModelItem) => this.findTrackLyrics(track) };
+
+    bannedTrackIds$: BehaviorSubject<HomeViewModel['bannedTrackIds']>;
+    @State bannedTrackIds = [] as string[];
 
     bannTrackCommand$: BehaviorSubject<HomeViewModel['bannTrackCommand']>;
     @State bannTrackCommand = { exec: (track: TrackViewModelItem) => this.bannTrack(track) };
@@ -96,16 +78,22 @@ class HomeViewModel {
     }
 
     @isLoading
-    async fetchData() {
-        const tracksResult = this.selectedPlaylist
-            ? await this.ss.fetchPlaylistTracks(this.selectedPlaylist.id(), 0, 20)
+    async fetchData(trackId?: string) {
+        const artistIds = [];
+        let trackIds = trackId ? [trackId] : [];
+
+        if (!trackIds.length) {
+            const tracksResult = this.selectedPlaylist ? await this.ss.fetchPlaylistTracks(this.selectedPlaylist.id(), 0, 20)
             : await this.ss.fetchTracks(0, 20);
-        if (assertNoErrors(tracksResult, e => this.errors = e)) {
-            return;
+        
+            if (assertNoErrors(tracksResult, e => this.errors = e)) {
+                return;
+            }
+
+            const tracks = tracksResult.val as IResponseResult<ISpotifySong>;
+            trackIds = _.first(_.uniq(_.map(tracks.items, (song) => song.track.id)), 5);
         }
-        const tracks = tracksResult.val as IResponseResult<ISpotifySong>;
-        const artistIds = []; ///_.first(_.uniq(_.flatten(_.map(tracks.items, (song) => _.pluck(song.track.artists, 'id')))), 5);
-        let trackIds = _.first(_.uniq(_.map(tracks.items, (song) => song.track.id)), 5);
+
         if (!trackIds.length) {
             const topTracksResult = await this.ss.listTopTracks();
             if (assertNoErrors(topTracksResult, e => this.errors = e)) {
@@ -131,6 +119,9 @@ class HomeViewModel {
     }
 
     async checkTracks(tracks: TrackViewModelItem[]) {
+        if (!tracks.length) {
+            return;
+        }
         const tracksToCheck = tracks;
         const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
         if (assertNoErrors(likedResult, e => this.errors = e)) {
@@ -140,6 +131,7 @@ class HomeViewModel {
             tracksToCheck[index].isLiked = liked;
             this.likedTracks = _.filter(this.tracks, track => track.isLiked);
         });
+        this.bannedTrackIds = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
     }
 
     loadMore() {
@@ -165,16 +157,6 @@ class HomeViewModel {
         this.checkTracks([track]);
     }
 
-    async bannTrack(track: TrackViewModelItem) {
-        await this.ss.bannTrack(track.id());
-        track.isBanned = true;
-    }
-
-    async removeBannFromTrack(track: TrackViewModelItem) {
-        await this.ss.removeBannFromTrak(track.id());
-        track.isBanned = false;
-    }
-
     async findTrackLyrics(track: TrackViewModelItem) {
         if (this.trackLyrics && this.trackLyrics.trackId === track.id()) {
             return this.trackLyrics = null;
@@ -195,6 +177,16 @@ class HomeViewModel {
             trackId: track.id(),
             lyrics: '' + lyricsResult.val
         };
+    }
+
+    async bannTrack(track: TrackViewModelItem) {
+        await track.bannTrack();
+        this.bannedTrackIds = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
+    }
+
+    async removeBannFromTrack(track: TrackViewModelItem) {
+        await track.removeBannFromTrack();
+        this.bannedTrackIds = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
     }
 }
 

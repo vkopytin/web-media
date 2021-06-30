@@ -13,73 +13,68 @@ export interface IMyTracksViewProps {
 }
 
 class MyTracksView extends React.Component<IMyTracksViewProps> {
+    didRefresh: MyTracksView['refresh'] = () => { };
     vm = current(MyTracksViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding errors = this.errors$.getValue();
+    @Binding({
+        didSet: (view, errors) => {
+            view.didRefresh();
+            view.showErrors(errors);
+        }
+    })
+    errors: MyTracksView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
-    @Binding tracks = this.tracks$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    tracks: MyTracksView['vm']['tracks'];
 
     likedTracks$ = this.vm.likedTracks$;
-    @Binding likedTracks = [] as TrackViewModelItem[];
+    @Binding({ didSet: (view) => view.didRefresh() })
+    likedTracks: MyTracksView['vm']['likedTracks'];
 
     isLoading$ = this.vm.isLoading$;
-    @Binding isLoading = this.isLoading$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    isLoading: MyTracksView['vm']['isLoading'];
 
     selectedItem$ = this.vm.selectedItem$;
-    @Binding selectedItem = this.selectedItem$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    selectedItem: MyTracksView['vm']['selectedItem'];
 
     trackLyrics$ = this.vm.trackLyrics$;
-    @Binding trackLyrics = this.trackLyrics$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    trackLyrics: MyTracksView['vm']['trackLyrics'];
 
     state = {
         term: '',
     };
 
     loadMoreCommand$ = this.vm.loadMoreCommand$;
-    @Binding loadMoreCommand = this.loadMoreCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    loadMoreCommand: MyTracksView['vm']['loadMoreCommand'];
 
     findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
-    @Binding findTrackLyricsCommand = this.findTrackLyricsCommand$.getValue();
-
-    dispose$: Subject<void>;
-    disposeSubscription: Subscription;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    findTrackLyricsCommand: MyTracksView['vm']['findTrackLyricsCommand'];
 
     componentDidMount() {
-        this.dispose$ = new Subject<void>();
-        this.disposeSubscription = merge(
-            this.errors$.pipe(map(errors => ({ errors }))),
-            this.tracks$.pipe(map(tracks => ({ tracks }))),
-            this.likedTracks$.pipe(map(likedTracks => ({ likedTracks }))),
-            this.isLoading$.pipe(map(isLoading => ({ isLoading }))),
-            this.trackLyrics$.pipe(map(trackLyrics => ({ trackLyrics }))),
-            this.selectedItem$.pipe(map(selectedItem => ({ selectedItem }))),
-            this.loadMoreCommand$.pipe(map(loadMoreCommand => ({ loadMoreCommand }))),
-            this.findTrackLyricsCommand$.pipe(map(findTrackLyricsCommand => ({ findTrackLyricsCommand }))),
-        ).pipe(
-            takeUntil(this.dispose$)
-        ).subscribe((v) => {
-            //console.log(v);
-            this.setState({
-                ...this.state
-            });
-        });
-        this.errors$.pipe(
-            takeUntil(this.dispose$),
-            map(errors => this.showErrors(errors))
-        ).subscribe();
+        this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
-        this.dispose$.next();
-        this.dispose$.complete();
+        this.didRefresh = () => { };
     }
 
     componentDidUpdate(prevProps: IMyTracksViewProps, prevState, snapshot) {
         if (this.props.loadMore) {
             this.loadMoreCommand.exec();
         }
+    }
+
+    refresh() {
+        this.setState({
+            ...this.state,
+        });
     }
 
     isPlaying(track: TrackViewModelItem) {

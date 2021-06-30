@@ -14,12 +14,9 @@ export class BannedTracksStore {
         index: {
             id: {
                 id: { unique: true }
-            },
-            name: {
-                name: { }
             }
         },
-        orderBy: 'name',
+        orderBy: 'id',
         orderDesk: false
     };
 

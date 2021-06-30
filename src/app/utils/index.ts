@@ -1,7 +1,7 @@
 import * as _ from 'underscore';
 import { utils } from 'databindjs';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 
 export function formatTime(ms: number) {
@@ -171,10 +171,38 @@ export function debounce(func, wait = 0, cancelObj = 'canceled') {
     }
 }
 
-export function State<T, Y extends keyof T>(target: T, propName: Y) {
-    function ensureStore(v?) {
+export function isLoading<T extends { isLoading: boolean; }>(target: T, key, descriptor) {
+    // save a reference to the original method this way we keep the values currently in the
+    // descriptor and don't overwrite what another decorator might have done to the descriptor.
+    if (descriptor === undefined) {
+        descriptor = Object.getOwnPropertyDescriptor(target, key);
+    }
+    const originalMethod = descriptor.value;
+   
+    //editing the descriptor/value parameter
+    descriptor.value = async function (this: T, ...args) {
+        try {
+            this.isLoading = true;
+            return await originalMethod.apply(this, args);
+        } finally {
+            this.isLoading = false;
+        }
+    };
+   
+    // return edited descriptor as opposed to overwriting the descriptor
+    return descriptor;
+}
+
+const bindingsList = [];
+export function State<T, Y extends keyof T>(target: T, propName: Y, descriptor?) {
+    function initState(v?) {
         let store$ = new BehaviorSubject(v);
-        
+        bindingsList.push({
+            view: this,
+            propName,
+            subj: store$
+        });
+
         Object.defineProperty(this, `${propName}$`, {
             get() {
                 return store$;
@@ -192,74 +220,85 @@ export function State<T, Y extends keyof T>(target: T, propName: Y) {
     }
 
     const opts = {
-        get: ensureStore,
-        set: ensureStore,
+        get: initState,
+        set: initState,
         enumerable: true,
         configurable: true
     };
     Object.defineProperty(target, `${propName}$`, opts);
 
-    Binding(target, propName);
+    Binding()(target, propName, descriptor);
 }
 
-export function Binding<T, Y extends keyof T>(target: T, propName: Y) {
-    const desc = Object.getOwnPropertyDescriptor(target, `${propName}$`);
-    function ensureStore(v) {
-        let store$ = v;
-        const assignedSubjects = [] as [any, Subscription, Subscription][];
-        Object.defineProperty(this, `${propName}$`, {
-            get() {
-                return store$;
-            },
-            set(v$) {
-                if (!(v$ instanceof BehaviorSubject)) {
-                    throw new Error('Please, provide BehaviorSubject');
-                }
-                if (v$ !== store$) {
-                    let current = assignedSubjects.find(([a]) => a === v$);
-                    if (current) {
-                        current[1].unsubscribe();
-                        current[2].unsubscribe();
+export function Binding({ didSet }: { didSet?: (view, val) => void } = {}) {
+    return function <T, Y extends keyof T>(target: T, propName: Y, descriptor?): any {
+        const desc = Object.getOwnPropertyDescriptor(target, `${propName}$`);
+        function initBinding(v) {
+            let store$ = v;
+            const assignedSubjects = [] as [any, Subscription, Subscription][];
+            Object.defineProperty(this, `${propName}$`, {
+                get() {
+                    return store$;
+                },
+                set(v$) {
+                    if (!(v$ instanceof BehaviorSubject)) {
+                        throw new Error('Please, provide BehaviorSubject');
                     }
+                    if (v$ !== store$) {
+                        let current = assignedSubjects.find(([a]) => a === v$);
+                        if (current) {
+                            current[1].unsubscribe();
+                            current[2].unsubscribe();
+                        }
 
-                    current = [
-                        v$,
-                        store$.pipe(distinctUntilChanged()).subscribe(v$),
-                        v$.pipe(distinctUntilChanged()).subscribe(store$)
-                    ];
-                    assignedSubjects.push(current);
-                }
-            },
-            enumerable: true,
-            configurable: true
-        });
+                        current = [
+                            v$,
+                            store$.pipe(
+                                distinctUntilChanged(),
+                                map(val => descriptor?.set.call(this, val))
+                            ).subscribe(v$),
+                            v$.pipe(distinctUntilChanged()).subscribe(store$)
+                        ];
+                        assignedSubjects.push(current);
+                    }
+                },
+                enumerable: true,
+                configurable: true
+            });
 
-        return store$;
-    }
+            didSet && store$.subscribe(val => {
+                didSet(this, val);
+            });
 
-    if (!desc) {
+            return store$;
+        }
+
+        if (!desc) {
+            const opts = {
+                get() {
+                    throw new Error('There is no assigned subscriber to the binding property');
+                },
+                set: initBinding,
+                enumerable: true,
+                configurable: true
+            };
+            Object.defineProperty(target, `${propName}$`, opts);
+        }
+
         const opts = {
             get() {
-                throw new Error('There is no assigned subscriber to the binding property');
+                return this[`${propName}$`].getValue();
             },
-            set: ensureStore,
+            set(val) {
+                if (this[propName] !== val) {
+                    this[`${propName}$`].next(val);
+                }
+            },
             enumerable: true,
             configurable: true
         };
-        Object.defineProperty(target, `${propName}$`, opts);
-    }
+        Object.defineProperty(target, propName, opts);
 
-    const opts = {
-        get() {
-            return this[`${propName}$`].getValue();
-        },
-        set(val) {
-            if (this[propName] !== val) {
-                this[`${propName}$`].next(val);
-            }
-        },
-        enumerable: true,
-        configurable: true
+        return opts;
     };
-    Object.defineProperty(target, propName, opts);
 }

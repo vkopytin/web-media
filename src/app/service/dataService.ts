@@ -98,6 +98,30 @@ class DataService extends withEvents(BaseService) {
         });
     }
 
+    async removeTrackFromPlaylist(playlistId: string, song: ISpotifySong) {
+        return new Promise<any>((resolve, reject) => {
+            DataStorage.create(async (err, storage) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                try {
+                    const playlistRowsStore = new PlaylistRowsStore(storage);
+                    const rows = playlistRowsStore.where({
+                        playlistId,
+                        trackId: song.track.id
+                    });
+                    for await (const row of rows) {
+                        await playlistRowsStore.delete(row.id);
+                    }
+                    resolve(true);
+                } catch (ex) {
+                    reject(ex);
+                }
+            });
+        });
+    }
+
     async listPlaylistsByTrack(track: ITrack) {
         return new Promise<IUserPlaylist[]>((resolve, reject) => {
             DataStorage.create(async (err, storage) => {
@@ -170,6 +194,31 @@ class DataService extends withEvents(BaseService) {
                     const track = await bannedTracksStore.get(trackId);
 
                     resolve(!!track);
+                } catch (ex) {
+                    reject(ex);
+                }
+            });
+        });
+    }
+
+    async listBannedTracks(trackIds: string[]) {
+        trackIds = [].concat(trackIds).sort();
+        return new Promise<string[]>((resolve, reject) => {
+            DataStorage.create(async (err, storage) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                try {
+                    const bannedIds = [] as string[];
+                    const bannedTracksStore = new BannedTracksStore(storage);
+                    for await (const track of bannedTracksStore.list()) {
+                        if (trackIds.indexOf(track.id) !== -1) {
+                            bannedIds.push(track.id);
+                        }
+                    }
+
+                    resolve(bannedIds);
                 } catch (ex) {
                     reject(ex);
                 }

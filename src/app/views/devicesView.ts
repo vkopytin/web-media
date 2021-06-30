@@ -12,46 +12,42 @@ export interface IDevicesViewProps {
 }
 
 class DevicesView extends React.Component<IDevicesViewProps> {
+    didRefresh: DevicesView['refresh'] = () => {};
     vm = current(AppViewModel);
     
     errors$ = this.vm.errors$;
-    @Binding errors = this.errors$.getValue();
+    @Binding({
+        didSet: (view, errors) => {
+            view.didRefresh();
+            view.showErrors(errors);
+        }
+    })
+    errors: DevicesView['vm']['errors'];
 
     switchDeviceCommand$ = this.vm.switchDeviceCommand$;
-    @Binding switchDeviceCommand = this.switchDeviceCommand$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    switchDeviceCommand: DevicesView['vm']['switchDeviceCommand'];
 
     devices$ = this.vm.devices$;
-    @Binding devices: DeviceViewModelItem[] = this.devices$.getValue();
+    @Binding({ didSet: (view) => view.didRefresh() })
+    devices: DevicesView['vm']['devices'];
 
     currentDevice$ = this.vm.currentDevice$;
-    @Binding currentDevice = this.currentDevice$.getValue();
-
-    dispose$: Subject<void>;
-    disposeSubscription: Subscription;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentDevice: DevicesView['vm']['currentDevice'];
 
     componentDidMount() {
-        this.dispose$ = new Subject<void>();
-        this.disposeSubscription = merge(
-            this.switchDeviceCommand$.pipe(map(switchDeviceCommand => ({ switchDeviceCommand }))),
-            this.devices$.pipe(map(devices => ({ devices }))),
-            this.currentDevice$.pipe(map(currentDevice => ({ currentDevice }))),
-        ).pipe(
-            takeUntil(this.dispose$)
-        ).subscribe((v) => {
-            //console.log(v);
-            this.setState({
-                ...this.state
-            });
-        });
-        this.errors$.pipe(
-            takeUntil(this.dispose$),
-            map(errors => this.showErrors(errors))
-        ).subscribe();
+        this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
-        this.dispose$.next();
-        this.dispose$.complete();
+        this.didRefresh = () => { };
+    }
+
+    refresh() {
+        this.setState({
+            ...this.state,
+        });
     }
 
     async switchDevice(device) {
