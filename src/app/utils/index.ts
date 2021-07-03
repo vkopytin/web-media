@@ -264,7 +264,7 @@ export function Binding({ didSet }: { didSet?: (view, val) => void } = {}) {
             });
 
             didSet && store$.subscribe(val => {
-                didSet(this, val);
+                setTimeout(() => didSet(this, val));
             });
 
             return store$;

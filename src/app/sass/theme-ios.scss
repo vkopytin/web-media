@@ -665,3 +665,24 @@ textarea,
     }
   }
 }
+
+.slider {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.slide {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+  width: 100vw;
+}
+
+.inner-slide {
+  height: 100vh;
+  overflow-y: auto;
+}
+.slide-content {
+  padding-bottom: 200px;
+}

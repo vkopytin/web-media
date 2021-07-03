@@ -146,21 +146,20 @@ class AppViewModel {
 
     async updateDevices() {
         const devicesResult = await this.ss.listDevices();
+        this.devices = devicesResult.assert(e => this.errors = [e])
+            .map(devices => _.map(devices, item => new DeviceViewModelItem(item)));
 
-        if (!devicesResult.isError) {
-            const devices = devicesResult.val as IDevice[];
-            this.devices = _.map(devices, item => new DeviceViewModelItem(item));
-        }
-
-        const currentDevice = _.find<DeviceViewModelItem>(this.devices, d => d.isActive()) || null;
+        const currentDevice = _.find(this.devices, d => d.isActive()) || null;
         this.currentDevice = currentDevice;
     }
 
-    switchDevice(device: DeviceViewModelItem) {
-        this.ss.player(device.id(), true);
-        _.delay(() => {
-            this.updateDevices();
-        }, 1000);
+    async switchDevice(device: DeviceViewModelItem) {
+        const res = await this.ss.player(device.id(), true);
+
+        res.assert(e => this.errors = [e])
+            .map(() => _.delay(() => {
+                this.updateDevices();
+            }, 1000));
     }
 }
 

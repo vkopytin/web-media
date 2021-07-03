@@ -187,7 +187,8 @@ class PlaylistsViewModel {
             tracksToCheck[index].isLiked = liked;
         });
         this.likedTracks = _.filter(this.tracks, track => track.isLiked);
-        this.bannedTrackIds = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
+        const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
+        this.bannedTrackIds = res.assert(e => this.errors = [e]).map(r => r);
     }
 
     playlistsAddRange(value: PlaylistsViewModelItem[]) {
@@ -270,13 +271,17 @@ class PlaylistsViewModel {
     @isLoading
     async bannTrack(track: TrackViewModelItem) {
         await track.bannTrack();
-        this.bannedTrackIds = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
+        const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
+
+        this.bannedTrackIds = res.assert(e => this.errors = [e]).map(r => r);
     }
 
     @isLoading
     async removeBannFromTrack(track: TrackViewModelItem) {
         await track.removeBannFromTrack();
-        this.bannedTrackIds = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
+        const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
+
+        this.bannedTrackIds = res.assert(e => this.errors = [e]).map(r => r);
     }
 }
 

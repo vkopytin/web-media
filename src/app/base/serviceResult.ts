@@ -1,3 +1,5 @@
+import e from "express";
+
 class ServiceResult<T, E extends Error> {
     isError = false;
 
@@ -8,6 +10,20 @@ class ServiceResult<T, E extends Error> {
     is(a: new (...args) => E): boolean {
 
         return this.error instanceof a;
+    }
+
+    assert(err: (e: ServiceResult<T, E>) => void): ServiceResult<T, E> {
+        if (this.isError) {
+            err(this);
+        }
+        return this;
+    }
+
+    map<R>(done: (v: T) => R): R {
+        if (this.isError) {
+            return this as any;
+        }
+        return done(this.val);
     }
 }
 

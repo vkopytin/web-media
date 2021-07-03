@@ -1,11 +1,12 @@
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
-import { IAlbum, IResponseResult, ITrack } from '../adapter/spotify';
+import { IAlbum, IResponseResult, ISearchResult, ISpotifySong, ITrack } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
 import { assertNoErrors, current, State } from '../utils';
 import { AlbumViewModelItem } from './albumViewModelItem';
+import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 
@@ -16,8 +17,17 @@ class NewReleasesViewModel {
     newReleases$: BehaviorSubject<NewReleasesViewModel['newReleases']>;
     @State newReleases = [] as AlbumViewModelItem[];
 
+    featuredPlaylists$: BehaviorSubject<NewReleasesViewModel['featuredPlaylists']>;
+    @State featuredPlaylists = [] as PlaylistsViewModelItem[];
+
     currentAlbum$: BehaviorSubject<NewReleasesViewModel['currentAlbum']>;
     @State currentAlbum = null as AlbumViewModelItem;
+
+    currentPlaylist$: BehaviorSubject<NewReleasesViewModel['currentPlaylist']>;
+    @State currentPlaylist = null as PlaylistsViewModelItem;
+
+    currentTracks$: BehaviorSubject<NewReleasesViewModel['currentTracks']>;
+    @State currentTracks = [] as TrackViewModelItem[];
 
     tracks$: BehaviorSubject<NewReleasesViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
@@ -27,6 +37,9 @@ class NewReleasesViewModel {
 
     selectAlbumCommand$: BehaviorSubject<NewReleasesViewModel['selectAlbumCommand']>;
     @State selectAlbumCommand = { exec: (album: AlbumViewModelItem) => this.currentAlbum = album };
+
+    selectPlaylistCommand$: BehaviorSubject<NewReleasesViewModel['selectPlaylistCommand']>;
+    @State selectPlaylistCommand = { exec: (playlist: PlaylistsViewModelItem) => this.currentPlaylist = playlist };
 
     likeAlbumCommand$: BehaviorSubject<NewReleasesViewModel['likeAlbumCommand']>;
     @State likeAlbumCommand = { exec: (album: AlbumViewModelItem) => this.likeAlbum(album) };
@@ -50,18 +63,27 @@ class NewReleasesViewModel {
         }
         spotifyResult.val.on('change:state', state => this.checkAlbums());
         this.currentAlbum$.subscribe(() => _.delay(() => this.loadTracks()));
+        this.currentPlaylist$.subscribe(() => _.delay(() => this.loadTracks()));
     }
 
     async fetchData() {
         const res = await this.ss.newReleases();
         if (assertNoErrors(res, e => this.errors = e)) {
+
             return;
         }
-        const recomendations = res.val as IResponseResult<IAlbum>;
 
-        this.newReleases = _.map(recomendations.items, album => new AlbumViewModelItem(album));
-
+        const releases = res.val as IResponseResult<IAlbum>;
+        this.newReleases = _.map(releases.items, album => new AlbumViewModelItem(album));
         this.checkAlbums();
+
+        const featuredPlaylistsResult = await this.ss.featuredPlaylists();
+        if (assertNoErrors(res, e => this.errors = e)) {
+
+            return;
+        }
+        const featuredPlaylists = featuredPlaylistsResult.val as ISearchResult;
+        this.featuredPlaylists = _.map(featuredPlaylists.playlists.items, playlist => new PlaylistsViewModelItem(playlist));
     }
 
     async loadTracks() {
@@ -81,6 +103,14 @@ class NewReleasesViewModel {
                 },
                 added_at: ''
             }, index));
+        } else if (this.currentPlaylist) {
+            const playlistTracksResult = await this.ss.fetchPlaylistTracks(this.currentPlaylist.id(), 0, 100);
+            if (assertNoErrors(playlistTracksResult, e => this.errors = e)) {
+                return;
+            }
+            const tracksResult = playlistTracksResult.val as IResponseResult<ISpotifySong>;
+            const tracksModels = _.map(tracksResult.items, (item, index) => new TrackViewModelItem(item, index));
+            this.currentTracks = tracksModels;
         } else {
             this.tracks = [];
         }

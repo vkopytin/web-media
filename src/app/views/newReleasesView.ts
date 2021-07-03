@@ -30,9 +30,17 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
     @Binding({ didSet: (view) => view.didRefresh() })
     newReleases: NewReleasesView['vm']['newReleases'];
 
+    featuredPlaylists$ = this.vm.featuredPlaylists$;
+    @Binding({ didSet: (view => view.didRefresh()) })
+    featuredPlaylists: NewReleasesView['vm']['featuredPlaylists'];
+
     currentAlbum$ = this.vm.currentAlbum$;
     @Binding({ didSet: (view) => view.didRefresh() })
     currentAlbum: NewReleasesView['vm']['currentAlbum'];
+
+    currentPlaylist$ = this.vm.currentPlaylist$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentPlaylist: NewReleasesView['vm']['currentPlaylist'];
 
     tracks$ = this.vm.tracks$;
     @Binding({ didSet: (view) => view.didRefresh() })
@@ -42,9 +50,17 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
     @Binding({ didSet: (view) => view.didRefresh() })
     likedAlbums: NewReleasesView['vm']['likedAlbums'];
 
+    currentTracks$ = this.vm.currentTracks$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    currentTracks: NewReleasesView['vm']['currentTracks'];
+
     selectAlbumCommand$ = this.vm.selectAlbumCommand$;
     @Binding({ didSet: (view) => view.didRefresh() })
     selectAlbumCommand: NewReleasesView['vm']['selectAlbumCommand'];
+
+    selectPlaylistCommand$ = this.vm.selectPlaylistCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    selectPlaylistCommand: NewReleasesView['vm']['selectPlaylistCommand'];
 
     likeAlbumCommand$ = this.vm.likeAlbumCommand$;
     @Binding({ didSet: (view) => view.didRefresh() })

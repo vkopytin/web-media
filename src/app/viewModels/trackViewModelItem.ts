@@ -96,23 +96,21 @@ class TrackViewModelItem {
         }
 
         this.trackPlaylists = await this.listPlaylists();
-        this.isBanned = await this.ss.isBannedTrack(this.song.track.id);
+        const res = await this.ss.isBannedTrack(this.song.track.id);
+        this.isBanned = res.assert(e => this.errors = [e]).map(r => r);
     }
 
     async listPlaylists() {
         const dataResult = await this.ss.service(DataService);
-        if (assertNoErrors(dataResult, e => this.errors = e)) {
-            return;
-        }
-        const playlists = await dataResult.val.listPlaylistsByTrack(this.song.track);
-        if (assertNoErrors(playlists, e => this.errors = e)) {
-            return;
-        }
-        return playlists.map(playlist => new PlaylistsViewModelItem(playlist));
+        const res = await dataResult.map(data => data.listPlaylistsByTrack(this.song.track));
+
+        return res.assert(e => this.errors = [e])
+            .map(playlists => playlists.map(playlist => new PlaylistsViewModelItem(playlist)));
     }
 
     async play(playlistUri: string) {
-        await this.ss.play(null, playlistUri, this.uri());
+        const playResult = await this.ss.play(null, playlistUri, this.uri());
+        playResult.assert(e => this.errors = [e]);
     }
 
     async playTracks(tracks: TrackViewModelItem[]) {

@@ -4,6 +4,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import * as _ from 'underscore';
 import { IDevice } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
+import { NoActiveDeviceError } from '../service/errors/noActiveDeviceError';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
 import { template } from '../templates/app';
 import { Binding, current } from '../utils';
@@ -156,23 +157,28 @@ class AppView extends React.Component<IAppViewProps> {
     }
 
     showErrors(errors: ServiceResult<any, Error>[]) {
+        if (_.isEmpty(errors)) {
+            return;
+        }
         const tokenExpired = _.filter(errors, err => err.is(TokenExpiredError));
+        const activeDevice = _.filter(errors, err => err.is(NoActiveDeviceError));
+
         if (!_.isEmpty(tokenExpired)) {
+            this.errors = _.filter(errors, err => !err.is(TokenExpiredError));
             this.openLogin = true;
             this.refreshTokenCommand.exec();
+            return;
         }
-        if (errors.length) {
-            console.log(errors);
+
+        if (!_.isEmpty(activeDevice)) {
+            this.errors = _.filter(errors, err => !err.is(NoActiveDeviceError));
+            this.toggleSelectDevices('hide');
         }
-        this.errors = errors;
     }
 
     clearErrors(evnt) {
         evnt && evnt.preventDefault();
         this.errors = [];
-        this.setState({
-            ...this.state
-        });
     }
 
     render() {

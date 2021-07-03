@@ -23,6 +23,10 @@ class PlaylistsViewModelItem {
         return this.playlist.owner.display_name;
     }
 
+    ownerUrl() {
+        return this.playlist.owner.href;
+    }
+
     tracksTotal() {
         return this.playlist.tracks.total;
     }

@@ -566,6 +566,30 @@ class SpotifyAdapter {
         });
     }
 
+    featuredPlaylists(offset = 0, limit = 20, country?: string, locale?: string, timestamp?: string) {
+        return new Promise<ISearchResult>((resolve, reject) => {
+            $.ajax({
+                url: 'https://api.spotify.com/v1/browse/featured-playlists',
+                headers: {
+                    'Authorization': 'Bearer ' + this.token
+                },
+                data: {
+                    ...country ? { country } : {},
+                    ...locale ? { locale } : {},
+                    ...timestamp ? { timestamp }: {},
+                    ...offset ? { offset } : {},
+                    limit
+                },
+                success(response) {
+                    resolve(response);
+                },
+                error(jqXHR, textStatus: string, errorThrown: string) {
+                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
+                }
+            })
+        });
+    }
+
     search(type: ISearchType, term, offset = 0, limit = 20) {
         return new Promise<ISearchResult>((resolve, reject) => {
             $.ajax({
