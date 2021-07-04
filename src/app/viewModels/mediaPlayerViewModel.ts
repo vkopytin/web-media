@@ -95,26 +95,22 @@ class MediaPlayerViewModel {
 
     async connect() {
         const playerResult = await this.ss.spotifyPlayer();
-        const spotifyResult = await this.ss.service(SpotifyService);
-        if (spotifyResult.isError) {
-            this.errors = [spotifyResult];
-        }
-        if (assertNoErrors(spotifyResult, playerResult, e => this.errors = e)) {
-            return;
-        }
-        playerResult.val.on('playerStateChanged', (en, state) => this.updateFromPlayerState(state));
-        spotifyResult.val.on('change:state', state => this.updateState(state));
-        this.updateState();
+        const spotifyResult = await playerResult.map((player) => {
+            player.on('playerStateChanged', (en, state) => this.updateFromPlayerState(state));
+            return this.ss.service(SpotifyService);
+        });
+
+        spotifyResult.assert(e => this.errors = [e])
+            .map(spotify => {
+                spotify.on('change:state', state => this.updateState(state));
+                this.updateState();
+            });
     }
 
     async currentPlayerState() {
         const stateResult = await this.ss.spotifyPlayerState();
-        if (assertNoErrors(stateResult, e => this.errors = e)) {
-            return;
-        }
-        const state = stateResult.val as IWebPlaybackState;
 
-        return state;
+        return stateResult.assert(e => this.errors = [e]).map(r => r);
     }
 
     updateState(res?) {

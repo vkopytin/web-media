@@ -174,15 +174,14 @@ class Service {
         const propName = args[0];
         const val = args[1];
         const settingsResult = await this.service(SettingsService);
-        if (settingsResult.isError) {
-
+        const res = settingsResult.map(s => {
+            if (args.length > 1) {
+                settingsResult.map(s => s.set(propName, val));
+            }
             return settingsResult;
-        }
-        if (args.length > 1) {
-            settingsResult.val.set(propName, val);
-        }
+        });
 
-        return settingsResult.val.get(propName);
+        return res.map(s => s.get(propName));
     }
 
     async refreshToken(newToken: string) {
@@ -473,7 +472,7 @@ class Service {
         const spotify = await this.service(SpotifyService);
         const result = await spotify.map(s => s.addTrackToPlaylist(_.map([].concat(tracks), t => t.uri), playlist.id));
  
-        const dataResult = await this.service(DataService);
+        const dataResult = await result.map(() => this.service(DataService));
         for (const track of tracks) {
             await dataResult.map(data => data.createTrack(track));
             await dataResult.map(data => data.addTrackToPlaylist(playlist, {
@@ -486,28 +485,16 @@ class Service {
     }
 
     async removeTrackFromPlaylist(tracks: ITrack | ITrack[], playlistId: string) {
-        tracks = [].concat(tracks);
+        const arrTracks = [].concat(tracks);
         const spotify = await this.service(SpotifyService);
+        const result = await spotify.map(s => s.removeTrackFromPlaylist(_.map(arrTracks, t => t.uri), playlistId));
 
-        if (spotify.isError) {
-
-            return spotify;
-        }
-
-        const result = await spotify.val.removeTrackFromPlaylist(_.map(tracks, t => t.uri), playlistId);
-        if (result.isError) {
-            return result;
-        }
-
-        const dataResult = await this.service(DataService);
-        if (dataResult.isError) {
-            return dataResult;
-        }
-        for (const track of tracks) {
-            const res = await dataResult.val.removeTrackFromPlaylist(playlistId, {
+        const dataResult = await result.map(() => this.service(DataService));
+        for (const track of arrTracks) {
+            await dataResult.map(d => d.removeTrackFromPlaylist(playlistId, {
                 added_at: new Date().toISOString(),
                 track
-            });
+            }));
         }
 
         return result;
@@ -515,19 +502,15 @@ class Service {
 
     async findTrackLyrics(songInfo: { name: string; artist: string; }) {
         const lyricsService = await this.service(LyricsService);
-        if (lyricsService.isError) {
-            return lyricsService;
-        }
-        const lyricsResult = await lyricsService.val.search(songInfo);
+        const lyricsResult = await lyricsService.map(s => s.search(songInfo));
+
         return lyricsResult;
     }
 
     async reorderTrack(playlistId: string, oldPosition: number, newPosition: number) {
         const spotifyResult = await this.service(SpotifyService);
-        if (spotifyResult.isError) {
-            return spotifyResult;
-        }
-        const reorderSResult = await spotifyResult.val.reorderTracks(playlistId, oldPosition, newPosition, 1);
+        const reorderSResult = await spotifyResult.map(s => s.reorderTracks(playlistId, oldPosition, newPosition, 1));
+
         return reorderSResult;
     }
 

@@ -22,12 +22,12 @@ function returnErrorResult<T>(message: string, ex: Error) {
 class LyricsService extends withEvents(BaseService) {
     static async create(connection: Service) {
         const settingsResult = await connection.settings('apiseeds');
-        if (settingsResult.isError) {
-            return settingsResult;
-        }
-        let accessToken = settingsResult.val.key;
-        const adapter = new LyricsAdapter(accessToken);
-        return LyricsServiceResult.success(new LyricsService(adapter));
+
+        return settingsResult.map(({ key: accessToken }) => {
+            const adapter = new LyricsAdapter(accessToken);
+    
+            return LyricsServiceResult.success(new LyricsService(adapter));
+        });
     }
 
     constructor(public adapter: LyricsAdapter) {
