@@ -36,7 +36,7 @@ class Service {
         switch (ctor) {
             case SpotifyService as any:
                 return new Promise((resolve, reject) => {
-                    lockSpotifyService.push(_.bind(async function (this: Service, next) {
+                    lockSpotifyService.push(async (next) => {
                         if (this.spotifyService) {
                             resolve(this.spotifyService as any);
                             next();
@@ -50,11 +50,11 @@ class Service {
 
                         resolve(this.spotifyService = spotifyService as any)
                         next();
-                    }, this));
+                    });
                 });
             case SettingsService as any:
                 return new Promise((resolve, reject) => {
-                    lockSettingsService.push(_.bind(async function (this: Service, next) {
+                    lockSettingsService.push(async (next) => {
                         if (this.settingsService) {
                             resolve(this.settingsService as any);
                             next();
@@ -68,11 +68,11 @@ class Service {
 
                         resolve(this.settingsService = settingsService as any);
                         next();
-                    }, this));
+                    });
                 });
             case SpotifyPlayerService as any:
                 return new Promise((resolve, reject) => {
-                    lockSpotifyPlayerService.push(_.bind(async function (this: Service, next) {
+                    lockSpotifyPlayerService.push(async (next) => {
                         if (this.spotifyPlayerService) {
                             resolve(this.spotifyPlayerService as any);
                             next();
@@ -86,11 +86,11 @@ class Service {
 
                         resolve(this.spotifyPlayerService = spotifyPlayerService as any);
                         next();
-                    }, this));
+                    });
                 });
             case SpotifySyncService as any:
                 return new Promise((resolve, reject) => {
-                    lockSpotifySyncService.push(_.bind(async function (this: Service, next) {
+                    lockSpotifySyncService.push(async (next) => {
                         if (this.spotifySyncService) {
                             resolve(this.spotifySyncService as any);
                             next();
@@ -104,11 +104,11 @@ class Service {
 
                         resolve(this.spotifySyncService = spotifySyncService as any);
                         next();
-                    }, this));
+                    });
                 });
             case DataService as any:
                 return new Promise((resolve, reject) => {
-                    lockDataService.push(_.bind(async function (this: Service, next) {
+                    lockDataService.push(async (next) => {
                         if (this.dataService) {
                             resolve(this.dataService as any);
                             next();
@@ -122,11 +122,11 @@ class Service {
     
                         resolve(this.dataService = dataService as any);
                         next();
-                    }, this));
+                    });
                 });
             case LoginService as any:
                 return new Promise((resolve, reject) => {
-                    lockLoginService.push(_.bind(async function (this: Service, next) {
+                    lockLoginService.push(async (next) => {
                         const loginService = await LoginService.create(this);
                         if (loginService.isError) {
                             return resolve(loginService as any);
@@ -134,11 +134,11 @@ class Service {
         
                         resolve(loginService as any);
                         next();
-                    }, this));
+                    });
                 });
             case LyricsService as any:
                 return new Promise((resolve, reject) => {
-                    lockLyricsServiceResult.push(_.bind(async function (this: Service, next) {
+                    lockLyricsServiceResult.push(async (next) => {
                         const lyricsServiceResult = await LyricsService.create(this);
                         if (lyricsServiceResult.isError) {
                             return resolve(lyricsServiceResult as any);
@@ -146,7 +146,7 @@ class Service {
             
                         resolve(lyricsServiceResult as any);
                         next();
-                    }, this));
+                    });
                 });
             default:
                 throw new Error('Unexpected service request');
@@ -155,22 +155,15 @@ class Service {
 
     async isLoggedIn() {
         const loginResult = await this.service(LoginService);
-        if (loginResult.isError) {
-            return loginResult;
-        }
-        const isLoggedInResult = await loginResult.val.isLoggedIn();
-        if (isLoggedInResult.isError) {
-            return isLoggedInResult;
-        }
+        const isLoggedInResult = await loginResult.map(s => s.isLoggedIn());
         if (!isLoggedInResult.val) {
+
             return isLoggedInResult;
-        }
-        const spotifyResult = await this.service(SpotifyService);
-        if (spotifyResult.isError) {
-            return spotifyResult;
         }
 
-        return spotifyResult.val.isLoggedIn();
+        const spotifyResult = await this.service(SpotifyService);
+    
+        return spotifyResult.map(s => s.isLoggedIn());
     }
 
     async settings<K extends keyof SettingsService['config']>(
