@@ -540,18 +540,14 @@ class Service {
 
     async bannTrack(trackId: string) {
         const dataResult = await this.service(DataService);
-        if (dataResult.isError) {
-            return false;
-        }
-        return await dataResult.val.bannTrack(trackId);
+        const res = await dataResult.map(d => d.bannTrack(trackId));
+
+        return res;
     }
 
     async removeBannFromTrak(trackId: string) {
         const dataResult = await this.service(DataService);
-        if (dataResult.isError) {
-            return false;
-        }
-        return await dataResult.val.removeBannFromTrack(trackId);
+        return await dataResult.map(d => d.removeBannFromTrack(trackId));
     }
 
     async isBannedTrack(trackId: string) {

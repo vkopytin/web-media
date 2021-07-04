@@ -90,12 +90,8 @@ class TrackViewModelItem {
 
     async connect() {
         const spotifyResult = await this.ss.service(SpotifyService);
-        if (assertNoErrors(spotifyResult, e => this.errors = e)) {
-
-            return;
-        }
-
-        this.trackPlaylists = await this.listPlaylists();
+        this.trackPlaylists = await spotifyResult.assert(e => this.errors = [e])
+            .map(() => this.listPlaylists());
         const res = await this.ss.isBannedTrack(this.song.track.id);
         this.isBanned = res.assert(e => this.errors = [e]).map(r => r);
     }
@@ -116,54 +112,44 @@ class TrackViewModelItem {
     async playTracks(tracks: TrackViewModelItem[]) {
         const allowedTracks = _.filter(tracks, track => !track.isBanned);
         const playResult = await this.ss.play(null, _.map(allowedTracks, item => item.uri()), this.uri());
-        assertNoErrors(playResult, e => this.errors = e);
+        playResult.assert(e => this.errors = [e]);
     }
 
     @isLoading
     async addToPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
         const result = await this.ss.addTrackToPlaylist(track.song.track, playlist.playlist);
-        if (assertNoErrors(result, e => this.errors = e)) {
-            return;
-        }
-        setTimeout(() => {
+        result.assert(e => this.errors = [e]).map(() => setTimeout(() => {
             this.connect();
-        }, 2000);
+        }, 2000));
     }
 
     @isLoading
     async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
         const result = await this.ss.removeTrackFromPlaylist(track.song.track, playlist.id());
-        if (assertNoErrors(result, e => this.errors = e)) {
-            return;
-        }
-        await this.connect();
+        await result.assert(e => this.errors = [e]).map(() => this.connect());
     }
 
     async likeTrack() {
         const result = await this.ss.addTracks(this.song.track);
-        if (assertNoErrors(result, e => this.errors = e)) {
-            return;
-        }
+        result.assert(e => this.errors = [e]);
     }
 
     async unlikeTrack() {
         const result = await this.ss.removeTracks(this.song.track);
-        if (assertNoErrors(result, e => this.errors = e)) {
-            return;
-        }
+        await result.assert(e => this.errors = [e]);
     }
 
     updateIsCached(playlists: PlaylistsViewModelItem[]) {
     }
 
     async bannTrack() {
-        await this.ss.bannTrack(this.id());
-        this.isBanned = true;
+        const res = await this.ss.bannTrack(this.id());
+        res.assert(e => this.errors = [e]).map(r => this.isBanned = r);
     }
 
     async removeBannFromTrack() {
-        await this.ss.removeBannFromTrak(this.id());
-        this.isBanned = false;
+        const res = await this.ss.removeBannFromTrak(this.id());
+        res.assert(e => this.errors = [e]).map(r => this.isBanned = !r);
     }
 
 }
