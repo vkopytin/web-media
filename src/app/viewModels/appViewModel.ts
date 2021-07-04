@@ -80,17 +80,12 @@ class AppViewModel {
     }
 
     async startSync() {
-        const syncServiceResult = await this.ss.service(SpotifySyncService);
-        if (assertNoErrors(syncServiceResult, e => this.errors = e)) {
-            return;
-        }
-        const syncService = syncServiceResult.val;
         this.isSyncing = 1;
-        try {
-            await syncService.syncData();
-        } finally {
-            this.isSyncing = 0;
-        }
+        const syncServiceResult = await this.ss.service(SpotifySyncService);
+        const res = await syncServiceResult.map(syncService => syncService.syncData());
+        res.assert(e => this.errors = [e]);
+
+        this.isSyncing = 0;
     }
 
     async refreshToken() {
@@ -106,25 +101,21 @@ class AppViewModel {
 
     async connect() {
         const isLoggedInResult = await this.ss.isLoggedIn();
-
-        if (assertNoErrors(isLoggedInResult, e => this.errors = e)) {
-            return;
-        }
-
-        this.openLogin = !isLoggedInResult.val;
+        this.openLogin = isLoggedInResult.assert(e => this.errors = [e])
+            .map(r => !r);
 
         const playerResult = await this.ss.spotifyPlayer();
-        if (assertNoErrors(playerResult, e => this.errors = e)) {
-            return;
-        }
-        const updateDevicesHandler = async (eventName: string, device: { device_id: string; }) => {
-            await this.updateDevices();
-            if (!this.currentDevice) {
-                this.ss.player(device.device_id, false);
-            }
-            playerResult.val.off('ready', updateDevicesHandler);
-        };
-        playerResult.val.on('ready', updateDevicesHandler);
+        playerResult.assert(e => this.errors = [e])
+            .map((player) => {
+                const updateDevicesHandler = async (eventName: string, device: { device_id: string; }) => {
+                    await this.updateDevices();
+                    if (!this.currentDevice) {
+                        this.ss.player(device.device_id, false);
+                    }
+                    player.off('ready', updateDevicesHandler);
+                };
+                player.on('ready', updateDevicesHandler);
+            });
     }
 
     async fetchData() {

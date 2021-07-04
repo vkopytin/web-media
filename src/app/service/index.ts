@@ -223,20 +223,20 @@ class Service {
     }
 
     async playerResume() {
-        const player = await this.spotifyPlayer();
+        const player = await this.service(SpotifyPlayerService);
         return await player.map(p => p.resume());
     }
 
     async playerPause() {
-        const player = await this.spotifyPlayer();
+        const player = await this.service(SpotifyPlayerService);
         return await player.map(p => p.pause());
     }
     async playerNextTrack() {
-        const player = await this.spotifyPlayer();
+        const player = await this.service(SpotifyPlayerService);
         return await player.map(p => p.nextTrack());
     }
     async playerPreviouseTrack() {
-        const player = await this.spotifyPlayer();
+        const player = await this.service(SpotifyPlayerService);
         return await player.map(p => p.previouseTrack());
     }
 

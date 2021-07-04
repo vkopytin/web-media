@@ -77,7 +77,7 @@ class SpotifyService extends withEvents(BaseService) {
             this.onStateChanged(res);
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting spotify recently played', ex);
+            return returnErrorResult<IPlayerResult>('Unexpected error on requesting spotify recently played', ex);
         }
     }
 
@@ -313,7 +313,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting spotify recently played', ex);
+            return returnErrorResult<ISearchResult>('Unexpected error on requesting spotify recently played', ex);
         }
     }
 
