@@ -90,13 +90,10 @@ class AppViewModel {
 
     async refreshToken() {
         const tokenUrlResult = await this.ss.getSpotifyAuthUrl();
-        if (assertNoErrors(tokenUrlResult, e => this.errors = e)) {
 
-            return;
-        }
-        const spotifyAuthUrl = tokenUrlResult.val as string;
-        this.autoRefreshUrl = spotifyAuthUrl + '23';
         console.log('updating token');
+        this.autoRefreshUrl = tokenUrlResult.assert(e => this.errors = [e])
+            .map(spotifyAuthUrl => spotifyAuthUrl + '23');
     }
 
     async connect() {
@@ -120,19 +117,14 @@ class AppViewModel {
 
     async fetchData() {
         const userInfoResult = await this.ss.profile();
-
-        if (assertNoErrors(userInfoResult, e => this.errors = e)) {
-            return;
-        }
-        this.profile = userInfoResult.val;
+        this.profile = userInfoResult.assert(e => this.errors = [e])
+            .map(r => r);
 
         await this.updateDevices();
+
         const topTracksResult = await this.ss.listTopTracks();
-        if (assertNoErrors(topTracksResult, e => this.errors = e)) {
-            return;
-        }
-        const topTracks = topTracksResult.val as IResponseResult<ITrack>;
-        this.topTracks = _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index));
+        this.topTracks = topTracksResult.assert(e => this.errors = [e])
+            .map(topTracks => _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index)));
     }
 
     async updateDevices() {

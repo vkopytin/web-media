@@ -13,7 +13,7 @@ function returnErrorResult<T>(message: string, ex: Error) {
     switch (true) {
         case ex instanceof ErrorWithStatus:
             const err = ex as ErrorWithStatus;
-            return LyricsServiceError.create(err.message, err);
+            return LyricsServiceError.create<T>(err.message, err);
         default:
             return LyricsServiceUnexpectedError.create<T>(message, ex);
     }
@@ -44,7 +44,7 @@ class LyricsService extends withEvents(BaseService) {
                 lyrics.result.copyright.text
             ].join('\n'));
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting sptify recently played', ex);
+            return returnErrorResult<string>('Unexpected error on requesting sptify recently played', ex);
         }
     }
 }

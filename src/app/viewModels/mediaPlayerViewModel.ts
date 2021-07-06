@@ -149,10 +149,8 @@ class MediaPlayerViewModel {
 
     async fetchDataInternal() {
         const res = await this.ss.player();
-        if (assertNoErrors(res, e => this.errors = e)) {
-            return res;
-        }
-        const currentlyPlaying = res.val as IPlayerResult;
+        const currentlyPlaying = res.assert(e => this.errors = [e])
+            .map(r => r);
 
         this.lastTime = +new Date();
         if (currentlyPlaying && currentlyPlaying.item) {
@@ -177,11 +175,8 @@ class MediaPlayerViewModel {
 
     async checkTrackExists() {
         const trackExistsResult = await this.ss.hasTracks(this.currentTrackId);
-        if (assertNoErrors(trackExistsResult, e => this.errors = e)) {
-            return;
-        }
-        const likedResult = trackExistsResult.val as boolean[];
-        this.isLiked = _.first(likedResult);
+        this.isLiked = trackExistsResult.assert(e => this.errors = [e])
+            .map(r => _.first(r));
     }
 
     async monitorPlybackInternal() {
@@ -214,7 +209,8 @@ class MediaPlayerViewModel {
             
         lockSection.push(async (next) => {
             this.timePlayed = timePlayed;
-            await this.ss.seek(timePlayed);
+            const res = await this.ss.seek(timePlayed);
+            res.assert(e => this.errors = [e]);
 
             next();
         });

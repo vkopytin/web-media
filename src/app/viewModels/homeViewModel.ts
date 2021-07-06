@@ -149,35 +149,42 @@ class HomeViewModel {
     }
 
     async likeTrack(track: TrackViewModelItem) {
-        await track.likeTrack();
-        this.checkTracks([track]);
+        const res = await track.likeTrack();
+        res.assert(e => this.errors = [e]).map(() => {
+            this.checkTracks([track]);
+        });
     }
 
     async unlikeTrack(track: TrackViewModelItem) {
-        await track.unlikeTrack();
-        this.checkTracks([track]);
+        const res = await track.unlikeTrack();
+        res.assert(e => this.errors = [e]).map(() => {
+            this.checkTracks([track]);
+        });
     }
 
     async findTrackLyrics(track: TrackViewModelItem) {
         if (this.trackLyrics && this.trackLyrics.trackId === track.id()) {
+
             return this.trackLyrics = null;
         }
+
         const lyricsResult = await this.ss.findTrackLyrics({
             name: track.name(),
             artist: track.artist()
         });
-        if (assertNoErrors(lyricsResult, e => { })) {
+        lyricsResult.assert(e => {
             this.trackLyrics = {
                 trackId: track.id(),
                 lyrics: lyricsResult.error.message
             };
-            return;
-        }
-
-        this.trackLyrics = {
-            trackId: track.id(),
-            lyrics: '' + lyricsResult.val
-        };
+            
+            return this.errors = [e];
+        }).map(() => {
+            this.trackLyrics = {
+                trackId: track.id(),
+                lyrics: '' + lyricsResult.val
+            };
+        });
     }
 
     async bannTrack(track: TrackViewModelItem) {

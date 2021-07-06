@@ -131,12 +131,12 @@ class TrackViewModelItem {
 
     async likeTrack() {
         const result = await this.ss.addTracks(this.song.track);
-        result.assert(e => this.errors = [e]);
+        return result.assert(e => this.errors = [e]);
     }
 
     async unlikeTrack() {
         const result = await this.ss.removeTracks(this.song.track);
-        await result.assert(e => this.errors = [e]);
+        return result.assert(e => this.errors = [e]);
     }
 
     updateIsCached(playlists: PlaylistsViewModelItem[]) {

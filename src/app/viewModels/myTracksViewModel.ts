@@ -48,11 +48,9 @@ class MyTracksViewModel {
 
     async connect() {
         const spotifyResult = await this.ss.service(SpotifyService);
-        if (assertNoErrors(spotifyResult, e => this.errors = e)) {
-            return;
-        }
-        const spotify = spotifyResult.val;
-        spotify.on('change:state', (...args) => this.loadData(...args));
+        spotifyResult.assert(e => this.errors = [e]).map(spotify => {
+            spotify.on('change:state', (...args) => this.loadData(...args));
+        });
     }
 
     async fetchData() {
