@@ -20,7 +20,12 @@ function elementIndex(el) {
     return index + 1;
 }
 
-class TracksView extends React.Component<ITracksViewProps, TracksView['state']> {
+interface ITracksViewState {
+    draggedIndex: number;
+    dragIndex: number;
+}
+
+class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
     didRefresh: TracksView['refresh'] = () => { };
     vm = current(PlaylistsViewModel);
     

@@ -263,7 +263,7 @@ export function Binding({ didSet }: { didSet?: (view, val) => void } = {}) {
                 configurable: true
             });
 
-            didSet && store$.subscribe(val => {
+            didSet && store$.pipe(distinctUntilChanged()).subscribe(val => {
                 setTimeout(() => didSet(this, val));
             });
 

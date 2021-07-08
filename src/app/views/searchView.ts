@@ -77,11 +77,11 @@ class SearchView extends React.Component<ISearchViewProps> {
 
     likeTrackCommand$ = new BehaviorSubject({ exec(track: TrackViewModelItem) { } });
     @Binding({ didSet: (view) => view.didRefresh() })
-    likeTrackCommand: SearchView['likeTrackCommand$'];
+    likeTrackCommand: SearchView['likeTrackCommand$']['value'];
 
     unlikeTrackCommand$ = new BehaviorSubject({ exec(track: TrackViewModelItem) { } });
     @Binding({ didSet: (view) => view.didRefresh() })
-    unlikeTrackCommand: SearchView['unlikeTrackCommand$'];
+    unlikeTrackCommand: SearchView['unlikeTrackCommand$']['value'];
 
     searchTracks = _.debounce(term => {
         this.term = term;
