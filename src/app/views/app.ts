@@ -173,6 +173,7 @@ class AppView extends React.Component<IAppViewProps> {
         if (!_.isEmpty(activeDevice)) {
             this.errors = _.filter(errors, err => !err.is(NoActiveDeviceError));
             this.toggleSelectDevices('hide');
+            return;
         }
         this.errors = errors;
     }
