@@ -40,12 +40,13 @@ class UserProfileViewModel {
         apiseedsKey: ''
     };
 
-    isInit = _.delay(() => {
-        this.fetchData();
+    isInit = new Promise<boolean>(resolve => _.delay(async () => {
+        await this.fetchData();
         this.apiseedsKey$.subscribe(_.debounce((val) => {
             this.saveApiseedsKey(val);
         }, 300));
-    });
+        resolve(true);
+    }));
 
     constructor(private ss = current(Service)) {
         
@@ -53,46 +54,35 @@ class UserProfileViewModel {
 
     async fetchData() {
         const settingsResult = await this.ss.service(SettingsService);
-        if (!settingsResult.isError) {
+        settingsResult.assert(e => this.errors = [e]).map(() => {
             this.apiseedsKey = settingsResult.val.apiseedsKey();
-        }
+        });
         const spotifyTokenUrlResult = await this.ss.getSpotifyAuthUrl();
-        if (assertNoErrors(spotifyTokenUrlResult, e => this.errors = e)) {
+        spotifyTokenUrlResult.assert(e => this.errors = [e]).map(spotifyAuthUrl => {
+            this.spotifyAuthUrl = spotifyAuthUrl;
+        });
 
-            return;
-        }
-        const spotifyAuthUrl = spotifyTokenUrlResult.val as string;
-        this.spotifyAuthUrl = spotifyAuthUrl;
         const geniusTokenUrlResult = await this.ss.getGeniusAuthUrl();
-        if (assertNoErrors(geniusTokenUrlResult, e => this.errors = e)) {
-
-            return;
-        }
-        const geniusAuthUrl = geniusTokenUrlResult.val as string;
-        this.geniusAuthUrl = geniusAuthUrl;
+        geniusTokenUrlResult.assert(e => this.errors = [e]).map(geniusAuthUrl => {
+            this.geniusAuthUrl = geniusAuthUrl;
+        });
 
         const userInfoResult = await this.ss.profile();
-
-        if (assertNoErrors(userInfoResult, e => this.errors = e)) {
-            return;
-        }
-        this.profile = userInfoResult.val;
+        userInfoResult.assert(e => this.errors = [e]).map(userInfo => {
+            this.profile = userInfo;
+        });
 
         const topTracksResult = await this.ss.listTopTracks();
-        if (assertNoErrors(topTracksResult, e => this.errors = e)) {
-            return;
-        }
-        const topTracks = topTracksResult.val as IResponseResult<ITrack>;
-        this.topTracks = _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index));
+        topTracksResult.assert(e => this.errors = [e]).map(topTracks => {
+            this.topTracks = _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index));
+        });
     }
 
     async saveApiseedsKey(val: string) {
         const settingsResult = await this.ss.service(SettingsService);
-        if (assertNoErrors(settingsResult, e => this.errors = e)) {
-            return;
-        }
-
-        settingsResult.val.apiseedsKey(val);
+        settingsResult.assert(e => this.errors = [e]).map(settings => {
+            settingsResult.val.apiseedsKey(val);
+        });
     }
 }
 

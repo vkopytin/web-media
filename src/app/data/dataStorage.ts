@@ -15,8 +15,10 @@ const config: IConfig = {
 
 // Unit of Work Factory
 class DataStorage {
-	static async create(callback: { (err, result: IStorage): void }) {
-		switch (config.dbType) {
+	static dbType = config.dbType;
+
+	static async create(callback: { (err, result: IStorage): void }, dbType = DataStorage.dbType) {
+		switch (dbType) {
 			case 'inMemory':
 				const { InMemoryStorage } = await import('./inMemoryStorage');
 				const uow = new InMemoryStorage(null);

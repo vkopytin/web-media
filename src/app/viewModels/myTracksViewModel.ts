@@ -37,10 +37,11 @@ class MyTracksViewModel {
     findTrackLyricsCommand$: BehaviorSubject<MyTracksViewModel['findTrackLyricsCommand']>;
     @State findTrackLyricsCommand = { exec: (track: TrackViewModelItem) => this.findTrackLyrics(track) };
 
-    isInit = _.delay(() => {
-        this.connect();
-        this.fetchData();
-    }, 100);
+    isInit = new Promise<boolean>(resolve => _.delay(async () => {
+        await this.connect();
+        await this.fetchData();
+        resolve(true);
+    }));
 
     constructor(private ss = current(Service)) {
         

@@ -99,6 +99,7 @@ declare global {
         Spotify: {
             Player: IPlayer
         };
+        onSpotifyWebPlaybackSDKReady(): void;
     }
 }
 
@@ -132,7 +133,7 @@ class SpotifyPlayerService extends withEvents(BaseService) {
 
             return new Promise<SpotifyPlayerServiceResult<SpotifyPlayerService, Error>>((resolve, reject) => {
 
-                (window as any).onSpotifyWebPlaybackSDKReady = () => {
+                window.onSpotifyWebPlaybackSDKReady = () => {
                     const Spotify = window.Spotify;
                     const player = new Spotify.Player({
                         name,
@@ -141,7 +142,7 @@ class SpotifyPlayerService extends withEvents(BaseService) {
 
                     resolve(SpotifyPlayerServiceResult.success(new SpotifyPlayerService(player)));
                 };
-          
+
                 if (!window.Spotify) {
                     const scriptTag = document.createElement('script');
                     scriptTag.src = 'https://sdk.scdn.co/spotify-player.js';

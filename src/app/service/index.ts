@@ -54,16 +54,17 @@ class Service {
                 });
             case SettingsService as any:
                 return new Promise((resolve, reject) => {
-                    lockSettingsService.push(async (next) => {
+                    lockSettingsService.push(next => {
                         if (this.settingsService) {
                             resolve(this.settingsService as any);
                             next();
                             return;
                         }
 
-                        const settingsService = await SettingsService.create(this);
+                        const settingsService = SettingsService.create(this);
                         if (settingsService.isError) {
-                            return resolve(settingsService as any);
+                            resolve(settingsService as any);
+                            return next();
                         }
 
                         resolve(this.settingsService = settingsService as any);
@@ -461,8 +462,8 @@ class Service {
         const spotify = await this.service(SpotifyService);
         const result = await spotify.map(s => s.createNewPlaylist(userId, name, description, isPublic));
 
-        const syncServiceResult = await this.service(SpotifySyncService);
-        const syncPlaylistsResult = syncServiceResult.map(s => s.syncMyPlaylists());
+        const syncServiceResult = await result.map(() => this.service(SpotifySyncService));
+        const syncPlaylistsResult = await syncServiceResult.map(s => s.syncMyPlaylists());
 
         return syncPlaylistsResult;
     }

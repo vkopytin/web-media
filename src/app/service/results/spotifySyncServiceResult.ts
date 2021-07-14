@@ -12,8 +12,8 @@ class SpotifySyncServiceResult<T, E extends Error> extends ServiceResult<T, E> {
         return new SpotifySyncServiceResult(val, null as Error);
     }
 
-    static error<Y extends Error>(val: Y) {
-        const error = new SpotifySyncServiceResult(null as SpotifySyncService, val);
+    static error<R, Y extends Error = Error>(val: Y) {
+        const error = new SpotifySyncServiceResult(null as R, val);
         error.isError = true;
 
         return error;

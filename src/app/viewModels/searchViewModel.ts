@@ -53,7 +53,7 @@ class SearchViewModel {
     loadMoreCommand$: BehaviorSubject<SearchViewModel['loadMoreCommand']>;
     @State loadMoreCommand = { exec: () => this.loadMore() };
 
-    isInit = _.delay(() => {
+    isInit = new Promise<boolean>(resolve => _.delay(async () => {
         this.fetchData();
         this.term$.subscribe(_.debounce(() => {
             searchQueue.push(async (next) => {
@@ -78,7 +78,8 @@ class SearchViewModel {
         this.currentArtist$.subscribe(_.debounce(() => {
             this.fetchTracks();
         }, 300));
-    }, 100);
+        resolve(true);
+    }, 100));
 
     constructor(private ss = current(Service)) {
         this.ss.spotifyPlayer();
@@ -163,22 +164,22 @@ class SearchViewModel {
         if (this.searchType === 'album' && this.currentAlbum) {
             const albumTrackssResult = await spotifyResult.map(s => s.listAlbumTracks(this.currentAlbum.id()));
 
-            return this.currentTracks = albumTrackssResult.assert(e => this.errors = [e])
-                .map(tr => _.map(tr.items, (item, index) => new TrackViewModelItem({ track: item } as any, index)));
+            return albumTrackssResult.assert(e => this.errors = [e])
+                .map(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem({ track: item } as any, index)));
         }
 
         if (this.searchType === 'playlist' && this.currentPlaylist) {
             const playlistTracksResult = await spotifyResult.map(s => s.fetchPlaylistTracks(this.currentPlaylist.id()));
 
-            return this.currentTracks = playlistTracksResult.assert(e => this.errors = [e])
-                .map(tr => _.map(tr.items, (item, index) => new TrackViewModelItem(item, index)));
+            return playlistTracksResult.assert(e => this.errors = [e])
+                .map(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem(item, index)));
         }
 
         if (this.searchType === 'artist' && this.currentArtist) {
             const artistTracksResult = await spotifyResult.map(s => s.fetchArtistTopTracks(this.currentArtist.id(), 'US'));
 
-            return this.currentTracks = artistTracksResult.assert(e => this.errors = [e])
-                .map(tr => _.map(tr.tracks, (item, index) => new TrackViewModelItem({ track: item } as any, index)));
+            return artistTracksResult.assert(e => this.errors = [e])
+                .map(tr => this.currentTracks = _.map(tr.tracks, (item, index) => new TrackViewModelItem({ track: item } as any, index)));
         }
 
     }

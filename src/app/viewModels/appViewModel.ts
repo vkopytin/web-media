@@ -52,12 +52,14 @@ class AppViewModel {
     isSyncing$: BehaviorSubject<AppViewModel['isSyncing']>;
     @State isSyncing = 0;
 
-    isInit = _.delay(() => {
-        this.init();
-        this.startSync();
-        this.connect();
-        this.fetchData();
-    });
+    isInit = new Promise<boolean>(resolve => _.delay(async () => {
+        await this.init();
+        await this.startSync();
+        await this.connect();
+        await this.fetchData();
+
+        resolve(true);
+    }));
 
     constructor(private ss = current(Service)) {
 
@@ -92,8 +94,8 @@ class AppViewModel {
         const tokenUrlResult = await this.ss.getSpotifyAuthUrl();
 
         console.log('updating token');
-        this.autoRefreshUrl = tokenUrlResult.assert(e => this.errors = [e])
-            .map(spotifyAuthUrl => spotifyAuthUrl + '23');
+        tokenUrlResult.assert(e => this.errors = [e])
+            .map(spotifyAuthUrl => this.autoRefreshUrl = spotifyAuthUrl + '23');
     }
 
     async connect() {
@@ -107,7 +109,7 @@ class AppViewModel {
                 const updateDevicesHandler = async (eventName: string, device: { device_id: string; }) => {
                     await this.updateDevices();
                     if (!this.currentDevice) {
-                        this.ss.player(device.device_id, false);
+                        await this.ss.player(device.device_id, false);
                     }
                     player.off('ready', updateDevicesHandler);
                 };
@@ -117,8 +119,8 @@ class AppViewModel {
 
     async fetchData() {
         const userInfoResult = await this.ss.profile();
-        this.profile = userInfoResult.assert(e => this.errors = [e])
-            .map(r => r);
+        userInfoResult.assert(e => this.errors = [e])
+            .map(r => this.profile = r);
 
         await this.updateDevices();
 
@@ -129,8 +131,8 @@ class AppViewModel {
 
     async updateDevices() {
         const devicesResult = await this.ss.listDevices();
-        this.devices = devicesResult.assert(e => this.errors = [e])
-            .map(devices => _.map(devices, item => new DeviceViewModelItem(item)));
+        devicesResult.assert(e => this.errors = [e])
+            .map(devices => this.devices = _.map(devices, item => new DeviceViewModelItem(item)));
 
         const currentDevice = _.find(this.devices, d => d.isActive()) || null;
         this.currentDevice = currentDevice;

@@ -83,14 +83,15 @@ class PlaylistsViewModel {
     removeBannFromTrackCommand$: BehaviorSubject<PlaylistsViewModel['removeBannFromTrackCommand']>;
     @State removeBannFromTrackCommand = { exec: (track: TrackViewModelItem) => this.removeBannFromTrack(track) };
 
-    isInit = _.delay(() => {
-        this.connect();
-        this.fetchData();
+    isInit = new Promise<boolean>(resolve => _.delay(async () => {
+        await this.connect();
+        await this.fetchData();
         //toDO: Find better solution
         this.currentPlaylistId$.subscribe(id => {
             this.fetchTracks();
         });
-    });
+        resolve(true);
+    }));
 
     constructor(private ss = current(Service)) {
         
@@ -98,35 +99,26 @@ class PlaylistsViewModel {
 
     async connect() {
         const spotifyResult = await this.ss.service(SpotifyService);
-        if (assertNoErrors(spotifyResult, e => this.errors = e)) {
-            return;
-        }
-        const spotify = spotifyResult.val;
+        spotifyResult.assert(e => this.errors = [e]);
     }
 
     async fetchData() {
         const result = await this.ss.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
-        if (assertNoErrors(result, e => this.errors = e)) {
-            return result;
-        }
-        const playlists = (result.val as IUserPlaylistsResult).items;
-        this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
-        this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
-        this.playlists = _.map(_.first(playlists, this.settings.playlist.limit), item => new PlaylistsViewModelItem(item));
+        result.assert(e => this.errors = [e]).map(({ items: playlists }) => {
+            this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
+            this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
+            this.playlists = _.map(_.first(playlists, this.settings.playlist.limit), item => new PlaylistsViewModelItem(item));
+        });
     }
 
+    @isLoading
     async loadMore() {
-        this.isLoading = true;
         const result = await this.ss.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
-        if (assertNoErrors(result, e => this.errors = e)) {
-            this.isLoading = false;
-            return result;
-        }
-        const playlists = (result.val as IUserPlaylistsResult).items;
-        this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
-        this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
-        this.playlists = [...this.playlists, ..._.map(_.first(playlists, this.settings.playlist.limit), item => new PlaylistsViewModelItem(item))];
-        this.isLoading = false;
+        result.assert(e => this.errors = [e]).map(({ items: playlists }) => {
+            this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
+            this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
+            this.playlists = [...this.playlists, ..._.map(_.first(playlists, this.settings.playlist.limit), item => new PlaylistsViewModelItem(item))];
+        });
     }
 
     async fetchTracks() {
@@ -137,14 +129,12 @@ class PlaylistsViewModel {
         if (currentPlaylistId) {
             this.loadTracks('playlistTracks');
             const result = await this.ss.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
-            if (assertNoErrors(result, e => this.errors = e)) {
-                return;
-            }
-            const tracks = (result.val as IResponseResult<ISpotifySong>).items;
-            this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
-            this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);    
-            this.tracks = _.map(_.first(tracks, this.settings.track.limit), (item, index) => new TrackViewModelItem(item, index));
-            this.checkTracks(this.tracks);
+            result.assert(e => this.errors = [e]).map(({ items: tracks }) => {
+                this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
+                this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);
+                this.tracks = _.map(_.first(tracks, this.settings.track.limit), (item, index) => new TrackViewModelItem(item, index));
+                this.checkTracks(this.tracks);
+            });
         }
     }
 
@@ -152,18 +142,16 @@ class PlaylistsViewModel {
         const currentPlaylistId = this.currentPlaylistId;
         if (currentPlaylistId) {
             const result = await this.ss.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
-            if (assertNoErrors(result, e => this.errors = e)) {
-                return;
-            }
-            const tracks = (result.val as IResponseResult<ISpotifySong>).items;
-            this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
-            this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);    
-            const moreTracks = _.map(_.first(tracks, this.settings.track.limit), (item, index) => new TrackViewModelItem(item, index));
-            this.tracks = [
-                ...this.tracks,
-                ...moreTracks
-            ];
-            this.checkTracks(moreTracks);
+            result.assert(e => this.errors = [e]).map(({ items: tracks }) => {
+                this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
+                this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);
+                const moreTracks = _.map(_.first(tracks, this.settings.track.limit), (item, index) => new TrackViewModelItem(item, index));
+                this.tracks = [
+                    ...this.tracks,
+                    ...moreTracks
+                ];
+                this.checkTracks(moreTracks);
+            });
         }
     }
 
@@ -180,15 +168,14 @@ class PlaylistsViewModel {
             return;
         }
         const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
-        if (assertNoErrors(likedResult, e => this.errors = e)) {
-            return;
-        }
-        _.each(likedResult.val as boolean[], (liked, index) => {
-            tracksToCheck[index].isLiked = liked;
+        likedResult.assert(e => this.errors = [e]).map(likedList => {
+            _.each(likedList, (liked, index) => {
+                tracksToCheck[index].isLiked = liked;
+            });
+            this.likedTracks = _.filter(this.tracks, track => track.isLiked);
         });
-        this.likedTracks = _.filter(this.tracks, track => track.isLiked);
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
-        this.bannedTrackIds = res.assert(e => this.errors = [e]).map(r => r);
+        res.assert(e => this.errors = [e]).map(r => this.bannedTrackIds = r);
     }
 
     playlistsAddRange(value: PlaylistsViewModelItem[]) {
@@ -201,30 +188,23 @@ class PlaylistsViewModel {
             return;
         }
         const meResult = await this.ss.profile();
-        if (assertNoErrors(meResult, e => this.errors = e)) {
-            return;
-        }
-        const me = meResult.val as IUserInfo;
-        const spotifyResult = await this.ss.createNewPlaylist(
+        const spotifyResult = await meResult.map(me => this.ss.createNewPlaylist(
             me.id,
             this.newPlaylistName,
             '',
             isPublic
-        );
-        if (assertNoErrors(spotifyResult, e => this.errors = e)) {
-            return;
-        }
-        this.fetchData();
+        ));
+        await spotifyResult.assert(e => this.errors = [e]).map(() => this.fetchData());
     }
 
     async likeTrack(track: TrackViewModelItem) {
         await track.likeTrack();
-        this.checkTracks([track]);
+        await this.checkTracks([track]);
     }
 
     async unlikeTrack(track: TrackViewModelItem) {
         await track.unlikeTrack();
-        this.checkTracks([track]);
+        await this.checkTracks([track]);
     }
 
     async findTrackLyrics(track: TrackViewModelItem) {
@@ -263,9 +243,7 @@ class PlaylistsViewModel {
         } else if (oldPosition > newPosition) {
             res = await this.ss.reorderTrack(this.currentPlaylistId, oldPosition, newPosition);
         }
-        if (assertNoErrors(res, e => this.errors = e)) {
-            return;
-        }
+        res.assert(e => this.errors = e);
     }
 
     @isLoading
@@ -273,7 +251,7 @@ class PlaylistsViewModel {
         await track.bannTrack();
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
 
-        this.bannedTrackIds = res.assert(e => this.errors = [e]).map(r => r);
+        res.assert(e => this.errors = [e]).map(r => this.bannedTrackIds = r);
     }
 
     @isLoading
@@ -281,7 +259,7 @@ class PlaylistsViewModel {
         await track.removeBannFromTrack();
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
 
-        this.bannedTrackIds = res.assert(e => this.errors = [e]).map(r => r);
+        res.assert(e => this.errors = [e]).map(r => this.bannedTrackIds = r);
     }
 }
 

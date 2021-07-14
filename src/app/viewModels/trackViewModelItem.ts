@@ -43,12 +43,13 @@ class TrackViewModelItem {
     removeFromPlaylistCommand$: BehaviorSubject<TrackViewModelItem['removeFromPlaylistCommand']>;
     @State removeFromPlaylistCommand = { exec: (track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist) };
 
-    isInit = _.delay(() => {
-        this.connect();
+    isInit = new Promise<boolean>(resolve => _.delay(async () => {
+        await this.connect();
         this.trackPlaylists$.subscribe((val) => {
             this.updateIsCached(val);
-        })
-    });
+        });
+        resolve(true);
+    }));
 
     constructor(
         public song: ISpotifySong,
@@ -93,7 +94,7 @@ class TrackViewModelItem {
         this.trackPlaylists = await spotifyResult.assert(e => this.errors = [e])
             .map(() => this.listPlaylists());
         const res = await this.ss.isBannedTrack(this.song.track.id);
-        this.isBanned = res.assert(e => this.errors = [e]).map(r => r);
+        res.assert(e => this.errors = [e]).map(r => this.isBanned = r);
     }
 
     async listPlaylists() {

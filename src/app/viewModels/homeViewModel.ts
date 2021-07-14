@@ -56,13 +56,15 @@ class HomeViewModel {
     removeBannFromTrackCommand$: BehaviorSubject<HomeViewModel['removeBannFromTrackCommand']>;
     @State removeBannFromTrackCommand = { exec: (track: TrackViewModelItem) => this.removeBannFromTrack(track) };
 
-    isInit = _.delay(() => {
-        this.connect();
-        this.fetchData();
+    isInit = new Promise<boolean>(resolve => _.delay(async () => {
+        await this.connect();
+        await this.fetchData();
         this.selectedPlaylist$.subscribe(() => {
             this.fetchData();
         });
-    }, 100);
+
+        resolve(true);
+    }, 100));
 
     constructor(private ss = current(Service)) {
         this.ss.spotifyPlayer();
@@ -85,7 +87,7 @@ class HomeViewModel {
         if (!trackIds.length) {
             const tracksResult = this.selectedPlaylist ? await this.ss.fetchPlaylistTracks(this.selectedPlaylist.id(), 0, 20)
             : await this.ss.fetchTracks(0, 20);
-        
+
             if (assertNoErrors(tracksResult, e => this.errors = e)) {
                 return;
             }
@@ -120,19 +122,18 @@ class HomeViewModel {
 
     async checkTracks(tracks: TrackViewModelItem[]) {
         if (!tracks.length) {
+
             return;
         }
         const tracksToCheck = tracks;
         const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
-        if (assertNoErrors(likedResult, e => this.errors = e)) {
-            return;
-        }
-        _.each(likedResult.val as boolean[], (liked, index) => {
+        likedResult.assert(e => this.errors = [e]).map(liked => _.each(liked, (liked, index) => {
             tracksToCheck[index].isLiked = liked;
             this.likedTracks = _.filter(this.tracks, track => track.isLiked);
-        });
+        }));
+
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
-        this.bannedTrackIds = res.assert(e => this.errors = [e]).map(r => r);
+        res.assert(e => this.errors = [e]).map(r => this.bannedTrackIds = r);
     }
 
     loadMore() {
@@ -144,8 +145,9 @@ class HomeViewModel {
     }
 
     async resume() {
-        const playerResult= await this.ss.spotifyPlayer();
-        playerResult.val.resume();
+        const playerResult = await this.ss.spotifyPlayer();
+        playerResult.assert(e => this.errors = [e])
+            .map(player => player.resume());
     }
 
     async likeTrack(track: TrackViewModelItem) {
@@ -191,14 +193,14 @@ class HomeViewModel {
         await track.bannTrack();
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
 
-        this.bannedTrackIds = res.assert(e => this.errors = [e]).map(r => r);
+        res.assert(e => this.errors = [e]).map(r => this.bannedTrackIds = r);
     }
 
     async removeBannFromTrack(track: TrackViewModelItem) {
         await track.removeBannFromTrack();
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
 
-        this.bannedTrackIds = res.assert(e => this.errors = [e]).map(r => r);
+        res.assert(e => this.errors = [e]).map(r => this.bannedTrackIds = r);
     }
 }
 

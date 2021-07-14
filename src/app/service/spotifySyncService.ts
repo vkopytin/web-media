@@ -33,7 +33,7 @@ class SpotifySyncService extends withEvents(BaseService) {
         try {
             await this.syncMyTracks();
             const playlists = await this.syncMyPlaylists();
-            for (const playlist of playlists) {
+            for (const playlist of playlists.val) {
                 await this.syncTracksByPlaylist(playlist);
             }
             this.cleanUpData();
@@ -45,6 +45,7 @@ class SpotifySyncService extends withEvents(BaseService) {
     }
 
     async syncMyPlaylists() {
+        try {
         let res = [] as IUserPlaylist[];
         for await (const playlists of this.listMyPlaylists()) {
             for (const playlist of playlists) {
@@ -52,7 +53,10 @@ class SpotifySyncService extends withEvents(BaseService) {
             }
             res = [...res, ...playlists];
         }
-        return res;
+            return SpotifySyncServiceResult.success(res);
+        } catch (ex) {
+            return SpotifySyncServiceResult.error<IUserPlaylist[]>(ex);
+        }
     }
 
     async syncTracksByPlaylist(playlist: IUserPlaylist) {

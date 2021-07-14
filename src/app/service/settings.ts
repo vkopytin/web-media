@@ -34,7 +34,7 @@ const getCookie = key => {
 }
 
 class SettingsService extends BaseService {
-    static async create(connection: Service) {
+    static create(connection: Service) {
         try {
             let sToken = getCookie('spat');
             let gToken = getCookie('gsat');

@@ -47,10 +47,14 @@ class NewReleasesViewModel {
     unlikeAlbumCommand$: BehaviorSubject<NewReleasesViewModel['unlikeAlbumCommand']>;
     @State unlikeAlbumCommand = { exec: (album: AlbumViewModelItem) => this.unlikeAlbum(album) };
 
-    isInit = _.delay(() => this.fetchData(), 100);
+    isInit = new Promise(resume => _.delay(async () => {
+        await this.connect();
+        await this.fetchData();
+        resume(true);
+    }));
 
     constructor(private ss = current(Service)) {
-        _.delay(() => this.connect());
+
     }
 
     async connect() {

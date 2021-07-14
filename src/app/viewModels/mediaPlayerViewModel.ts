@@ -85,12 +85,14 @@ class MediaPlayerViewModel {
     autoSeek = _.debounce(this.autoSeekInternal, 500);
     fetchData = _.debounce(this.fetchDataInternal, 500);
 
-    isInit = _.delay(() => this.fetchData(), 100);
+    isInit = new Promise<boolean>(resolve => _.delay(async () => {
+        await this.connect();
+        await this.fetchData();
+        resolve(true);
+    }));
 
     constructor(private ss = current(Service)) {
-        _.delay(() => {
-            this.connect();
-        });
+
     }
 
     async connect() {
@@ -134,49 +136,49 @@ class MediaPlayerViewModel {
         this.thumbnailUrl = _.last(state.track_window.current_track.album.images).url;
         this.autoSeek();
         this.checkTrackExists();
+
         const playerResult = await this.ss.spotifyPlayer();
-        if (assertNoErrors(playerResult, e => this.errors = e)) {
-            return;
-        }
-        const settingsResult = await this.ss.settings('spotify');
-        if (settingsResult.isError) {
-            const volume = await playerResult.val.getVolume();
-            return this.volume = volume;
-        }
-        playerResult.val.setVolume(settingsResult.val.volume);
-        this.volume = settingsResult.val.volume;
+        await playerResult.assert(e => this.errors = [e]).map(async player => {
+            const settingsResult = await this.ss.settings('spotify');
+            await settingsResult.assert(async () => {
+                const volume = await player.getVolume();
+                return this.volume = volume;
+            }).map(settings => {
+                player.setVolume(settings.volume);
+                this.volume = settings.volume;
+            });
+        });
     }
 
     async fetchDataInternal() {
         const res = await this.ss.player();
-        const currentlyPlaying = res.assert(e => this.errors = [e])
-            .map(r => r);
-
-        this.lastTime = +new Date();
-        if (currentlyPlaying && currentlyPlaying.item) {
-            const [artist] = currentlyPlaying.item.artists;
-            this.currentTrack = currentlyPlaying.item;
-            this.currentTrackUri = currentlyPlaying.item.uri;
-            this.currentTrackId = currentlyPlaying.item.id;
-            this.volume = currentlyPlaying.device.volume_percent;
-            this.duration = currentlyPlaying.item.duration_ms;
-            this.timePlayed = currentlyPlaying.progress_ms;
-            this.isPlaying = currentlyPlaying.is_playing;
-            this.trackName = currentlyPlaying.item.name;
-            this.albumName = currentlyPlaying.item.album.name;
-            this.artistName = artist.name;
-            this.thumbnailUrl = _.last(currentlyPlaying.item.album.images).url;
-            this.autoSeek();
-            this.checkTrackExists();
-        } else {
-            this.isPlaying = currentlyPlaying?.is_playing || false;
-        }
+        res.assert(e => this.errors = [e]).map(currentlyPlaying => {
+            this.lastTime = +new Date();
+            if (currentlyPlaying && currentlyPlaying.item) {
+                const [artist] = currentlyPlaying.item.artists;
+                this.currentTrack = currentlyPlaying.item;
+                this.currentTrackUri = currentlyPlaying.item.uri;
+                this.currentTrackId = currentlyPlaying.item.id;
+                this.volume = currentlyPlaying.device.volume_percent;
+                this.duration = currentlyPlaying.item.duration_ms;
+                this.timePlayed = currentlyPlaying.progress_ms;
+                this.isPlaying = currentlyPlaying.is_playing;
+                this.trackName = currentlyPlaying.item.name;
+                this.albumName = currentlyPlaying.item.album.name;
+                this.artistName = artist.name;
+                this.thumbnailUrl = _.last(currentlyPlaying.item.album.images).url;
+                this.autoSeek();
+                this.checkTrackExists();
+            } else {
+                this.isPlaying = currentlyPlaying?.is_playing || false;
+            }
+        });
     }
 
     async checkTrackExists() {
         const trackExistsResult = await this.ss.hasTracks(this.currentTrackId);
-        this.isLiked = trackExistsResult.assert(e => this.errors = [e])
-            .map(r => _.first(r));
+        trackExistsResult.assert(e => this.errors = [e])
+            .map(r => this.isLiked = _.first(r));
     }
 
     async monitorPlybackInternal() {
@@ -219,25 +221,23 @@ class MediaPlayerViewModel {
     async setVolume(percent: number) {
         lockSection.push(async next => {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors = e)) {
-                return next();
-            }
-            if (_.isEmpty(stateResult.val)) {
-                this.volume = percent;
-                await this.ss.volume(percent);
-            } else {
-                const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors = e)) {
-                    return next();
+            const res = await stateResult.assert(e => this.errors = [e]).map(async state => {
+                if (_.isEmpty(state)) {
+                    this.volume = percent;
+                    await this.ss.volume(percent);
+                } else {
+                    const playerResult = await this.ss.spotifyPlayer();
+                    await playerResult.assert(e => this.errors = [e]).map(async player => {
+                        this.volume = percent;
+                        await player.setVolume(percent);
+                    });
                 }
-                this.volume = percent;
-                await playerResult.val.setVolume(percent);
-            }
-            const settingsResult = await this.ss.service(SettingsService);
-            if (assertNoErrors(settingsResult, e => this.errors = e)) {
-                return next();
-            }
-            this.volume = settingsResult.val.volume(percent);
+
+                return await this.ss.service(SettingsService);
+            });
+            res.assert(e => this.errors = [e]).map(settings => {
+                settings.volume(this.volume = percent);
+            });
 
             next();
         });
@@ -375,7 +375,7 @@ class MediaPlayerViewModel {
     async likeTrack() {
         lockSection.push(async (next) => {
             const stateResult = await this.ss.addTracks(this.currentTrack);
-            assertNoErrors(stateResult, e => this.errors = e);
+            stateResult.assert(e => this.errors = [e]);
 
             next();
         });
@@ -384,7 +384,7 @@ class MediaPlayerViewModel {
     async unlikeTrack() {
         lockSection.push(async (next) => {
             const stateResult = await this.ss.removeTracks(this.currentTrack);
-            assertNoErrors(stateResult, e => this.errors = e);
+            stateResult.assert(e => this.errors = [e]);
 
             next();
         });
@@ -395,8 +395,8 @@ class MediaPlayerViewModel {
     }
 
     async resume() {
-        const playerResult= await this.ss.spotifyPlayer();
-        playerResult.val.resume();
+        const playerResult = await this.ss.spotifyPlayer();
+        playerResult.assert(e => this.errors = [e]).map(player => player.resume());
     }
 }
 
