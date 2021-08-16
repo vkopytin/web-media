@@ -263,8 +263,20 @@ export function Binding({ didSet }: { didSet?: (view, val) => void } = {}) {
                 configurable: true
             });
 
-            didSet && store$.pipe(distinctUntilChanged()).subscribe(val => {
-                setTimeout(() => didSet(this, val));
+            let cnt = 0;
+            didSet && store$.pipe(distinctUntilChanged((a, b) => _.isEqual(a, b))).subscribe(val => {
+                try {
+                    if (cnt !== 0) {
+                        console.log(new Error('Recursive call has detected. Stopping...'));
+                        return;
+                    }
+                    cnt++;
+                    didSet(this, val);
+                    cnt--;
+                } catch (ex) {
+                    cnt--;
+                    throw ex;
+                }
             });
 
             return store$;

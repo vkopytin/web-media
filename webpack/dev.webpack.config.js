@@ -32,7 +32,7 @@ const newConfig = {
     ]
   },
   optimization: {
-    noEmitOnErrors: true,
+    //noEmitOnErrors: true,
     namedModules: true,
   },
   plugins: [

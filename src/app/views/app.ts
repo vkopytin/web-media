@@ -61,7 +61,7 @@ class AppView extends React.Component<IAppViewProps> {
 
     refreshTokenCommand$ = this.vm.refreshTokenCommand$;
     @Binding({ didSet: (view) => view.didRefresh() })
-    refreshTokenCommand: AppView['vm']['refreshDevicesCommand'];
+    refreshTokenCommand: AppView['vm']['refreshTokenCommand'];
 
     autoRefreshUrl$ = this.vm.autoRefreshUrl$;
     @Binding({ didSet: (view) => view.didRefresh() })
@@ -166,13 +166,13 @@ class AppView extends React.Component<IAppViewProps> {
         if (!_.isEmpty(tokenExpired)) {
             this.errors = _.filter(errors, err => !err.is(TokenExpiredError));
             this.openLogin = true;
-            this.refreshTokenCommand.exec();
+            setTimeout(() => this.refreshTokenCommand.exec());
             return;
         }
 
         if (!_.isEmpty(activeDevice)) {
             this.errors = _.filter(errors, err => !err.is(NoActiveDeviceError));
-            this.toggleSelectDevices('hide');
+            setTimeout(() => this.toggleSelectDevices('hide'));
             return;
         }
         this.errors = errors;

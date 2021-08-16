@@ -71,8 +71,7 @@ module.exports = {
             signal: false
         }),
         new webpack.NamedModulesPlugin(),
-        new webpack.HotModuleReplacementPlugin(),
-        new webpack.NoEmitOnErrorsPlugin()
+        new webpack.HotModuleReplacementPlugin()
     ],
     node: {
         __dirname: false

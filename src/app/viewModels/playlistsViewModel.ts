@@ -104,7 +104,7 @@ class PlaylistsViewModel {
 
     async fetchData() {
         const result = await this.ss.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
-        result.assert(e => this.errors = [e]).map(({ items: playlists }) => {
+        result.assert(e => this.errors = [e]).cata(({ items: playlists }) => {
             this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
             this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
             this.playlists = _.map(_.first(playlists, this.settings.playlist.limit), item => new PlaylistsViewModelItem(item));
@@ -114,7 +114,7 @@ class PlaylistsViewModel {
     @isLoading
     async loadMore() {
         const result = await this.ss.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
-        result.assert(e => this.errors = [e]).map(({ items: playlists }) => {
+        result.assert(e => this.errors = [e]).cata(({ items: playlists }) => {
             this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
             this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
             this.playlists = [...this.playlists, ..._.map(_.first(playlists, this.settings.playlist.limit), item => new PlaylistsViewModelItem(item))];
@@ -129,7 +129,7 @@ class PlaylistsViewModel {
         if (currentPlaylistId) {
             this.loadTracks('playlistTracks');
             const result = await this.ss.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
-            result.assert(e => this.errors = [e]).map(({ items: tracks }) => {
+            result.assert(e => this.errors = [e]).cata(({ items: tracks }) => {
                 this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
                 this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);
                 this.tracks = _.map(_.first(tracks, this.settings.track.limit), (item, index) => new TrackViewModelItem(item, index));
@@ -142,7 +142,7 @@ class PlaylistsViewModel {
         const currentPlaylistId = this.currentPlaylistId;
         if (currentPlaylistId) {
             const result = await this.ss.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
-            result.assert(e => this.errors = [e]).map(({ items: tracks }) => {
+            result.assert(e => this.errors = [e]).cata(({ items: tracks }) => {
                 this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
                 this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);
                 const moreTracks = _.map(_.first(tracks, this.settings.track.limit), (item, index) => new TrackViewModelItem(item, index));
@@ -168,14 +168,14 @@ class PlaylistsViewModel {
             return;
         }
         const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
-        likedResult.assert(e => this.errors = [e]).map(likedList => {
+        likedResult.assert(e => this.errors = [e]).cata(likedList => {
             _.each(likedList, (liked, index) => {
                 tracksToCheck[index].isLiked = liked;
             });
             this.likedTracks = _.filter(this.tracks, track => track.isLiked);
         });
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
-        res.assert(e => this.errors = [e]).map(r => this.bannedTrackIds = r);
+        res.assert(e => this.errors = [e]).cata(r => this.bannedTrackIds = r);
     }
 
     playlistsAddRange(value: PlaylistsViewModelItem[]) {
@@ -188,13 +188,13 @@ class PlaylistsViewModel {
             return;
         }
         const meResult = await this.ss.profile();
-        const spotifyResult = await meResult.map(me => this.ss.createNewPlaylist(
+        const spotifyResult = await meResult.cata(me => this.ss.createNewPlaylist(
             me.id,
             this.newPlaylistName,
             '',
             isPublic
         ));
-        await spotifyResult.assert(e => this.errors = [e]).map(() => this.fetchData());
+        await spotifyResult.assert(e => this.errors = [e]).cata(() => this.fetchData());
     }
 
     async likeTrack(track: TrackViewModelItem) {
@@ -251,7 +251,7 @@ class PlaylistsViewModel {
         await track.bannTrack();
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
 
-        res.assert(e => this.errors = [e]).map(r => this.bannedTrackIds = r);
+        res.assert(e => this.errors = [e]).cata(r => this.bannedTrackIds = r);
     }
 
     @isLoading
@@ -259,7 +259,7 @@ class PlaylistsViewModel {
         await track.removeBannFromTrack();
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
 
-        res.assert(e => this.errors = [e]).map(r => this.bannedTrackIds = r);
+        res.assert(e => this.errors = [e]).cata(r => this.bannedTrackIds = r);
     }
 }
 

@@ -9,7 +9,7 @@ const cn = utils.className;
 export const template = (view: MyTracksView) => <>
     <ul className="todo-list table-view">
         {_.map(view.tracks, (item: MyTracksView['tracks'][0], index) => {
-            return <li key={item.id()}>
+            return <li key={`${index}-${item.id()}`}>
                 <div className="table-view-cell media">
                     <div className="info-list">
                         {item.isCached && <span className="info-item material-icons">delete</span>}

@@ -49,7 +49,7 @@ class MyTracksViewModel {
 
     async connect() {
         const spotifyResult = await this.ss.service(SpotifyService);
-        spotifyResult.assert(e => this.errors = [e]).map(spotify => {
+        spotifyResult.assert(e => this.errors = [e]).cata(spotify => {
             spotify.on('change:state', (...args) => this.loadData(...args));
         });
     }

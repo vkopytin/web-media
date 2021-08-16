@@ -34,6 +34,10 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
     @Binding({ didSet: (view) => view.didRefresh() })
     openLogin: boolean;
 
+    isLoggedin$ = this.vm.isLoggedin$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    isLoggedin: UserProfileView['vm']['isLoggedin'];
+
     profile$ = this.vm.profile$;
     @Binding({ didSet: (view) => view.didRefresh() })
     profile: UserProfileView['vm']['profile'];
@@ -61,6 +65,12 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
     apiseedsKey$ = this.vm.apiseedsKey$;
     @Binding({ didSet: (view) => view.didRefresh() })
     apiseedsKey: UserProfileView['vm']['apiseedsKey'];
+
+    logoutCommand$ = this.vm.logoutCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    logoutCommand: UserProfileView['vm']['logoutCommand'];
+
+    doLogout = false;
   
     componentDidMount() {
         this.didRefresh = this.refresh;

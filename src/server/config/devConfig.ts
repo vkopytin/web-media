@@ -62,6 +62,7 @@ const devConfig = (app: express.Application) => {
         app.use(morgan('development'));  // log every request to the console
         app.use('/static', express.static(path.join(process.cwd(), 'bundle')));
     }
+    app.use('/icons', express.static(path.join(process.cwd(), 'src/images')));
 
     app.use('/bower_components', express.static(path.join(process.cwd(), 'bower_components'))); // set the static files location of bower_components
     app.use(morgan('development'));  // log every request to the console

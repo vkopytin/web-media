@@ -4,6 +4,7 @@ const childProcess = require('child_process')
 const path = require('path')
 const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const WorkboxPlugin = require('workbox-webpack-plugin')
 
 module.exports = (options, workingDir) => {
   const CDN_PATH = options.CDN || '/';
@@ -65,6 +66,13 @@ module.exports = (options, workingDir) => {
       //   template: 'index.html'
       // }),
       // new HtmlWebpackHarddiskPlugin(),
+      new WorkboxPlugin.GenerateSW({
+        // these options encourage the ServiceWorkers to get in there fast
+        // and not allow any straggling "old" SWs to hang around
+        clientsClaim: true,
+        skipWaiting: true,
+        //swSrc: '/spotify/service-worker.js'
+      }),
       new (function VersionInfo() {
         this.apply = function (compiler) {
           compiler.hooks.emit.tapAsync('VersionInfo', function (compilation, callback) {

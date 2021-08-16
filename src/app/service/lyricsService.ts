@@ -23,7 +23,7 @@ class LyricsService extends withEvents(BaseService) {
     static async create(connection: Service) {
         const settingsResult = await connection.settings('apiseeds');
 
-        return settingsResult.map(({ key: accessToken }) => {
+        return settingsResult.cata(({ key: accessToken }) => {
             const adapter = new LyricsAdapter(accessToken);
     
             return LyricsServiceResult.success(new LyricsService(adapter));

@@ -32,15 +32,17 @@ class SpotifySyncService extends withEvents(BaseService) {
     async syncData() {
         try {
             await this.syncMyTracks();
-            const playlists = await this.syncMyPlaylists();
-            for (const playlist of playlists.val) {
-                await this.syncTracksByPlaylist(playlist);
-            }
-            this.cleanUpData();
+            const playlistsResult = await this.syncMyPlaylists();
+            return playlistsResult.cata(async playlists => {
+                for (const playlist of playlists) {
+                    await this.syncTracksByPlaylist(playlist);
+                }
+                this.cleanUpData();
 
-            return SpotifySyncServiceResult.success(true);
+                return SpotifySyncServiceResult.success(true);
+            });
         } catch (ex) {
-            return SpotifySyncServiceResult.error(ex);
+            return SpotifySyncServiceResult.error<boolean>(ex);
         }
     }
 

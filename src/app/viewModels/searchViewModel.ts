@@ -162,24 +162,24 @@ class SearchViewModel {
         this.currentTracks = [];
 
         if (this.searchType === 'album' && this.currentAlbum) {
-            const albumTrackssResult = await spotifyResult.map(s => s.listAlbumTracks(this.currentAlbum.id()));
+            const albumTrackssResult = await spotifyResult.cata(s => s.listAlbumTracks(this.currentAlbum.id()));
 
             return albumTrackssResult.assert(e => this.errors = [e])
-                .map(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem({ track: item } as any, index)));
+                .cata(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem({ track: item } as any, index)));
         }
 
         if (this.searchType === 'playlist' && this.currentPlaylist) {
-            const playlistTracksResult = await spotifyResult.map(s => s.fetchPlaylistTracks(this.currentPlaylist.id()));
+            const playlistTracksResult = await spotifyResult.cata(s => s.fetchPlaylistTracks(this.currentPlaylist.id()));
 
             return playlistTracksResult.assert(e => this.errors = [e])
-                .map(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem(item, index)));
+                .cata(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem(item, index)));
         }
 
         if (this.searchType === 'artist' && this.currentArtist) {
-            const artistTracksResult = await spotifyResult.map(s => s.fetchArtistTopTracks(this.currentArtist.id(), 'US'));
+            const artistTracksResult = await spotifyResult.cata(s => s.fetchArtistTopTracks(this.currentArtist.id(), 'US'));
 
             return artistTracksResult.assert(e => this.errors = [e])
-                .map(tr => this.currentTracks = _.map(tr.tracks, (item, index) => new TrackViewModelItem({ track: item } as any, index)));
+                .cata(tr => this.currentTracks = _.map(tr.tracks, (item, index) => new TrackViewModelItem({ track: item } as any, index)));
         }
 
     }

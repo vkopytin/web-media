@@ -127,13 +127,13 @@ class HomeViewModel {
         }
         const tracksToCheck = tracks;
         const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
-        likedResult.assert(e => this.errors = [e]).map(liked => _.each(liked, (liked, index) => {
+        likedResult.assert(e => this.errors = [e]).cata(liked => _.each(liked, (liked, index) => {
             tracksToCheck[index].isLiked = liked;
             this.likedTracks = _.filter(this.tracks, track => track.isLiked);
         }));
 
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
-        res.assert(e => this.errors = [e]).map(r => this.bannedTrackIds = r);
+        res.assert(e => this.errors = [e]).cata(r => this.bannedTrackIds = r);
     }
 
     loadMore() {
@@ -147,19 +147,19 @@ class HomeViewModel {
     async resume() {
         const playerResult = await this.ss.spotifyPlayer();
         playerResult.assert(e => this.errors = [e])
-            .map(player => player.resume());
+            .cata(player => player.resume());
     }
 
     async likeTrack(track: TrackViewModelItem) {
         const res = await track.likeTrack();
-        res.assert(e => this.errors = [e]).map(() => {
+        res.assert(e => this.errors = [e]).cata(() => {
             this.checkTracks([track]);
         });
     }
 
     async unlikeTrack(track: TrackViewModelItem) {
         const res = await track.unlikeTrack();
-        res.assert(e => this.errors = [e]).map(() => {
+        res.assert(e => this.errors = [e]).cata(() => {
             this.checkTracks([track]);
         });
     }
@@ -181,7 +181,7 @@ class HomeViewModel {
             };
             
             return this.errors = [e];
-        }).map(() => {
+        }).cata(() => {
             this.trackLyrics = {
                 trackId: track.id(),
                 lyrics: '' + lyricsResult.val
@@ -193,14 +193,14 @@ class HomeViewModel {
         await track.bannTrack();
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
 
-        res.assert(e => this.errors = [e]).map(r => this.bannedTrackIds = r);
+        res.assert(e => this.errors = [e]).cata(r => this.bannedTrackIds = r);
     }
 
     async removeBannFromTrack(track: TrackViewModelItem) {
         await track.removeBannFromTrack();
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
 
-        res.assert(e => this.errors = [e]).map(r => this.bannedTrackIds = r);
+        res.assert(e => this.errors = [e]).cata(r => this.bannedTrackIds = r);
     }
 }
 

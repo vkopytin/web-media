@@ -1,7 +1,18 @@
 import * as _ from 'underscore';
 import { IUserPlaylist } from '../adapter/spotify';
-import sanitizeHtml = require('sanitize-html');
 
+
+function unsafeHtml(html) {
+    const el = document.createElement('div');
+    el.innerHTML = html;
+
+    const els = el.getElementsByTagName('script');
+    for(let el of [].slice.call(els, 0)) {
+        el.parentElement?.removeChild(el);
+    }
+
+    return el.innerHTML;
+}
 
 class PlaylistsViewModelItem {
     constructor(public playlist: IUserPlaylist) {
@@ -32,7 +43,7 @@ class PlaylistsViewModelItem {
     }
 
     description() {
-        return sanitizeHtml(this.playlist.description || '');
+        return unsafeHtml(this.playlist.description || '');
     }
 
     thumbnailUrl() {

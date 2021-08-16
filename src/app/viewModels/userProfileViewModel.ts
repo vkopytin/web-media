@@ -11,7 +11,10 @@ import { TrackViewModelItem } from './trackViewModelItem';
 class UserProfileViewModel {
     errors$: BehaviorSubject<UserProfileViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
-    
+
+    isLoggedin$: BehaviorSubject<boolean>;
+    @State isLoggedin = false;
+
     profile$: BehaviorSubject<UserProfileViewModel['profile']>;
     @State profile: IUserInfo = {};
 
@@ -32,6 +35,9 @@ class UserProfileViewModel {
 
     apiseedsKey$: BehaviorSubject<UserProfileViewModel['apiseedsKey']>;
     @State apiseedsKey = '';
+
+    logoutCommand$: BehaviorSubject<UserProfileViewModel['logoutCommand']>;
+    @State logoutCommand = { exec: () => this.logout() };
 
     settings = {
         currentTrackId: '',
@@ -54,34 +60,46 @@ class UserProfileViewModel {
 
     async fetchData() {
         const settingsResult = await this.ss.service(SettingsService);
-        settingsResult.assert(e => this.errors = [e]).map(() => {
+        settingsResult.assert(e => this.errors = [e]).cata(() => {
             this.apiseedsKey = settingsResult.val.apiseedsKey();
         });
         const spotifyTokenUrlResult = await this.ss.getSpotifyAuthUrl();
-        spotifyTokenUrlResult.assert(e => this.errors = [e]).map(spotifyAuthUrl => {
+        spotifyTokenUrlResult.assert(e => this.errors = [e]).cata(spotifyAuthUrl => {
             this.spotifyAuthUrl = spotifyAuthUrl;
         });
 
+        const isLoggedinResult = await this.ss.isLoggedIn();
+        isLoggedinResult.assert(e => this.errors = [e]).cata(isLoggedIn => {
+            this.isLoggedin = isLoggedIn;
+        });
+
         const geniusTokenUrlResult = await this.ss.getGeniusAuthUrl();
-        geniusTokenUrlResult.assert(e => this.errors = [e]).map(geniusAuthUrl => {
+        geniusTokenUrlResult.assert(e => this.errors = [e]).cata(geniusAuthUrl => {
             this.geniusAuthUrl = geniusAuthUrl;
         });
 
         const userInfoResult = await this.ss.profile();
-        userInfoResult.assert(e => this.errors = [e]).map(userInfo => {
+        userInfoResult.assert(e => this.errors = [e]).cata(userInfo => {
             this.profile = userInfo;
         });
 
         const topTracksResult = await this.ss.listTopTracks();
-        topTracksResult.assert(e => this.errors = [e]).map(topTracks => {
+        topTracksResult.assert(e => this.errors = [e]).cata(topTracks => {
             this.topTracks = _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index));
         });
     }
 
     async saveApiseedsKey(val: string) {
         const settingsResult = await this.ss.service(SettingsService);
-        settingsResult.assert(e => this.errors = [e]).map(settings => {
+        settingsResult.assert(e => this.errors = [e]).cata(settings => {
             settingsResult.val.apiseedsKey(val);
+        });
+    }
+
+    async logout() {
+        const res = await this.ss.logout();
+        res.assert(e => this.errors = []).cata(() => {
+            this.isLoggedin = false;
         });
     }
 }

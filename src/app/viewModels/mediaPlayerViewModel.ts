@@ -97,13 +97,13 @@ class MediaPlayerViewModel {
 
     async connect() {
         const playerResult = await this.ss.spotifyPlayer();
-        const spotifyResult = await playerResult.map((player) => {
+        const spotifyResult = await playerResult.cata((player) => {
             player.on('playerStateChanged', (en, state) => this.updateFromPlayerState(state));
             return this.ss.service(SpotifyService);
         });
 
         spotifyResult.assert(e => this.errors = [e])
-            .map(spotify => {
+            .cata(spotify => {
                 spotify.on('change:state', state => this.updateState(state));
                 this.updateState();
             });
@@ -112,7 +112,7 @@ class MediaPlayerViewModel {
     async currentPlayerState() {
         const stateResult = await this.ss.spotifyPlayerState();
 
-        return stateResult.assert(e => this.errors = [e]).map(r => r);
+        return stateResult.assert(e => this.errors = [e]).cata(r => r);
     }
 
     updateState(res?) {
@@ -138,12 +138,12 @@ class MediaPlayerViewModel {
         this.checkTrackExists();
 
         const playerResult = await this.ss.spotifyPlayer();
-        await playerResult.assert(e => this.errors = [e]).map(async player => {
+        await playerResult.assert(e => this.errors = [e]).cata(async player => {
             const settingsResult = await this.ss.settings('spotify');
             await settingsResult.assert(async () => {
                 const volume = await player.getVolume();
                 return this.volume = volume;
-            }).map(settings => {
+            }).cata(settings => {
                 player.setVolume(settings.volume);
                 this.volume = settings.volume;
             });
@@ -152,7 +152,7 @@ class MediaPlayerViewModel {
 
     async fetchDataInternal() {
         const res = await this.ss.player();
-        res.assert(e => this.errors = [e]).map(currentlyPlaying => {
+        res.assert(e => this.errors = [e]).cata(currentlyPlaying => {
             this.lastTime = +new Date();
             if (currentlyPlaying && currentlyPlaying.item) {
                 const [artist] = currentlyPlaying.item.artists;
@@ -178,7 +178,7 @@ class MediaPlayerViewModel {
     async checkTrackExists() {
         const trackExistsResult = await this.ss.hasTracks(this.currentTrackId);
         trackExistsResult.assert(e => this.errors = [e])
-            .map(r => this.isLiked = _.first(r));
+            .cata(r => this.isLiked = _.first(r));
     }
 
     async monitorPlybackInternal() {
@@ -221,13 +221,13 @@ class MediaPlayerViewModel {
     async setVolume(percent: number) {
         lockSection.push(async next => {
             const stateResult = await this.ss.spotifyPlayerState();
-            const res = await stateResult.assert(e => this.errors = [e]).map(async state => {
+            const res = await stateResult.assert(e => this.errors = [e]).cata(async state => {
                 if (_.isEmpty(state)) {
                     this.volume = percent;
                     await this.ss.volume(percent);
                 } else {
                     const playerResult = await this.ss.spotifyPlayer();
-                    await playerResult.assert(e => this.errors = [e]).map(async player => {
+                    await playerResult.assert(e => this.errors = [e]).cata(async player => {
                         this.volume = percent;
                         await player.setVolume(percent);
                     });
@@ -235,7 +235,7 @@ class MediaPlayerViewModel {
 
                 return await this.ss.service(SettingsService);
             });
-            res.assert(e => this.errors = [e]).map(settings => {
+            res.assert(e => this.errors = [e]).cata(settings => {
                 settings.volume(this.volume = percent);
             });
 
@@ -246,22 +246,18 @@ class MediaPlayerViewModel {
     async play() {
         lockSection.push(async next => {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors = e)) {
-                return next();
-            }
-            if (_.isEmpty(stateResult.val)) {
-                const playResult = await this.ss.play();
-                if (assertNoErrors(playResult, e => this.errors = e)) {
-                    return next();
+            const res = await stateResult.cata(async state => {
+                if (_.isEmpty(state)) {
+                    return await this.ss.play();
+                } else {
+                    const playerResult = await this.ss.spotifyPlayer();
+                    await playerResult.val.resume();
+                    return playerResult;
                 }
-            } else {
-                const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors = e)) {
-                    return next();
-                }
-                await playerResult.val.resume();
-            }
-            this.isPlaying = true;
+            });
+            res.assert(e => this.errors = [e]).cata(() => {
+                this.isPlaying = true;
+            });
 
             next();
         });
@@ -396,7 +392,7 @@ class MediaPlayerViewModel {
 
     async resume() {
         const playerResult = await this.ss.spotifyPlayer();
-        playerResult.assert(e => this.errors = [e]).map(player => player.resume());
+        playerResult.assert(e => this.errors = [e]).cata(player => player.resume());
     }
 }
 

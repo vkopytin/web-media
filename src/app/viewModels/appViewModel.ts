@@ -84,7 +84,7 @@ class AppViewModel {
     async startSync() {
         this.isSyncing = 1;
         const syncServiceResult = await this.ss.service(SpotifySyncService);
-        const res = await syncServiceResult.map(syncService => syncService.syncData());
+        const res = await syncServiceResult.cata(syncService => syncService.syncData());
         res.assert(e => this.errors = [e]);
 
         this.isSyncing = 0;
@@ -95,17 +95,17 @@ class AppViewModel {
 
         console.log('updating token');
         tokenUrlResult.assert(e => this.errors = [e])
-            .map(spotifyAuthUrl => this.autoRefreshUrl = spotifyAuthUrl + '23');
+            .cata(spotifyAuthUrl => this.autoRefreshUrl = spotifyAuthUrl + '23');
     }
 
     async connect() {
         const isLoggedInResult = await this.ss.isLoggedIn();
         this.openLogin = isLoggedInResult.assert(e => this.errors = [e])
-            .map(r => !r);
+            .cata(r => !r);
 
         const playerResult = await this.ss.spotifyPlayer();
         playerResult.assert(e => this.errors = [e])
-            .map((player) => {
+            .cata((player) => {
                 const updateDevicesHandler = async (eventName: string, device: { device_id: string; }) => {
                     await this.updateDevices();
                     if (!this.currentDevice) {
@@ -120,19 +120,19 @@ class AppViewModel {
     async fetchData() {
         const userInfoResult = await this.ss.profile();
         userInfoResult.assert(e => this.errors = [e])
-            .map(r => this.profile = r);
+            .cata(r => this.profile = r);
 
         await this.updateDevices();
 
         const topTracksResult = await this.ss.listTopTracks();
         this.topTracks = topTracksResult.assert(e => this.errors = [e])
-            .map(topTracks => _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index)));
+            .cata(topTracks => _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index)));
     }
 
     async updateDevices() {
         const devicesResult = await this.ss.listDevices();
         devicesResult.assert(e => this.errors = [e])
-            .map(devices => this.devices = _.map(devices, item => new DeviceViewModelItem(item)));
+            .cata(devices => this.devices = _.map(devices, item => new DeviceViewModelItem(item)));
 
         const currentDevice = _.find(this.devices, d => d.isActive()) || null;
         this.currentDevice = currentDevice;
@@ -142,7 +142,7 @@ class AppViewModel {
         const res = await this.ss.player(device.id(), true);
 
         res.assert(e => this.errors = [e])
-            .map(() => _.delay(() => {
+            .cata(() => _.delay(() => {
                 this.updateDevices();
             }, 1000));
     }

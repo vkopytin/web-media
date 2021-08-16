@@ -92,17 +92,17 @@ class TrackViewModelItem {
     async connect() {
         const spotifyResult = await this.ss.service(SpotifyService);
         this.trackPlaylists = await spotifyResult.assert(e => this.errors = [e])
-            .map(() => this.listPlaylists());
+            .cata(() => this.listPlaylists());
         const res = await this.ss.isBannedTrack(this.song.track.id);
-        res.assert(e => this.errors = [e]).map(r => this.isBanned = r);
+        res.assert(e => this.errors = [e]).cata(r => this.isBanned = r);
     }
 
     async listPlaylists() {
         const dataResult = await this.ss.service(DataService);
-        const res = await dataResult.map(data => data.listPlaylistsByTrack(this.song.track));
+        const res = await dataResult.cata(data => data.listPlaylistsByTrack(this.song.track));
 
         return res.assert(e => this.errors = [e])
-            .map(playlists => playlists.map(playlist => new PlaylistsViewModelItem(playlist)));
+            .cata(playlists => playlists.map(playlist => new PlaylistsViewModelItem(playlist)));
     }
 
     async play(playlistUri: string) {
@@ -119,7 +119,7 @@ class TrackViewModelItem {
     @isLoading
     async addToPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
         const result = await this.ss.addTrackToPlaylist(track.song.track, playlist.playlist);
-        result.assert(e => this.errors = [e]).map(() => setTimeout(() => {
+        result.assert(e => this.errors = [e]).cata(() => setTimeout(() => {
             this.connect();
         }, 2000));
     }
@@ -127,7 +127,7 @@ class TrackViewModelItem {
     @isLoading
     async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
         const result = await this.ss.removeTrackFromPlaylist(track.song.track, playlist.id());
-        await result.assert(e => this.errors = [e]).map(() => this.connect());
+        await result.assert(e => this.errors = [e]).cata(() => this.connect());
     }
 
     async likeTrack() {
@@ -145,12 +145,12 @@ class TrackViewModelItem {
 
     async bannTrack() {
         const res = await this.ss.bannTrack(this.id());
-        res.assert(e => this.errors = [e]).map(r => this.isBanned = r);
+        res.assert(e => this.errors = [e]).cata(r => this.isBanned = r);
     }
 
     async removeBannFromTrack() {
         const res = await this.ss.removeBannFromTrak(this.id());
-        res.assert(e => this.errors = [e]).map(r => this.isBanned = !r);
+        res.assert(e => this.errors = [e]).cata(r => this.isBanned = !r);
     }
 
 }

@@ -18,9 +18,13 @@ export const template = (view: UserProfileView) => <div className={cn(`${view.pr
 
     <div className="content">
         <p className="content-padded">
-            <a className="btn btn-block btn-outlined" href={view.spotifyAuthUrl}>
+            {view.isLoggedin ? <a className="btn btn-block btn-outlined" href="#"
+                onClick={e => (e.preventDefault(), view.logoutCommand.exec())}
+            >
+                Logout
+            </a> : <a className="btn btn-block btn-outlined" href={view.spotifyAuthUrl}>
                 Login on Spotify
-            </a>
+            </a>}
         </p>
         <form className="input-group">
             <div className="input-row">
@@ -82,4 +86,8 @@ export const template = (view: UserProfileView) => <div className={cn(`${view.pr
             })}
         </ul>
     </div>
+    {view.doLogout && <iframe
+        src="https://accounts.spotify.com/logout"
+        style={{ display: 'none' }}
+    ></iframe>}
 </div>;

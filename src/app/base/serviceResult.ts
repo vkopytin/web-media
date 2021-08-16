@@ -19,7 +19,7 @@ class ServiceResult<T, E extends Error> {
         return this;
     }
 
-    map<R>(done: (v: T) => R): R {
+    cata<R>(done: (v: T) => R): R {
         if (this.isError) {
             return this as any;
         }
