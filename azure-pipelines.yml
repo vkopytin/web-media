@@ -28,12 +28,12 @@ steps:
 - task: FtpUpload@2
   inputs:
     credentialsOption: 'inputs'
-    serverUrl: 'ftp://waws-prod-db3-041.ftp.azurewebsites.windows.net/site/wwwroot'
+    serverUrl: 'ftp://waws-prod-db3-041.ftp.azurewebsites.windows.net'
     username: '$(FTP_NAME)'
     password: '$(FTP_PASSWORD)'
     rootDirectory: 'app/spotify'
     filePatterns: '**'
-    remoteDirectory: '/Scripts/spotify'
+    remoteDirectory: '/site/wwwroot/Scripts/spotify'
     enableUtf8: true
     clean: true
     preservePaths: true
