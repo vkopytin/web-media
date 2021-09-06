@@ -4,7 +4,7 @@ import { Service } from '.';
 import * as _ from 'underscore';
 import { DataServiceResult } from './results/dataServiceResult';
 import { initializeStructure } from '../data/useCases';
-import { ITrack } from '../data/entities/interfaces/ITrack';
+import { ITrack } from '../data/entities/interfaces/iTrack';
 import { DataStorage } from '../data/dataStorage';
 import { TracksStore } from '../data/entities/tracksStore';
 import { ISpotifySong, IUserPlaylist } from '../adapter/spotify';

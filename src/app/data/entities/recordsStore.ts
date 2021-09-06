@@ -1,7 +1,7 @@
 import * as _ from 'underscore';
 import { IStorage, IStorageConfig } from "../iStorage";
 import { asAsync, asAsyncOf } from '../../utils';
-import { IRecord } from './interfaces/IRecord';
+import { IRecord } from './interfaces/iRecord';
 
 
 class RecordsStore {

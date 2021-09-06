@@ -1,5 +1,5 @@
 import { IPlaylist } from './iPlaylist';
-import { ITrack } from './ITrack';
+import { ITrack } from './iTrack';
 
 export interface IPlaylistRow {
     id: string;

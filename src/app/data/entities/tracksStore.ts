@@ -1,7 +1,7 @@
 import * as _ from 'underscore';
 import { IStorage, IStorageConfig } from "../iStorage";
 import { asAsync, asAsyncOf } from '../../utils';
-import { ITrack } from './interfaces/ITrack';
+import { ITrack } from './interfaces/iTrack';
 
 
 export class TracksStore {

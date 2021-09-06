@@ -19,6 +19,13 @@ class ServiceResult<T, E extends Error> {
         return this;
     }
 
+    map<R>(done: (v: T) => R): ServiceResult<R, Error> {
+        if (this.isError) {
+            return this as any;
+        }
+        return new ServiceResult<R, Error>(done(this.val), null);
+    }
+
     cata<R>(done: (v: T) => R): R {
         if (this.isError) {
             return this as any;
