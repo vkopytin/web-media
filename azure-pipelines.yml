@@ -22,4 +22,5 @@ steps:
 
 - script: |
     npm run build-alpha
+  workingDirectory: $(System.DefaultWorkingDirectory)
   displayName: 'Build web-app'
