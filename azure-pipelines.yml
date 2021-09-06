@@ -31,10 +31,10 @@ steps:
     serverUrl: 'ftp://waws-prod-db3-041.ftp.azurewebsites.windows.net/site/wwwroot'
     username: '$(FTP_NAME)'
     password: '$(FTP_PASSWORD)'
-    rootDirectory: 'app'
+    rootDirectory: 'app/spotify'
     filePatterns: '**'
-    remoteDirectory: '/Scripts'
+    remoteDirectory: '/Scripts/spotify'
     enableUtf8: true
     clean: true
-    preservePaths: false
+    preservePaths: true
     trustSSL: true
