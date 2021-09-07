@@ -46,9 +46,10 @@ steps:
     username: '$(FTP_NAME)'
     password: '$(FTP_PASSWORD)'
     rootDirectory: 'app/spotify'
-    filePatterns: 'index.html'
+    filePatterns: '*.html'
     remoteDirectory: '/site/wwwroot/'
     enableUtf8: true
-    clean: true
-    preservePaths: true
+    clean: false
+    preservePaths: false
     trustSSL: true
+    cleanContents: false
