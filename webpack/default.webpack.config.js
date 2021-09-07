@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const childProcess = require('child_process')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
@@ -57,14 +58,14 @@ module.exports = (options, workingDir) => {
       }
     },
     plugins: [
-      // new HtmlWebpackPlugin({
+      new HtmlWebpackPlugin({
       //   filename: '../public/index.html',
       //   template: path.resolve(workingDir, '..', 'src', 'html.mustache'),
       //   inject: false,
       //   alwaysWriteToDisk: true,
       //   path: !DEBUG ? '/public' : ''
-      //   template: 'index.html'
-      // }),
+        template: 'index.html'
+      }),
       // new HtmlWebpackHarddiskPlugin(),
       new WorkboxPlugin.GenerateSW({
         // these options encourage the ServiceWorkers to get in there fast
