@@ -38,3 +38,18 @@ steps:
     clean: true
     preservePaths: true
     trustSSL: true
+
+- task: FtpUpload@2
+  inputs:
+    credentialsOption: 'inputs'
+    serverUrl: 'ftp://waws-prod-db3-041.ftp.azurewebsites.windows.net'
+    username: '$(FTP_NAME)'
+    password: '$(FTP_PASSWORD)'
+    rootDirectory: 'app/spotify'
+    filePatterns: '*.html'
+    remoteDirectory: '/site/wwwroot/'
+    enableUtf8: true
+    clean: false
+    preservePaths: false
+    trustSSL: true
+    cleanContents: false
