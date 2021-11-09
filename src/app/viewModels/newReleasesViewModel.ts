@@ -36,10 +36,20 @@ class NewReleasesViewModel {
     @State likedAlbums = [] as AlbumViewModelItem[];
 
     selectAlbumCommand$: BehaviorSubject<NewReleasesViewModel['selectAlbumCommand']>;
-    @State selectAlbumCommand = { exec: (album: AlbumViewModelItem) => this.currentAlbum = album };
+    @State selectAlbumCommand = {
+        exec: (album: AlbumViewModelItem) => {
+            this.currentPlaylist = null;
+            this.currentAlbum = album;
+        }
+    };
 
     selectPlaylistCommand$: BehaviorSubject<NewReleasesViewModel['selectPlaylistCommand']>;
-    @State selectPlaylistCommand = { exec: (playlist: PlaylistsViewModelItem) => this.currentPlaylist = playlist };
+    @State selectPlaylistCommand = {
+        exec: (playlist: PlaylistsViewModelItem) => {
+            this.currentAlbum = null;
+            this.currentPlaylist = playlist;
+        }
+    };
 
     likeAlbumCommand$: BehaviorSubject<NewReleasesViewModel['likeAlbumCommand']>;
     @State likeAlbumCommand = { exec: (album: AlbumViewModelItem) => this.likeAlbum(album) };

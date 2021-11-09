@@ -17,8 +17,8 @@ class DevicesView extends React.Component<IDevicesViewProps> {
     
     errors$ = this.vm.errors$;
     @Binding({
-        didSet: (view, errors) => {
-            view.didRefresh();
+        didSet(view, errors) {
+            this.didRefresh();
             view.showErrors(errors);
         }
     })

@@ -133,7 +133,7 @@ class MediaPlayerViewModel {
         this.trackName = state.track_window.current_track.name;
         this.albumName = state.track_window.current_track.album.name;
         this.artistName = artist.name;
-        this.thumbnailUrl = _.last(state.track_window.current_track.album.images).url;
+        this.thumbnailUrl = _.first(state.track_window.current_track.album.images).url;
         this.autoSeek();
         this.checkTrackExists();
 
@@ -166,7 +166,7 @@ class MediaPlayerViewModel {
                 this.trackName = currentlyPlaying.item.name;
                 this.albumName = currentlyPlaying.item.album.name;
                 this.artistName = artist.name;
-                this.thumbnailUrl = _.last(currentlyPlaying.item.album.images).url;
+                this.thumbnailUrl = _.first(currentlyPlaying.item.album.images).url;
                 this.autoSeek();
                 this.checkTrackExists();
             } else {

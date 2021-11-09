@@ -1,6 +1,5 @@
 import React from 'react';
-import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/albums';
 import { Binding, current, State } from '../utils';
@@ -27,7 +26,7 @@ class AlbumsViewModel {
 class AlbumsView extends React.Component<IAlbumsViewProps> {
     didRefresh: AlbumsView['refresh'] = () => {};
     vm = current(AlbumsViewModel);
-    
+
     errors$ = this.vm.errors$;
     @Binding({
         didSet: (view, errors) => {

@@ -86,7 +86,7 @@ class HomeViewModel {
 
         if (!trackIds.length) {
             const tracksResult = this.selectedPlaylist ? await this.ss.fetchPlaylistTracks(this.selectedPlaylist.id(), 0, 20)
-            : await this.ss.fetchTracks(0, 20);
+                : await this.ss.fetchTracks(0, 20);
 
             if (assertNoErrors(tracksResult, e => this.errors = e)) {
                 return;

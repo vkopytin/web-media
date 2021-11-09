@@ -43,7 +43,7 @@ class ArtistViewModelItem {
     }
 
     thumbnailUrl() {
-        const image = _.last(this.artist.images);
+        const image = _.first(this.artist.images);
         return image?.url;
     }
 

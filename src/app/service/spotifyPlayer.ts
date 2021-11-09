@@ -108,6 +108,7 @@ class SpotifyPlayerService extends withEvents(BaseService) {
         const getOAuthToken = async (cb) => {
             const settingsResult = await connection.settings('spotify');
             const spotifySettings = settingsResult.val as ISettings['spotify'];
+            console.log('*** Requesting OAuth Token ***');
             cb(spotifySettings.accessToken);
         };
         const settingsResult = await connection.settings('spotify');
@@ -160,26 +161,31 @@ class SpotifyPlayerService extends withEvents(BaseService) {
 
     deviceId: string = '';
     onInitializationError = (error: IWebPlaybackError) => {
+        console.log('initializationErrpr', error);
         this.trigger('initializationErrpr', error);
     };
     onAuthenticationError = (error: IWebPlaybackError) => {
+        console.log('authenticationError', error);
         this.trigger('authenticationError', error);
     };
     onAccountError = (error: IWebPlaybackError) => {
+        console.log('accountError', error);
         this.trigger('accountError', error);
     };
     onPlaybackError = (error: IWebPlaybackError) => {
+        console.log('playbackError', error);
         this.trigger('playbackError', error);
     };
     onPlayerStateChanged = (state: IWebPlaybackState) => {
+        console.log('playerStateChanged', state);
         this.trigger('playerStateChanged', state);
     }
     onReady = (player: IWebPlaybackPlayer) => {
-        this.deviceId = player.device_id;
+        console.log('ready', player);
         this.trigger('ready', player);
     }
     onNotReady = (player: IWebPlaybackPlayer) => {
-        this.deviceId = null;
+        console.log('notReady', player);
         this.trigger('notReady', player);
     }
 

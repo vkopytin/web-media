@@ -227,11 +227,11 @@ export function State<T, Y extends keyof T>(target: T, propName: Y, descriptor?)
     };
     Object.defineProperty(target, `${propName}$`, opts);
 
-    Binding()(target, propName, descriptor);
+    Binding<T>()(target, propName, descriptor);
 }
 
-export function Binding({ didSet }: { didSet?: (view, val) => void } = {}) {
-    return function <T, Y extends keyof T>(target: T, propName: Y, descriptor?): any {
+export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) => void } = {}) {
+    return function <Y extends keyof T>(target: T, propName: Y, descriptor?): any {
         const desc = Object.getOwnPropertyDescriptor(target, `${propName}$`);
         function initBinding(v) {
             let store$ = v;
@@ -271,7 +271,7 @@ export function Binding({ didSet }: { didSet?: (view, val) => void } = {}) {
                         return;
                     }
                     cnt++;
-                    didSet(this, val);
+                    didSet.call(this, this, val);
                     cnt--;
                 } catch (ex) {
                     cnt--;

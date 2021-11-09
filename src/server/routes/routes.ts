@@ -21,7 +21,7 @@ home.get(
     '/manifest.json', [],
     (req: express.Request, res: express.Response) => {
         return res.json({
-            "name": "Example App",
+            "name": process.env.PLAYER_NAME || 'Dev Player for Spotify',
             "short_name": "ExApp",
             "theme_color": "#2196f3",
             "background_color": "#2196f3",

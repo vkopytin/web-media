@@ -10,6 +10,7 @@
     "build-prod": "cross-env NODE_OPTIONS=--max_old_space_size=4000 NODE_ENV=production webpack --progress --color --config webpack/prod.webpack.config",
     "test": "jest test",
     "make-ssl-sert": "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./selfsigned.key -out selfsigned.crt",
+    "make-ssl-cert": "openssl req -x509 -nodes -sha256 -newkey rsa:2048 -out selfsigned.crt -keyout selfsigned.key -subj '/CN=localhost' -extensions EXT -config <( printf \"[dn]\nCN=localhost\n[req]\ndistinguished_name=dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth\")",
     "make-ssl-pem": "cat selfsigned.crt selfsigned.key > selfsigned.pem",
     "node-version": "node --version",
     "ts-version": "tsc --version",
