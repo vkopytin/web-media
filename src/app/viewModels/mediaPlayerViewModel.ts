@@ -1,12 +1,14 @@
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
-import { IPlayerResult, ITrack } from '../adapter/spotify';
+import { ITrack } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SettingsService } from '../service/settings';
 import { SpotifyService } from '../service/spotify';
 import { IWebPlaybackState } from '../service/spotifyPlayer';
 import { assertNoErrors, asyncQueue, current, State } from '../utils';
+import { Scheduler } from '../utils/scheduler';
+import { AppViewModel } from './appViewModel';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 
@@ -16,7 +18,7 @@ class MediaPlayerViewModel {
     errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    currentTrackId$: BehaviorSubject<MediaPlayerViewModel['currentTrackId']>;
+    currentTrackId$ = this.appViewModel.currentTrackId$;
     @State currentTrackId = '';
 
     queue$: BehaviorSubject<MediaPlayerViewModel['queue']>;
@@ -59,27 +61,27 @@ class MediaPlayerViewModel {
     @State tracks = null as TrackViewModelItem[];
 
     resumeCommand$: BehaviorSubject<MediaPlayerViewModel['resumeCommand']>;
-    @State resumeCommand = { exec: () => this.play() };
+    @State resumeCommand = Scheduler.Command(() => this.play());
     pauseCommand$: BehaviorSubject<MediaPlayerViewModel['pauseCommand']>;
-    @State pauseCommand = { exec: () => this.pause() };
+    @State pauseCommand = Scheduler.Command(() => this.pause());
     prevCommand$: BehaviorSubject<MediaPlayerViewModel['prevCommand']>;
-    @State prevCommand = { exec: () => this.previous() };
+    @State prevCommand = Scheduler.Command(() => this.previous());
     nextCommand$: BehaviorSubject<MediaPlayerViewModel['nextCommand']>;
-    @State nextCommand = { exec: () => this.next() };
+    @State nextCommand = Scheduler.Command(() => this.next());
     volumeUpCommand$: BehaviorSubject<MediaPlayerViewModel['volumeUpCommand']>;
-    @State volumeUpCommand = { exec: () => this.volumeUp() };
+    @State volumeUpCommand = Scheduler.Command(() => this.volumeUp());
     volumeCommand$: BehaviorSubject<MediaPlayerViewModel['volumeCommand']>;
-    @State volumeCommand = { exec: (percent) => this.setVolume(percent) };
+    @State volumeCommand = Scheduler.Command((percent) => this.setVolume(percent));
     volumeDownCommand$: BehaviorSubject<MediaPlayerViewModel['volumeDownCommand']>;
-    @State volumeDownCommand = { exec: () => this.volumeDown() };
+    @State volumeDownCommand = Scheduler.Command(() => this.volumeDown());
     refreshPlaybackCommand$: BehaviorSubject<MediaPlayerViewModel['refreshPlaybackCommand']>;
-    @State refreshPlaybackCommand = { exec: () => this.fetchData() };
+    @State refreshPlaybackCommand = Scheduler.Command(() => this.fetchData());
     likeSongCommand$: BehaviorSubject<MediaPlayerViewModel['likeSongCommand']>;
-    @State likeSongCommand = { exec: () => this.likeTrack() };
+    @State likeSongCommand = Scheduler.Command(() => this.likeTrack());
     unlikeSongCommand$: BehaviorSubject<MediaPlayerViewModel['unlikeSongCommand']>;
-    @State unlikeSongCommand = { exec: () => this.unlikeTrack() };
+    @State unlikeSongCommand = Scheduler.Command(() => this.unlikeTrack());
     seekPlaybackCommand$: BehaviorSubject<MediaPlayerViewModel['seekPlaybackCommand']>;
-    @State seekPlaybackCommand = { exec: (percent) => this.manualSeek(percent) };
+    @State seekPlaybackCommand = Scheduler.Command((percent) => this.manualSeek(percent));
 
     monitorPlyback = _.debounce(this.monitorPlybackInternal, 5 * 1000);
     autoSeek = _.debounce(this.autoSeekInternal, 500);
@@ -91,7 +93,7 @@ class MediaPlayerViewModel {
         resolve(true);
     }));
 
-    constructor(private ss = current(Service)) {
+    constructor(private appViewModel = current(AppViewModel), private ss = current(Service)) {
 
     }
 
@@ -152,7 +154,7 @@ class MediaPlayerViewModel {
 
     async fetchDataInternal() {
         const res = await this.ss.player();
-        res.assert(e => this.errors = [e]).cata(currentlyPlaying => {
+        res.map(currentlyPlaying => {
             this.lastTime = +new Date();
             if (currentlyPlaying && currentlyPlaying.item) {
                 const [artist] = currentlyPlaying.item.artists;
@@ -172,7 +174,7 @@ class MediaPlayerViewModel {
             } else {
                 this.isPlaying = currentlyPlaying?.is_playing || false;
             }
-        });
+        }).assert(e => this.errors = [e]);
     }
 
     async checkTrackExists() {

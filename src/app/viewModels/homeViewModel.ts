@@ -3,9 +3,9 @@ import * as _ from 'underscore';
 import { IRecommendationsResult, IResponseResult, ISpotifySong, ITrack } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
-import { DataService } from '../service/dataService';
 import { SpotifyService } from '../service/spotify';
 import { assertNoErrors, current, isLoading, State } from '../utils';
+import { Scheduler } from '../utils/scheduler';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
@@ -33,28 +33,28 @@ class HomeViewModel {
     @State selectedPlaylist = null as PlaylistsViewModelItem;
     
     refreshCommand$: BehaviorSubject<HomeViewModel['refreshCommand']>;
-    @State refreshCommand = { exec: (trackId?: string) => this.fetchData(trackId) };
+    @State refreshCommand = Scheduler.Command((trackId?: string) => this.fetchData(trackId));
 
     selectTrackCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
-    @State selectTrackCommand = { exec: (track: TrackViewModelItem) => this.selectedTrack = track };
+    @State selectTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.selectedTrack = track);
 
     likeTrackCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
-    @State likeTrackCommand = { exec: (track: TrackViewModelItem) => this.likeTrack(track) };
+    @State likeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.likeTrack(track));
 
     unlikeTrackCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
-    @State unlikeTrackCommand = { exec: (track: TrackViewModelItem) => this.unlikeTrack(track) };
-    
+    @State unlikeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.unlikeTrack(track));
+
     findTrackLyricsCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
-    @State findTrackLyricsCommand = { exec: (track: TrackViewModelItem) => this.findTrackLyrics(track) };
+    @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
 
     bannedTrackIds$: BehaviorSubject<HomeViewModel['bannedTrackIds']>;
     @State bannedTrackIds = [] as string[];
 
     bannTrackCommand$: BehaviorSubject<HomeViewModel['bannTrackCommand']>;
-    @State bannTrackCommand = { exec: (track: TrackViewModelItem) => this.bannTrack(track) };
+    @State bannTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.bannTrack(track));
 
     removeBannFromTrackCommand$: BehaviorSubject<HomeViewModel['removeBannFromTrackCommand']>;
-    @State removeBannFromTrackCommand = { exec: (track: TrackViewModelItem) => this.removeBannFromTrack(track) };
+    @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         await this.connect();

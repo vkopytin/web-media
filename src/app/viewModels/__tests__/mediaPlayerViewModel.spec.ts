@@ -51,7 +51,7 @@ describe('Media Player View Model', () => {
 
     beforeAll(async () => {
         srv = new Service();
-        vm = new MediaPlayerViewModel(srv);
+        vm = new MediaPlayerViewModel({} as any, srv);
         const res = await vm.isInit;
         expect(res).toBeTruthy();
     });

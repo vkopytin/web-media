@@ -1,10 +1,12 @@
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
-import { IResponseResult, ITrack, IUserInfo } from '../adapter/spotify';
+import { IUserInfo } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SettingsService } from '../service/settings';
-import { assertNoErrors, current, State } from '../utils';
+import { current, State } from '../utils';
+import { Scheduler } from '../utils/scheduler';
+import { AppViewModel } from './appViewModel';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 
@@ -18,7 +20,7 @@ class UserProfileViewModel {
     profile$: BehaviorSubject<UserProfileViewModel['profile']>;
     @State profile: IUserInfo = {};
 
-    currentTrackId$: BehaviorSubject<UserProfileViewModel['currentTrackId']>;
+    currentTrackId$ = this.appViewModel.currentTrackId$;
     @State currentTrackId = '';
 
     topTracks$: BehaviorSubject<UserProfileViewModel['topTracks']>;
@@ -37,7 +39,7 @@ class UserProfileViewModel {
     @State apiseedsKey = '';
 
     logoutCommand$: BehaviorSubject<UserProfileViewModel['logoutCommand']>;
-    @State logoutCommand = { exec: () => this.logout() };
+    @State logoutCommand = Scheduler.Command(() => this.logout());
 
     settings = {
         currentTrackId: '',
@@ -54,7 +56,7 @@ class UserProfileViewModel {
         resolve(true);
     }));
 
-    constructor(private ss = current(Service)) {
+    constructor(private appViewModel = current(AppViewModel), private ss = current(Service)) {
         
     }
 

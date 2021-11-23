@@ -5,6 +5,7 @@ import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
 import { assertNoErrors, current, State } from '../utils';
+import { Scheduler } from '../utils/scheduler';
 import { AlbumViewModelItem } from './albumViewModelItem';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
@@ -36,26 +37,22 @@ class NewReleasesViewModel {
     @State likedAlbums = [] as AlbumViewModelItem[];
 
     selectAlbumCommand$: BehaviorSubject<NewReleasesViewModel['selectAlbumCommand']>;
-    @State selectAlbumCommand = {
-        exec: (album: AlbumViewModelItem) => {
-            this.currentPlaylist = null;
-            this.currentAlbum = album;
-        }
-    };
+    @State selectAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => {
+        this.currentPlaylist = null;
+        this.currentAlbum = album;
+    });
 
     selectPlaylistCommand$: BehaviorSubject<NewReleasesViewModel['selectPlaylistCommand']>;
-    @State selectPlaylistCommand = {
-        exec: (playlist: PlaylistsViewModelItem) => {
-            this.currentAlbum = null;
-            this.currentPlaylist = playlist;
-        }
-    };
+    @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => {
+        this.currentAlbum = null;
+        this.currentPlaylist = playlist;
+    });
 
     likeAlbumCommand$: BehaviorSubject<NewReleasesViewModel['likeAlbumCommand']>;
-    @State likeAlbumCommand = { exec: (album: AlbumViewModelItem) => this.likeAlbum(album) };
+    @State likeAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.likeAlbum(album));
 
     unlikeAlbumCommand$: BehaviorSubject<NewReleasesViewModel['unlikeAlbumCommand']>;
-    @State unlikeAlbumCommand = { exec: (album: AlbumViewModelItem) => this.unlikeAlbum(album) };
+    @State unlikeAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.unlikeAlbum(album));
 
     isInit = new Promise(resume => _.delay(async () => {
         await this.connect();

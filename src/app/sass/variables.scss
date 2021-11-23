@@ -2,7 +2,6 @@
 // Variables
 // --------------------------------------------------
 
-
 // Type
 // --------------------------------------------------
 $font-family-default: "Lucida Sans Unicode", "Lucida Grande", sans-serif !default;
@@ -11,17 +10,16 @@ $font-weight: 500 !default;
 $font-weight-light: 400 !default;
 $line-height-default: 21px !default;
 
-
 // Colors
 // --------------------------------------------------
 
 // Main theme colors
 $text-color: #999;
 $primary-color: #409b9e !default;
-$chrome-color:  #242424 !default;
+$chrome-color: #242424 !default;
 
 // Action colors
-$default-color:  #11111166 !default;
+$default-color: #11111166 !default;
 $bar-color: #242424 !default;
 $positive-color: #422944 !default;
 $negative-color: #d9534f !default;
@@ -29,28 +27,30 @@ $negative-color: #d9534f !default;
 // Bars
 // --------------------------------------------------
 
-$bar-base-height:  44px !default;
-$bar-tab-height:   50px !default;
+$bar-base-height: 44px !default;
+$bar-tab-height: 50px !default;
 $bar-side-spacing: 10px !default;
-
 
 // Cards
 // --------------------------------------------------
 
 $card-bg: #00000022 !default;
 
-
 // Buttons
 // --------------------------------------------------
 
 $button-font-size: 12px !default;
-
+$button-font-size-small: 20px;
 
 // Transitions
 // --------------------------------------------------
 
-$timing-fuction: cubic-bezier(.1,.5,.1,1) !default; // Inspired by @c2prods
-
+$timing-fuction: cubic-bezier(
+  0.1,
+  0.5,
+  0.1,
+  1
+) !default; // Inspired by @c2prods
 
 // Borders
 // --------------------------------------------------

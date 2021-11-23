@@ -193,15 +193,50 @@ export function isLoading<T extends { isLoading: boolean; }>(target: T, key, des
     return descriptor;
 }
 
-const bindingsList = [];
+class Board {
+    subscribers = [];
+
+    constructor(public value) {
+
+    }
+
+    subscribe(handler) {
+        this.subscribers.push(handler);
+    }
+
+    next(val) {
+        this.value = val;
+        this.subscribers.forEach(subsciber => subsciber(val));
+    }
+
+    map(fn) {
+        return Board.from(this.cat(fn));
+    }
+
+    cat(fn) {
+        return fn(this.value);
+    }
+
+    pipe(...args) {
+        return this;
+    }
+
+    getValue() {
+        return this.value;
+    }
+
+    static from(val) {
+        if (val instanceof Board) {
+            return val;
+        }
+
+        return new Board(val);
+    }
+}
+
 export function State<T, Y extends keyof T>(target: T, propName: Y, descriptor?) {
     function initState(v?) {
-        let store$ = new BehaviorSubject(v);
-        bindingsList.push({
-            view: this,
-            propName,
-            subj: store$
-        });
+        let store$ = v || new BehaviorSubject(null);
 
         Object.defineProperty(this, `${propName}$`, {
             get() {
@@ -233,9 +268,9 @@ export function State<T, Y extends keyof T>(target: T, propName: Y, descriptor?)
 export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) => void } = {}) {
     return function <Y extends keyof T>(target: T, propName: Y, descriptor?): any {
         const desc = Object.getOwnPropertyDescriptor(target, `${propName}$`);
+
         function initBinding(v) {
             let store$ = v;
-            const assignedSubjects = [] as [any, Subscription, Subscription][];
             Object.defineProperty(this, `${propName}$`, {
                 get() {
                     return store$;
@@ -245,54 +280,46 @@ export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) 
                         throw new Error('Please, provide BehaviorSubject');
                     }
                     if (v$ !== store$) {
-                        let current = assignedSubjects.find(([a]) => a === v$);
-                        if (current) {
-                            current[1].unsubscribe();
-                            current[2].unsubscribe();
-                        }
-
-                        current = [
-                            v$,
-                            store$.pipe(distinctUntilChanged()).subscribe(v$),
-                            v$.pipe(distinctUntilChanged()).subscribe(store$)
-                        ];
-                        assignedSubjects.push(current);
+                        throw new Error('Not supported')
                     }
                 },
                 enumerable: true,
                 configurable: true
             });
 
-            let cnt = 0;
-            didSet && store$.pipe(distinctUntilChanged((a, b) => _.isEqual(a, b))).subscribe(val => {
-                try {
-                    if (cnt !== 0) {
-                        console.log(new Error('Recursive call has detected. Stopping...'));
-                        return;
+            if (didSet) {
+                let cnt = 0;
+                store$.pipe(
+                    distinctUntilChanged((a, b) => _.isEqual(a, b))
+                ).subscribe(val => {
+                    try {
+                        if (cnt !== 0) {
+                            console.log(new Error('Recursive call has detected. Stopping...'));
+                            return;
+                        }
+                        cnt++;
+                        didSet.call(this, this, val);
+                        cnt--;
+                    } catch (ex) {
+                        cnt--;
+                        throw ex;
                     }
-                    cnt++;
-                    didSet.call(this, this, val);
-                    cnt--;
-                } catch (ex) {
-                    cnt--;
-                    throw ex;
-                }
-            });
+                });
+            }
 
             return store$;
         }
 
-        if (!desc) {
-            const opts = {
-                get() {
-                    throw new Error('There is no assigned subscriber to the binding property');
-                },
-                set: initBinding,
-                enumerable: true,
-                configurable: true
-            };
-            Object.defineProperty(target, `${propName}$`, opts);
-        }
+        const storeOpts = {
+            get() {
+                throw new Error('There is no assigned subscriber to the binding property');
+            },
+            set: initBinding,
+            enumerable: true,
+            configurable: true,
+            ...desc
+        };
+        Object.defineProperty(target, `${propName}$`, storeOpts);
 
         const opts = {
             get() {

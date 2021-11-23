@@ -5,7 +5,8 @@ import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { DataService } from '../service/dataService';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, current, formatTime, isLoading, State } from '../utils';
+import { current, formatTime, isLoading, State } from '../utils';
+import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModel } from './playlistsViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
@@ -38,10 +39,13 @@ class TrackViewModelItem {
     };
 
     addToPlaylistCommand$: BehaviorSubject<TrackViewModelItem['addToPlaylistCommand']>;
-    @State addToPlaylistCommand = { exec: (track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.addToPlaylist(track, playlist) };
+    @State addToPlaylistCommand = Scheduler.Command((track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.addToPlaylist(track, playlist));
 
     removeFromPlaylistCommand$: BehaviorSubject<TrackViewModelItem['removeFromPlaylistCommand']>;
-    @State removeFromPlaylistCommand = { exec: (track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist) };
+    @State removeFromPlaylistCommand = Scheduler.Command((track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist));
+
+    playTracksCommand$: BehaviorSubject<TrackViewModelItem['playTracksCommand']>;
+    @State playTracksCommand = Scheduler.Command((tracls: TrackViewModelItem[]) => this.playTracks(tracls));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         await this.connect();

@@ -22,17 +22,24 @@
   // Active & filled button styles
   &:active,
   &.active {
-    color: lighten($text-color, 10%); // Overriding the global style for all anchors.
+    color: lighten(
+      $text-color,
+      10%
+    ); // Overriding the global style for all anchors.
     background-color: lighten($default-color, 10%);
   }
 
   // Disabled styles & filled button active styles
   &:disabled,
   &.disabled {
-    opacity: .6;
+    opacity: 0.6;
+  }
+
+  &.small {
+    padding: 3px 4px 4px;
+    font-size: $button-font-size-small;
   }
 }
-
 
 // Other button types
 // --------------------------------------------------
@@ -124,7 +131,6 @@
   font-size: 18px;
 }
 
-
 // Button overrides
 // --------------------------------------------------
 
@@ -134,7 +140,6 @@ input[type="button"] {
   width: 100%;
 }
 
-
 // Buttons with badges
 // --------------------------------------------------
 
@@ -142,7 +147,7 @@ input[type="button"] {
 .btn .badge {
   margin: -2px -4px -2px 4px;
   font-size: 12px;
-  background-color: rgba(0,0,0,.15);
+  background-color: rgba(0, 0, 0, 0.15);
 }
 
 // Buttons with inverted badges
@@ -164,7 +169,6 @@ input[type="button"] {
   right: 0;
   margin-right: 10px;
 }
-
 
 // Buttons with Ratchicons
 // --------------------------------------------------

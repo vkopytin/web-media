@@ -1,11 +1,11 @@
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
-import { IResponseResult, ISpotifySong, IUserInfo, IUserPlaylistsResult } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
 import { assertNoErrors, current, isLoading, State } from '../utils';
+import { Scheduler } from '../utils/scheduler';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
@@ -60,28 +60,26 @@ class PlaylistsViewModel {
     };
 
     selectPlaylistCommand$: BehaviorSubject<PlaylistsViewModel['selectPlaylistCommand']>;
-    @State selectPlaylistCommand = { exec: (playlistId: string) => this.currentPlaylistId = playlistId };
+    @State selectPlaylistCommand = Scheduler.Command((playlistId: string) => this.currentPlaylistId = playlistId);
     loadMoreCommand$: BehaviorSubject<PlaylistsViewModel['loadMoreCommand']>;
-    @State loadMoreCommand = { exec: () => this.loadMore() };
+    @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
     loadMoreTracksCommand$: BehaviorSubject<PlaylistsViewModel['loadMoreTracksCommand']>;
-    @State loadMoreTracksCommand = { exec: () => this.loadMoreTracks() };
+    @State loadMoreTracksCommand = Scheduler.Command(() => this.loadMoreTracks());
     createPlaylistCommand$: BehaviorSubject<PlaylistsViewModel['createPlaylistCommand']>;
-    @State createPlaylistCommand = { exec: (isPublic: boolean) => this.createNewPlaylist(isPublic) };
+    @State createPlaylistCommand = Scheduler.Command((isPublic: boolean) => this.createNewPlaylist(isPublic));
     likeTrackCommand$: BehaviorSubject<PlaylistsViewModel['likeTrackCommand']>;
-    @State likeTrackCommand = { exec: (track: TrackViewModelItem) => this.likeTrack(track) };
+    @State likeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.likeTrack(track));
     unlikeTrackCommand$: BehaviorSubject<PlaylistsViewModel['unlikeTrackCommand']>;
-    @State unlikeTrackCommand = { exec: (track: TrackViewModelItem) => this.unlikeTrack(track) };
+    @State unlikeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.unlikeTrack(track));
     findTrackLyricsCommand$: BehaviorSubject<PlaylistsViewModel['findTrackLyricsCommand']>;
-    @State findTrackLyricsCommand = { exec: (track: TrackViewModelItem) => this.findTrackLyrics(track) };
+    @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
     reorderTrackCommand$: BehaviorSubject<PlaylistsViewModel['reorderTrackCommand']>;
-    @State reorderTrackCommand = {
-        exec: (track: TrackViewModelItem, beforeTrack: TrackViewModelItem) => this.reorderTrack(track, beforeTrack)
-    };
+    @State reorderTrackCommand = Scheduler.Command((track: TrackViewModelItem, beforeTrack: TrackViewModelItem) => this.reorderTrack(track, beforeTrack));
 
     bannTrackCommand$: BehaviorSubject<PlaylistsViewModel['bannTrackCommand']>;
-    @State bannTrackCommand = { exec: (track: TrackViewModelItem) => this.bannTrack(track) };
+    @State bannTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.bannTrack(track));
     removeBannFromTrackCommand$: BehaviorSubject<PlaylistsViewModel['removeBannFromTrackCommand']>;
-    @State removeBannFromTrackCommand = { exec: (track: TrackViewModelItem) => this.removeBannFromTrack(track) };
+    @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         await this.connect();

@@ -1,23 +1,20 @@
-import { utils } from 'databindjs';
 import * as React from 'react';
 import * as _ from 'underscore';
 import { PickPlaylistsView, SelectPlaylistsView } from '../views';
 import { HomeView } from '../views/homeView';
 
 
-const cn = utils.className;
-
 export const template = (view: HomeView) => <>
     <div className="center">
-        <div className="chips-list" style={{float: 'left'}}>
+        {view.isLoading || <button className="pull-right button-round small btn btn-primary btn-block btn-outlined icon icon-refresh"
+            onClick={evnt => view.refreshCommand.exec()}
+        ></button>}
+        {view.isLoading && <button className="pull-right loading small button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
+        ></button>}
+        <div className="chips-list pull-left">
             <span className="chips chips-positive" onClick={evnt => view.refreshCommand.exec(view.props.currentTrackId)}>Current Song</span>
         </div>
         <PickPlaylistsView showErrors={e => view.showErrors(e)} />
-        {view.isLoading || <button className="button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
-            onClick={evnt => view.refreshCommand.exec()}
-        ></button>}
-        {view.isLoading && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
-        ></button>}
     </div>
     <ul className="todo-list table-view">
         {_.map(view.tracks, (item: HomeView['tracks'][0], index) =>
@@ -29,7 +26,7 @@ export const template = (view: HomeView) => <>
                         >receipt</span>
                     </div>
                     <span className="media-object pull-left player-left--32"
-                        onClick={evnt => { view.isBanned(item) || item.playTracks(view.tracks) }}
+                        onClick={evnt => { view.isBanned(item) || item.playTracksCommand.exec(view.tracks) }}
                     >
                         <div className="region">
                             <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>

@@ -1,11 +1,12 @@
 import $ from 'jquery';
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
-import { IDevice, IResponseResult, ITrack, IUserInfo } from '../adapter/spotify';
+import { IUserInfo } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifySyncService } from '../service/spotifySyncService';
-import { assertNoErrors, current, State } from '../utils';
+import { current, State } from '../utils';
+import { Scheduler } from '../utils/scheduler';
 import { DeviceViewModelItem } from './deviceViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
@@ -26,13 +27,13 @@ class AppViewModel {
     @State profile: IUserInfo = {};
 
     refreshDevicesCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
-    @State refreshDevicesCommand = { exec: () => this.updateDevices() };
+    @State refreshDevicesCommand = Scheduler.Command(() => this.updateDevices());
 
     switchDeviceCommand$: BehaviorSubject<{ exec: (a) => Promise<void> }>;
-    @State switchDeviceCommand = { exec: (device: DeviceViewModelItem) => this.switchDevice(device) };
+    @State switchDeviceCommand = Scheduler.Command((device: DeviceViewModelItem) => this.switchDevice(device));
 
     refreshTokenCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
-    @State refreshTokenCommand = { exec: () => this.refreshToken() };
+    @State refreshTokenCommand = Scheduler.Command(() => this.refreshToken());
 
     currentTrackId$: BehaviorSubject<string>;
     @State currentTrackId = '';

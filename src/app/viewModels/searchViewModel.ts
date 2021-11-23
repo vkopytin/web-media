@@ -1,10 +1,11 @@
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
-import { IResponseResult, ISearchResult, ISearchType, ISpotifySong, ITrack } from '../adapter/spotify';
+import { ISearchResult, ISearchType, ISpotifySong } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, asyncQueue, current, State } from '../utils';
+import { asyncQueue, current, State } from '../utils';
+import { Scheduler } from '../utils/scheduler';
 import { AlbumViewModelItem } from './albumViewModelItem';
 import { ArtistViewModelItem } from './artistViewModelItem';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
@@ -51,7 +52,7 @@ class SearchViewModel {
     };
 
     loadMoreCommand$: BehaviorSubject<SearchViewModel['loadMoreCommand']>;
-    @State loadMoreCommand = { exec: () => this.loadMore() };
+    @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         this.fetchData();

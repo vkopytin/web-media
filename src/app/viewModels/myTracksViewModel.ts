@@ -5,6 +5,7 @@ import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
 import { assertNoErrors, current, State } from '../utils';
+import { Scheduler } from '../utils/scheduler';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 class MyTracksViewModel {
@@ -33,9 +34,9 @@ class MyTracksViewModel {
     };
 
     loadMoreCommand$: BehaviorSubject<MyTracksViewModel['loadMoreCommand']>;
-    @State loadMoreCommand = { exec: () => this.loadMore() };
+    @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
     findTrackLyricsCommand$: BehaviorSubject<MyTracksViewModel['findTrackLyricsCommand']>;
-    @State findTrackLyricsCommand = { exec: (track: TrackViewModelItem) => this.findTrackLyrics(track) };
+    @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         await this.connect();

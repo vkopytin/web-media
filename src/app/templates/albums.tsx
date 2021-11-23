@@ -1,10 +1,6 @@
-import { utils } from 'databindjs';
 import * as React from 'react';
 import * as _ from 'underscore';
-import { AlbumsView } from '../views';
-import { SelectPlaylistsView } from '../views';
-
-const cn = utils.className;
+import { AlbumsView, SelectPlaylistsView } from '../views';
 
 export const template = (view: AlbumsView) => <>
     <ul className="todo-list table-view">
