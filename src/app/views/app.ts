@@ -1,13 +1,11 @@
 import React from 'react';
-import { merge, Subject, Subscription } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
 import * as _ from 'underscore';
-import { IDevice } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { NoActiveDeviceError } from '../service/errors/noActiveDeviceError';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
 import { template } from '../templates/app';
 import { Binding, current } from '../utils';
+import { Scheduler } from '../utils/scheduler';
 import { AppViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IAppViewProps {
@@ -166,6 +164,7 @@ class AppView extends React.Component<IAppViewProps> {
         if (!_.isEmpty(tokenExpired)) {
             this.errors = _.filter(errors, err => !err.is(TokenExpiredError));
             this.openLogin = true;
+            console.log('running tasks:', Scheduler.getCurrent().inProgress);
             setTimeout(() => this.refreshTokenCommand.exec());
             return;
         }

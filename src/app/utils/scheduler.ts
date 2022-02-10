@@ -55,13 +55,18 @@ export class Scheduler {
             }
         };
         this.running++;
+        this.inProgress.push(task);
         try {
             task.isRunning = true;
             await task.exec();
         } catch (ex) {
-            setTimeout(() => { throw ex; });
+            setTimeout(() => {
+                console.log(this.inProgress);
+                throw ex;
+            });
         } finally {
             task.isRunning = false;
+            this.inProgress = this.inProgress.filter(a => a !== task);
             done();
         }
     }

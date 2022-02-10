@@ -1,7 +1,5 @@
+import { distinctUntilChanged } from 'rxjs/operators';
 import * as _ from 'underscore';
-import { utils } from 'databindjs';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
 
 
 export function formatTime(ms: number) {
@@ -83,6 +81,7 @@ function asAsync(c, fn, ...args) {
     });
 }
 export { asAsync };
+export { asAsyncOf };
 
 function asAsyncOf<T1, T2, T3, T4, Y>(c, fn: { (a: T1, a1: T2, a2: T3, a3: T4, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2, a2: T3, a3: T4): AsyncGenerator<Y>
 function asAsyncOf<T1, T2, T3, Y>(c, fn: { (a: T1, a1: T2, a2: T3, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2, a3: T3): AsyncGenerator<Y>
@@ -132,7 +131,6 @@ async function* asAsyncOf(context, fn, ...args) {
         }
     }
 }
-export { asAsyncOf };
 
 export function debounce(func, wait = 0, cancelObj = 'canceled') {
     let timerId, latestResolve, shouldCancel;
@@ -193,27 +191,53 @@ export function isLoading<T extends { isLoading: boolean; }>(target: T, key, des
     return descriptor;
 }
 
-class Board {
-    subscribers = [];
+class ValueContainer<T> {
+    subscribers = [] as Array<(v: T) => void>;
+    children = [] as ValueContainer<T>[];
 
-    constructor(public value) {
+    constructor(public value: T) {
 
+    }
+
+    attach(o: ValueContainer<T>) {
+        if (this.children.includes(o)) {
+            return;
+        }
+        this.children.push(o);
+        o.attach(this);
+
+        return this;
     }
 
     subscribe(handler) {
-        this.subscribers.push(handler);
+        const cb = (...args) => {
+            return handler(...args);
+        }
+        this.subscribers.push(cb);
     }
 
-    next(val) {
+    next(val: T, context = { cb: [], inst: [] }) {
         this.value = val;
-        this.subscribers.forEach(subsciber => subsciber(val));
+        
+        try {
+            this.subscribers.filter(s => !context.cb.includes(s)).forEach(subsciber => {
+                context.cb.push(subsciber);
+                subsciber(val);
+            });
+            this.children.filter(s => !context.inst.includes(s)).forEach(c => {
+                context.inst.push(c);
+                c.next(val, context);
+            });
+        } catch (ex) {
+            throw ex;
+        }
     }
 
-    map(fn) {
-        return Board.from(this.cat(fn));
+    map<Y>(fn: (v: T) => Y): ValueContainer<Y> {
+        return ValueContainer.from(this.cat(fn));
     }
 
-    cat(fn) {
+    cat<Y>(fn: (v: T) => Y): Y {
         return fn(this.value);
     }
 
@@ -221,22 +245,22 @@ class Board {
         return this;
     }
 
-    getValue() {
+    getValue(): T {
         return this.value;
     }
 
-    static from(val) {
-        if (val instanceof Board) {
-            return val;
+    static from<T>(val: T | ValueContainer<T>) {
+        if (val instanceof ValueContainer) {
+            return new ValueContainer<T>(val.getValue()).attach(val);
         }
 
-        return new Board(val);
+        return new ValueContainer<T>(val);
     }
 }
 
 export function State<T, Y extends keyof T>(target: T, propName: Y, descriptor?) {
     function initState(v?) {
-        let store$ = v || new BehaviorSubject(null);
+        let store$ = ValueContainer.from(v);
 
         Object.defineProperty(this, `${propName}$`, {
             get() {
@@ -269,18 +293,19 @@ export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) 
     return function <Y extends keyof T>(target: T, propName: Y, descriptor?): any {
         const desc = Object.getOwnPropertyDescriptor(target, `${propName}$`);
 
-        function initBinding(v) {
+        function initBinding(v: ValueContainer<any>) {
             let store$ = v;
             Object.defineProperty(this, `${propName}$`, {
                 get() {
                     return store$;
                 },
                 set(v$) {
-                    if (!(v$ instanceof BehaviorSubject)) {
-                        throw new Error('Please, provide BehaviorSubject');
+                    if (!(v$ instanceof ValueContainer)) {
+                        throw new Error('Please, provide ValueContainer');
                     }
                     if (v$ !== store$) {
-                        throw new Error('Not supported')
+                        //throw new Error('Not supported')
+                        store$.attach(v$);
                     }
                 },
                 enumerable: true,
@@ -294,7 +319,7 @@ export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) 
                 ).subscribe(val => {
                     try {
                         if (cnt !== 0) {
-                            console.log(new Error('Recursive call has detected. Stopping...'));
+                            console.log(new Error('1. Recursive call has detected. Stopping...'));
                             return;
                         }
                         cnt++;

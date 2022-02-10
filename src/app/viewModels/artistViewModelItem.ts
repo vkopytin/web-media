@@ -4,7 +4,7 @@ import { IArtist } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, current, State } from '../utils';
+import { current, State } from '../utils';
 import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
