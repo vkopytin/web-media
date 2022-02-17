@@ -21,9 +21,33 @@ class LoginService extends withEvents(BaseService) {
                 client_id: clientId,
                 redirect_uri: redirectUri,
                 scope: [
-                    'streaming', 'user-read-email', 'user-read-private',
-                    'user-modify-playback-state', 'user-top-read', 'user-library-read',
-                    'playlist-read-private'
+                    // Images
+                    'ugc-image-upload',
+                    // Spotify Connect
+                    'user-read-playback-state',
+                    'user-modify-playback-state',
+                    'user-read-currently-playing',
+                    // Users
+                    'user-read-private',
+                    'user-read-email',
+                    // Follow
+                    'user-follow-modify',
+                    'user-follow-read',
+                    // Library
+                    'user-library-modify',
+                    'user-library-read',
+                    // Playback
+                    'streaming',
+                    'app-remote-control',
+                    // Listening History
+                    'user-read-playback-position',
+                    'user-top-read',
+                    'user-read-recently-played',
+                    // Playlists
+                    'playlist-modify-private',
+                    'playlist-read-collaborative',
+                    'playlist-read-private',
+                    'playlist-modify-public'
                 ].join(' '),
                 response_type: 'token',
                 state: 'onSpotify-1'
