@@ -40,12 +40,14 @@ class NewReleasesViewModel {
     @State selectAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => {
         this.currentPlaylist = null;
         this.currentAlbum = album;
+        this.loadTracks();
     });
 
     selectPlaylistCommand$: BehaviorSubject<NewReleasesViewModel['selectPlaylistCommand']>;
     @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => {
         this.currentAlbum = null;
         this.currentPlaylist = playlist;
+        this.loadTracks();
     });
 
     likeAlbumCommand$: BehaviorSubject<NewReleasesViewModel['likeAlbumCommand']>;

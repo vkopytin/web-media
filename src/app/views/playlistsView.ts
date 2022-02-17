@@ -3,7 +3,7 @@ import { merge, Subject, Subscription } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/playlists';
-import { Binding, current } from '../utils';
+import { Binding, current, Notify } from '../utils';
 import { PlaylistsViewModel } from '../viewModels';
 
 
@@ -66,10 +66,12 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
     createPlaylistCommand: PlaylistsView['vm']['createPlaylistCommand'];
 
     componentDidMount() {
+        Notify.subscribeChildren(this.refresh, this);
         this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
+        Notify.unsubscribeChildren(this.refresh, this);
         this.didRefresh = () => { };
     }
 

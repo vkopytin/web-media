@@ -4,7 +4,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import * as _ from 'underscore';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/newReleases';
-import { Binding, current } from '../utils';
+import { Binding, current, Notify } from '../utils';
 import { AlbumViewModelItem, NewReleasesViewModel } from '../viewModels';
 
 
@@ -71,10 +71,12 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
     unlikeAlbumCommand: NewReleasesView['vm']['unlikeAlbumCommand'];
 
     componentDidMount() {
+        Notify.subscribeChildren(this.refresh, this);
         this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
+        Notify.unsubscribeChildren(this.refresh, this);
         this.didRefresh = () => { };
     }
 

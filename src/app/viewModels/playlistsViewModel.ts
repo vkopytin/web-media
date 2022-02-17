@@ -60,7 +60,10 @@ class PlaylistsViewModel {
     };
 
     selectPlaylistCommand$: BehaviorSubject<PlaylistsViewModel['selectPlaylistCommand']>;
-    @State selectPlaylistCommand = Scheduler.Command((playlistId: string) => this.currentPlaylistId = playlistId);
+    @State selectPlaylistCommand = Scheduler.Command((playlistId: string) => {
+        this.currentPlaylistId = playlistId;
+        this.fetchTracks();
+    });
     loadMoreCommand$: BehaviorSubject<PlaylistsViewModel['loadMoreCommand']>;
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
     loadMoreTracksCommand$: BehaviorSubject<PlaylistsViewModel['loadMoreTracksCommand']>;
@@ -85,9 +88,9 @@ class PlaylistsViewModel {
         await this.connect();
         await this.fetchData();
         //toDO: Find better solution
-        this.currentPlaylistId$.subscribe(id => {
-            this.fetchTracks();
-        });
+        //this.currentPlaylistId$.subscribe(id => {
+        //    this.fetchTracks();
+        //});
         resolve(true);
     }));
 

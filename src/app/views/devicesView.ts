@@ -3,7 +3,7 @@ import { merge, Subject, Subscription } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/devices';
-import { Binding, current } from '../utils';
+import { Binding, current, Notify } from '../utils';
 import { AppViewModel, DeviceViewModelItem } from '../viewModels';
 
 export interface IDevicesViewProps {
@@ -37,10 +37,12 @@ class DevicesView extends React.Component<IDevicesViewProps> {
     currentDevice: DevicesView['vm']['currentDevice'];
 
     componentDidMount() {
+        Notify.subscribeChildren(this.refresh, this);
         this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
+        Notify.unsubscribeChildren(this.refresh, this);
         this.didRefresh = () => { };
     }
 

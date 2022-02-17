@@ -1,4 +1,5 @@
-import { distinctUntilChanged } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import * as _ from 'underscore';
 
 
@@ -191,45 +192,88 @@ export function isLoading<T extends { isLoading: boolean; }>(target: T, key, des
     return descriptor;
 }
 
+const mainLoop$ = new Subject<{
+    inst;
+    value;
+}>();
+
+export const Notify = {
+    lock: asyncQueue(),
+    listeners: [] as [(...args) => void, any, any, any][],
+    subscribe<T>(callback, inst, context) {
+        let listener = this.listeners.find(([cb, cx]) => cb === callback && cx === inst);
+        if (listener) {
+            return;
+        }
+        listener = [callback, inst, (args) => {
+            if (inst === args.inst) {
+                try{
+                callback.call(context);
+                } catch (ex) {
+                    console.error(ex);
+                }
+            }
+        }];
+        this.listeners.push(listener);
+        listener[3] = mainLoop$
+            //.pipe(debounceTime(100))
+            .subscribe(listener[2]);
+    },
+    unsubscribe<T>(callback, inst) {
+        let listener = this.listeners.find(([cb, cx]) => cb === callback && cx === inst);
+        if (!listener) {
+            return;
+        }
+        listener[3].unsubscribe();
+        const index = this.listeners.indexOf(listener);
+        this.listeners.splice(index, 1);
+    },
+    subscribeChildren<T>(listener, inst) {
+        const props = Object.keys(inst).reduce((res, key) => inst[key] instanceof ValueContainer
+            ? [...res, inst[key] as ValueContainer<T>]
+            : res, [] as ValueContainer<T>[]);
+
+        props.forEach(e => e.subscribe(listener, inst));
+    },
+    unsubscribeChildren<T>(listener, inst) {
+        const props = Object.keys(inst).reduce((res, key) => inst[key] instanceof ValueContainer
+            ? [...res, inst[key] as ValueContainer<T>]
+            : res, [] as ValueContainer<T>[]);
+
+        props.forEach(e => e.unsubscribe(listener, inst));
+    },
+    trigger({ inst, value }) {
+        this.lock.push(done => {
+            try {
+                mainLoop$.next({ inst, value });
+            } finally {
+                done();
+            }
+        });
+    }
+};
+
 class ValueContainer<T> {
-    subscribers = [] as Array<(v: T) => void>;
-    children = [] as ValueContainer<T>[];
 
     constructor(public value: T) {
 
     }
 
-    attach(o: ValueContainer<T>) {
-        if (this.children.includes(o)) {
-            return;
-        }
-        this.children.push(o);
-        o.attach(this);
-
-        return this;
+    subscribe(handler, ctx) {
+        Notify.subscribe(handler, this, ctx);
     }
 
-    subscribe(handler) {
-        const cb = (...args) => {
-            return handler(...args);
-        }
-        this.subscribers.push(cb);
+    unsubscribe(handler, ctx) {
+        Notify.unsubscribe(handler, this);
     }
 
-    next(val: T, context = { cb: [], inst: [] }) {
-        this.value = val;
-        
-        try {
-            this.subscribers.filter(s => !context.cb.includes(s)).forEach(subsciber => {
-                context.cb.push(subsciber);
-                subsciber(val);
+    next(val: T) {
+        if (this.value !== val) {
+            this.value = val;
+            Notify.trigger({
+                inst: this,
+                value: val
             });
-            this.children.filter(s => !context.inst.includes(s)).forEach(c => {
-                context.inst.push(c);
-                c.next(val, context);
-            });
-        } catch (ex) {
-            throw ex;
         }
     }
 
@@ -251,7 +295,7 @@ class ValueContainer<T> {
 
     static from<T>(val: T | ValueContainer<T>) {
         if (val instanceof ValueContainer) {
-            return new ValueContainer<T>(val.getValue()).attach(val);
+            return val;
         }
 
         return new ValueContainer<T>(val);
@@ -293,7 +337,7 @@ export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) 
     return function <Y extends keyof T>(target: T, propName: Y, descriptor?): any {
         const desc = Object.getOwnPropertyDescriptor(target, `${propName}$`);
 
-        function initBinding(v: ValueContainer<any>) {
+        function initBinding(v: ValueContainer<T[Y]>) {
             let store$ = v;
             Object.defineProperty(this, `${propName}$`, {
                 get() {
@@ -304,33 +348,12 @@ export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) 
                         throw new Error('Please, provide ValueContainer');
                     }
                     if (v$ !== store$) {
-                        //throw new Error('Not supported')
-                        store$.attach(v$);
+                        store$ = v$;
                     }
                 },
                 enumerable: true,
                 configurable: true
             });
-
-            if (didSet) {
-                let cnt = 0;
-                store$.pipe(
-                    distinctUntilChanged((a, b) => _.isEqual(a, b))
-                ).subscribe(val => {
-                    try {
-                        if (cnt !== 0) {
-                            console.log(new Error('1. Recursive call has detected. Stopping...'));
-                            return;
-                        }
-                        cnt++;
-                        didSet.call(this, this, val);
-                        cnt--;
-                    } catch (ex) {
-                        cnt--;
-                        throw ex;
-                    }
-                });
-            }
 
             return store$;
         }

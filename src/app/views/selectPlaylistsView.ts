@@ -4,7 +4,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import * as _ from 'underscore';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/selectPlaylists';
-import { Binding, current } from '../utils';
+import { Binding, current, Notify } from '../utils';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 
@@ -54,10 +54,12 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
     removeFromPlaylistCommand: SelectPlaylistsView['vm']['removeFromPlaylistCommand'];
 
     componentDidMount() {
+        Notify.subscribeChildren(this.refresh, this);
         this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
+        Notify.unsubscribeChildren(this.refresh, this);
         this.didRefresh = () => { };
     }
 

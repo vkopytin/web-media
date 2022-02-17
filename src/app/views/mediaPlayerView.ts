@@ -3,7 +3,7 @@ import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import { map, takeUntil, distinctUntilChanged } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/mediaPlayer';
-import { Binding, current, formatTime } from '../utils';
+import { Binding, current, formatTime, Notify } from '../utils';
 import { MediaPlayerViewModel } from '../viewModels';
 
 export interface IMediaPlayerViewProps {
@@ -119,10 +119,12 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     }
 
     componentDidMount() {
+        Notify.subscribeChildren(this.refresh, this);
         this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
+        Notify.unsubscribeChildren(this.refresh, this);
         this.didRefresh = () => { };
     }
 

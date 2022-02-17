@@ -3,7 +3,7 @@ import { merge, Subject, Subscription } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/pickPlaylist';
-import { Binding, current } from '../utils';
+import { Binding, current, Notify } from '../utils';
 import { HomeViewModel, PlaylistsViewModel } from '../viewModels';
 
 
@@ -34,10 +34,12 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
     selectedPlaylist: PickPlaylistsView['homeVm']['selectedPlaylist'];
 
     componentDidMount() {
+        Notify.subscribeChildren(this.refresh, this);
         this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
+        Notify.unsubscribeChildren(this.refresh, this);
         this.didRefresh = () => { };
     }
 

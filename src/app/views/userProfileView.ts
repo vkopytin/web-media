@@ -2,7 +2,7 @@ import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs'
 import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/userProfile';
-import { current } from '../utils';
+import { current, Notify } from '../utils';
 import { TrackViewModelItem, UserProfileViewModel } from '../viewModels';
 import { IUserInfo } from '../adapter/spotify';
 import { BehaviorSubject, merge, of, Subject, Subscription } from 'rxjs';
@@ -73,10 +73,12 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
     doLogout = false;
   
     componentDidMount() {
+        Notify.subscribeChildren(this.refresh, this);
         this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
+        Notify.unsubscribeChildren(this.refresh, this);
         this.didRefresh = () => { };
     }
 

@@ -4,7 +4,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import * as _ from 'underscore';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/search';
-import { Binding, current } from '../utils';
+import { Binding, current, Notify } from '../utils';
 import { SearchViewModel, TrackViewModelItem } from '../viewModels';
 
 
@@ -88,10 +88,12 @@ class SearchView extends React.Component<ISearchViewProps> {
     }, 300);
 
     componentDidMount() {
+        Notify.subscribeChildren(this.refresh, this);
         this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
+        Notify.unsubscribeChildren(this.refresh, this);
         this.didRefresh = () => { };
     }
 

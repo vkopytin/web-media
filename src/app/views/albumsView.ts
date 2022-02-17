@@ -2,7 +2,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/albums';
-import { Binding, current, State } from '../utils';
+import { Binding, current, Notify, State } from '../utils';
 import { TrackViewModelItem } from '../viewModels';
 
 export interface IAlbumsViewProps {
@@ -43,15 +43,14 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
     selectedItem$ = this.vm.selectedItem$;
     @Binding({ didSet: (view) => view.didRefresh() })
     selectedItem: AlbumsView['vm']['selectedItem'];
-    
-    state = {
-    };
 
     componentDidMount() {
+        Notify.subscribeChildren(this.refresh, this);
         this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
+        Notify.unsubscribeChildren(this.refresh, this);
         this.didRefresh = () => { };
     }
 

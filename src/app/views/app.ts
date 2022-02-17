@@ -4,7 +4,7 @@ import { ServiceResult } from '../base/serviceResult';
 import { NoActiveDeviceError } from '../service/errors/noActiveDeviceError';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
 import { template } from '../templates/app';
-import { Binding, current } from '../utils';
+import { Binding, current, Notify } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel, TrackViewModelItem } from '../viewModels';
 
@@ -79,10 +79,12 @@ class AppView extends React.Component<IAppViewProps> {
     onPageScroll = _.debounce(evnt => this.onPageScrollInternal(evnt), 500);
 
     componentDidMount() {
+        Notify.subscribeChildren(this.refresh, this);
         this.didRefresh = this.refresh;
     }
 
     componentWillUnmount() {
+        Notify.unsubscribeChildren(this.refresh, this);
         this.didRefresh = () => { };
     }
 
