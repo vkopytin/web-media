@@ -1,6 +1,4 @@
 import React from 'react';
-import { merge, Subject, Subscription } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
 import * as _ from 'underscore';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/newReleases';

@@ -1,10 +1,8 @@
 import React from 'react';
-import { merge, Subject, Subscription } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/devices';
 import { Binding, current, Notify } from '../utils';
-import { AppViewModel, DeviceViewModelItem } from '../viewModels';
+import { AppViewModel } from '../viewModels';
 
 export interface IDevicesViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);

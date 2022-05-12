@@ -1,30 +1,29 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IResponseResult, ISpotifySong } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, current, State } from '../utils';
+import { assertNoErrors, current, State, ValueContainer } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 class MyTracksViewModel {
-    errors$: BehaviorSubject<MyTracksViewModel['errors']>;
+    errors$: ValueContainer<MyTracksViewModel['errors'], MyTracksViewModel>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    tracks$: BehaviorSubject<MyTracksViewModel['tracks']>;
+    tracks$: ValueContainer<MyTracksViewModel['tracks'], MyTracksViewModel>;
     @State tracks = [] as TrackViewModelItem[];
 
-    likedTracks$: BehaviorSubject<MyTracksViewModel['likedTracks']>;
+    likedTracks$: ValueContainer<MyTracksViewModel['likedTracks'], MyTracksViewModel>;
     @State likedTracks = [] as TrackViewModelItem[];
 
-    isLoading$: BehaviorSubject<MyTracksViewModel['isLoading']>;
+    isLoading$: ValueContainer<MyTracksViewModel['isLoading'], MyTracksViewModel>;
     @State isLoading = false;
 
-    selectedItem$: BehaviorSubject<MyTracksViewModel['selectedItem']>;
+    selectedItem$: ValueContainer<MyTracksViewModel['selectedItem'], MyTracksViewModel>;
     @State selectedItem = null as TrackViewModelItem;
 
-    trackLyrics$: BehaviorSubject<MyTracksViewModel['trackLyrics']>;
+    trackLyrics$: ValueContainer<MyTracksViewModel['trackLyrics'], MyTracksViewModel>;
     @State trackLyrics = null as { trackId: string; lyrics: string };
     
     settings = {
@@ -33,9 +32,9 @@ class MyTracksViewModel {
         offset: 0
     };
 
-    loadMoreCommand$: BehaviorSubject<MyTracksViewModel['loadMoreCommand']>;
+    loadMoreCommand$: ValueContainer<MyTracksViewModel['loadMoreCommand'], MyTracksViewModel>;
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
-    findTrackLyricsCommand$: BehaviorSubject<MyTracksViewModel['findTrackLyricsCommand']>;
+    findTrackLyricsCommand$: ValueContainer<MyTracksViewModel['findTrackLyricsCommand'], MyTracksViewModel>;
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as _ from 'underscore';
-import { BaseView } from '../base/baseView';
 import { ServiceResult } from '../base/serviceResult';
 
 type PanelType = 'home' | 'playlists' | 'profile' | 'releases' | 'search' | 'tracks';

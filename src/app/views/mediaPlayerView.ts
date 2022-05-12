@@ -1,14 +1,12 @@
 import React from 'react';
-import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import { map, takeUntil, distinctUntilChanged } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/mediaPlayer';
-import { Binding, current, formatTime, Notify } from '../utils';
-import { MediaPlayerViewModel } from '../viewModels';
+import { Binding, current, formatTime, Notify, ValueContainer } from '../utils';
+import { AppViewModel, MediaPlayerViewModel } from '../viewModels';
 
 export interface IMediaPlayerViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
-    currentTrackId$: BehaviorSubject<string>;
+    currentTrackId$: ValueContainer<string, AppViewModel>;
 }
 
 class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {

@@ -1,20 +1,14 @@
-import { bindTo, subscribeToChange, unbindFrom, updateLayout } from 'databindjs';
-import { BaseView } from '../base/baseView';
+import React from 'react';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/userProfile';
-import { current, Notify } from '../utils';
-import { TrackViewModelItem, UserProfileViewModel } from '../viewModels';
-import { IUserInfo } from '../adapter/spotify';
-import { BehaviorSubject, merge, of, Subject, Subscription } from 'rxjs';
-import { Binding } from '../utils';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
-import React from 'react';
+import { Binding, current, Notify, ValueContainer } from '../utils';
+import { AppViewModel, TrackViewModelItem, UserProfileViewModel } from '../viewModels';
 
 
 export interface IUserProfileViewProps {
     className?: string;
     showErrors(errors: ServiceResult<any, Error>[]);
-    openLogin$: BehaviorSubject<boolean>;
+    openLogin$: ValueContainer<boolean, AppViewModel>;
 }
 
 class UserProfileView extends React.Component<IUserProfileViewProps> {

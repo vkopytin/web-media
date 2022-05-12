@@ -1,59 +1,58 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IRecommendationsResult, IResponseResult, ISpotifySong, ITrack } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, current, isLoading, State } from '../utils';
+import { assertNoErrors, current, isLoading, State, ValueContainer } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class HomeViewModel {
-    errors$: BehaviorSubject<HomeViewModel['errors']>;
+    errors$: ValueContainer<HomeViewModel['errors'], HomeViewModel>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    tracks$: BehaviorSubject<HomeViewModel['tracks']>;
+    tracks$: ValueContainer<HomeViewModel['tracks'], HomeViewModel>;
     @State tracks = [] as TrackViewModelItem[];
 
-    likedTracks$: BehaviorSubject<HomeViewModel['likedTracks']>;
+    likedTracks$: ValueContainer<HomeViewModel['likedTracks'], HomeViewModel>;
     @State likedTracks = [] as TrackViewModelItem[];
 
-    isLoading$: BehaviorSubject<HomeViewModel['isLoading']>;
+    isLoading$: ValueContainer<HomeViewModel['isLoading'], HomeViewModel>;
     @State isLoading = false;
 
-    selectedTrack$: BehaviorSubject<HomeViewModel['selectedTrack']>;
+    selectedTrack$: ValueContainer<HomeViewModel['selectedTrack'], HomeViewModel>;
     @State selectedTrack = null as TrackViewModelItem;
 
-    trackLyrics$: BehaviorSubject<HomeViewModel['trackLyrics']>;
+    trackLyrics$: ValueContainer<HomeViewModel['trackLyrics'], HomeViewModel>;
     @State trackLyrics = null as { trackId: string; lyrics: string };
 
-    selectedPlaylist$: BehaviorSubject<HomeViewModel['selectedPlaylist']>;
+    selectedPlaylist$: ValueContainer<HomeViewModel['selectedPlaylist'], HomeViewModel>;
     @State selectedPlaylist = null as PlaylistsViewModelItem;
     
-    refreshCommand$: BehaviorSubject<HomeViewModel['refreshCommand']>;
+    refreshCommand$: ValueContainer<HomeViewModel['refreshCommand'], HomeViewModel>;
     @State refreshCommand = Scheduler.Command((trackId?: string) => this.fetchData(trackId));
 
-    selectTrackCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
+    selectTrackCommand$: ValueContainer<{ exec: () => Promise<void> }, HomeViewModel>;
     @State selectTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.selectedTrack = track);
 
-    likeTrackCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
+    likeTrackCommand$: ValueContainer<{ exec: (track) => Promise<void> }, HomeViewModel>;
     @State likeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.likeTrack(track));
 
-    unlikeTrackCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
+    unlikeTrackCommand$: ValueContainer<{ exec: (track) => Promise<void> }, HomeViewModel>;
     @State unlikeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.unlikeTrack(track));
 
-    findTrackLyricsCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
+    findTrackLyricsCommand$: ValueContainer<{ exec: (track) => Promise<void> }, HomeViewModel>;
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
 
-    bannedTrackIds$: BehaviorSubject<HomeViewModel['bannedTrackIds']>;
+    bannedTrackIds$: ValueContainer<HomeViewModel['bannedTrackIds'], HomeViewModel>;
     @State bannedTrackIds = [] as string[];
 
-    bannTrackCommand$: BehaviorSubject<HomeViewModel['bannTrackCommand']>;
+    bannTrackCommand$: ValueContainer<HomeViewModel['bannTrackCommand'], HomeViewModel>;
     @State bannTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.bannTrack(track));
 
-    removeBannFromTrackCommand$: BehaviorSubject<HomeViewModel['removeBannFromTrackCommand']>;
+    removeBannFromTrackCommand$: ValueContainer<HomeViewModel['removeBannFromTrackCommand'], HomeViewModel>;
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
@@ -61,7 +60,7 @@ class HomeViewModel {
         await this.fetchData();
         this.selectedPlaylist$.subscribe(() => {
             this.fetchData();
-        });
+        }, this);
 
         resolve(true);
     }, 100));

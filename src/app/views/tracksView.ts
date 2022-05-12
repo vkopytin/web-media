@@ -1,7 +1,5 @@
 import $ = require('jquery');
 import React from 'react';
-import { merge, Subject, Subscription } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/tracks';
 import { Binding, current, Notify } from '../utils';

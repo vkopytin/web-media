@@ -1,10 +1,9 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { ISearchResult, ISearchType, ISpotifySong } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { asyncQueue, current, Notify, State } from '../utils';
+import { asyncQueue, current, Notify, State, ValueContainer } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AlbumViewModelItem } from './albumViewModelItem';
 import { ArtistViewModelItem } from './artistViewModelItem';
@@ -15,33 +14,33 @@ import { TrackViewModelItem } from './trackViewModelItem';
 const searchQueue = asyncQueue();
 
 class SearchViewModel {
-    errors$: BehaviorSubject<SearchViewModel['errors']>;
+    errors$: ValueContainer<SearchViewModel['errors'], SearchViewModel>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    term$: BehaviorSubject<SearchViewModel['term']>;
+    term$: ValueContainer<SearchViewModel['term'], SearchViewModel>;
     @State term = '';
 
     @State isLoading = false;
 
-    tracks$: BehaviorSubject<SearchViewModel['tracks']>;
+    tracks$: ValueContainer<SearchViewModel['tracks'], SearchViewModel>;
     @State tracks = [] as TrackViewModelItem[];
-    artists$: BehaviorSubject<SearchViewModel['artists']>;
+    artists$: ValueContainer<SearchViewModel['artists'], SearchViewModel>;
     @State artists = [] as ArtistViewModelItem[];
-    albums$: BehaviorSubject<SearchViewModel['albums']>;
+    albums$: ValueContainer<SearchViewModel['albums'], SearchViewModel>;
     @State albums = [] as AlbumViewModelItem[];
-    playlists$: BehaviorSubject<SearchViewModel['playlists']>;
+    playlists$: ValueContainer<SearchViewModel['playlists'], SearchViewModel>;
     @State playlists = [] as PlaylistsViewModelItem[];
-    searchType$: BehaviorSubject<SearchViewModel['searchType']>;
+    searchType$: ValueContainer<SearchViewModel['searchType'], SearchViewModel>;
     @State searchType: ISearchType = 'track';
-    currentArtist$: BehaviorSubject<SearchViewModel['currentArtist']>;
+    currentArtist$: ValueContainer<SearchViewModel['currentArtist'], SearchViewModel>;
     @State currentArtist = null as ArtistViewModelItem;
-    currentAlbum$: BehaviorSubject<SearchViewModel['currentAlbum']>;
+    currentAlbum$: ValueContainer<SearchViewModel['currentAlbum'], SearchViewModel>;
     @State currentAlbum = null as AlbumViewModelItem;
-    currentPlaylist$: BehaviorSubject<SearchViewModel['currentPlaylist']>;
+    currentPlaylist$: ValueContainer<SearchViewModel['currentPlaylist'], SearchViewModel>;
     @State currentPlaylist = null as PlaylistsViewModelItem;
-    currentTracks$: BehaviorSubject<SearchViewModel['currentTracks']>;
+    currentTracks$: ValueContainer<SearchViewModel['currentTracks'], SearchViewModel>;
     @State currentTracks = [] as TrackViewModelItem[];
-    selectedItem$: BehaviorSubject<SearchViewModel['selectedItem']>;
+    selectedItem$: ValueContainer<SearchViewModel['selectedItem'], SearchViewModel>;
     @State selectedItem = null as TrackViewModelItem;
     
     settings = {
@@ -51,13 +50,13 @@ class SearchViewModel {
         currentMediaUri: null,
     };
 
-    loadMoreCommand$: BehaviorSubject<SearchViewModel['loadMoreCommand']>;
+    loadMoreCommand$: ValueContainer<SearchViewModel['loadMoreCommand'], SearchViewModel>;
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
 
-    likeTrackCommand$: BehaviorSubject<SearchViewModel['likeTrackCommand']>;
+    likeTrackCommand$: ValueContainer<SearchViewModel['likeTrackCommand'], SearchViewModel>;
     @State likeTrackCommand = Scheduler.Command(() => {});
 
-    unlikeTrackCommand$: BehaviorSubject<SearchViewModel['unlikeTrackCommand']>;
+    unlikeTrackCommand$: ValueContainer<SearchViewModel['unlikeTrackCommand'], SearchViewModel>;
     @State unlikeTrackCommand = Scheduler.Command(() => {});
 
     onChangeTerm = _.debounce(() => {
@@ -77,16 +76,16 @@ class SearchViewModel {
         Notify.subscribe(this.onChangeTerm, this.term$ as any, this);
         this.searchType$.subscribe(_.debounce(() => {
             this.fetchData();
-        }, 300));
+        }, 300), this);
         this.currentAlbum$.subscribe(_.debounce(() => {
             this.fetchTracks();
-        }, 300));
+        }, 300), this);
         this.currentPlaylist$.subscribe(_.debounce(() => {
             this.fetchTracks();
-        }, 300));
+        }, 300), this);
         this.currentArtist$.subscribe(_.debounce(() => {
             this.fetchTracks();
-        }, 300));
+        }, 300), this);
         resolve(true);
     }, 100));
 

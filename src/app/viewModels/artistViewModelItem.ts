@@ -1,10 +1,9 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IArtist } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { current, State } from '../utils';
+import { current, State, ValueContainer } from '../utils';
 import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
@@ -12,13 +11,13 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 class ArtistViewModelItem {
     appViewModel = current(AppViewModel);
 
-    errors$: BehaviorSubject<ArtistViewModelItem['errors']>;
+    errors$: ValueContainer<ArtistViewModelItem['errors'], ArtistViewModelItem>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    playlists$: BehaviorSubject<ArtistViewModelItem['playlists']>;
+    playlists$: ValueContainer<ArtistViewModelItem['playlists'], ArtistViewModelItem>;
     @State playlists = [] as PlaylistsViewModelItem[];
 
-    isLiked$: BehaviorSubject<ArtistViewModelItem['playlists']>;
+    isLiked$: ValueContainer<ArtistViewModelItem['playlists'], ArtistViewModelItem>;
     @State isLiked = false;
     
     isInit = _.delay(() => {

@@ -1,10 +1,9 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IAlbum, IResponseResult, ISearchResult, ISpotifySong, ITrack } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, current, State } from '../utils';
+import { assertNoErrors, current, State, ValueContainer } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AlbumViewModelItem } from './albumViewModelItem';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
@@ -12,48 +11,48 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class NewReleasesViewModel {
-    errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
+    errors$: ValueContainer<ServiceResult<any, Error>[], NewReleasesViewModel>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    newReleases$: BehaviorSubject<NewReleasesViewModel['newReleases']>;
+    newReleases$: ValueContainer<NewReleasesViewModel['newReleases'], NewReleasesViewModel>;
     @State newReleases = [] as AlbumViewModelItem[];
 
-    featuredPlaylists$: BehaviorSubject<NewReleasesViewModel['featuredPlaylists']>;
+    featuredPlaylists$: ValueContainer<NewReleasesViewModel['featuredPlaylists'], NewReleasesViewModel>;
     @State featuredPlaylists = [] as PlaylistsViewModelItem[];
 
-    currentAlbum$: BehaviorSubject<NewReleasesViewModel['currentAlbum']>;
+    currentAlbum$: ValueContainer<NewReleasesViewModel['currentAlbum'], NewReleasesViewModel>;
     @State currentAlbum = null as AlbumViewModelItem;
 
-    currentPlaylist$: BehaviorSubject<NewReleasesViewModel['currentPlaylist']>;
+    currentPlaylist$: ValueContainer<NewReleasesViewModel['currentPlaylist'], NewReleasesViewModel>;
     @State currentPlaylist = null as PlaylistsViewModelItem;
 
-    currentTracks$: BehaviorSubject<NewReleasesViewModel['currentTracks']>;
+    currentTracks$: ValueContainer<NewReleasesViewModel['currentTracks'], NewReleasesViewModel>;
     @State currentTracks = [] as TrackViewModelItem[];
 
-    tracks$: BehaviorSubject<NewReleasesViewModel['tracks']>;
+    tracks$: ValueContainer<NewReleasesViewModel['tracks'], NewReleasesViewModel>;
     @State tracks = [] as TrackViewModelItem[];
 
-    likedAlbums$: BehaviorSubject<NewReleasesViewModel['likedAlbums']>;
+    likedAlbums$: ValueContainer<NewReleasesViewModel['likedAlbums'], NewReleasesViewModel>;
     @State likedAlbums = [] as AlbumViewModelItem[];
 
-    selectAlbumCommand$: BehaviorSubject<NewReleasesViewModel['selectAlbumCommand']>;
+    selectAlbumCommand$: ValueContainer<NewReleasesViewModel['selectAlbumCommand'], NewReleasesViewModel>;
     @State selectAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => {
         this.currentPlaylist = null;
         this.currentAlbum = album;
         this.loadTracks();
     });
 
-    selectPlaylistCommand$: BehaviorSubject<NewReleasesViewModel['selectPlaylistCommand']>;
+    selectPlaylistCommand$: ValueContainer<NewReleasesViewModel['selectPlaylistCommand'], NewReleasesViewModel>;
     @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => {
         this.currentAlbum = null;
         this.currentPlaylist = playlist;
         this.loadTracks();
     });
 
-    likeAlbumCommand$: BehaviorSubject<NewReleasesViewModel['likeAlbumCommand']>;
+    likeAlbumCommand$: ValueContainer<NewReleasesViewModel['likeAlbumCommand'], NewReleasesViewModel>;
     @State likeAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.likeAlbum(album));
 
-    unlikeAlbumCommand$: BehaviorSubject<NewReleasesViewModel['unlikeAlbumCommand']>;
+    unlikeAlbumCommand$: ValueContainer<NewReleasesViewModel['unlikeAlbumCommand'], NewReleasesViewModel>;
     @State unlikeAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.unlikeAlbum(album));
 
     isInit = new Promise(resume => _.delay(async () => {
@@ -75,8 +74,8 @@ class NewReleasesViewModel {
             return;
         }
         spotifyResult.val.on('change:state', state => this.checkAlbums());
-        this.currentAlbum$.subscribe(() => _.delay(() => this.loadTracks()));
-        this.currentPlaylist$.subscribe(() => _.delay(() => this.loadTracks()));
+        this.currentAlbum$.subscribe(() => _.delay(() => this.loadTracks()), this);
+        this.currentPlaylist$.subscribe(() => _.delay(() => this.loadTracks()), this);
     }
 
     async fetchData() {

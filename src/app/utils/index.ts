@@ -287,7 +287,7 @@ export const Notify = (function () {
     return impl;
 })();
 
-class ValueContainer<T, Y> {
+export class ValueContainer<T, Y> {
     listeners = [];
     trace = '';
 

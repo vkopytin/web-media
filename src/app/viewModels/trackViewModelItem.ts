@@ -1,11 +1,10 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { ISpotifySong } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { DataService } from '../service/dataService';
 import { SpotifyService } from '../service/spotify';
-import { current, formatTime, isLoading, State } from '../utils';
+import { current, formatTime, isLoading, State, ValueContainer } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
 import { MediaPlayerViewModel } from './mediaPlayerViewModel';
@@ -17,22 +16,22 @@ class TrackViewModelItem {
     playlistsViewModel = current(PlaylistsViewModel);
     mediaPlayerViewModel = current(MediaPlayerViewModel);
 
-    errors$: BehaviorSubject<TrackViewModelItem['errors']>;
+    errors$: ValueContainer<TrackViewModelItem['errors'], TrackViewModelItem>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    isLiked$: BehaviorSubject<TrackViewModelItem['isLiked']>;
+    isLiked$: ValueContainer<TrackViewModelItem['isLiked'], TrackViewModelItem>;
     @State isLiked = false;
 
-    isCached$: BehaviorSubject<TrackViewModelItem['isCached']>;
+    isCached$: ValueContainer<TrackViewModelItem['isCached'], TrackViewModelItem>;
     @State isCached = false;
 
-    trackPlaylists$: BehaviorSubject<TrackViewModelItem['trackPlaylists']>;
+    trackPlaylists$: ValueContainer<TrackViewModelItem['trackPlaylists'], TrackViewModelItem>;
     @State trackPlaylists = [] as PlaylistsViewModelItem[];
 
-    isBanned$: BehaviorSubject<TrackViewModelItem['isBanned']>;
+    isBanned$: ValueContainer<TrackViewModelItem['isBanned'], TrackViewModelItem>;
     @State isBanned = false;
     
-    isLoading$: BehaviorSubject<PlaylistsViewModel['isLoading']>;
+    isLoading$: ValueContainer<PlaylistsViewModel['isLoading'], TrackViewModelItem>;
     @State isLoading = false;
 
     settings = {
@@ -40,20 +39,20 @@ class TrackViewModelItem {
         isCached: false,
     };
 
-    addToPlaylistCommand$: BehaviorSubject<TrackViewModelItem['addToPlaylistCommand']>;
+    addToPlaylistCommand$: ValueContainer<TrackViewModelItem['addToPlaylistCommand'], TrackViewModelItem>;
     @State addToPlaylistCommand = Scheduler.Command((track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.addToPlaylist(track, playlist));
 
-    removeFromPlaylistCommand$: BehaviorSubject<TrackViewModelItem['removeFromPlaylistCommand']>;
+    removeFromPlaylistCommand$: ValueContainer<TrackViewModelItem['removeFromPlaylistCommand'], TrackViewModelItem>;
     @State removeFromPlaylistCommand = Scheduler.Command((track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist));
 
-    playTracksCommand$: BehaviorSubject<TrackViewModelItem['playTracksCommand']>;
+    playTracksCommand$: ValueContainer<TrackViewModelItem['playTracksCommand'], TrackViewModelItem>;
     @State playTracksCommand = Scheduler.Command((tracks: TrackViewModelItem[]) => this.playTracks(tracks));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         await this.connect();
         this.trackPlaylists$.subscribe((val) => {
             this.updateIsCached(val);
-        });
+        }, this);
         resolve(true);
     }));
 
