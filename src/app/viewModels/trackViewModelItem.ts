@@ -8,12 +8,14 @@ import { SpotifyService } from '../service/spotify';
 import { current, formatTime, isLoading, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
+import { MediaPlayerViewModel } from './mediaPlayerViewModel';
 import { PlaylistsViewModel } from './playlistsViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 class TrackViewModelItem {
     appViewModel = current(AppViewModel);
     playlistsViewModel = current(PlaylistsViewModel);
+    mediaPlayerViewModel = current(MediaPlayerViewModel);
 
     errors$: BehaviorSubject<TrackViewModelItem['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
@@ -45,7 +47,7 @@ class TrackViewModelItem {
     @State removeFromPlaylistCommand = Scheduler.Command((track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist));
 
     playTracksCommand$: BehaviorSubject<TrackViewModelItem['playTracksCommand']>;
-    @State playTracksCommand = Scheduler.Command((tracls: TrackViewModelItem[]) => this.playTracks(tracls));
+    @State playTracksCommand = Scheduler.Command((tracks: TrackViewModelItem[]) => this.playTracks(tracks));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         await this.connect();
@@ -143,13 +145,13 @@ class TrackViewModelItem {
 
     async play(playlistUri: string) {
         const playResult = await this.ss.play(null, playlistUri, this.uri());
-        playResult.assert(e => this.errors = [e]);
+        playResult.assert(e => this.errors = [e]).map(() => this.mediaPlayerViewModel.fetchDataInternal());
     }
 
     async playTracks(tracks: TrackViewModelItem[]) {
         const allowedTracks = _.filter(tracks, track => !track.isBanned);
         const playResult = await this.ss.play(null, _.map(allowedTracks, item => item.uri()), this.uri());
-        playResult.assert(e => this.errors = [e]);
+        playResult.assert(e => this.errors = [e]).map(() => this.mediaPlayerViewModel.fetchDataInternal());
     }
 
     @isLoading

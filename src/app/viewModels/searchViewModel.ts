@@ -4,7 +4,7 @@ import { ISearchResult, ISearchType, ISpotifySong } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { asyncQueue, current, State } from '../utils';
+import { asyncQueue, current, Notify, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AlbumViewModelItem } from './albumViewModelItem';
 import { ArtistViewModelItem } from './artistViewModelItem';
@@ -54,19 +54,27 @@ class SearchViewModel {
     loadMoreCommand$: BehaviorSubject<SearchViewModel['loadMoreCommand']>;
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
 
+    likeTrackCommand$: BehaviorSubject<SearchViewModel['likeTrackCommand']>;
+    @State likeTrackCommand = Scheduler.Command(() => {});
+
+    unlikeTrackCommand$: BehaviorSubject<SearchViewModel['unlikeTrackCommand']>;
+    @State unlikeTrackCommand = Scheduler.Command(() => {});
+
+    onChangeTerm = _.debounce(() => {
+        searchQueue.push(async (next) => {
+            if (this.term) {
+                await this.fetchData();
+                next();
+            } else {
+                this.tracks = [];
+                next();
+            }
+        });
+    }, 300);
+
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         this.fetchData();
-        this.term$.subscribe(_.debounce(() => {
-            searchQueue.push(async (next) => {
-                if (this.term) {
-                    await this.fetchData();
-                    next();
-                } else {
-                    this.tracks = [];
-                    next();
-                }
-            });
-        }, 300));
+        Notify.subscribe(this.onChangeTerm, this.term$ as any, this);
         this.searchType$.subscribe(_.debounce(() => {
             this.fetchData();
         }, 300));

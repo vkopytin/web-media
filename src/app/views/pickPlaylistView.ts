@@ -46,7 +46,10 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
     componentDidUpdate(prevProps: IPickPlaylistsViewProps, prevState, snapshot) {
     }
 
-    refresh() {
+    refresh(args) {
+        if (args?.inst === this.errors$) {
+            this.showErrors(args.value);
+        }
         this.setState({
             ...this.state,
         });

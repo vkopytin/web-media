@@ -192,71 +192,107 @@ export function isLoading<T extends { isLoading: boolean; }>(target: T, key, des
     return descriptor;
 }
 
-const mainLoop$ = new Subject<{
-    inst;
-    value;
-}>();
+export const Notify = (function () {
+    const mainLoop$ = new Subject<{
+        inst;
+        value;
+    }>();
 
-export const Notify = {
-    lock: asyncQueue(),
-    listeners: [] as [(...args) => void, any, any, any][],
-    subscribe<T>(callback, inst, context) {
-        let listener = this.listeners.find(([cb, cx]) => cb === callback && cx === inst);
-        if (listener) {
-            return;
-        }
-        listener = [callback, inst, (args) => {
-            if (inst === args.inst) {
-                try{
-                callback.call(context);
-                } catch (ex) {
-                    console.error(ex);
+    const impl = {
+        lock: asyncQueue(),
+        listeners: [] as [(...args) => void, ValueContainer<any, any>, any, any][],
+        subscribe<T>(callback, inst: ValueContainer<any, any>, context) {
+            //callback = false;
+            if (callback) {
+                let listener = this.listeners.find(([cb, cx]) => cb === callback && cx === inst);
+                if (listener) {
+                    return;
                 }
+                listener = [callback, inst, (args) => {
+                    if (inst !== args.inst) {
+                        return;
+                    }
+                    try {
+                        callback.call(context, args);
+                    } catch (ex) {
+                        console.error(ex);
+                    }
+                }];
+                this.listeners.push(listener);
+                listener[3] = mainLoop$.subscribe(listener[2]);
             }
-        }];
-        this.listeners.push(listener);
-        listener[3] = mainLoop$
-            //.pipe(debounceTime(100))
-            .subscribe(listener[2]);
-    },
-    unsubscribe<T>(callback, inst) {
-        let listener = this.listeners.find(([cb, cx]) => cb === callback && cx === inst);
-        if (!listener) {
-            return;
+
+            inst.listeners.forEach(fn => {
+                const listener2 = [fn, inst, (args) => {
+                    if (inst !== args.inst) {
+                        return;
+                    }
+                    try {
+                        fn.call(context, context, args.value);
+                    } catch (ex) {
+                        console.error(ex);
+                    }
+                }];
+                this.listeners.push(listener2);
+                listener2[3] = mainLoop$.subscribe(listener2[2]);
+            });
+        },
+        unsubscribe<T>(callback, inst: ValueContainer<any, any>) {
+            //callback = false;
+            if (callback) {
+                const listener = this.listeners.find(([cb, cx]) => cb === callback && cx === inst);
+                if (!listener) {
+                    return;
+                }
+                listener[3].unsubscribe();
+                const index = this.listeners.indexOf(listener);
+                this.listeners.splice(index, 1);
+            }
+
+            inst.listeners.forEach(fn => {
+                const listener = this.listeners.find(([cb, cx]) => cb === fn && cx === inst);
+                if (!listener) {
+                    return;
+                }
+                listener[3].unsubscribe();
+                const index = this.listeners.indexOf(listener);
+                this.listeners.splice(index, 1);
+            });
+        },
+        subscribeChildren<T, Y>(listener, inst) {
+            const props = Object.keys(inst).reduce((res, key) => inst[key] instanceof ValueContainer
+                ? [...res, inst[key] as ValueContainer<T, Y>]
+                : res, [] as ValueContainer<T, Y>[]);
+
+            props.forEach(e => e.subscribe(listener, inst));
+        },
+        unsubscribeChildren<T, Y>(listener, inst) {
+            const props = Object.keys(inst).reduce((res, key) => inst[key] instanceof ValueContainer
+                ? [...res, inst[key] as ValueContainer<T, Y>]
+                : res, [] as ValueContainer<T, Y>[]);
+
+            props.forEach(e => e.unsubscribe(listener, inst));
+        },
+        trigger({ inst, value }) {
+            this.lock.push(done => {
+                try {
+                    mainLoop$.next({ inst, value });
+                } finally {
+                    done();
+                }
+            });
         }
-        listener[3].unsubscribe();
-        const index = this.listeners.indexOf(listener);
-        this.listeners.splice(index, 1);
-    },
-    subscribeChildren<T>(listener, inst) {
-        const props = Object.keys(inst).reduce((res, key) => inst[key] instanceof ValueContainer
-            ? [...res, inst[key] as ValueContainer<T>]
-            : res, [] as ValueContainer<T>[]);
+    };
 
-        props.forEach(e => e.subscribe(listener, inst));
-    },
-    unsubscribeChildren<T>(listener, inst) {
-        const props = Object.keys(inst).reduce((res, key) => inst[key] instanceof ValueContainer
-            ? [...res, inst[key] as ValueContainer<T>]
-            : res, [] as ValueContainer<T>[]);
+    return impl;
+})();
 
-        props.forEach(e => e.unsubscribe(listener, inst));
-    },
-    trigger({ inst, value }) {
-        this.lock.push(done => {
-            try {
-                mainLoop$.next({ inst, value });
-            } finally {
-                done();
-            }
-        });
-    }
-};
+class ValueContainer<T, Y> {
+    listeners = [];
+    trace = '';
 
-class ValueContainer<T> {
-
-    constructor(public value: T) {
-
+    constructor(public value: T, public target: Y, public propName) {
+        this.trace = new Error().stack;
     }
 
     subscribe(handler, ctx) {
@@ -277,8 +313,8 @@ class ValueContainer<T> {
         }
     }
 
-    map<Y>(fn: (v: T) => Y): ValueContainer<Y> {
-        return ValueContainer.from(this.cat(fn));
+    map<U>(fn: (v: T) => U): ValueContainer<U, Y> {
+        return ValueContainer.from(this.cat(fn), this.target, fn);
     }
 
     cat<Y>(fn: (v: T) => Y): Y {
@@ -293,18 +329,18 @@ class ValueContainer<T> {
         return this.value;
     }
 
-    static from<T>(val: T | ValueContainer<T>) {
+    static from<T, Y>(val: T | ValueContainer<T, Y>, target: Y, propName) {
         if (val instanceof ValueContainer) {
             return val;
         }
 
-        return new ValueContainer<T>(val);
+        return new ValueContainer<T, Y>(val, target, propName);
     }
 }
 
 export function State<T, Y extends keyof T>(target: T, propName: Y, descriptor?) {
     function initState(v?) {
-        let store$ = ValueContainer.from(v);
+        let store$ = ValueContainer.from(v, target, propName);
 
         Object.defineProperty(this, `${propName}$`, {
             get() {
@@ -337,8 +373,8 @@ export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) 
     return function <Y extends keyof T>(target: T, propName: Y, descriptor?): any {
         const desc = Object.getOwnPropertyDescriptor(target, `${propName}$`);
 
-        function initBinding(v: ValueContainer<T[Y]>) {
-            let store$ = v;
+        function initBinding(store$: ValueContainer<T[Y], T>) {
+            store$.listeners.push(() => didSet.call(this, this));
             Object.defineProperty(this, `${propName}$`, {
                 get() {
                     return store$;
@@ -349,6 +385,7 @@ export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) 
                     }
                     if (v$ !== store$) {
                         store$ = v$;
+                        store$.listeners.push(didSet);
                     }
                 },
                 enumerable: true,

@@ -88,10 +88,12 @@ class AppView extends React.Component<IAppViewProps> {
         this.didRefresh = () => { };
     }
 
-    refresh(newState?) {
+    refresh(args) {
+        if (args?.inst === this.errors$) {
+            this.showErrors(args.value);
+        }
         this.setState({
             ...this.state,
-            ...newState,
         });
     }
 

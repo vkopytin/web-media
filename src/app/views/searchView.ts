@@ -75,13 +75,13 @@ class SearchView extends React.Component<ISearchViewProps> {
     @Binding({ didSet: (view) => view.didRefresh() })
     loadMoreCommand: SearchView['vm']['loadMoreCommand'];
 
-    likeTrackCommand$ = new BehaviorSubject({ exec(track: TrackViewModelItem) { } });
+    likeTrackCommand$ = this.vm.likeTrackCommand$;
     @Binding({ didSet: (view) => view.didRefresh() })
-    likeTrackCommand: SearchView['likeTrackCommand$']['value'];
+    likeTrackCommand: SearchView['vm']['likeTrackCommand'];
 
-    unlikeTrackCommand$ = new BehaviorSubject({ exec(track: TrackViewModelItem) { } });
+    unlikeTrackCommand$ = this.vm.unlikeTrackCommand$;
     @Binding({ didSet: (view) => view.didRefresh() })
-    unlikeTrackCommand: SearchView['unlikeTrackCommand$']['value'];
+    unlikeTrackCommand: SearchView['vm']['unlikeTrackCommand'];
 
     searchTracks = _.debounce(term => {
         this.term = term;
@@ -103,7 +103,10 @@ class SearchView extends React.Component<ISearchViewProps> {
         }
     }
 
-    refresh() {
+    refresh(args) {
+        if (args?.inst === this.errors$) {
+            this.showErrors(args.value);
+        }
         this.setState({
             ...this.state,
         });

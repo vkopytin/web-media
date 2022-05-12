@@ -73,7 +73,10 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
         }
     }
 
-    refresh() {
+    refresh(args) {
+        if (args?.inst === this.errors$) {
+            this.showErrors(args.value);
+        }
         this.setState({
             ...this.state,
         });

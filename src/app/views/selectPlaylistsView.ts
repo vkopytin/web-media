@@ -70,7 +70,10 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
         }
     }
 
-    refresh() {
+    refresh(args) {
+        if (args?.inst === this.errors$) {
+            this.showErrors(args.value);
+        }
         this.setState({
             ...this.state,
         });

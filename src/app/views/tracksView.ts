@@ -105,7 +105,10 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         this.didRefresh = () => { };
     }
 
-    refresh() {
+    refresh(args) {
+        if (args?.inst === this.errors$) {
+            this.showErrors(args.value);
+        }
         this.setState({
             ...this.state,
         });
