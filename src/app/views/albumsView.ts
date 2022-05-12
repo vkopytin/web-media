@@ -1,8 +1,7 @@
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/albums';
-import { Binding, current, Notify, State } from '../utils';
+import { Binding, current, Notify, State, ValueContainer } from '../utils';
 import { TrackViewModelItem } from '../viewModels';
 
 export interface IAlbumsViewProps {
@@ -13,13 +12,13 @@ export interface IAlbumsViewProps {
 }
 
 class AlbumsViewModel {
-    errors$: BehaviorSubject<AlbumsViewModel['errors']>;
+    errors$: ValueContainer<AlbumsViewModel['errors'], AlbumsViewModel>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    tracks$: BehaviorSubject<AlbumsViewModel['tracks']>;
+    tracks$: ValueContainer<AlbumsViewModel['tracks'], AlbumsViewModel>;
     @State tracks = [] as TrackViewModelItem[];
 
-    selectedItem$: BehaviorSubject<AlbumsViewModel['selectedItem']>;
+    selectedItem$: ValueContainer<AlbumsViewModel['selectedItem'], AlbumsViewModel>;
     @State selectedItem = null as TrackViewModelItem;
 }
 
