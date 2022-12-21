@@ -30,7 +30,7 @@ class HomeViewModel {
 
     selectedPlaylist$: ValueContainer<HomeViewModel['selectedPlaylist'], HomeViewModel>;
     @State selectedPlaylist = null as PlaylistsViewModelItem;
-    
+
     refreshCommand$: ValueContainer<HomeViewModel['refreshCommand'], HomeViewModel>;
     @State refreshCommand = Scheduler.Command((trackId?: string) => this.fetchData(trackId));
 
@@ -178,7 +178,7 @@ class HomeViewModel {
                 trackId: track.id(),
                 lyrics: lyricsResult.error.message
             };
-            
+
             return this.errors = [e];
         }).cata(() => {
             this.trackLyrics = {

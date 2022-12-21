@@ -2,24 +2,13 @@ import React from 'react';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/albums';
 import { Binding, current, Notify, State, ValueContainer } from '../utils';
-import { TrackViewModelItem } from '../viewModels';
+import { AlbumsViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IAlbumsViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
     uri: string;
     currentTrackId: string;
     tracks: TrackViewModelItem[];
-}
-
-class AlbumsViewModel {
-    errors$: ValueContainer<AlbumsViewModel['errors'], AlbumsViewModel>;
-    @State errors = [] as ServiceResult<any, Error>[];
-
-    tracks$: ValueContainer<AlbumsViewModel['tracks'], AlbumsViewModel>;
-    @State tracks = [] as TrackViewModelItem[];
-
-    selectedItem$: ValueContainer<AlbumsViewModel['selectedItem'], AlbumsViewModel>;
-    @State selectedItem = null as TrackViewModelItem;
 }
 
 class AlbumsView extends React.Component<IAlbumsViewProps> {

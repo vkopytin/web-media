@@ -34,6 +34,10 @@ class DevicesView extends React.Component<IDevicesViewProps> {
     @Binding({ didSet: (view) => view.didRefresh() })
     currentDevice: DevicesView['vm']['currentDevice'];
 
+    refreshDevicesCommand$ = this.vm.refreshDevicesCommand$;
+    @Binding({ didSet: (view) => view.didRefresh() })
+    refreshDevicesCommand: DevicesView['vm']['refreshDevicesCommand'];
+
     componentDidMount() {
         Notify.subscribeChildren(this.refresh, this);
         this.didRefresh = this.refresh;

@@ -1,3 +1,4 @@
+export { AlbumsViewModel } from './albumsViewModel';
 export { AlbumViewModelItem } from './albumViewModelItem';
 export { AppViewModel } from './appViewModel';
 export { DeviceViewModelItem } from './deviceViewModelItem';

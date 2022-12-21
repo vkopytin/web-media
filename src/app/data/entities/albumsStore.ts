@@ -1,4 +1,3 @@
-import * as _ from 'underscore';
 import { IStorage, IStorageConfig } from "../iStorage";
 import { asAsync, asAsyncOf } from '../../utils';
 import { IAlbum } from './interfaces/iAlbum';
@@ -16,7 +15,7 @@ export class AlbumsStore {
                 id: { unique: true }
             },
             name: {
-                name: { }
+                name: {}
             }
         },
         orderBy: 'name',
