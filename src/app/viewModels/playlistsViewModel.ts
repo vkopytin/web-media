@@ -87,10 +87,6 @@ class PlaylistsViewModel {
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         await this.connect();
         await this.fetchData();
-        //toDO: Find better solution
-        //this.currentPlaylistId$.subscribe(id => {
-        //    this.fetchTracks();
-        //});
         resolve(true);
     }));
 

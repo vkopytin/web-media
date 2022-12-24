@@ -198,7 +198,7 @@ interface INotification {
 
 interface ISignals {
     propName: string;
-    callbacks: Array<[unknown, () => void]>;
+    callbacks: Array<[unknown, Function]>;
     observers: Array<unknown>;
 }
 
@@ -207,35 +207,37 @@ export const Notifications = (function () {
 
     return {
         state,
-        observe(obj, callback) {
+        observe(obj: unknown, callback: Function) {
             Object.keys(obj).forEach(key => {
-                const hasTraits = objectTraits.has(obj[key]);
-                if (hasTraits) {
-                    GetTraits<ISignals['observers']>(obj[key]).observers.push(obj);
-                    Notifications.subscribe(obj[key], obj, callback);
+                const traits = GetTraits<ISignals>(obj[key], false);
+                if (!traits) {
+                    return;
                 }
+                traits.observers.push(obj);
+                Notifications.subscribe(obj[key], obj, callback);
             });
         },
-        stopObserving(obj, callback) {
+        stopObserving(obj: unknown, callback: Function) {
             Object.keys(obj).forEach(key => {
-                const hasTraits = objectTraits.has(obj[key]);
-                if (hasTraits) {
-                    const observers = GetTraits<ISignals['observers']>(obj[key]).observers.filter(o => o !== obj);
-                    GetTraits<ISignals['observers']>(obj[key]).observers = observers;
-                    Notifications.unsubscribe(obj[key], obj, callback);
+                const traits = GetTraits<ISignals>(obj[key], false);
+                if (!traits) {
+                    return;
                 }
+                const observers = GetTraits<ISignals>(obj[key]).observers.filter(o => o !== obj);
+                GetTraits<ISignals>(obj[key]).observers = observers;
+                Notifications.unsubscribe(obj[key], obj, callback);
             });
         },
         next(value: INotification) {
-            const observers = GetTraits<ISignals['observers']>(value.state).observers;
-            GetTraits<ISignals['callbacks']>(value.state).callbacks.forEach(([o, cb]) => {
+            const observers = GetTraits<ISignals>(value.state, false).observers;
+            GetTraits<ISignals>(value.state).callbacks.forEach(([o, cb]) => {
                 observers.forEach(obj => obj === o && cb.call(obj, value.value));
             });
         },
         declare<T>(state: BehaviorSubject<T>, propName: string) {
-            GetTraits<ISignals['callbacks']>(state).callbacks = [];
-            GetTraits<ISignals['observers']>(state).observers = [];
-            GetTraits<ISignals['propName']>(state).propName = propName;
+            GetTraits<ISignals>(state).callbacks = [];
+            GetTraits<ISignals>(state).observers = [];
+            GetTraits<ISignals>(state).propName = propName;
             state.subscribe(value => {
                 Notifications.next({
                     state,
@@ -243,23 +245,23 @@ export const Notifications = (function () {
                 });
             });
         },
-        subscribe<T>(state: BehaviorSubject<T>, view, callback) {
-            GetTraits<ISignals['callbacks']>(state).callbacks.push([view, callback]);
+        subscribe<T>(state: BehaviorSubject<T>, view: unknown, callback: Function) {
+            GetTraits<ISignals>(state, false).callbacks.push([view, callback]);
         },
-        unsubscribe<T>(state: BehaviorSubject<T>, view, callback) {
-            const callbacks = GetTraits<ISignals['callbacks']>(state).callbacks.filter(([a, b]) => a !== view && callback !== b);
-            GetTraits(state).callbacks = callbacks;
+        unsubscribe<T>(state: BehaviorSubject<T>, view: unknown, callback: Function) {
+            const callbacks = GetTraits<ISignals>(state).callbacks.filter(([a, b]) => a !== view && callback !== b);
+            GetTraits<ISignals>(state, false).callbacks = callbacks;
         },
     };
 })();
 
 const objectTraits = new WeakMap<object, { [key: string]: any }>();
-export const GetTraits = <T>(obj) => {
-    if (!objectTraits.has(obj)) {
+export const GetTraits = <T>(obj, autoCreate = true) => {
+    if (autoCreate && !objectTraits.has(obj)) {
         objectTraits.set(obj, {});
     }
 
-    return objectTraits.get(obj) as { [key: string]: T };
+    return objectTraits.get(obj) as T;
 }
 
 export function State<T>(target: T, propName: string, descriptor?) {
@@ -296,7 +298,7 @@ export function State<T>(target: T, propName: string, descriptor?) {
 
 export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) => void } = {}) {
     return function (target: T, propName: string, descriptor?): any {
-        const desc = Object.getOwnPropertyDescriptor(target, `${propName}$`);
+        const desc$ = Object.getOwnPropertyDescriptor(target, `${propName}$`);
 
         function initBinding(store$: BehaviorSubject<unknown>) {
             let state = store$;
@@ -332,17 +334,20 @@ export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) 
             set: initBinding,
             enumerable: true,
             configurable: true,
-            ...desc
+            ...desc$
         };
         Object.defineProperty(target, `${propName}$`, storeOpts);
+        const desc = Object.getOwnPropertyDescriptor(target, propName);
 
         const opts = {
             get() {
+                desc?.get();
                 return this[`${propName}$`].getValue();
             },
             set(val) {
                 if (this[propName] !== val) {
                     this[`${propName}$`].next(val);
+                    desc?.set(val);
                 }
             },
             enumerable: true,

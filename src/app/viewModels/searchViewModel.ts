@@ -74,7 +74,7 @@ class SearchViewModel {
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         this.fetchData();
-        //Notify.subscribe(this.onChangeTerm, this.term$ as any, this);
+        this.term$.subscribe(this.onChangeTerm);
         this.searchType$.subscribe(_.debounce(() => {
             this.fetchData();
         }, 300));
