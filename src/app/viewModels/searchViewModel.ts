@@ -1,9 +1,10 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { ISearchResult, ISearchType, ISpotifySong } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { asyncQueue, current, Notify, State, ValueContainer } from '../utils';
+import { asyncQueue, current, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AlbumViewModelItem } from './albumViewModelItem';
 import { ArtistViewModelItem } from './artistViewModelItem';
@@ -14,35 +15,35 @@ import { TrackViewModelItem } from './trackViewModelItem';
 const searchQueue = asyncQueue();
 
 class SearchViewModel {
-    errors$: ValueContainer<SearchViewModel['errors'], SearchViewModel>;
+    errors$: BehaviorSubject<SearchViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    term$: ValueContainer<SearchViewModel['term'], SearchViewModel>;
+    term$: BehaviorSubject<SearchViewModel['term']>;
     @State term = '';
 
     @State isLoading = false;
 
-    tracks$: ValueContainer<SearchViewModel['tracks'], SearchViewModel>;
+    tracks$: BehaviorSubject<SearchViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
-    artists$: ValueContainer<SearchViewModel['artists'], SearchViewModel>;
+    artists$: BehaviorSubject<SearchViewModel['artists']>;
     @State artists = [] as ArtistViewModelItem[];
-    albums$: ValueContainer<SearchViewModel['albums'], SearchViewModel>;
+    albums$: BehaviorSubject<SearchViewModel['albums']>;
     @State albums = [] as AlbumViewModelItem[];
-    playlists$: ValueContainer<SearchViewModel['playlists'], SearchViewModel>;
+    playlists$: BehaviorSubject<SearchViewModel['playlists']>;
     @State playlists = [] as PlaylistsViewModelItem[];
-    searchType$: ValueContainer<SearchViewModel['searchType'], SearchViewModel>;
+    searchType$: BehaviorSubject<SearchViewModel['searchType']>;
     @State searchType: ISearchType = 'track';
-    currentArtist$: ValueContainer<SearchViewModel['currentArtist'], SearchViewModel>;
+    currentArtist$: BehaviorSubject<SearchViewModel['currentArtist']>;
     @State currentArtist = null as ArtistViewModelItem;
-    currentAlbum$: ValueContainer<SearchViewModel['currentAlbum'], SearchViewModel>;
+    currentAlbum$: BehaviorSubject<SearchViewModel['currentAlbum']>;
     @State currentAlbum = null as AlbumViewModelItem;
-    currentPlaylist$: ValueContainer<SearchViewModel['currentPlaylist'], SearchViewModel>;
+    currentPlaylist$: BehaviorSubject<SearchViewModel['currentPlaylist']>;
     @State currentPlaylist = null as PlaylistsViewModelItem;
-    currentTracks$: ValueContainer<SearchViewModel['currentTracks'], SearchViewModel>;
+    currentTracks$: BehaviorSubject<SearchViewModel['currentTracks']>;
     @State currentTracks = [] as TrackViewModelItem[];
-    selectedItem$: ValueContainer<SearchViewModel['selectedItem'], SearchViewModel>;
+    selectedItem$: BehaviorSubject<SearchViewModel['selectedItem']>;
     @State selectedItem = null as TrackViewModelItem;
-    
+
     settings = {
         offset: 0,
         total: 0,
@@ -50,14 +51,14 @@ class SearchViewModel {
         currentMediaUri: null,
     };
 
-    loadMoreCommand$: ValueContainer<SearchViewModel['loadMoreCommand'], SearchViewModel>;
+    loadMoreCommand$: BehaviorSubject<SearchViewModel['loadMoreCommand']>;
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
 
-    likeTrackCommand$: ValueContainer<SearchViewModel['likeTrackCommand'], SearchViewModel>;
-    @State likeTrackCommand = Scheduler.Command(() => {});
+    likeTrackCommand$: BehaviorSubject<SearchViewModel['likeTrackCommand']>;
+    @State likeTrackCommand = Scheduler.Command(() => { });
 
-    unlikeTrackCommand$: ValueContainer<SearchViewModel['unlikeTrackCommand'], SearchViewModel>;
-    @State unlikeTrackCommand = Scheduler.Command(() => {});
+    unlikeTrackCommand$: BehaviorSubject<SearchViewModel['unlikeTrackCommand']>;
+    @State unlikeTrackCommand = Scheduler.Command(() => { });
 
     onChangeTerm = _.debounce(() => {
         searchQueue.push(async (next) => {
@@ -73,19 +74,19 @@ class SearchViewModel {
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         this.fetchData();
-        Notify.subscribe(this.onChangeTerm, this.term$ as any, this);
+        //Notify.subscribe(this.onChangeTerm, this.term$ as any, this);
         this.searchType$.subscribe(_.debounce(() => {
             this.fetchData();
-        }, 300), this);
+        }, 300));
         this.currentAlbum$.subscribe(_.debounce(() => {
             this.fetchTracks();
-        }, 300), this);
+        }, 300));
         this.currentPlaylist$.subscribe(_.debounce(() => {
             this.fetchTracks();
-        }, 300), this);
+        }, 300));
         this.currentArtist$.subscribe(_.debounce(() => {
             this.fetchTracks();
-        }, 300), this);
+        }, 300));
         resolve(true);
     }, 100));
 
@@ -114,17 +115,17 @@ class SearchViewModel {
         } else if ('artists' in search) {
             this.settings.total = search.artists.total;
             this.settings.offset = search.artists.offset + Math.min(this.settings.limit, search.artists.items.length);
-    
+
             this.artists = _.map(search.artists.items, (artist, index) => new ArtistViewModelItem(artist, index));
         } else if ('albums' in search) {
             this.settings.total = search.albums.total;
             this.settings.offset = search.albums.offset + Math.min(this.settings.limit, search.albums.items.length);
-    
+
             this.albums = _.map(search.albums.items, (album, index) => new AlbumViewModelItem(album));
         } else if ('playlists' in search) {
             this.settings.total = search.playlists.total;
             this.settings.offset = search.playlists.offset + Math.min(this.settings.limit, search.playlists.items.length);
-    
+
             this.playlists = _.map(search.playlists.items, (playlist, index) => new PlaylistsViewModelItem(playlist));
         }
         this.isLoading = false;

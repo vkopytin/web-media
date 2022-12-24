@@ -1,10 +1,11 @@
 import $ from 'jquery';
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IUserInfo } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifySyncService } from '../service/spotifySyncService';
-import { current, State, ValueContainer } from '../utils';
+import { current, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { DeviceViewModelItem } from './deviceViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
@@ -13,43 +14,43 @@ import { TrackViewModelItem } from './trackViewModelItem';
 type PanelType = 'home' | 'playlists' | 'profile' | 'releases' | 'search' | 'tracks';
 
 class AppViewModel {
-    openLogin$: ValueContainer<AppViewModel['openLogin'], AppViewModel>;
+    openLogin$: BehaviorSubject<AppViewModel['openLogin']>;
     @State openLogin = false;
 
-    currentPanel$: ValueContainer<PanelType, AppViewModel>;
+    currentPanel$: BehaviorSubject<PanelType>;
     @State currentPanel: PanelType = 'home';
 
-    devices$: ValueContainer<DeviceViewModelItem[], AppViewModel>;
+    devices$: BehaviorSubject<DeviceViewModelItem[]>;
     @State devices: DeviceViewModelItem[] = [];
 
-    profile$: ValueContainer<IUserInfo, AppViewModel>;
+    profile$: BehaviorSubject<IUserInfo>;
     @State profile: IUserInfo = {};
 
-    refreshDevicesCommand$: ValueContainer<{ exec: () => Promise<void> }, AppViewModel>;
+    refreshDevicesCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
     @State refreshDevicesCommand = Scheduler.Command(() => this.updateDevices());
 
-    switchDeviceCommand$: ValueContainer<{ exec: (a) => Promise<void> }, AppViewModel>;
+    switchDeviceCommand$: BehaviorSubject<{ exec: (a) => Promise<void> }>;
     @State switchDeviceCommand = Scheduler.Command((device: DeviceViewModelItem) => this.switchDevice(device));
 
-    refreshTokenCommand$: ValueContainer<{ exec: () => Promise<void> }, AppViewModel>;
+    refreshTokenCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
     @State refreshTokenCommand = Scheduler.Command(() => this.refreshToken());
 
-    currentTrackId$: ValueContainer<string, AppViewModel>;
+    currentTrackId$: BehaviorSubject<string>;
     @State currentTrackId = '';
 
-    topTracks$: ValueContainer<TrackViewModelItem[], AppViewModel>;
+    topTracks$: BehaviorSubject<TrackViewModelItem[]>;
     @State topTracks = [] as TrackViewModelItem[];
 
-    currentDevice$: ValueContainer<DeviceViewModelItem, AppViewModel>;
+    currentDevice$: BehaviorSubject<DeviceViewModelItem>;
     @State currentDevice = null as DeviceViewModelItem;
 
-    autoRefreshUrl$: ValueContainer<string, AppViewModel>;
+    autoRefreshUrl$: BehaviorSubject<string>;
     @State autoRefreshUrl = '';
 
-    errors$: ValueContainer<AppViewModel['errors'], AppViewModel>;
+    errors$: BehaviorSubject<AppViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    isSyncing$: ValueContainer<AppViewModel['isSyncing'], AppViewModel>;
+    isSyncing$: BehaviorSubject<AppViewModel['isSyncing']>;
     @State isSyncing = 0;
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {

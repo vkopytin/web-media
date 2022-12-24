@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import * as _ from 'underscore';
 
 
@@ -12,7 +12,7 @@ export function formatTime(ms: number) {
 const instances = new WeakMap();
 
 export function current<T extends {}, O extends {}>(
-    ctor: { new (...args): T },
+    ctor: { new(...args): T },
     options?: O
 ): T {
     if (instances.has(ctor)) {
@@ -63,9 +63,9 @@ export function assertNoErrors(...args) {
 
 function asAsync<T1, T2, T3, T4, Y>(c, fn: { (a: T1, a1: T2, a2: T3, a3: T4, cb: { (err?, res?: Y): void }): void }, a: T1, a1: T2, a2: T3, a3: T4): Promise<Y>
 function asAsync<T1, T2, T3, Y>(c, fn: { (a: T1, a1: T2, a2: T3, cb: { (err?, res?: Y): void }): void }, a: T1, a1: T2, a3: T3): Promise<Y>
-function asAsync<T1, T2, Y>(c, fn: { (a: T1, a1: T2, cb: {(err?, res?: Y): void}): void}, a: T1, a1: T2): Promise<Y>
+function asAsync<T1, T2, Y>(c, fn: { (a: T1, a1: T2, cb: { (err?, res?: Y): void }): void }, a: T1, a1: T2): Promise<Y>
 function asAsync<T, Y>(c, fn: { (a: T, cb: { (err?, res?: Y): void }): void }, a: T): Promise<Y>
-function asAsync<Y>(c, fn: { (cb: {(err?, res?: Y): void}): void}): Promise<Y>
+function asAsync<Y>(c, fn: { (cb: { (err?, res?: Y): void }): void }): Promise<Y>
 function asAsync(c, fn, ...args) {
     return new Promise((resolve, reject) => {
         try {
@@ -85,9 +85,9 @@ export { asAsyncOf };
 
 function asAsyncOf<T1, T2, T3, T4, Y>(c, fn: { (a: T1, a1: T2, a2: T3, a3: T4, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2, a2: T3, a3: T4): AsyncGenerator<Y>
 function asAsyncOf<T1, T2, T3, Y>(c, fn: { (a: T1, a1: T2, a2: T3, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2, a3: T3): AsyncGenerator<Y>
-function asAsyncOf<T1, T2, Y>(c, fn: { (a: T1, a1: T2, cb: {(err?, res?: Y, index?: number): boolean}): void}, a: T1, a1: T2): AsyncGenerator<Y>
+function asAsyncOf<T1, T2, Y>(c, fn: { (a: T1, a1: T2, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2): AsyncGenerator<Y>
 function asAsyncOf<T, Y>(c, fn: { (a: T, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T): AsyncGenerator<Y>
-function asAsyncOf<Y>(c, fn: { (cb: {(err?, res?: Y, index?: number): boolean}): void}): AsyncGenerator<Y>
+function asAsyncOf<Y>(c, fn: { (cb: { (err?, res?: Y, index?: number): boolean }): void }): AsyncGenerator<Y>
 async function* asAsyncOf(context, fn, ...args) {
     let next = (result?) => { };
     let fail = (err) => { };
@@ -143,7 +143,7 @@ export function debounce(func, wait = 0, cancelObj = 'canceled') {
                 timerId = setTimeout(invoke.bind(this, allArgs, resolve, reject), wait);
             });
         }
-  
+
         shouldCancel = true;
         return new Promise((resolve, reject) => {
             latestResolve = resolve;
@@ -176,7 +176,7 @@ export function isLoading<T extends { isLoading: boolean; }>(target: T, key, des
         descriptor = Object.getOwnPropertyDescriptor(target, key);
     }
     const originalMethod = descriptor.value;
-   
+
     //editing the descriptor/value parameter
     descriptor.value = async function (this: T, ...args) {
         try {
@@ -186,175 +186,101 @@ export function isLoading<T extends { isLoading: boolean; }>(target: T, key, des
             this.isLoading = false;
         }
     };
-   
+
     // return edited descriptor as opposed to overwriting the descriptor
     return descriptor;
 }
 
-export const Notify = (function () {
-    const mainLoop$ = new Subject<{
-        inst;
-        value;
-    }>();
-
-    const impl = {
-        lock: asyncQueue(),
-        listeners: [] as [(...args) => void, ValueContainer<any, any>, any, any][],
-        subscribe<T>(callback, inst: ValueContainer<any, any>, context) {
-            //callback = false;
-            if (callback) {
-                let listener = this.listeners.find(([cb, cx]) => cb === callback && cx === inst);
-                if (listener) {
-                    return;
-                }
-                listener = [callback, inst, (args) => {
-                    if (inst !== args.inst) {
-                        return;
-                    }
-                    try {
-                        callback.call(context, args);
-                    } catch (ex) {
-                        console.error(ex);
-                    }
-                }];
-                this.listeners.push(listener);
-                listener[3] = mainLoop$.subscribe(listener[2]);
-            }
-
-            inst.listeners.forEach(fn => {
-                const listener2 = [fn, inst, (args) => {
-                    if (inst !== args.inst) {
-                        return;
-                    }
-                    try {
-                        fn.call(context, context, args.value);
-                    } catch (ex) {
-                        console.error(ex);
-                    }
-                }];
-                this.listeners.push(listener2);
-                listener2[3] = mainLoop$.subscribe(listener2[2]);
-            });
-        },
-        unsubscribe<T>(callback, inst: ValueContainer<any, any>) {
-            //callback = false;
-            if (callback) {
-                const listener = this.listeners.find(([cb, cx]) => cb === callback && cx === inst);
-                if (!listener) {
-                    return;
-                }
-                listener[3].unsubscribe();
-                const index = this.listeners.indexOf(listener);
-                this.listeners.splice(index, 1);
-            }
-
-            inst.listeners.forEach(fn => {
-                const listener = this.listeners.find(([cb, cx]) => cb === fn && cx === inst);
-                if (!listener) {
-                    return;
-                }
-                listener[3].unsubscribe();
-                const index = this.listeners.indexOf(listener);
-                this.listeners.splice(index, 1);
-            });
-        },
-        subscribeChildren<T, Y>(listener, inst) {
-            const props = Object.keys(inst).reduce((res, key) => inst[key] instanceof ValueContainer
-                ? [...res, inst[key] as ValueContainer<T, Y>]
-                : res, [] as ValueContainer<T, Y>[]);
-
-            props.forEach(e => e.subscribe(listener, inst));
-        },
-        unsubscribeChildren<T, Y>(listener, inst) {
-            const props = Object.keys(inst).reduce((res, key) => inst[key] instanceof ValueContainer
-                ? [...res, inst[key] as ValueContainer<T, Y>]
-                : res, [] as ValueContainer<T, Y>[]);
-
-            props.forEach(e => e.unsubscribe(listener, inst));
-        },
-        trigger({ inst, value }) {
-            this.lock.push(done => {
-                try {
-                    mainLoop$.next({ inst, value });
-                } finally {
-                    done();
-                }
-            });
-        }
-    };
-
-    return impl;
-})();
-
-export class ValueContainer<T, Y> {
-    listeners = [];
-    trace = '';
-
-    constructor(public value: T, public target: Y, public propName) {
-        this.trace = new Error().stack;
-    }
-
-    subscribe(handler, ctx) {
-        Notify.subscribe(handler, this, ctx);
-    }
-
-    unsubscribe(handler, ctx) {
-        Notify.unsubscribe(handler, this);
-    }
-
-    next(val: T) {
-        if (this.value !== val) {
-            this.value = val;
-            Notify.trigger({
-                inst: this,
-                value: val
-            });
-        }
-    }
-
-    map<U>(fn: (v: T) => U): ValueContainer<U, Y> {
-        return ValueContainer.from(this.cat(fn), this.target, fn);
-    }
-
-    cat<Y>(fn: (v: T) => Y): Y {
-        return fn(this.value);
-    }
-
-    pipe(...args) {
-        return this;
-    }
-
-    getValue(): T {
-        return this.value;
-    }
-
-    static from<T, Y>(val: T | ValueContainer<T, Y>, target: Y, propName) {
-        if (val instanceof ValueContainer) {
-            return val;
-        }
-
-        return new ValueContainer<T, Y>(val, target, propName);
-    }
+interface INotification {
+    value;
+    state;
 }
 
-export function State<T, Y extends keyof T>(target: T, propName: Y, descriptor?) {
+interface ISignals {
+    propName: string;
+    callbacks: Array<[unknown, () => void]>;
+    observers: Array<unknown>;
+}
+
+export const Notifications = (function () {
+    const state = new Subject<INotification>();
+
+    return {
+        state,
+        observe(obj, callback) {
+            Object.keys(obj).forEach(key => {
+                const hasTraits = objectTraits.has(obj[key]);
+                if (hasTraits) {
+                    GetTraits<ISignals['observers']>(obj[key]).observers.push(obj);
+                    Notifications.subscribe(obj[key], obj, callback);
+                }
+            });
+        },
+        stopObserving(obj, callback) {
+            Object.keys(obj).forEach(key => {
+                const hasTraits = objectTraits.has(obj[key]);
+                if (hasTraits) {
+                    const observers = GetTraits<ISignals['observers']>(obj[key]).observers.filter(o => o !== obj);
+                    GetTraits<ISignals['observers']>(obj[key]).observers = observers;
+                    Notifications.unsubscribe(obj[key], obj, callback);
+                }
+            });
+        },
+        next(value: INotification) {
+            const observers = GetTraits<ISignals['observers']>(value.state).observers;
+            GetTraits<ISignals['callbacks']>(value.state).callbacks.forEach(([o, cb]) => {
+                observers.forEach(obj => obj === o && cb.call(obj, value.value));
+            });
+        },
+        declare<T>(state: BehaviorSubject<T>, propName: string) {
+            GetTraits<ISignals['callbacks']>(state).callbacks = [];
+            GetTraits<ISignals['observers']>(state).observers = [];
+            GetTraits<ISignals['propName']>(state).propName = propName;
+            state.subscribe(value => {
+                Notifications.next({
+                    state,
+                    value,
+                });
+            });
+        },
+        subscribe<T>(state: BehaviorSubject<T>, view, callback) {
+            GetTraits<ISignals['callbacks']>(state).callbacks.push([view, callback]);
+        },
+        unsubscribe<T>(state: BehaviorSubject<T>, view, callback) {
+            const callbacks = GetTraits<ISignals['callbacks']>(state).callbacks.filter(([a, b]) => a !== view && callback !== b);
+            GetTraits(state).callbacks = callbacks;
+        },
+    };
+})();
+
+const objectTraits = new WeakMap<object, { [key: string]: any }>();
+export const GetTraits = <T>(obj) => {
+    if (!objectTraits.has(obj)) {
+        objectTraits.set(obj, {});
+    }
+
+    return objectTraits.get(obj) as { [key: string]: T };
+}
+
+export function State<T>(target: T, propName: string, descriptor?) {
     function initState(v?) {
-        let store$ = ValueContainer.from(v, target, propName);
+        let state = new BehaviorSubject<unknown>(null);
+        Notifications.declare(state, propName);
 
         Object.defineProperty(this, `${propName}$`, {
             get() {
-                return store$;
+                return state;
             },
             set(v) {
-                if (v !== store$) {
-                    store$ = v;
+                if (v !== state) {
+                    state = v;
                 }
             },
             enumerable: true,
             configurable: true
         });
 
-        return store$;
+        return state;
     }
 
     const opts = {
@@ -369,22 +295,27 @@ export function State<T, Y extends keyof T>(target: T, propName: Y, descriptor?)
 }
 
 export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) => void } = {}) {
-    return function <Y extends keyof T>(target: T, propName: Y, descriptor?): any {
+    return function (target: T, propName: string, descriptor?): any {
         const desc = Object.getOwnPropertyDescriptor(target, `${propName}$`);
 
-        function initBinding(store$: ValueContainer<T[Y], T>) {
-            store$.listeners.push(() => didSet.call(this, this));
+        function initBinding(store$: BehaviorSubject<unknown>) {
+            let state = store$;
+            const didSetCb = didSet && (value => {
+                didSet.call(this, this, value);
+            });
+            didSetCb && Notifications.subscribe(state, this, didSetCb);
             Object.defineProperty(this, `${propName}$`, {
                 get() {
-                    return store$;
+                    return state;
                 },
                 set(v$) {
-                    if (!(v$ instanceof ValueContainer)) {
-                        throw new Error('Please, provide ValueContainer');
+                    if (!(v$ instanceof BehaviorSubject)) {
+                        throw new Error('Please, provide BehaviorSubject');
                     }
-                    if (v$ !== store$) {
-                        store$ = v$;
-                        store$.listeners.push(didSet);
+                    if (v$ !== state) {
+                        didSetCb && Notifications.unsubscribe(state, this, didSetCb);
+                        state = v$;
+                        didSetCb && Notifications.subscribe(state, this, didSetCb);
                     }
                 },
                 enumerable: true,

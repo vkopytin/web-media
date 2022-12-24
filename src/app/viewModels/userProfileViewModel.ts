@@ -1,43 +1,44 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IUserInfo } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SettingsService } from '../service/settings';
-import { current, State, ValueContainer } from '../utils';
+import { Binding, current, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class UserProfileViewModel {
-    errors$: ValueContainer<UserProfileViewModel['errors'], UserProfileViewModel>;
+    errors$: BehaviorSubject<UserProfileViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    isLoggedin$: ValueContainer<boolean, UserProfileViewModel>;
+    isLoggedin$: BehaviorSubject<boolean>;
     @State isLoggedin = false;
 
-    profile$: ValueContainer<UserProfileViewModel['profile'], UserProfileViewModel>;
+    profile$: BehaviorSubject<UserProfileViewModel['profile']>;
     @State profile: IUserInfo = {};
 
     currentTrackId$ = this.appViewModel.currentTrackId$;
-    @State currentTrackId = '';
+    @Binding() currentTrackId = '';
 
-    topTracks$: ValueContainer<UserProfileViewModel['topTracks'], UserProfileViewModel>;
+    topTracks$: BehaviorSubject<UserProfileViewModel['topTracks']>;
     @State topTracks = [] as TrackViewModelItem[];
 
-    tracks$: ValueContainer<UserProfileViewModel['tracks'], UserProfileViewModel>;
+    tracks$: BehaviorSubject<UserProfileViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
 
-    spotifyAuthUrl$: ValueContainer<UserProfileViewModel['spotifyAuthUrl'], UserProfileViewModel>;
+    spotifyAuthUrl$: BehaviorSubject<UserProfileViewModel['spotifyAuthUrl']>;
     @State spotifyAuthUrl = '';
 
-    geniusAuthUrl$: ValueContainer<UserProfileViewModel['geniusAuthUrl'], UserProfileViewModel>;
+    geniusAuthUrl$: BehaviorSubject<UserProfileViewModel['geniusAuthUrl']>;
     @State geniusAuthUrl = '';
 
-    apiseedsKey$: ValueContainer<UserProfileViewModel['apiseedsKey'], UserProfileViewModel>;
+    apiseedsKey$: BehaviorSubject<UserProfileViewModel['apiseedsKey']>;
     @State apiseedsKey = '';
 
-    logoutCommand$: ValueContainer<UserProfileViewModel['logoutCommand'], UserProfileViewModel>;
+    logoutCommand$: BehaviorSubject<UserProfileViewModel['logoutCommand']>;
     @State logoutCommand = Scheduler.Command(() => this.logout());
 
     settings = {
@@ -51,12 +52,12 @@ class UserProfileViewModel {
         await this.fetchData();
         this.apiseedsKey$.subscribe(_.debounce((val) => {
             this.saveApiseedsKey(val);
-        }, 300), this);
+        }, 300));
         resolve(true);
     }));
 
     constructor(private appViewModel = current(AppViewModel), private ss = current(Service)) {
-        
+
     }
 
     async fetchData() {

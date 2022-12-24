@@ -1,9 +1,10 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IArtist } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { current, State, ValueContainer } from '../utils';
+import { current, State } from '../utils';
 import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
@@ -11,22 +12,22 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 class ArtistViewModelItem {
     appViewModel = current(AppViewModel);
 
-    errors$: ValueContainer<ArtistViewModelItem['errors'], ArtistViewModelItem>;
+    errors$: BehaviorSubject<ArtistViewModelItem['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    playlists$: ValueContainer<ArtistViewModelItem['playlists'], ArtistViewModelItem>;
+    playlists$: BehaviorSubject<ArtistViewModelItem['playlists']>;
     @State playlists = [] as PlaylistsViewModelItem[];
 
-    isLiked$: ValueContainer<ArtistViewModelItem['playlists'], ArtistViewModelItem>;
+    isLiked$: BehaviorSubject<ArtistViewModelItem['playlists']>;
     @State isLiked = false;
-    
+
     isInit = _.delay(() => {
         this.connect();
         this.loadData('playlistTracks');
     });
 
     constructor(public artist: IArtist, private index: number, private ss = current(Service)) {
-        
+
     }
 
     id() {

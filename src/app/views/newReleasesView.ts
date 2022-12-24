@@ -2,7 +2,7 @@ import React from 'react';
 import * as _ from 'underscore';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/newReleases';
-import { Binding, current, Notify } from '../utils';
+import { Binding, current, Notifications } from '../utils';
 import { AlbumViewModelItem, NewReleasesViewModel } from '../viewModels';
 
 
@@ -12,70 +12,63 @@ export interface INewReleasesViewProps {
 }
 
 class NewReleasesView extends React.Component<INewReleasesViewProps> {
-    didRefresh: NewReleasesView['refresh'] = () => { };
+    didRefresh: NewReleasesView['refresh'] = this.refresh.bind(this);
     vm = current(NewReleasesViewModel);
-    
+
     errors$ = this.vm.errors$;
-    @Binding({
-        didSet: (view, errors) => {
-            view.didRefresh();
-            view.showErrors(errors);
-        }
-    })
+    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
     errors: NewReleasesView['vm']['errors'];
 
     newReleases$ = this.vm.newReleases$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     newReleases: NewReleasesView['vm']['newReleases'];
 
     featuredPlaylists$ = this.vm.featuredPlaylists$;
-    @Binding({ didSet: (view => view.didRefresh()) })
+    @Binding()
     featuredPlaylists: NewReleasesView['vm']['featuredPlaylists'];
 
     currentAlbum$ = this.vm.currentAlbum$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     currentAlbum: NewReleasesView['vm']['currentAlbum'];
 
     currentPlaylist$ = this.vm.currentPlaylist$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     currentPlaylist: NewReleasesView['vm']['currentPlaylist'];
 
     tracks$ = this.vm.tracks$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     tracks: NewReleasesView['vm']['tracks'];
 
     likedAlbums$ = this.vm.likedAlbums$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     likedAlbums: NewReleasesView['vm']['likedAlbums'];
 
     currentTracks$ = this.vm.currentTracks$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     currentTracks: NewReleasesView['vm']['currentTracks'];
 
     selectAlbumCommand$ = this.vm.selectAlbumCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     selectAlbumCommand: NewReleasesView['vm']['selectAlbumCommand'];
 
     selectPlaylistCommand$ = this.vm.selectPlaylistCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     selectPlaylistCommand: NewReleasesView['vm']['selectPlaylistCommand'];
 
     likeAlbumCommand$ = this.vm.likeAlbumCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     likeAlbumCommand: NewReleasesView['vm']['likeAlbumCommand'];
 
     unlikeAlbumCommand$ = this.vm.unlikeAlbumCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     unlikeAlbumCommand: NewReleasesView['vm']['unlikeAlbumCommand'];
 
     componentDidMount() {
-        Notify.subscribeChildren(this.refresh, this);
-        this.didRefresh = this.refresh;
+        Notifications.observe(this, this.didRefresh);
     }
 
     componentWillUnmount() {
-        Notify.unsubscribeChildren(this.refresh, this);
-        this.didRefresh = () => { };
+        Notifications.stopObserving(this, this.didRefresh);
     }
 
     refresh(args) {

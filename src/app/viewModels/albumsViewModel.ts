@@ -1,15 +1,16 @@
+import { BehaviorSubject } from "rxjs";
 import { ServiceResult } from "../base/serviceResult";
-import { State, ValueContainer } from "../utils";
+import { State } from "../utils";
 import { TrackViewModelItem } from "./trackViewModelItem";
 
 
 export class AlbumsViewModel {
-    errors$: ValueContainer<AlbumsViewModel['errors'], AlbumsViewModel>;
+    errors$: BehaviorSubject<AlbumsViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    tracks$: ValueContainer<AlbumsViewModel['tracks'], AlbumsViewModel>;
+    tracks$: BehaviorSubject<AlbumsViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
 
-    selectedItem$: ValueContainer<AlbumsViewModel['selectedItem'], AlbumsViewModel>;
+    selectedItem$: BehaviorSubject<AlbumsViewModel['selectedItem']>;
     @State selectedItem = null as TrackViewModelItem;
 }

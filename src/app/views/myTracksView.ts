@@ -1,7 +1,7 @@
 import React from 'react';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/myTracks';
-import { Binding, current, Notify } from '../utils';
+import { Binding, current, Notifications } from '../utils';
 import { MyTracksViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IMyTracksViewProps {
@@ -11,58 +11,47 @@ export interface IMyTracksViewProps {
 }
 
 class MyTracksView extends React.Component<IMyTracksViewProps> {
-    didRefresh: MyTracksView['refresh'] = () => { };
+    didRefresh: MyTracksView['refresh'] = this.refresh.bind(this);
     vm = current(MyTracksViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({
-        didSet: (view, errors) => {
-            view.didRefresh();
-            view.showErrors(errors);
-        }
-    })
+    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
     errors: MyTracksView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     tracks: MyTracksView['vm']['tracks'];
 
     likedTracks$ = this.vm.likedTracks$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     likedTracks: MyTracksView['vm']['likedTracks'];
 
     isLoading$ = this.vm.isLoading$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     isLoading: MyTracksView['vm']['isLoading'];
 
     selectedItem$ = this.vm.selectedItem$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     selectedItem: MyTracksView['vm']['selectedItem'];
 
     trackLyrics$ = this.vm.trackLyrics$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     trackLyrics: MyTracksView['vm']['trackLyrics'];
 
-    state = {
-        term: '',
-    };
-
     loadMoreCommand$ = this.vm.loadMoreCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     loadMoreCommand: MyTracksView['vm']['loadMoreCommand'];
 
     findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     findTrackLyricsCommand: MyTracksView['vm']['findTrackLyricsCommand'];
 
     componentDidMount() {
-        Notify.subscribeChildren(this.refresh, this);
-        this.didRefresh = this.refresh;
+        Notifications.observe(this, this.didRefresh);
     }
 
     componentWillUnmount() {
-        Notify.unsubscribeChildren(this.refresh, this);
-        this.didRefresh = () => { };
+        Notifications.stopObserving(this, this.didRefresh);
     }
 
     componentDidUpdate(prevProps: IMyTracksViewProps, prevState, snapshot) {

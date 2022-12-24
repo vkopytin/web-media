@@ -4,7 +4,7 @@ import { ServiceResult } from '../base/serviceResult';
 import { NoActiveDeviceError } from '../service/errors/noActiveDeviceError';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
 import { template } from '../templates/app';
-import { Binding, current, Notify } from '../utils';
+import { Binding, current, Notifications } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel, TrackViewModelItem } from '../viewModels';
 
@@ -13,60 +13,55 @@ export interface IAppViewProps {
 }
 
 class AppView extends React.Component<IAppViewProps> {
-    didRefresh: AppView['refresh'] = () => { };
+    didRefresh: AppView['refresh'] = this.refresh.bind(this);
     vm = current(AppViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({
-        didSet: (view, errors) => {
-            view.didRefresh();
-            view.showErrors(errors);
-        }
-    })
+    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
     errors: AppView['vm']['errors'];
 
     openLogin$ = this.vm.openLogin$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     openLogin: AppView['vm']['openLogin'];
 
     currentPanel$ = this.vm.currentPanel$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     currentPanel: AppView['vm']['currentPanel'];
 
     devices$ = this.vm.devices$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     devices: AppView['vm']['devices'];
 
     profile$ = this.vm.profile$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     profile: AppView['vm']['profile'];
 
     currentTrackId$ = this.vm.currentTrackId$;
-    @Binding({ didSet: (view, currentTrackId) => view.didRefresh({ currentTrackId }) })
+    @Binding()
     currentTrackId: AppView['vm']['currentTrackId'];
-    
+
     topTracks$ = this.vm.topTracks$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     topTracks: AppView['vm']['topTracks'];
 
     currentDevice$ = this.vm.currentDevice$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     currentDevice: AppView['vm']['currentDevice'];
 
     refreshDevicesCommand$ = this.vm.refreshDevicesCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     refreshDevicesCommand: AppView['vm']['refreshDevicesCommand'];
 
     refreshTokenCommand$ = this.vm.refreshTokenCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     refreshTokenCommand: AppView['vm']['refreshTokenCommand'];
 
     autoRefreshUrl$ = this.vm.autoRefreshUrl$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     autoRefreshUrl: AppView['vm']['autoRefreshUrl'];
 
     isSyncing$ = this.vm.isSyncing$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     isSyncing: AppView['vm']['isSyncing'];
 
     state = {
@@ -79,13 +74,11 @@ class AppView extends React.Component<IAppViewProps> {
     onPageScroll = _.debounce(evnt => this.onPageScrollInternal(evnt), 500);
 
     componentDidMount() {
-        Notify.subscribeChildren(this.refresh, this);
-        this.didRefresh = this.refresh;
+        Notifications.observe(this, this.didRefresh);
     }
 
     componentWillUnmount() {
-        Notify.unsubscribeChildren(this.refresh, this);
-        this.didRefresh = () => { };
+        Notifications.stopObserving(this, this.didRefresh);
     }
 
     refresh(args) {
@@ -103,7 +96,7 @@ class AppView extends React.Component<IAppViewProps> {
             this.refreshDevicesCommand.exec();
         }
     }
-    
+
     isPlaying(track: TrackViewModelItem) {
         return this.currentTrackId === track.id();
     }
@@ -139,7 +132,7 @@ class AppView extends React.Component<IAppViewProps> {
                 this.setState({
                     ...this.state,
                     scrolledToBottom: false
-                });   
+                });
             });
         }
     }

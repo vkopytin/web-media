@@ -1,3 +1,4 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { ITrack } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
@@ -5,7 +6,7 @@ import { Service } from '../service';
 import { SettingsService } from '../service/settings';
 import { SpotifyService } from '../service/spotify';
 import { IWebPlaybackState } from '../service/spotifyPlayer';
-import { assertNoErrors, asyncQueue, current, State, ValueContainer } from '../utils';
+import { assertNoErrors, asyncQueue, Binding, current, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
 import { TrackViewModelItem } from './trackViewModelItem';
@@ -14,72 +15,72 @@ import { TrackViewModelItem } from './trackViewModelItem';
 const lockSection = asyncQueue();
 
 class MediaPlayerViewModel {
-    errors$: ValueContainer<ServiceResult<any, Error>[], MediaPlayerViewModel>;
+    errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
     @State errors = [] as ServiceResult<any, Error>[];
 
     currentTrackId$ = this.appViewModel.currentTrackId$;
-    @State currentTrackId = '';
+    @Binding() currentTrackId = '';
 
-    queue$: ValueContainer<MediaPlayerViewModel['queue'], MediaPlayerViewModel>;
+    queue$: BehaviorSubject<MediaPlayerViewModel['queue']>;
     @State queue = [] as TrackViewModelItem[];
 
-    timePlayed$: ValueContainer<MediaPlayerViewModel['timePlayed'], MediaPlayerViewModel>;
+    timePlayed$: BehaviorSubject<MediaPlayerViewModel['timePlayed']>;
     @State timePlayed = 1;
 
-    duration$: ValueContainer<MediaPlayerViewModel['duration'], MediaPlayerViewModel>;
+    duration$: BehaviorSubject<MediaPlayerViewModel['duration']>;
     @State duration = 3.14 * 60 * 1000;
 
-    isPlaying$: ValueContainer<MediaPlayerViewModel['isPlaying'], MediaPlayerViewModel>;
+    isPlaying$: BehaviorSubject<MediaPlayerViewModel['isPlaying']>;
     @State isPlaying = false;
 
-    trackName$: ValueContainer<MediaPlayerViewModel['trackName'], MediaPlayerViewModel>;
+    trackName$: BehaviorSubject<MediaPlayerViewModel['trackName']>;
     @State trackName = '';
 
-    albumName$: ValueContainer<MediaPlayerViewModel['albumName'], MediaPlayerViewModel>;
+    albumName$: BehaviorSubject<MediaPlayerViewModel['albumName']>;
     @State albumName = '';
 
-    artistName$: ValueContainer<MediaPlayerViewModel['artistName'], MediaPlayerViewModel>;
+    artistName$: BehaviorSubject<MediaPlayerViewModel['artistName']>;
     @State artistName = '';
 
-    volume$: ValueContainer<MediaPlayerViewModel['volume'], MediaPlayerViewModel>;
+    volume$: BehaviorSubject<MediaPlayerViewModel['volume']>;
     @State volume = 50;
 
-    thumbnailUrl$: ValueContainer<MediaPlayerViewModel['thumbnailUrl'], MediaPlayerViewModel>;
+    thumbnailUrl$: BehaviorSubject<MediaPlayerViewModel['thumbnailUrl']>;
     @State thumbnailUrl = '';
 
-    isLiked$: ValueContainer<MediaPlayerViewModel['isLiked'], MediaPlayerViewModel>;
+    isLiked$: BehaviorSubject<MediaPlayerViewModel['isLiked']>;
     @State isLiked = false;
 
-    currentTrack$: ValueContainer<MediaPlayerViewModel['currentTrack'], MediaPlayerViewModel>;
+    currentTrack$: BehaviorSubject<MediaPlayerViewModel['currentTrack']>;
     @State currentTrack = null as ITrack;
 
-    currentTrackUri$: ValueContainer<MediaPlayerViewModel['currentTrackUri'], MediaPlayerViewModel>;
+    currentTrackUri$: BehaviorSubject<MediaPlayerViewModel['currentTrackUri']>;
     @State currentTrackUri = '';
 
-    tracks$: ValueContainer<MediaPlayerViewModel['tracks'], MediaPlayerViewModel>;
+    tracks$: BehaviorSubject<MediaPlayerViewModel['tracks']>;
     @State tracks = null as TrackViewModelItem[];
 
-    resumeCommand$: ValueContainer<MediaPlayerViewModel['resumeCommand'], MediaPlayerViewModel>;
+    resumeCommand$: BehaviorSubject<MediaPlayerViewModel['resumeCommand']>;
     @State resumeCommand = Scheduler.Command(() => this.play());
-    pauseCommand$: ValueContainer<MediaPlayerViewModel['pauseCommand'], MediaPlayerViewModel>;
+    pauseCommand$: BehaviorSubject<MediaPlayerViewModel['pauseCommand']>;
     @State pauseCommand = Scheduler.Command(() => this.pause());
-    prevCommand$: ValueContainer<MediaPlayerViewModel['prevCommand'], MediaPlayerViewModel>;
+    prevCommand$: BehaviorSubject<MediaPlayerViewModel['prevCommand']>;
     @State prevCommand = Scheduler.Command(() => this.previous());
-    nextCommand$: ValueContainer<MediaPlayerViewModel['nextCommand'], MediaPlayerViewModel>;
+    nextCommand$: BehaviorSubject<MediaPlayerViewModel['nextCommand']>;
     @State nextCommand = Scheduler.Command(() => this.next());
-    volumeUpCommand$: ValueContainer<MediaPlayerViewModel['volumeUpCommand'], MediaPlayerViewModel>;
+    volumeUpCommand$: BehaviorSubject<MediaPlayerViewModel['volumeUpCommand']>;
     @State volumeUpCommand = Scheduler.Command(() => this.volumeUp());
-    volumeCommand$: ValueContainer<MediaPlayerViewModel['volumeCommand'], MediaPlayerViewModel>;
+    volumeCommand$: BehaviorSubject<MediaPlayerViewModel['volumeCommand']>;
     @State volumeCommand = Scheduler.Command((percent) => this.setVolume(percent));
-    volumeDownCommand$: ValueContainer<MediaPlayerViewModel['volumeDownCommand'], MediaPlayerViewModel>;
+    volumeDownCommand$: BehaviorSubject<MediaPlayerViewModel['volumeDownCommand']>;
     @State volumeDownCommand = Scheduler.Command(() => this.volumeDown());
-    refreshPlaybackCommand$: ValueContainer<MediaPlayerViewModel['refreshPlaybackCommand'], MediaPlayerViewModel>;
+    refreshPlaybackCommand$: BehaviorSubject<MediaPlayerViewModel['refreshPlaybackCommand']>;
     @State refreshPlaybackCommand = Scheduler.Command(() => this.fetchData());
-    likeSongCommand$: ValueContainer<MediaPlayerViewModel['likeSongCommand'], MediaPlayerViewModel>;
+    likeSongCommand$: BehaviorSubject<MediaPlayerViewModel['likeSongCommand']>;
     @State likeSongCommand = Scheduler.Command(() => this.likeTrack());
-    unlikeSongCommand$: ValueContainer<MediaPlayerViewModel['unlikeSongCommand'], MediaPlayerViewModel>;
+    unlikeSongCommand$: BehaviorSubject<MediaPlayerViewModel['unlikeSongCommand']>;
     @State unlikeSongCommand = Scheduler.Command(() => this.unlikeTrack());
-    seekPlaybackCommand$: ValueContainer<MediaPlayerViewModel['seekPlaybackCommand'], MediaPlayerViewModel>;
+    seekPlaybackCommand$: BehaviorSubject<MediaPlayerViewModel['seekPlaybackCommand']>;
     @State seekPlaybackCommand = Scheduler.Command((percent) => this.manualSeek(percent));
 
     monitorPlyback = _.debounce(this.monitorPlybackInternal, 5 * 1000);
@@ -209,7 +210,7 @@ class MediaPlayerViewModel {
     manualSeek(percent) {
         const max = this.duration,
             timePlayed = max * percent / 100;
-            
+
         lockSection.push(async (next) => {
             this.timePlayed = timePlayed;
             const res = await this.ss.seek(timePlayed);

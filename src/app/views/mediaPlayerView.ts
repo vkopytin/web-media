@@ -1,115 +1,111 @@
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/mediaPlayer';
-import { Binding, current, formatTime, Notify, ValueContainer } from '../utils';
+import { Binding, current, formatTime, Notifications } from '../utils';
 import { AppViewModel, MediaPlayerViewModel } from '../viewModels';
 
 export interface IMediaPlayerViewProps {
     showErrors(errors: ServiceResult<any, Error>[]);
-    currentTrackId$: ValueContainer<string, AppViewModel>;
+    currentTrackId$: BehaviorSubject<string>;
 }
 
 class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
-    didRefresh: MediaPlayerView['refresh'] = () => { };
+    didRefresh: MediaPlayerView['refresh'] = this.refresh.bind(this);
     vm = current(MediaPlayerViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({
-        didSet: (view, errors) => {
-            view.didRefresh();
-            view.showErrors(errors);
-        }
-    })
+    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
     errors: MediaPlayerView['vm']['errors'];
 
     currentTrackId$ = this.vm.currentTrackId$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     currentTrackId: MediaPlayerView['vm']['currentTrackId'];
 
     queue$ = this.vm.queue$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     queue: MediaPlayerView['vm']['queue'];
 
     timePlayed$ = this.vm.timePlayed$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     timePlayed: MediaPlayerView['vm']['timePlayed'];
 
     duration$ = this.vm.duration$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     duration: MediaPlayerView['vm']['duration'];
 
     isPlaying$ = this.vm.isPlaying$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     isPlaying: MediaPlayerView['vm']['isPlaying'];
 
     trackName$ = this.vm.trackName$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     trackName: MediaPlayerView['vm']['trackName'];
 
     albumName$ = this.vm.albumName$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     albumName: MediaPlayerView['vm']['albumName'];
 
     artistName$ = this.vm.artistName$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     artistName: MediaPlayerView['vm']['artistName'];
 
     volume$ = this.vm.volume$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     volume: MediaPlayerView['vm']['volume'];
 
     thumbnailUrl$ = this.vm.thumbnailUrl$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     thumbnailUrl: MediaPlayerView['vm']['thumbnailUrl'];
 
     isLiked$ = this.vm.isLiked$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     isLiked: MediaPlayerView['vm']['isLiked'];
 
     resumeCommand$ = this.vm.resumeCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     resumeCommand: MediaPlayerView['vm']['resumeCommand'];
 
     pauseCommand$ = this.vm.pauseCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     pauseCommand: MediaPlayerView['vm']['pauseCommand'];
 
     prevCommand$ = this.vm.prevCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     prevCommand: MediaPlayerView['vm']['prevCommand'];
 
     nextCommand$ = this.vm.nextCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     nextCommand: MediaPlayerView['vm']['nextCommand'];
 
     volumeUpCommand$ = this.vm.volumeUpCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     volumeUpCommand: MediaPlayerView['vm']['volumeUpCommand'];
 
     volumeDownCommand$ = this.vm.volumeDownCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
-    volumeDownCommand : MediaPlayerView['vm']['volumeDownCommand'];
+    @Binding()
+    volumeDownCommand: MediaPlayerView['vm']['volumeDownCommand'];
 
     refreshPlaybackCommand$ = this.vm.refreshPlaybackCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     refreshPlaybackCommand: MediaPlayerView['vm']['refreshPlaybackCommand'];
 
     likeSongCommand$ = this.vm.likeSongCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     likeSongCommand: MediaPlayerView['vm']['likeSongCommand'];
 
     unlikeSongCommand$ = this.vm.unlikeSongCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     unlikeSongCommand: MediaPlayerView['vm']['unlikeSongCommand'];
 
     seekPlaybackCommand$ = this.vm.seekPlaybackCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     seekPlaybackCommand: MediaPlayerView['vm']['seekPlaybackCommand'];
 
     volumeCommand$ = this.vm.volumeCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     volumeCommand: MediaPlayerView['vm']['volumeCommand'];
-    
+
     constructor(props) {
         super(props);
         // toDO: Find better solution
@@ -117,13 +113,12 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     }
 
     componentDidMount() {
-        Notify.subscribeChildren(this.refresh, this);
         this.didRefresh = this.refresh;
+        Notifications.observe(this, this.didRefresh);
     }
 
     componentWillUnmount() {
-        Notify.unsubscribeChildren(this.refresh, this);
-        this.didRefresh = () => { };
+        Notifications.stopObserving(this, this.didRefresh);
     }
 
     refresh(args) {
@@ -173,14 +168,14 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
         // position will be between 0 and 100
         var minp = 0;
         var maxp = 100;
-      
+
         // The result should be between 100 an 10000000
         var minv = Math.log(1);
         var maxv = Math.log(100);
-      
+
         // calculate adjustment factor
         var scale = (maxv - minv) / (maxp - minp);
-      
+
         return Math.exp(minv + scale * (position - minp));
     }
 
@@ -188,11 +183,11 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
         // position will be between 0 and 100
         var minp = 0;
         var maxp = 100;
-      
+
         // The result should be between 100 an 10000000
         var minv = Math.log(1);
         var maxv = Math.log(100);
-      
+
         // calculate adjustment factor
         var scale = (maxv - minv) / (maxp - minp);
 

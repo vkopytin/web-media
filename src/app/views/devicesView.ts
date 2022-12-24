@@ -1,7 +1,7 @@
 import React from 'react';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/devices';
-import { Binding, current, Notify } from '../utils';
+import { Binding, current, Notifications } from '../utils';
 import { AppViewModel } from '../viewModels';
 
 export interface IDevicesViewProps {
@@ -10,42 +10,35 @@ export interface IDevicesViewProps {
 }
 
 class DevicesView extends React.Component<IDevicesViewProps> {
-    didRefresh: DevicesView['refresh'] = () => {};
+    didRefresh: DevicesView['refresh'] = this.refresh.bind(this);
     vm = current(AppViewModel);
-    
+
     errors$ = this.vm.errors$;
-    @Binding({
-        didSet(view, errors) {
-            this.didRefresh();
-            view.showErrors(errors);
-        }
-    })
+    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
     errors: DevicesView['vm']['errors'];
 
     switchDeviceCommand$ = this.vm.switchDeviceCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     switchDeviceCommand: DevicesView['vm']['switchDeviceCommand'];
 
     devices$ = this.vm.devices$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     devices: DevicesView['vm']['devices'];
 
     currentDevice$ = this.vm.currentDevice$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     currentDevice: DevicesView['vm']['currentDevice'];
 
     refreshDevicesCommand$ = this.vm.refreshDevicesCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     refreshDevicesCommand: DevicesView['vm']['refreshDevicesCommand'];
 
     componentDidMount() {
-        Notify.subscribeChildren(this.refresh, this);
-        this.didRefresh = this.refresh;
+        Notifications.observe(this, this.didRefresh);
     }
 
     componentWillUnmount() {
-        Notify.unsubscribeChildren(this.refresh, this);
-        this.didRefresh = () => { };
+        Notifications.stopObserving(this, this.didRefresh);
     }
 
     refresh(args) {

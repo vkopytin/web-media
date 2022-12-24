@@ -2,7 +2,7 @@ import $ = require('jquery');
 import React from 'react';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/tracks';
-import { Binding, current, Notify } from '../utils';
+import { Binding, current, Notifications } from '../utils';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 export interface ITracksViewProps {
@@ -24,36 +24,31 @@ interface ITracksViewState {
 }
 
 class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
-    didRefresh: TracksView['refresh'] = () => { };
+    didRefresh: TracksView['refresh'] = this.refresh.bind(this);
     vm = current(PlaylistsViewModel);
-    
+
     errors$ = this.vm.errors$;
-    @Binding({
-        didSet: (view, errors) => {
-            view.didRefresh();
-            view.showErrors(errors);
-        }
-    })
+    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
     errors: TracksView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     tracks: TracksView['vm']['tracks'];
 
     likedTracks$ = this.vm.likedTracks$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     likedTracks: TracksView['vm']['likedTracks'];
 
     selectedItem$ = this.vm.selectedItem$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     selectedItem: TracksView['vm']['selectedItem'];
 
     trackLyrics$ = this.vm.trackLyrics$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     trackLyrics: TracksView['vm']['trackLyrics'];
 
     bannedTrackIds$ = this.vm.bannedTrackIds$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     bannedTrackIds: TracksView['vm']['bannedTrackIds'];
 
     state = {
@@ -62,27 +57,27 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
     };
 
     likeTrackCommand$ = this.vm.likeTrackCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     likeTrackCommand: TracksView['vm']['likeTrackCommand'];
 
     unlikeTrackCommand$ = this.vm.unlikeTrackCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     unlikeTrackCommand: TracksView['vm']['unlikeTrackCommand'];
 
     findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     findTrackLyricsCommand: TracksView['vm']['findTrackLyricsCommand'];
 
     reorderTrackCommand$ = this.vm.reorderTrackCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     reorderTrackCommand: TracksView['vm']['reorderTrackCommand'];
 
     bannTrackCommand$ = this.vm.bannTrackCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     bannTrackCommand: TracksView['vm']['bannTrackCommand'];
 
     removeBannFromTrackCommand$ = this.vm.removeBannFromTrackCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     removeBannFromTrackCommand: TracksView['vm']['removeBannFromTrackCommand'];
 
     constructor(props) {
@@ -94,13 +89,11 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
     }
 
     componentDidMount() {
-        Notify.subscribeChildren(this.refresh, this);
-        this.didRefresh = this.refresh;
+        Notifications.observe(this, this.didRefresh);
     }
 
     componentWillUnmount() {
-        Notify.unsubscribeChildren(this.refresh, this);
-        this.didRefresh = () => { };
+        Notifications.stopObserving(this, this.didRefresh);
     }
 
     refresh(args) {
@@ -137,7 +130,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
             target.ondragend = this.onDragEnd;
         }
     }
-    
+
     onDragStart(e) {
         console.log('onDragStart');
         const target = this.getTrNode(e.target);
@@ -160,7 +153,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
             this.state.draggedIndex = dragIndex;
         }
     }
-    
+
     onDragEnter(e, el) {
         const target = this.getTrNode(e.target);
         $(target).toggleClass('dragged-place', true);
@@ -178,7 +171,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         const target = this.getTrNode(e.target);
         $(target).toggleClass('dragged-place', false);
     }
-    
+
     onDragEnd(e) {
         console.log('onDragEnd');
         const target = this.getTrNode(e.target);
@@ -192,13 +185,13 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
             $('li', $(target).parent()).toggleClass('dragged-place', false);
         }
     }
-    
+
     getTrNode(target) {
         //     console.log('dragContainer:', this.refs.dragContainer)
         //     return closest(target, 'tr', this.refs.dragContainer.tableNode);
         return $(target).closest('li')[0];
     }
-    
+
     changeRowIndex() {
         const dragIndex = this.state.dragIndex;
         const draggedIndex = this.state.draggedIndex;

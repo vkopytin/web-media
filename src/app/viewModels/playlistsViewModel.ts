@@ -1,42 +1,43 @@
+import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { ServiceResult } from '../base/serviceResult';
 import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, current, isLoading, State, ValueContainer } from '../utils';
+import { assertNoErrors, current, isLoading, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 class PlaylistsViewModel {
-    errors$: ValueContainer<PlaylistsViewModel['errors'], PlaylistsViewModel>;
+    errors$: BehaviorSubject<PlaylistsViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    playlists$: ValueContainer<PlaylistsViewModel['playlists'], PlaylistsViewModel>;
+    playlists$: BehaviorSubject<PlaylistsViewModel['playlists']>;
     @State playlists = [] as PlaylistsViewModelItem[];
 
-    tracks$: ValueContainer<PlaylistsViewModel['tracks'], PlaylistsViewModel>;
+    tracks$: BehaviorSubject<PlaylistsViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
-    
-    isLoading$: ValueContainer<PlaylistsViewModel['isLoading'], PlaylistsViewModel>;
+
+    isLoading$: BehaviorSubject<PlaylistsViewModel['isLoading']>;
     @State isLoading = false;
 
-    likedTracks$: ValueContainer<PlaylistsViewModel['likedTracks'], PlaylistsViewModel>;
+    likedTracks$: BehaviorSubject<PlaylistsViewModel['likedTracks']>;
     @State likedTracks = [] as TrackViewModelItem[];
 
-    currentPlaylistId$: ValueContainer<PlaylistsViewModel['currentPlaylistId'], PlaylistsViewModel>;
+    currentPlaylistId$: BehaviorSubject<PlaylistsViewModel['currentPlaylistId']>;
     @State currentPlaylistId = '';
 
-    newPlaylistName$: ValueContainer<PlaylistsViewModel['newPlaylistName'], PlaylistsViewModel>;
+    newPlaylistName$: BehaviorSubject<PlaylistsViewModel['newPlaylistName']>;
     @State newPlaylistName = '';
 
-    selectedItem$: ValueContainer<PlaylistsViewModel['selectedItem'], PlaylistsViewModel>;
+    selectedItem$: BehaviorSubject<PlaylistsViewModel['selectedItem']>;
     @State selectedItem = null as TrackViewModelItem;
 
-    trackLyrics$: ValueContainer<PlaylistsViewModel['trackLyrics'], PlaylistsViewModel>;
+    trackLyrics$: BehaviorSubject<PlaylistsViewModel['trackLyrics']>;
     @State trackLyrics = null as { trackId: string; lyrics: string };
 
-    bannedTrackIds$: ValueContainer<PlaylistsViewModel['bannedTrackIds'], PlaylistsViewModel>;
+    bannedTrackIds$: BehaviorSubject<PlaylistsViewModel['bannedTrackIds']>;
     @State bannedTrackIds = [] as string[];
 
     settings = {
@@ -58,29 +59,29 @@ class PlaylistsViewModel {
         newPlaylistName: '',
     };
 
-    selectPlaylistCommand$: ValueContainer<PlaylistsViewModel['selectPlaylistCommand'], PlaylistsViewModel>;
+    selectPlaylistCommand$: BehaviorSubject<PlaylistsViewModel['selectPlaylistCommand']>;
     @State selectPlaylistCommand = Scheduler.Command((playlistId: string) => {
         this.currentPlaylistId = playlistId;
         this.fetchTracks();
     });
-    loadMoreCommand$: ValueContainer<PlaylistsViewModel['loadMoreCommand'], PlaylistsViewModel>;
+    loadMoreCommand$: BehaviorSubject<PlaylistsViewModel['loadMoreCommand']>;
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
-    loadMoreTracksCommand$: ValueContainer<PlaylistsViewModel['loadMoreTracksCommand'], PlaylistsViewModel>;
+    loadMoreTracksCommand$: BehaviorSubject<PlaylistsViewModel['loadMoreTracksCommand']>;
     @State loadMoreTracksCommand = Scheduler.Command(() => this.loadMoreTracks());
-    createPlaylistCommand$: ValueContainer<PlaylistsViewModel['createPlaylistCommand'], PlaylistsViewModel>;
+    createPlaylistCommand$: BehaviorSubject<PlaylistsViewModel['createPlaylistCommand']>;
     @State createPlaylistCommand = Scheduler.Command((isPublic: boolean) => this.createNewPlaylist(isPublic));
-    likeTrackCommand$: ValueContainer<PlaylistsViewModel['likeTrackCommand'], PlaylistsViewModel>;
+    likeTrackCommand$: BehaviorSubject<PlaylistsViewModel['likeTrackCommand']>;
     @State likeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.likeTrack(track));
-    unlikeTrackCommand$: ValueContainer<PlaylistsViewModel['unlikeTrackCommand'], PlaylistsViewModel>;
+    unlikeTrackCommand$: BehaviorSubject<PlaylistsViewModel['unlikeTrackCommand']>;
     @State unlikeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.unlikeTrack(track));
-    findTrackLyricsCommand$: ValueContainer<PlaylistsViewModel['findTrackLyricsCommand'], PlaylistsViewModel>;
+    findTrackLyricsCommand$: BehaviorSubject<PlaylistsViewModel['findTrackLyricsCommand']>;
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
-    reorderTrackCommand$: ValueContainer<PlaylistsViewModel['reorderTrackCommand'], PlaylistsViewModel>;
+    reorderTrackCommand$: BehaviorSubject<PlaylistsViewModel['reorderTrackCommand']>;
     @State reorderTrackCommand = Scheduler.Command((track: TrackViewModelItem, beforeTrack: TrackViewModelItem) => this.reorderTrack(track, beforeTrack));
 
-    bannTrackCommand$: ValueContainer<PlaylistsViewModel['bannTrackCommand'], PlaylistsViewModel>;
+    bannTrackCommand$: BehaviorSubject<PlaylistsViewModel['bannTrackCommand']>;
     @State bannTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.bannTrack(track));
-    removeBannFromTrackCommand$: ValueContainer<PlaylistsViewModel['removeBannFromTrackCommand'], PlaylistsViewModel>;
+    removeBannFromTrackCommand$: BehaviorSubject<PlaylistsViewModel['removeBannFromTrackCommand']>;
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
@@ -94,7 +95,7 @@ class PlaylistsViewModel {
     }));
 
     constructor(private ss = current(Service)) {
-        
+
     }
 
     async connect() {

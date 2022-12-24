@@ -1,7 +1,7 @@
 import React from 'react';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/home';
-import { Binding, current, Notify } from '../utils';
+import { Binding, current, Notifications } from '../utils';
 import { HomeViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IHomeViewProps {
@@ -10,78 +10,71 @@ export interface IHomeViewProps {
 }
 
 class HomeView extends React.Component<IHomeViewProps> {
-    didRefresh: HomeView['refresh'] = () => { };
+    didRefresh: HomeView['refresh'] = this.refresh.bind(this);
     vm = current(HomeViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({
-        didSet: (view, errors) => {
-            view.didRefresh();
-            view.showErrors(errors);
-        }
-    })
+    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
     errors: HomeView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     tracks: HomeView['vm']['tracks'];
 
     likedTracks$ = this.vm.likedTracks$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     likedTracks: HomeView['vm']['likedTracks'];
 
     isLoading$ = this.vm.isLoading$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     isLoading: HomeView['vm']['isLoading'];
 
     selectedTrack$ = this.vm.selectedTrack$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     selectedTrack: HomeView['vm']['selectedTrack'];
 
     trackLyrics$ = this.vm.trackLyrics$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     trackLyrics: HomeView['vm']['trackLyrics'];
 
     bannedTrackIds$ = this.vm.bannedTrackIds$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     bannedTrackIds: HomeView['vm']['bannedTrackIds'];
 
     refreshCommand$ = this.vm.refreshCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     refreshCommand: HomeView['vm']['refreshCommand'];
 
     selectTrackCommand$ = this.vm.selectTrackCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     selectTrackCommand: HomeView['vm']['selectTrackCommand'];
 
     likeTrackCommand$ = this.vm.likeTrackCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     likeTrackCommand: HomeView['vm']['likeTrackCommand'];
 
     unlikeTrackCommand$ = this.vm.unlikeTrackCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     unlikeTrackCommand: HomeView['vm']['unlikeTrackCommand'];
 
     findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     findTrackLyricsCommand: HomeView['vm']['findTrackLyricsCommand'];
 
     bannTrackCommand$ = this.vm.bannTrackCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     bannTrackCommand: HomeView['vm']['bannTrackCommand'];
 
     removeBannFromTrackCommand$ = this.vm.removeBannFromTrackCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     removeBannFromTrackCommand: HomeView['vm']['removeBannFromTrackCommand'];
 
     componentDidMount() {
-        Notify.subscribeChildren(this.refresh, this);
-        this.didRefresh = this.refresh;
+        Notifications.observe(this, this.didRefresh);
     }
 
     componentWillUnmount() {
-        Notify.unsubscribeChildren(this.refresh, this);
-        this.didRefresh = () => { };
+        Notifications.stopObserving(this, this.didRefresh);
     }
 
     refresh(args) {

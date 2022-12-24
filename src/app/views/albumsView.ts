@@ -1,7 +1,7 @@
 import React from 'react';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/albums';
-import { Binding, current, Notify, State, ValueContainer } from '../utils';
+import { Binding, current, Notifications } from '../utils';
 import { AlbumsViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IAlbumsViewProps {
@@ -12,34 +12,27 @@ export interface IAlbumsViewProps {
 }
 
 class AlbumsView extends React.Component<IAlbumsViewProps> {
-    didRefresh: AlbumsView['refresh'] = () => {};
+    didRefresh: AlbumsView['refresh'] = this.refresh.bind(this);
     vm = current(AlbumsViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({
-        didSet: (view, errors) => {
-            view.didRefresh();
-            view.showErrors(errors);
-        }
-    })
+    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
     errors: AlbumsView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     tracks: AlbumsView['vm']['tracks'];
 
     selectedItem$ = this.vm.selectedItem$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     selectedItem: AlbumsView['vm']['selectedItem'];
 
     componentDidMount() {
-        Notify.subscribeChildren(this.refresh, this);
-        this.didRefresh = this.refresh;
+        Notifications.observe(this, this.didRefresh);
     }
 
     componentWillUnmount() {
-        Notify.unsubscribeChildren(this.refresh, this);
-        this.didRefresh = () => { };
+        Notifications.stopObserving(this, this.didRefresh);
     }
 
     componentDidUpdate(prevProps: IAlbumsViewProps, prevState, snapshot) {

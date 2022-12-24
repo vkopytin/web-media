@@ -1,79 +1,73 @@
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/userProfile';
-import { Binding, current, Notify, ValueContainer } from '../utils';
+import { Binding, current, Notifications } from '../utils';
 import { AppViewModel, TrackViewModelItem, UserProfileViewModel } from '../viewModels';
 
 
 export interface IUserProfileViewProps {
     className?: string;
     showErrors(errors: ServiceResult<any, Error>[]);
-    openLogin$: ValueContainer<boolean, AppViewModel>;
+    openLogin$: BehaviorSubject<boolean>;
 }
 
 class UserProfileView extends React.Component<IUserProfileViewProps> {
-    didRefresh: UserProfileView['refresh'] = () => { };
+    didRefresh: UserProfileView['refresh'] = this.refresh.bind(this);
     vm = current(UserProfileViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({
-        didSet: (view, errors) => {
-            view.didRefresh();
-            view.showErrors(errors);
-        }
-    })
+    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
     errors: UserProfileView['vm']['errors'];
 
     openLogin$ = this.props.openLogin$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     openLogin: boolean;
 
     isLoggedin$ = this.vm.isLoggedin$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     isLoggedin: UserProfileView['vm']['isLoggedin'];
 
     profile$ = this.vm.profile$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     profile: UserProfileView['vm']['profile'];
 
     currentTrackId$ = this.vm.currentTrackId$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     currentTrackId: UserProfileView['vm']['currentTrackId'];
 
     topTracks$ = this.vm.topTracks$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     topTracks: UserProfileView['vm']['topTracks'];
 
     tracks$ = this.vm.tracks$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     tracks: UserProfileView['vm']['tracks'];
 
     spotifyAuthUrl$ = this.vm.spotifyAuthUrl$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     spotifyAuthUrl: UserProfileView['vm']['spotifyAuthUrl'];
 
     geniusAuthUrl$ = this.vm.geniusAuthUrl$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     geniusAuthUrl: UserProfileView['vm']['geniusAuthUrl'];
 
     apiseedsKey$ = this.vm.apiseedsKey$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     apiseedsKey: UserProfileView['vm']['apiseedsKey'];
 
     logoutCommand$ = this.vm.logoutCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     logoutCommand: UserProfileView['vm']['logoutCommand'];
 
     doLogout = false;
-  
+
     componentDidMount() {
-        Notify.subscribeChildren(this.refresh, this);
-        this.didRefresh = this.refresh;
+        Notifications.observe(this, this.didRefresh);
     }
 
     componentWillUnmount() {
-        Notify.unsubscribeChildren(this.refresh, this);
-        this.didRefresh = () => { };
+        Notifications.stopObserving(this, this.didRefresh);
     }
 
     refresh(args) {

@@ -2,7 +2,7 @@ import React from 'react';
 import * as _ from 'underscore';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/selectPlaylists';
-import { Binding, current, Notify } from '../utils';
+import { Binding, current, Notifications } from '../utils';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 
@@ -14,51 +14,44 @@ export interface ISelectPlaylistsViewProps {
 }
 
 class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
-    didRefresh: SelectPlaylistsView['refresh'] = () => { };
+    didRefresh: SelectPlaylistsView['refresh'] = this.refresh.bind(this);
     playlistsViewModel = current(PlaylistsViewModel);
     vm = this.props.track;
-    
+
     errors$ = this.vm.errors$;
-    @Binding({
-        didSet: (view, errors) => {
-            view.didRefresh();
-            view.showErrors(errors);
-        }
-    })
+    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
     errors: SelectPlaylistsView['vm']['errors'];
 
     // playlists
     trackPlaylists$ = this.vm.trackPlaylists$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     trackPlaylists: SelectPlaylistsView['vm']['trackPlaylists'];
 
     //items
     playlists$ = this.playlistsViewModel.playlists$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     playlists: SelectPlaylistsView['playlistsViewModel']['playlists'];
 
     isLoading$ = this.playlistsViewModel.isLoading$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     isLoading: SelectPlaylistsView['playlistsViewModel']['isLoading'];
 
     fetchData = () => this.playlistsViewModel.fetchData();
 
     addToPlaylistCommand$ = this.vm.addToPlaylistCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     addToPlaylistCommand: SelectPlaylistsView['vm']['removeFromPlaylistCommand'];
 
     removeFromPlaylistCommand$ = this.vm.removeFromPlaylistCommand$;
-    @Binding({ didSet: (view) => view.didRefresh() })
+    @Binding()
     removeFromPlaylistCommand: SelectPlaylistsView['vm']['removeFromPlaylistCommand'];
 
     componentDidMount() {
-        Notify.subscribeChildren(this.refresh, this);
-        this.didRefresh = this.refresh;
+        Notifications.observe(this, this.didRefresh);
     }
 
     componentWillUnmount() {
-        Notify.unsubscribeChildren(this.refresh, this);
-        this.didRefresh = () => { };
+        Notifications.stopObserving(this, this.didRefresh);
     }
 
     componentDidUpdate(prevProps: ISelectPlaylistsViewProps, prevState, snapshot) {
