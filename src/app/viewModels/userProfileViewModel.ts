@@ -20,9 +20,6 @@ class UserProfileViewModel {
     profile$: BehaviorSubject<UserProfileViewModel['profile']>;
     @State profile: IUserInfo = {};
 
-    currentTrackId$ = this.appViewModel.currentTrackId$;
-    @Binding() currentTrackId = '';
-
     topTracks$: BehaviorSubject<UserProfileViewModel['topTracks']>;
     @State topTracks = [] as TrackViewModelItem[];
 
@@ -40,6 +37,9 @@ class UserProfileViewModel {
 
     logoutCommand$: BehaviorSubject<UserProfileViewModel['logoutCommand']>;
     @State logoutCommand = Scheduler.Command(() => this.logout());
+
+    currentTrackId$ = this.appViewModel.currentTrackId$;
+    @Binding() currentTrackId = '';
 
     settings = {
         currentTrackId: '',

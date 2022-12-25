@@ -213,7 +213,7 @@ export const Notifications = (function () {
                 if (!traits) {
                     return;
                 }
-                traits.observers.push(obj);
+                Notifications.attach(obj[key], obj);
                 Notifications.subscribe(obj[key], obj, callback);
             });
         },
@@ -223,21 +223,21 @@ export const Notifications = (function () {
                 if (!traits) {
                     return;
                 }
-                const observers = GetTraits<ISignals>(obj[key]).observers.filter(o => o !== obj);
-                GetTraits<ISignals>(obj[key]).observers = observers;
+                Notifications.detach(obj[key], obj);
                 Notifications.unsubscribe(obj[key], obj, callback);
             });
         },
         next(value: INotification) {
-            const observers = GetTraits<ISignals>(value.state, false).observers;
-            GetTraits<ISignals>(value.state).callbacks.forEach(([o, cb]) => {
-                observers.forEach(obj => obj === o && cb.call(obj, value.value));
+            const trait = GetTraits<ISignals>(value.state, false);
+            trait.callbacks.forEach(([o, cb]) => {
+                trait.observers.forEach(obj => obj === o && cb.call(obj, value.value));
             });
         },
         declare<T>(state: BehaviorSubject<T>, propName: string) {
-            GetTraits<ISignals>(state).callbacks = [];
-            GetTraits<ISignals>(state).observers = [];
-            GetTraits<ISignals>(state).propName = propName;
+            const traits = GetTraits<ISignals>(state);
+            traits.callbacks = [];
+            traits.observers = [];
+            traits.propName = propName;
             state.subscribe(value => {
                 Notifications.next({
                     state,
@@ -245,8 +245,17 @@ export const Notifications = (function () {
                 });
             });
         },
+        attach<T>(state: BehaviorSubject<T>, obj: unknown) {
+            const { observers } = GetTraits<ISignals>(state, false);
+            observers.push(obj);
+        },
+        detach<T>(state: BehaviorSubject<T>, obj: unknown) {
+            const observers = GetTraits<ISignals>(state, false).observers.filter(o => o !== obj);
+            GetTraits<ISignals>(state).observers = observers;
+        },
         subscribe<T>(state: BehaviorSubject<T>, view: unknown, callback: Function) {
-            GetTraits<ISignals>(state, false).callbacks.push([view, callback]);
+            const { callbacks } = GetTraits<ISignals>(state, false);
+            callbacks.push([view, callback]);
         },
         unsubscribe<T>(state: BehaviorSubject<T>, view: unknown, callback: Function) {
             const callbacks = GetTraits<ISignals>(state).callbacks.filter(([a, b]) => a !== view && callback !== b);
@@ -299,7 +308,7 @@ export function State<T>(target: T, propName: string, descriptor?) {
 export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) => void } = {}) {
     return function (target: T, propName: string, descriptor?): any {
         const desc$ = Object.getOwnPropertyDescriptor(target, `${propName}$`);
-
+        const desc = Object.getOwnPropertyDescriptor(target, propName);
         function initBinding(store$: BehaviorSubject<unknown>) {
             let state = store$;
             const didSetCb = didSet && (value => {
@@ -337,7 +346,6 @@ export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) 
             ...desc$
         };
         Object.defineProperty(target, `${propName}$`, storeOpts);
-        const desc = Object.getOwnPropertyDescriptor(target, propName);
 
         const opts = {
             get() {

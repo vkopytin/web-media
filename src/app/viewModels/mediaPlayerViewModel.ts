@@ -18,9 +18,6 @@ class MediaPlayerViewModel {
     errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    currentTrackId$ = this.appViewModel.currentTrackId$;
-    @Binding() currentTrackId = '';
-
     queue$: BehaviorSubject<MediaPlayerViewModel['queue']>;
     @State queue = [] as TrackViewModelItem[];
 
@@ -82,6 +79,9 @@ class MediaPlayerViewModel {
     @State unlikeSongCommand = Scheduler.Command(() => this.unlikeTrack());
     seekPlaybackCommand$: BehaviorSubject<MediaPlayerViewModel['seekPlaybackCommand']>;
     @State seekPlaybackCommand = Scheduler.Command((percent) => this.manualSeek(percent));
+
+    currentTrackId$ = this.appViewModel.currentTrackId$;
+    @Binding() currentTrackId = '';
 
     monitorPlyback = _.debounce(this.monitorPlybackInternal, 5 * 1000);
     autoSeek = _.debounce(this.autoSeekInternal, 500);

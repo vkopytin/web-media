@@ -7,14 +7,11 @@ import { DataService } from '../service/dataService';
 import { SpotifyService } from '../service/spotify';
 import { current, formatTime, isLoading, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
-import { AppViewModel } from './appViewModel';
 import { MediaPlayerViewModel } from './mediaPlayerViewModel';
 import { PlaylistsViewModel } from './playlistsViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 class TrackViewModelItem {
-    appViewModel = current(AppViewModel);
-    playlistsViewModel = current(PlaylistsViewModel);
     mediaPlayerViewModel = current(MediaPlayerViewModel);
 
     errors$: BehaviorSubject<TrackViewModelItem['errors']>;
