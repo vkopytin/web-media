@@ -16,7 +16,7 @@ export const template = (view: HomeView) => <>
         </div>
         <PickPlaylistsView showErrors={e => view.showErrors(e)} />
     </div>
-    <ul className="todo-list table-view">
+    <ul className="table-view">
         {_.map(view.tracks, (item: HomeView['tracks'][0], index) =>
             <li key={item.id()}>
                 <div className="table-view-cell media">
@@ -61,9 +61,9 @@ export const template = (view: HomeView) => <>
                             onClick={evnt => view.removeBannFromTrackCommand.exec(item)}
                         >block</button>
                             : <button className="action chips btn btn-positive btn-outlined material-icons"
-                            title="Allowed, tab to set a bann"
-                            onClick={evnt => view.bannTrackCommand.exec(item)}
-                        >done</button>}
+                                title="Allowed, tab to set a bann"
+                                onClick={evnt => view.bannTrackCommand.exec(item)}
+                            >done</button>}
                     </span>
                     {item.isLiked && <span className="badge badge-positive"
                         onClick={evnt => view.unlikeTrackCommand.exec(item)}

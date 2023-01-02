@@ -24,7 +24,7 @@ export const template = (view: PlaylistsView) => <>
             onClick={evnt => { evnt.preventDefault(); view.createPlaylistCommand.exec(false); }}
         >Create private</a>
     </div>
-    <ul className="todo-list table-view">
+    <ul className="table-view">
         {_.map(view.playlists, (item: PlaylistsView['playlists'][0], index) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media">

@@ -7,7 +7,7 @@ import { MyTracksView, SelectPlaylistsView } from '../views';
 const cn = utils.className;
 
 export const template = (view: MyTracksView) => <>
-    <ul className="todo-list table-view">
+    <ul className="table-view">
         {_.map(view.tracks, (item: MyTracksView['tracks'][0], index) => {
             return <li key={`${index}-${item.id()}`}>
                 <div className="table-view-cell media">
@@ -34,7 +34,7 @@ export const template = (view: MyTracksView) => <>
                         <div>
                             <span className="song-title">{item.name()}</span>
                             &nbsp;-&nbsp;
-                                <span className="author-title">{item.artist()}</span>
+                            <span className="author-title">{item.artist()}</span>
                         </div>
                         <div className="album-title">{item.album()}</div>
                         {view.selectedItem !== item && <SelectPlaylistsView
@@ -48,9 +48,9 @@ export const template = (view: MyTracksView) => <>
                     {item.isLiked || <span className="badge">{item.duration()}</span>}
                 </div>
                 {(view.trackLyrics && view.trackLyrics.trackId === item.id())
-                && <div className="card">{_.map(view.trackLyrics.lyrics.split('\n'), (line, index) => {
-                    return <div key={index}>{line}</div>;
-                })}</div>}
+                    && <div className="card">{_.map(view.trackLyrics.lyrics.split('\n'), (line, index) => {
+                        return <div key={index}>{line}</div>;
+                    })}</div>}
             </li>
         })}
     </ul>

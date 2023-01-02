@@ -9,7 +9,7 @@ const cn = utils.className;
 export const template = (view: SearchView) => <>
     <section className="bar bar-standard">
         <form onSubmit={e => e.preventDefault()}>
-            <input className="new-todo" type="search" placeholder="Enter search title..."
+            <input type="search" placeholder="Enter search title..."
                 onChange={evnt => view.searchTracks(evnt.target.value)}
                 defaultValue={view.term}
             />
@@ -29,7 +29,7 @@ export const template = (view: SearchView) => <>
             onClick={evnt => { evnt.preventDefault(); view.searchType = 'playlist' }}
         >Playlists</a>
     </div>
-    <ul className="todo-list table-view">
+    <ul className="table-view">
         {_.map(view.tracks, (item: SearchView['tracks'][0], index) => {
             return <li key={item.id()} className="table-view-cell media">
                 <span className="media-object pull-left player-left--32"
@@ -49,7 +49,7 @@ export const template = (view: SearchView) => <>
                     <div>
                         <span className="song-title">{item.name()}</span>
                         &nbsp;-&nbsp;
-                            <span className="author-title">{item.artist()}</span>
+                        <span className="author-title">{item.artist()}</span>
                     </div>
                     <div className="album-title">{item.album()}</div>
                     {view.selectedItem !== item && <SelectPlaylistsView

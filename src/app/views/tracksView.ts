@@ -27,6 +27,11 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
     didRefresh: TracksView['refresh'] = this.refresh.bind(this);
     vm = current(PlaylistsViewModel);
 
+    state = {
+        draggedIndex: 0,
+        dragIndex: 0
+    };
+
     errors$ = this.vm.errors$;
     @Binding({ didSet: (view, errors) => view.showErrors(errors) })
     errors: TracksView['vm']['errors'];
@@ -50,11 +55,6 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
     bannedTrackIds$ = this.vm.bannedTrackIds$;
     @Binding()
     bannedTrackIds: TracksView['vm']['bannedTrackIds'];
-
-    state = {
-        draggedIndex: 0,
-        dragIndex: 0
-    };
 
     likeTrackCommand$ = this.vm.likeTrackCommand$;
     @Binding()

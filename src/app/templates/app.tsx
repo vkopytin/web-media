@@ -1,5 +1,4 @@
 import { utils } from 'databindjs';
-import * as $ from 'jquery';
 import * as React from 'react';
 import * as _ from 'underscore';
 import { AppView, DevicesView, HomeView, MediaPlayerView, MyTracksView, NewReleasesView, PlaylistsView, SearchView, SwitchView, UserProfileView } from '../views';
@@ -8,7 +7,7 @@ const imgSrc = require('../../images/Spotify_Logo_RGB_Green.png');
 const cn = utils.className;
 
 export const template = (view: AppView) => <main>
-    <section className="todoapp device-content">
+    <section className="device-content">
         <UserProfileView
             showErrors={errors => view.showErrors(errors)}
             openLogin$={view.openLogin$}

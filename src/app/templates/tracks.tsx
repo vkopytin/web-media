@@ -7,13 +7,13 @@ import { SelectPlaylistsView, TracksView } from '../views';
 const cn = utils.className;
 
 export const template = (view: TracksView) => <>
-    <ul className={cn(`${view.props.className} todo-list table-view`)}>
+    <ul className={cn(`${view.props.className} table-view`)}>
         {_.map(view.tracks, (item: TracksView['tracks'][0], index) => <li key={item.id()}>
             <div className="table-view-cell media"
-            onTouchStart={e => view.onMouseDown(e)}>
+                onTouchStart={e => view.onMouseDown(e)}>
                 <span className="material-icons handle"
                     onMouseDown={e => view.onMouseDown(e)}
-                    
+
                 ></span>
                 <div className="info-list">
                     {item.isCached && <span className="info-item material-icons">delete</span>}
@@ -39,7 +39,7 @@ export const template = (view: TracksView) => <>
                     <div>
                         <span className="song-title">{item.name()}</span>
                         &nbsp;-&nbsp;
-                                <span className="author-title">{item.artist()}</span>
+                        <span className="author-title">{item.artist()}</span>
                     </div>
                     <div className="album-title"><span>{item.album()}</span>{view.selectedItem !== item && <SelectPlaylistsView
                         showErrors={e => view.showErrors(e)}
@@ -54,9 +54,9 @@ export const template = (view: TracksView) => <>
                         onClick={evnt => view.removeBannFromTrackCommand.exec(item)}
                     >block</button>
                         : <button className="badge badge-positive badge-outlined material-icons"
-                        title="Allowed, tab to set a bann"
-                        onClick={evnt => view.bannTrackCommand.exec(item)}
-                    >done</button>}
+                            title="Allowed, tab to set a bann"
+                            onClick={evnt => view.bannTrackCommand.exec(item)}
+                        >done</button>}
                     {item.isLiked && <span className="badge badge-positive"
                         onClick={evnt => view.unlikeTrackCommand.exec(item)}
                     >{item.duration()}</span>}

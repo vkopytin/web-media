@@ -32,11 +32,6 @@ class TrackViewModelItem {
     isLoading$: BehaviorSubject<PlaylistsViewModel['isLoading']>;
     @State isLoading = false;
 
-    settings = {
-        isLiked: false,
-        isCached: false,
-    };
-
     addToPlaylistCommand$: BehaviorSubject<TrackViewModelItem['addToPlaylistCommand']>;
     @State addToPlaylistCommand = Scheduler.Command((track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.addToPlaylist(track, playlist));
 

@@ -3,7 +3,7 @@ import * as _ from 'underscore';
 import { AlbumsView, SelectPlaylistsView } from '../views';
 
 export const template = (view: AlbumsView) => <>
-    <ul className="todo-list table-view">
+    <ul className="table-view">
         {_.map(view.tracks, (item: AlbumsView['tracks'][0], index) => {
             return <li key={item.id()} className="table-view-cell media">
                 <span className="media-object pull-left player-left--32"

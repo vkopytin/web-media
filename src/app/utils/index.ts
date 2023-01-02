@@ -302,13 +302,12 @@ export function State<T>(target: T, propName: string, descriptor?) {
     };
     Object.defineProperty(target, `${propName}$`, opts);
 
-    Binding<T>()(target, propName, descriptor);
+    return Binding<T>()(target, propName, descriptor);
 }
 
 export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) => void } = {}) {
     return function (target: T, propName: string, descriptor?): any {
         const desc$ = Object.getOwnPropertyDescriptor(target, `${propName}$`);
-        const desc = Object.getOwnPropertyDescriptor(target, propName);
         function initBinding(store$: BehaviorSubject<unknown>) {
             let state = store$;
             const didSetCb = didSet && (value => {
@@ -349,13 +348,14 @@ export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) 
 
         const opts = {
             get() {
-                desc?.get();
-                return this[`${propName}$`].getValue();
+                const val = this[`${propName}$`].getValue();
+                descriptor?.get?.();
+                return val;
             },
             set(val) {
                 if (this[propName] !== val) {
                     this[`${propName}$`].next(val);
-                    desc?.set(val);
+                    descriptor?.set?.(val);
                 }
             },
             enumerable: true,

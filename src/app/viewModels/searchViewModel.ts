@@ -62,11 +62,13 @@ class SearchViewModel {
 
     onChangeTerm = _.debounce(() => {
         searchQueue.push(async (next) => {
-            if (this.term) {
-                await this.fetchData();
-                next();
-            } else {
-                this.tracks = [];
+            try {
+                if (this.term) {
+                    await this.fetchData();
+                } else {
+                    this.tracks = [];
+                }
+            } finally {
                 next();
             }
         });
