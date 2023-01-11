@@ -17,16 +17,16 @@ export interface ISettings {
         key: string;
     }
 }
-const fromEntries = str => {
-    const obj = {};
-    str.replace(/([^=&]+)=([^&]*)/g, function (m, key, value) {
-        obj[decodeURIComponent(key)] = decodeURIComponent(value);
+const fromEntries = (str: string) => {
+    const obj = {} as { [key: string]: string };
+    str.replace(/([^=&]+)=([^&]*)/g, (m: unknown, key: string, value: string) => {
+        return obj[decodeURIComponent(key)] = decodeURIComponent(value);
     });
 
     return obj;
 };
 
-const getCookie = key => {
+const getCookie = (key: string) => {
     const cookieRx = new RegExp('(^' + key + '|[^\\w\\d\\s]*' + key + ')[\\s]*=[\\s]*([^;]+)');
     const [a, k, value] = cookieRx.exec(document.cookie) || [];
 
@@ -89,10 +89,10 @@ class SettingsService extends BaseService {
         this.config = settings;
     }
 
-    volume(val?) {
+    volume(val?: number) {
         if (arguments.length && val !== this.config.spotify.volume) {
             this.config.spotify.volume = val;
-            document.cookie = 'lastVolume=' + val;
+            document.cookie = `lastVolume=${val}`;
         }
 
         return this.config.spotify.volume;

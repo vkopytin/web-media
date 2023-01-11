@@ -2,24 +2,24 @@ import * as _ from 'underscore';
 import { IStorage, IStorageConfig } from './iStorage';
 
 
-const db = {};
+const db = {} as { [key: string]: { [key: string]: {} } };
 
 class InMemoryStorage implements IStorage {
     db = db;
-    constructor(public connection) {
+    constructor(public connection: string) {
     }
 
-    initializeStructure(cb: { (err?, res?): void }) {
+    initializeStructure(cb: { (err?: Error, res?: boolean): void }) {
         cb(null, true);
     }
-    
-    hasTable(config: IStorageConfig, cb: { (err, res?): void }) {
+
+    hasTable(config: IStorageConfig, cb: { (err: Error, res?: boolean): void }) {
         const tableName = config.name;
 
         cb(null, tableName in this.db);
     }
 
-    createTable(config: IStorageConfig, cb: { (err, res?): void }) {
+    createTable(config: IStorageConfig, cb: { (err: Error, res?: boolean): void }) {
         const tableName = config.name;
         try {
             if (!this.db[tableName]) {
@@ -31,8 +31,8 @@ class InMemoryStorage implements IStorage {
             cb(ex);
         }
     }
-    
-    create(config: IStorageConfig, data: { id; }, cb: { (err, res?): void }) {
+
+    create(config: IStorageConfig, data: { id: string; }, cb: { (err: Error, res?: unknown): void }) {
         const tableName = config.name;
         try {
             if (data.id in this.db[tableName]) {
@@ -46,7 +46,7 @@ class InMemoryStorage implements IStorage {
         }
     }
 
-    update(config: IStorageConfig, id, data, cb: { (err, res?): void }) {
+    update<T>(config: IStorageConfig, id: string, data: { id: string }, cb: { (err: Error, res?: T): void }) {
         const tableName = config.name;
         try {
             const item = this.db[tableName][id];
@@ -59,7 +59,7 @@ class InMemoryStorage implements IStorage {
                 ...data
             };
 
-            cb(null, data.id);
+            cb(null, data.id as unknown as T);
         } catch (ex) {
             cb(ex, null);
         }
@@ -67,7 +67,7 @@ class InMemoryStorage implements IStorage {
         return true;
     }
 
-    delete(config: IStorageConfig, id, cb: { (err, result?): void }) {
+    delete(config: IStorageConfig, id: string, cb: { (err: Error, result?: boolean): void }) {
         const tableName = config.name;
         try {
             delete this.db[tableName][id];
@@ -77,26 +77,26 @@ class InMemoryStorage implements IStorage {
         }
     }
 
-    getById(config: IStorageConfig, id, cb: { (err, id?): void }) {
+    getById<T>(config: IStorageConfig, id: string, cb: { (err: Error, res?: T): void }) {
         const tableName = config.name;
         try {
-            cb(null, this.db[tableName][id] || undefined);
+            cb(null, (this.db[tableName][id] || undefined) as T);
         } catch (ex) {
             cb(ex);
         }
     }
 
-    where(config: IStorageConfig, where: { [key: string]: any }, cb: { (err?, result?): boolean }) {
-        
+    where<T>(config: IStorageConfig, where: { [key: string]: any }, cb: { (err?: Error, result?: T): boolean }) {
+
     }
 
-    each(config: IStorageConfig, cb: { (err?, record?, index?: number): boolean }) {
+    each<T>(config: IStorageConfig, cb: { (err?: Error, record?: T, index?: number): boolean }) {
         const tableName = config.name;
         let index = 0;
         for (const key in this.db[tableName]) {
             if (Object.prototype.hasOwnProperty.call(this.db[tableName], key)) {
                 try {
-                    const stop = cb(null, this.db[tableName][key] || null, index++) === false;
+                    const stop = cb(null, (this.db[tableName][key] || null) as T, index++) === false;
                     if (stop) {
                         return;
                     }
@@ -111,7 +111,7 @@ class InMemoryStorage implements IStorage {
         return true;
     }
 
-    getCount(config: IStorageConfig, cb: { (err, res?): void }) {
+    getCount(config: IStorageConfig, cb: { (err: Error, res?: number): void }) {
         const tableName = config.name;
         try {
             let count = 0;

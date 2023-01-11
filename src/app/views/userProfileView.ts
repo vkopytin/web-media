@@ -8,7 +8,7 @@ import { AppViewModel, TrackViewModelItem, UserProfileViewModel } from '../viewM
 
 export interface IUserProfileViewProps {
     className?: string;
-    showErrors(errors: ServiceResult<any, Error>[]);
+    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
     openLogin$: BehaviorSubject<boolean>;
 }
 
@@ -17,7 +17,7 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
     vm = current(UserProfileViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding<UserProfileView>({ didSet: (view, errors) => view.showErrors(errors) })
     errors: UserProfileView['vm']['errors'];
 
     openLogin$ = this.props.openLogin$;
@@ -70,7 +70,7 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args) {
+    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -83,7 +83,7 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
         return this.currentTrackId === track.id();
     }
 
-    showErrors(errors) {
+    showErrors<T>(errors: ServiceResult<T, Error>[]) {
         this.props.showErrors(errors);
     }
 

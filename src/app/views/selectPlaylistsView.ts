@@ -7,7 +7,7 @@ import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '
 
 
 export interface ISelectPlaylistsViewProps {
-    showErrors(errors: ServiceResult<any, Error>[]);
+    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
     className?: string;
     track: TrackViewModelItem;
     active?: boolean;
@@ -19,7 +19,7 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
     vm = this.props.track;
 
     errors$ = this.vm.errors$;
-    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding<SelectPlaylistsView>({ didSet: (view, errors) => view.showErrors(errors) })
     errors: SelectPlaylistsView['vm']['errors'];
 
     // playlists
@@ -54,14 +54,14 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    componentDidUpdate(prevProps: ISelectPlaylistsViewProps, prevState, snapshot) {
+    componentDidUpdate(prevProps: ISelectPlaylistsViewProps) {
         if (this.props.track !== prevProps.track) {
             this.componentWillUnmount();
             this.componentDidMount();
         }
     }
 
-    refresh(args) {
+    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -75,7 +75,7 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
         return !!res;
     }
 
-    showErrors(errors) {
+    showErrors(errors: ServiceResult<unknown, Error>[]) {
         this.props.showErrors(errors);
     }
 

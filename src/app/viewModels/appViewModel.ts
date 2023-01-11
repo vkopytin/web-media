@@ -29,7 +29,7 @@ class AppViewModel {
     refreshDevicesCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
     @State refreshDevicesCommand = Scheduler.Command(() => this.updateDevices());
 
-    switchDeviceCommand$: BehaviorSubject<{ exec: (a) => Promise<void> }>;
+    switchDeviceCommand$: BehaviorSubject<{ exec: (a: unknown) => Promise<void> }>;
     @State switchDeviceCommand = Scheduler.Command((device: DeviceViewModelItem) => this.switchDevice(device));
 
     refreshTokenCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;

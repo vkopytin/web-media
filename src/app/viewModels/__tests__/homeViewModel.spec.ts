@@ -4,13 +4,13 @@ import { DataStorage } from '../../data/dataStorage';
 import { Service } from '../../service';
 import { HomeViewModel } from '../homeViewModel';
 
-let mockSrv;
+let mockSrv: any;
 
 jest.mock('../../adapter/spotify', () => {
     return {
         SpotifyAdapter: jest.fn().mockImplementation(() => {
             return mockSrv = mockSrv || {
-                recommendations: jest.fn().mockImplementation(() => Promise.resolve({ tracks: [{ id: 'recommendation-01', uri: 'recommendation:uri-01'  }] })),
+                recommendations: jest.fn().mockImplementation(() => Promise.resolve({ tracks: [{ id: 'recommendation-01', uri: 'recommendation:uri-01' }] })),
                 tracks: jest.fn().mockImplementation(() => Promise.resolve({ items: [{ track: { id: 'track-01', uri: 'track:uri-01' } }] })),
                 hasTracks: jest.fn().mockImplementation(() => Promise.resolve([true])),
                 play: jest.fn().mockImplementation((deviceId, tracksUriList, indexOrUri) => Promise.resolve(true)),

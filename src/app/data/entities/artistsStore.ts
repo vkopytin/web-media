@@ -16,7 +16,7 @@ export class ArtistsStore {
                 id: { unique: true }
             },
             name: {
-                name: { }
+                name: {}
             }
         },
         orderBy: 'name',
@@ -28,7 +28,7 @@ export class ArtistsStore {
     }
 
     createTable() {
-        return asAsync(null, (cb: { (res?, result?) }) => {
+        return asAsync(null, (cb: { (res?: Error, result?: boolean): void }) => {
             this.storage.hasTable(this.storeConfig, (err, res) => {
                 if (err) {
                     return cb(err);
@@ -54,7 +54,7 @@ export class ArtistsStore {
     }
 
     async refresh(myStore: IArtist) {
-        const record = await asAsync(this.storage, this.storage.getById, this.storeConfig, myStore.id);
+        const record = await asAsync(this.storage, this.storage.getById<IArtist>, this.storeConfig, myStore.id);
         if (record) {
             return await this.update({
                 ...record,
@@ -69,8 +69,8 @@ export class ArtistsStore {
         return asAsync(this.storage, this.storage.getById, this.storeConfig, myStoreId);
     }
 
-    list(offset = 0, limit?) {
-        return asAsyncOf(null, (cb: { (res?, result?: IArtist, index?): boolean }) => {
+    list(offset = 0, limit?: number) {
+        return asAsyncOf(null, (cb: { (res?: unknown, result?: IArtist, index?: number): boolean }) => {
             this.storage.each<IArtist>(this.storeConfig, (...args) => {
                 const index = args[2];
                 if (index < offset) {

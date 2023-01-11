@@ -7,7 +7,7 @@ class LyricsServiceUnexpectedError extends Error {
         return LyricsServiceResult.error<T, LyricsServiceUnexpectedError>(new LyricsServiceUnexpectedError(message, details));
     }
 
-    constructor(public msg, public details) {
+    constructor(public msg: string, public details: { stack?: string }) {
         super(msg);
 
         this.name = 'LyricsServiceUnexpectedError';

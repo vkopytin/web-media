@@ -5,7 +5,7 @@ import { Binding, current, Notifications } from '../utils';
 import { MyTracksViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IMyTracksViewProps {
-    showErrors(errors: ServiceResult<any, Error>[]);
+    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
     loadMore?: boolean;
     currentTrackId: string;
 }
@@ -15,7 +15,7 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
     vm = current(MyTracksViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding<MyTracksView>({ didSet: (view, errors) => view.showErrors(errors) })
     errors: MyTracksView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
@@ -54,13 +54,13 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    componentDidUpdate(prevProps: IMyTracksViewProps, prevState, snapshot) {
+    componentDidUpdate(prevProps: IMyTracksViewProps) {
         if (this.props.loadMore) {
             this.loadMoreCommand.exec();
         }
     }
 
-    refresh(args) {
+    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -73,7 +73,7 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
         return this.props.currentTrackId === track.id();
     }
 
-    showErrors(errors) {
+    showErrors(errors: ServiceResult<unknown, Error>[]) {
         this.props.showErrors(errors);
     }
 

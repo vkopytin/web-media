@@ -7,7 +7,7 @@ class TokenExpiredError extends Error {
         return SpotifyServiceResult.error<T, TokenExpiredError>(new TokenExpiredError(message, details));
     }
 
-    constructor(public msg, public details) {
+    constructor(public msg: string, public details: { stack?: string }) {
         super(msg);
 
         this.name = 'TokenExpiredError';

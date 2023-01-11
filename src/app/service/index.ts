@@ -120,7 +120,7 @@ class Service {
                         if (dataService.isError) {
                             return resolve(dataService as any);
                         }
-    
+
                         resolve(this.dataService = dataService as any);
                         next();
                     });
@@ -132,7 +132,7 @@ class Service {
                         if (loginService.isError) {
                             return resolve(loginService as any);
                         }
-        
+
                         resolve(loginService as any);
                         next();
                     });
@@ -144,7 +144,7 @@ class Service {
                         if (lyricsServiceResult.isError) {
                             return resolve(lyricsServiceResult as any);
                         }
-            
+
                         resolve(lyricsServiceResult as any);
                         next();
                     });
@@ -163,7 +163,7 @@ class Service {
         }
 
         const spotifyResult = await this.service(SpotifyService);
-    
+
         return spotifyResult.cata(s => s.isLoggedIn());
     }
 
@@ -177,9 +177,9 @@ class Service {
         propName: K,
         val?: SettingsService['config'][K]
     ): Promise<SettingsServiceResult<SettingsService['config'][K], Error>>;
-    async settings(...args) {
-        const propName = args[0];
-        const val = args[1];
+    async settings<K extends keyof SettingsService['config']>(...args: unknown[]) {
+        const propName = args[0] as K;
+        const val = args[1] as SettingsService['config'][K];
         const settingsResult = await this.service(SettingsService);
         const res = settingsResult.cata(s => {
             if (args.length > 1) {
@@ -300,7 +300,7 @@ class Service {
         return result;
     }
 
-    async volume(percent) {
+    async volume(percent: number) {
         const spotify = await this.service(SpotifyService);
         const result = await spotify.cata(s => s.volume(percent));
 
@@ -334,14 +334,14 @@ class Service {
         return result;
     }
 
-    async fetchPlaylistTracks(playlistId: string, offset=0, limit=20) {
+    async fetchPlaylistTracks(playlistId: string, offset = 0, limit = 20) {
         const service = await this.service(SpotifyService);
         const result = await service.cata(s => s.fetchPlaylistTracks(playlistId, offset, limit));
 
         return result;
     }
 
-    async listAlbumTracks(albumId) {
+    async listAlbumTracks(albumId: string) {
         const spotify = await this.service(SpotifyService);
         const result = await spotify.cata(s => s.listAlbumTracks(albumId));
 
@@ -392,7 +392,7 @@ class Service {
 
     async featuredPlaylists(offset = 0, limit = 20, country?: string, locale?: string, timestamp?: string) {
         const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata( s=> s.featuredPlaylists(offset, limit, country, locale, timestamp));
+        const result = await spotify.cata(s => s.featuredPlaylists(offset, limit, country, locale, timestamp));
 
         return result;
     }
@@ -404,7 +404,7 @@ class Service {
         return result;
     }
 
-    async player(deviceId='', play=null) {
+    async player(deviceId = '', play: boolean = null) {
         const spotify = await this.service(SpotifyService);
         const result = await spotify.cata(spotify => spotify.player(deviceId, play));
 
@@ -425,7 +425,7 @@ class Service {
         return result;
     }
 
-    async albums(offset?, limit?) {
+    async albums(offset = 0, limit = 20) {
         const spotify = await this.service(SpotifyService);
         const result = spotify.cata(s => s.albums(offset, limit));
 
@@ -467,7 +467,7 @@ class Service {
         tracks = [].concat(tracks);
         const spotify = await this.service(SpotifyService);
         const result = await spotify.cata(s => s.addTrackToPlaylist(_.map([].concat(tracks), t => t.uri), playlist.id));
- 
+
         const dataResult = await result.cata(() => this.service(DataService));
         for (const track of tracks) {
             await dataResult.cata(data => data.createTrack(track));

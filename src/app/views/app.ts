@@ -17,7 +17,7 @@ class AppView extends React.Component<IAppViewProps> {
     vm = current(AppViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding<AppView>({ didSet: (view, errors) => view.showErrors(errors) })
     errors: AppView['vm']['errors'];
 
     openLogin$ = this.vm.openLogin$;
@@ -65,13 +65,12 @@ class AppView extends React.Component<IAppViewProps> {
     isSyncing: AppView['vm']['isSyncing'];
 
     state = {
-        transition: ['', ''],
         prevPanel: 'home',
         showSelectDevices: 'hide' as 'show' | 'hide' | '',
         scrolledToBottom: false
     };
     elScroller = null as HTMLElement;
-    onPageScroll = _.debounce(evnt => this.onPageScrollInternal(evnt), 500);
+    onPageScroll = _.debounce(() => this.onPageScrollInternal(), 500);
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);
@@ -81,7 +80,7 @@ class AppView extends React.Component<IAppViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args) {
+    refresh(args: { inst: AppView['errors$']; value: ServiceResult<unknown, Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -90,7 +89,7 @@ class AppView extends React.Component<IAppViewProps> {
         });
     }
 
-    openDevices(show) {
+    openDevices(show: 'show' | 'hide' | boolean) {
         this.toggleSelectDevices(show ? 'hide' : 'show');
         if (show === 'show') {
             this.refreshDevicesCommand.exec();
@@ -121,7 +120,7 @@ class AppView extends React.Component<IAppViewProps> {
         }, 100);
     }
 
-    onPageScrollInternal(evnt) {
+    onPageScrollInternal() {
         const scrollThreshold = 15,
             distance = this.getBottomDistance();
         if (distance <= scrollThreshold) {
@@ -174,7 +173,7 @@ class AppView extends React.Component<IAppViewProps> {
         this.errors = errors;
     }
 
-    clearErrors(evnt) {
+    clearErrors(evnt: React.MouseEvent<HTMLElement, MouseEvent>) {
         evnt && evnt.preventDefault();
         this.errors = [];
     }

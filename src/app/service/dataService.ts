@@ -15,6 +15,7 @@ import { ArtistsStore } from '../data/entities/artistsStore';
 import { PlaylistRowsStore } from '../data/entities/playlistRowsStore';
 import { BannedTracksStore } from '../data/entities/bannedTracksStore';
 import { ServiceResult } from '../base/serviceResult';
+import { IPlaylistRow } from '../data/entities/interfaces/iPlaylistRow';
 
 
 class DataService extends withEvents(BaseService) {
@@ -113,7 +114,7 @@ class DataService extends withEvents(BaseService) {
                         trackId: song.track.id
                     });
                     for await (const row of rows) {
-                        await playlistRowsStore.delete(row.id);
+                        await playlistRowsStore.delete((row as IPlaylistRow).id);
                     }
                     resolve(true);
                 } catch (ex) {
@@ -134,7 +135,7 @@ class DataService extends withEvents(BaseService) {
                     const res = [] as IUserPlaylist[];
                     const playlistRowsStore = new PlaylistRowsStore(storage);
                     for await (const row of playlistRowsStore.where({ trackId: track.id })) {
-                        res.push(row.playlist);
+                        res.push((row as IPlaylistRow).playlist as IUserPlaylist);
                     }
 
                     resolve(DataServiceResult.success(res));

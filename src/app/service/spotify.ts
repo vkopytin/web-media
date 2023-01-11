@@ -60,11 +60,11 @@ class SpotifyService extends withEvents(BaseService) {
         return SpotifyServiceResult.success(true);
     }
 
-    onStateChangedInternal(...args) {
+    onStateChangedInternal(...args: unknown[]) {
         this.trigger('change:state', ...args);
     }
 
-    async seek(positionMs, deviceId) {
+    async seek(positionMs: number, deviceId: string) {
         try {
             const res = await this.adapter.seek(Math.round(positionMs), deviceId);
 
@@ -213,7 +213,7 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async fetchPlaylistTracks(playlistId, offset=0, limit=20) {
+    async fetchPlaylistTracks(playlistId: string, offset = 0, limit = 20) {
         try {
             const res = await this.adapter.listPlaylistTracks(playlistId, offset, limit);
 
@@ -277,7 +277,7 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async listAlbumTracks(albumId) {
+    async listAlbumTracks(albumId: string) {
         try {
             const res = await this.adapter.listAlbumTracks(albumId);
 
@@ -317,7 +317,7 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async player(deviceId='', play=null) {
+    async player(deviceId = '', play: boolean = null) {
         try {
             const res = await this.adapter.player(deviceId, play);
 
@@ -348,7 +348,7 @@ class SpotifyService extends withEvents(BaseService) {
         }
     }
 
-    async albums(offset, limit) {
+    async albums(offset = 0, limit = 20) {
         try {
             const res = await this.adapter.albums(offset, limit);
 

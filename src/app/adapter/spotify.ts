@@ -263,7 +263,7 @@ class SpotifyAdapter {
         });
     }
 
-    userPlaylists(userId) {
+    userPlaylists(userId: string) {
         return new Promise<IUserPlaylistsResult>((resolve, reject) => {
             $.ajax({
                 url: `https://api.spotify.com/v1/users/${userId}/playlists`,
@@ -305,7 +305,7 @@ class SpotifyAdapter {
         });
     }
 
-    myPlaylists(offset=0, limit=20) {
+    myPlaylists(offset = 0, limit = 20) {
         return new Promise<IUserPlaylistsResult>((resolve, reject) => {
             $.ajax({
                 url: 'https://api.spotify.com/v1/me/playlists',
@@ -370,7 +370,7 @@ class SpotifyAdapter {
         });
     }
 
-    listPlaylistTracks(playlistId: string, offset=0, limit=20) {
+    listPlaylistTracks(playlistId: string, offset = 0, limit = 20) {
         return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
                 url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
@@ -428,7 +428,7 @@ class SpotifyAdapter {
         });
     }
 
-    listAlbumTracks(albumId) {
+    listAlbumTracks(albumId: string) {
         return new Promise<IResponseResult<ITrack>>((resolve, reject) => {
             $.ajax({
                 url: `https://api.spotify.com/v1/albums/${albumId}/tracks`,
@@ -576,7 +576,7 @@ class SpotifyAdapter {
                 data: {
                     ...country ? { country } : {},
                     ...locale ? { locale } : {},
-                    ...timestamp ? { timestamp }: {},
+                    ...timestamp ? { timestamp } : {},
                     ...offset ? { offset } : {},
                     limit
                 },
@@ -590,7 +590,7 @@ class SpotifyAdapter {
         });
     }
 
-    search(type: ISearchType, term, offset = 0, limit = 20) {
+    search(type: ISearchType, term: string, offset = 0, limit = 20) {
         return new Promise<ISearchResult>((resolve, reject) => {
             $.ajax({
                 url: 'https://api.spotify.com/v1/search',
@@ -617,7 +617,7 @@ class SpotifyAdapter {
         const ready = delayWithin();
         return new Promise<IPlayerResult>((resolve, reject) => {
             $.ajax({
-                method: play===null ? 'GET': 'PUT',
+                method: play === null ? 'GET' : 'PUT',
                 url: 'https://api.spotify.com/v1/me/player',
                 headers: {
                     'Authorization': 'Bearer ' + this.token
@@ -639,7 +639,7 @@ class SpotifyAdapter {
         });
     }
 
-    seek(positionMs, deviceId = '') {
+    seek(positionMs: number, deviceId = '') {
         const ready = delayWithin();
         return new Promise<IPlayerResult>((resolve, reject) => {
             $.ajax({
@@ -795,7 +795,7 @@ class SpotifyAdapter {
         });
     }
 
-    volume(precent, deviceId?) {
+    volume(precent: number, deviceId?: string) {
         const ready = delayWithin();
         return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({

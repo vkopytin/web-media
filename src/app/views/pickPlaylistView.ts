@@ -6,7 +6,7 @@ import { HomeViewModel, PlaylistsViewModel } from '../viewModels';
 
 
 export interface IPickPlaylistsViewProps {
-    showErrors(errors: ServiceResult<any, Error>[]);
+    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
 }
 
 class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
@@ -15,7 +15,7 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
     homeVm = current(HomeViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding<PickPlaylistsView>({ didSet: (view, errors) => view.showErrors(errors) })
     errors: PickPlaylistsView['vm']['errors'];
 
     playlists$ = this.vm.playlists$;
@@ -35,10 +35,10 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    componentDidUpdate(prevProps: IPickPlaylistsViewProps, prevState, snapshot) {
+    componentDidUpdate(prevProps: IPickPlaylistsViewProps) {
     }
 
-    refresh(args) {
+    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -47,7 +47,7 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
         });
     }
 
-    showErrors(errors) {
+    showErrors(errors: ServiceResult<unknown, Error>[]) {
         this.props.showErrors(errors);
     }
 

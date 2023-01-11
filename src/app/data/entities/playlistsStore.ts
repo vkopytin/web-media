@@ -16,7 +16,7 @@ export class PlaylistsStore {
                 id: { unique: true }
             },
             name: {
-                name: { }
+                name: {}
             }
         },
         orderBy: 'name',
@@ -28,7 +28,7 @@ export class PlaylistsStore {
     }
 
     createTable() {
-        return asAsync(null, (cb: { (res?, result?) }) => {
+        return asAsync(null, (cb: { (res?: Error, result?: boolean): void }) => {
             this.storage.hasTable(this.storeConfig, (err, res) => {
                 if (err) {
                     return cb(err);
@@ -54,7 +54,7 @@ export class PlaylistsStore {
     }
 
     async refresh(myStore: IPlaylist) {
-        const record = await asAsync(this.storage, this.storage.getById, this.storeConfig, myStore.id);
+        const record = await asAsync(this.storage, this.storage.getById<IPlaylist>, this.storeConfig, myStore.id);
         if (record) {
             return await this.update({
                 ...record,
@@ -69,8 +69,8 @@ export class PlaylistsStore {
         return asAsync(this.storage, this.storage.getById, this.storeConfig, myStoreId);
     }
 
-    list(offset = 0, limit?) {
-        return asAsyncOf(null, (cb: { (res?, result?: IPlaylist, index?): boolean }) => {
+    list(offset = 0, limit?: number) {
+        return asAsyncOf(null, (cb: { (res?: unknown, result?: IPlaylist, index?: number): boolean }) => {
             this.storage.each<IPlaylist>(this.storeConfig, (...args) => {
                 const index = args[2];
                 if (index < offset) {

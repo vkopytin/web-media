@@ -5,7 +5,7 @@ import { Binding, current, Notifications } from '../utils';
 import { AlbumsViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IAlbumsViewProps {
-    showErrors(errors: ServiceResult<any, Error>[]);
+    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
     uri: string;
     currentTrackId: string;
     tracks: TrackViewModelItem[];
@@ -16,7 +16,7 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
     vm = current(AlbumsViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding<AlbumsView>({ didSet: (view, errors) => view.showErrors(errors) })
     errors: AlbumsView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
@@ -35,11 +35,11 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    componentDidUpdate(prevProps: IAlbumsViewProps, prevState, snapshot) {
+    componentDidUpdate(prevProps: IAlbumsViewProps) {
         this.tracks = this.props.tracks;
     }
 
-    refresh(args) {
+    refresh(args: { inst: AlbumsView['errors$']; value: ServiceResult<unknown, Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -56,7 +56,7 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
         return this.props.currentTrackId === track.id();
     }
 
-    showErrors(errors) {
+    showErrors(errors: ServiceResult<unknown, Error>[]) {
         this.props.showErrors(errors);
     }
 

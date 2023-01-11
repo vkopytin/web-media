@@ -55,7 +55,7 @@ describe('App View Model', () => {
     const MockedSpotifyAdapter = mocked(SpotifyAdapter, true);
     let vm: AppViewModel;
     let srv: Service;
-    let mockedInit;
+    let mockedInit: jest.SpyInstance<ReturnType<AppViewModel['init']>>;
 
     beforeEach(async () => {
         srv = new Service();

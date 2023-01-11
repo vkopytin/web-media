@@ -6,7 +6,7 @@ type PanelType = 'home' | 'playlists' | 'profile' | 'releases' | 'search' | 'tra
 
 export interface ISwitchViewProps {
     currentView: PanelType;
-    onClick?(evnt): void;
+    onClick?(evnt: {}): void;
 }
 
 const panels = ['home', 'playlists', 'tracks', 'search', 'releases'];
@@ -21,7 +21,7 @@ class SwitchView extends React.Component<ISwitchViewProps, {}> {
         transition: ['', '']
     };
 
-    getSlideEffect(panelKey, nextPanelKey) {
+    getSlideEffect(panelKey: string, nextPanelKey: string) {
         const aIndex = panels.indexOf(panelKey),
             bIndex = panels.indexOf(nextPanelKey);
 
@@ -31,7 +31,7 @@ class SwitchView extends React.Component<ISwitchViewProps, {}> {
         return ['right 3', '4'];
     }
 
-    getInitSlideEffect(panelKey, nextPanelKey) {
+    getInitSlideEffect(panelKey: string, nextPanelKey: string) {
         const aIndex = panels.indexOf(panelKey),
             bIndex = panels.indexOf(nextPanelKey);
 

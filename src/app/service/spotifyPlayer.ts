@@ -68,28 +68,28 @@ export interface IWebPlaybackState {
 }
 
 interface IPlayer {
-    new(...args): IPlayer;
-    addListener(eventName: 'ready', cb?: (player: IWebPlaybackPlayer) => void);
-    addListener(eventName: 'playback_error', cb?: (res: IWebPlaybackError) => void);
-    addListener(eventName: 'player_state_changed', cb?: (res: IWebPlaybackState) => void);
-    addListener(eventName: 'not_ready', cb?: (player: IWebPlaybackPlayer) => void);
-    addListener(eventName: 'account_error', cb?: (res: IWebPlaybackError) => void);
-    addListener(eventName: 'initialization_error', cb?: (res: IWebPlaybackError) => void);
-    addListener(eventName: 'authentication_error', cb?: (res: IWebPlaybackError) => void);
+    new(...args: unknown[]): IPlayer;
+    addListener(eventName: 'ready', cb?: (player: IWebPlaybackPlayer) => void): void;
+    addListener(eventName: 'playback_error', cb?: (res: IWebPlaybackError) => void): void;
+    addListener(eventName: 'player_state_changed', cb?: (res: IWebPlaybackState) => void): void;
+    addListener(eventName: 'not_ready', cb?: (player: IWebPlaybackPlayer) => void): void;
+    addListener(eventName: 'account_error', cb?: (res: IWebPlaybackError) => void): void;
+    addListener(eventName: 'initialization_error', cb?: (res: IWebPlaybackError) => void): void;
+    addListener(eventName: 'authentication_error', cb?: (res: IWebPlaybackError) => void): void;
     togglePlay(): Promise<void>;
     setName(name: string): Promise<void>;
     getVolume(): Promise<number>;
-    setVolume(number): Promise<void>;
+    setVolume(number: number): Promise<void>;
     pause(): Promise<void>;
     resume(): Promise<void>;
-    seek(number): Promise<void>;
+    seek(number: number): Promise<void>;
     previousTrack(): Promise<void>;
     nextTrack(): Promise<void>;
-    connect(): Promise<(success) => void>;
+    connect(): Promise<(success: boolean) => void>;
     getCurrentState(): Promise<IWebPlaybackState>;
-    disconnect();
+    disconnect(): void;
     _options: {
-        getOAuthToken(fn: (access_token) => void);
+        getOAuthToken(fn: (access_token: string) => void): void;
         id: string;
     };
 };
@@ -105,7 +105,7 @@ declare global {
 
 class SpotifyPlayerService extends withEvents(BaseService) {
     static async create(connection: Service) {
-        const getOAuthToken = async (cb) => {
+        const getOAuthToken = async (cb: (t: string) => void) => {
             const settingsResult = await connection.settings('spotify');
             const spotifySettings = settingsResult.val as ISettings['spotify'];
             console.log('*** Requesting OAuth Token ***');
@@ -147,7 +147,7 @@ class SpotifyPlayerService extends withEvents(BaseService) {
                 if (!window.Spotify) {
                     const scriptTag = document.createElement('script');
                     scriptTag.src = 'https://sdk.scdn.co/spotify-player.js';
-          
+
                     document.head!.appendChild(scriptTag);
                 }
 
@@ -203,16 +203,16 @@ class SpotifyPlayerService extends withEvents(BaseService) {
         this.player.addListener('authentication_error', this.onAuthenticationError);
         this.player.addListener('account_error', this.onAccountError);
         this.player.addListener('playback_error', this.onPlaybackError);
-        
+
         // Playback status updates
         this.player.addListener('player_state_changed', this.onPlayerStateChanged);
-        
+
         // Ready
         this.player.addListener('ready', this.onReady);
-        
+
         // Not Ready
         this.player.addListener('not_ready', this.onNotReady);
-        
+
         // Connect to the player!
         const success = await this.player.connect();
         if (success) {

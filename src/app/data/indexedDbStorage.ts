@@ -11,13 +11,13 @@ class IndexedDbStorage implements IStorage {
 		});
 	}
 
-	initializeStructure(cb: { (err?, res?): void }) {
+	initializeStructure(cb: { (err?: Error, res?: IDBDatabase): void }) {
 		this.connection.onupgradeneeded = (evnt) => cb(null, this.connection.result);
 		this.connection.onsuccess = () => cb(null);
 		this.connection.onerror = () => cb(this.connection.error);
 	}
 
-	hasTable(config: IStorageConfig, cb: { (err, res?): void }) {
+	hasTable(config: IStorageConfig, cb: { (err: Error, res?: boolean): void }) {
 		const tableName = config.name;
 		try {
 			const res = this.connection.result;
@@ -31,7 +31,7 @@ class IndexedDbStorage implements IStorage {
 		}
 	}
 
-	createTable(config: IStorageConfig, cb: { (err, res?): void }) {
+	createTable(config: IStorageConfig, cb: { (err: Error, res?: IDBDatabase): void }) {
 		try {
 			const tableName = config.name;
 			const res = this.connection.result;
@@ -53,9 +53,9 @@ class IndexedDbStorage implements IStorage {
 		return firstIndex;
 	}
 
-	create(config: IStorageConfig, data: { id; }, cb: { (err, res?): void }) {
+	create<T>(config: IStorageConfig, data: { id: IDBValidKey | IDBKeyRange; }, cb: { (err: Event | Error, res?: T): void }) {
 		const tableName = config.name;
-		const exec = (evnt) => {
+		const exec = (evnt: Event) => {
 			if (evnt !== null) {
 				this.connection.removeEventListener('success', exec);
 			}
@@ -73,7 +73,7 @@ class IndexedDbStorage implements IStorage {
 			request.onsuccess = evnt => {
 				clearInterval(timeout);
 				//console.log(`Finished creating ${tableName} with id: ${data.id}`);
-				cb(null, request.result || null);
+				cb(null, (request.result || null) as unknown as T);
 			}
 			request.onerror = err => {
 				//console.log(`Failed 2 creating ${tableName} with id: ${data.id}`);
@@ -88,9 +88,9 @@ class IndexedDbStorage implements IStorage {
 		}
 	}
 
-	update(config: IStorageConfig, id, data, cb: { (err, res?): void }) {
+	update<T>(config: IStorageConfig, id: IDBValidKey | IDBKeyRange, data: {}, cb: { (err: Event | Error, res?: T): void }) {
 		const tableName = config.name;
-		const exec = (evnt) => {
+		const exec = (evnt: Event) => {
 			if (evnt !== null) {
 				this.connection.removeEventListener('success', exec);
 			}
@@ -111,7 +111,7 @@ class IndexedDbStorage implements IStorage {
 			request.onsuccess = evnt => {
 				clearInterval(timeout);
 				//console.log(`Finished updating ${tableName} with id: ${data.id}`);
-				cb(null, request.result || null);
+				cb(null, (request.result || null) as unknown as T);
 			}
 			request.onerror = err => {
 				//console.log(`Failed 2 updating ${tableName} with id: ${data.id}`);
@@ -126,9 +126,9 @@ class IndexedDbStorage implements IStorage {
 		}
 	}
 
-	delete(config: IStorageConfig, id, cb: { (err, result?): void }) {
+	delete(config: IStorageConfig, id: IDBValidKey | IDBKeyRange, cb: { (err: Event | Error, result?: boolean): void }): void {
 		const tableName = config.name;
-		const exec = (evnt) => {
+		const exec = (evnt: Event) => {
 			if (evnt !== null) {
 				this.connection.removeEventListener('success', exec);
 			}
@@ -158,9 +158,9 @@ class IndexedDbStorage implements IStorage {
 		}
 	}
 
-	getById(config: IStorageConfig, id, cb: { (err?, id?): void }) {
+	getById<T>(config: IStorageConfig, id: IDBValidKey | IDBKeyRange, cb: { (err?: Event | Error, res?: T): void }): void {
 		const tableName = config.name;
-		const exec = (evnt) => {
+		const exec = (evnt: Event) => {
 			if (evnt !== null) {
 				this.connection.removeEventListener('success', exec);
 			}
@@ -192,9 +192,9 @@ class IndexedDbStorage implements IStorage {
 		}
 	}
 
-	each(config: IStorageConfig, cb: { (err?, record?, index?: number): boolean }) {
+	each<T>(config: IStorageConfig, cb: { (err?: Error | Event, record?: T, index?: number): boolean }) {
 		const tableName = config.name;
-		const exec = (evnt) => {
+		const exec = (evnt: Event) => {
 			if (evnt !== null) {
 				this.connection.removeEventListener('success', exec);
 			}
@@ -243,11 +243,11 @@ class IndexedDbStorage implements IStorage {
 		}
 	}
 
-	where(config: IStorageConfig, where: { [key: string]: any }, cb: { (err?, result?, index?: number): boolean }) {
+	where<T>(config: IStorageConfig, where: { [key: string]: any }, cb: { (err?: Error | Event, result?: T, index?: number): boolean }): void {
 		const tableName = config.name;
 		const keys = _.keys(where);
 
-		const exec = (evnt) => {
+		const exec = (evnt: Event) => {
 			if (evnt !== null) {
 				this.connection.removeEventListener('success', exec);
 			}
@@ -299,9 +299,9 @@ class IndexedDbStorage implements IStorage {
 		}
 	}
 
-	getCount(config: IStorageConfig, cb: { (err, res?): void }) {
+	getCount(config: IStorageConfig, cb: { (err: Event | Error, res?: number): void }) {
 		const tableName = config.name;
-		const exec = (evnt) => {
+		const exec = (evnt: Event) => {
 			if (evnt !== null) {
 				this.connection.removeEventListener('success', exec);
 			}
@@ -334,7 +334,7 @@ class IndexedDbStorage implements IStorage {
 	}
 
 	complete() {
-		const exec = (evnt) => {
+		const exec = (evnt: Event) => {
 			if (evnt !== null) {
 				this.connection.removeEventListener('success', exec);
 			}

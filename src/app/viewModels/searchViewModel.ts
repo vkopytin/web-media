@@ -48,7 +48,7 @@ class SearchViewModel {
         offset: 0,
         total: 0,
         limit: 20,
-        currentMediaUri: null,
+        currentMediaUri: null as string,
     };
 
     loadMoreCommand$: BehaviorSubject<SearchViewModel['loadMoreCommand']>;

@@ -68,7 +68,7 @@ class MediaPlayerViewModel {
     volumeUpCommand$: BehaviorSubject<MediaPlayerViewModel['volumeUpCommand']>;
     @State volumeUpCommand = Scheduler.Command(() => this.volumeUp());
     volumeCommand$: BehaviorSubject<MediaPlayerViewModel['volumeCommand']>;
-    @State volumeCommand = Scheduler.Command((percent) => this.setVolume(percent));
+    @State volumeCommand = Scheduler.Command((percent: number) => this.setVolume(percent));
     volumeDownCommand$: BehaviorSubject<MediaPlayerViewModel['volumeDownCommand']>;
     @State volumeDownCommand = Scheduler.Command(() => this.volumeDown());
     refreshPlaybackCommand$: BehaviorSubject<MediaPlayerViewModel['refreshPlaybackCommand']>;
@@ -78,7 +78,7 @@ class MediaPlayerViewModel {
     unlikeSongCommand$: BehaviorSubject<MediaPlayerViewModel['unlikeSongCommand']>;
     @State unlikeSongCommand = Scheduler.Command(() => this.unlikeTrack());
     seekPlaybackCommand$: BehaviorSubject<MediaPlayerViewModel['seekPlaybackCommand']>;
-    @State seekPlaybackCommand = Scheduler.Command((percent) => this.manualSeek(percent));
+    @State seekPlaybackCommand = Scheduler.Command((percent: number) => this.manualSeek(percent));
 
     currentTrackId$ = this.appViewModel.currentTrackId$;
     @Binding() currentTrackId = '';
@@ -117,7 +117,7 @@ class MediaPlayerViewModel {
         return stateResult.assert(e => this.errors = [e]).cata(r => r);
     }
 
-    updateState(res?) {
+    updateState(res?: unknown) {
         this.fetchData();
     }
 
@@ -207,7 +207,7 @@ class MediaPlayerViewModel {
         }
     }
 
-    manualSeek(percent) {
+    manualSeek(percent: number) {
         const max = this.duration,
             timePlayed = max * percent / 100;
 
@@ -268,14 +268,14 @@ class MediaPlayerViewModel {
     async pause() {
         lockSection.push(async next => {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors = e)) {
+            if (assertNoErrors(stateResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                 return next();
             }
             if (_.isEmpty(stateResult.val)) {
                 await this.ss.pause();
             } else {
                 const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors = e)) {
+                if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                     return next();
                 }
                 await playerResult.val.pause();
@@ -289,14 +289,14 @@ class MediaPlayerViewModel {
     async previous() {
         lockSection.push(async next => {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors = e)) {
+            if (assertNoErrors(stateResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                 return next();
             }
             if (_.isEmpty(stateResult.val)) {
                 await this.ss.previous();
             } else {
                 const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors = e)) {
+                if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                     return next();
                 }
                 await playerResult.val.previouseTrack();
@@ -309,14 +309,14 @@ class MediaPlayerViewModel {
     async next() {
         lockSection.push(async next => {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors = e)) {
+            if (assertNoErrors(stateResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                 return next();
             }
             if (_.isEmpty(stateResult.val)) {
                 await this.ss.next();
             } else {
                 const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors = e)) {
+                if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                     return next();
                 }
                 await playerResult.val.nextTrack();
@@ -329,7 +329,7 @@ class MediaPlayerViewModel {
     async volumeUp() {
         lockSection.push(async (next) => {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors = e)) {
+            if (assertNoErrors(stateResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                 return next();
             }
             if (_.isEmpty(stateResult.val)) {
@@ -337,7 +337,7 @@ class MediaPlayerViewModel {
                 await this.ss.volume(volume * 1.1);
             } else {
                 const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors = e)) {
+                if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                     return next();
                 }
                 const volume = await playerResult.val.getVolume();
@@ -351,7 +351,7 @@ class MediaPlayerViewModel {
     async volumeDown() {
         lockSection.push(async next => {
             const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, e => this.errors = e)) {
+            if (assertNoErrors(stateResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                 return next();
             }
             if (_.isEmpty(stateResult.val)) {
@@ -359,7 +359,7 @@ class MediaPlayerViewModel {
                 await this.ss.volume(volume * 0.9);
             } else {
                 const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, e => this.errors = e)) {
+                if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                     return next();
                 }
                 const volume = await playerResult.val.getVolume();

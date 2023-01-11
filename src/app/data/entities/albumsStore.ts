@@ -27,7 +27,7 @@ export class AlbumsStore {
     }
 
     createTable() {
-        return asAsync(null, (cb: { (res?, result?) }) => {
+        return asAsync(null, (cb: { (res?: Error, result?: boolean): void }) => {
             this.storage.hasTable(this.storeConfig, (err, res) => {
                 if (err) {
                     return cb(err);
@@ -53,7 +53,7 @@ export class AlbumsStore {
     }
 
     async refresh(myStore: IAlbum) {
-        const record = await asAsync(this.storage, this.storage.getById, this.storeConfig, myStore.id);
+        const record = await asAsync(this.storage, this.storage.getById<IAlbum>, this.storeConfig, myStore.id);
         if (record) {
             return await this.update({
                 ...record,
@@ -68,8 +68,8 @@ export class AlbumsStore {
         return asAsync(this.storage, this.storage.getById, this.storeConfig, myStoreId);
     }
 
-    list(offset = 0, limit?) {
-        return asAsyncOf(null, (cb: { (res?, result?: IAlbum, index?): boolean }) => {
+    list(offset = 0, limit?: number) {
+        return asAsyncOf(null, (cb: { (res?: unknown, result?: IAlbum, index?: number): boolean }) => {
             this.storage.each<IAlbum>(this.storeConfig, (...args) => {
                 const index = args[2];
                 if (index < offset) {

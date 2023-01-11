@@ -9,10 +9,10 @@ export interface ITracksViewProps {
     className?: string;
     playlist: PlaylistsViewModelItem;
     currentTrackId: string;
-    showErrors(errors: ServiceResult<any, Error>[]);
+    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
 }
 
-function elementIndex(el) {
+function elementIndex(el: HTMLElement) {
     const nodes = Array.prototype.slice.call(el.parentNode.childNodes);
     const index = nodes.indexOf(el);
     return index + 1;
@@ -33,7 +33,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
     };
 
     errors$ = this.vm.errors$;
-    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding<TracksView>({ didSet: (view, errors) => view.showErrors(errors) })
     errors: TracksView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
@@ -80,7 +80,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
     @Binding()
     removeBannFromTrackCommand: TracksView['vm']['removeBannFromTrackCommand'];
 
-    constructor(props) {
+    constructor(props: ITracksViewProps) {
         super(props);
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onDragStart = this.onDragStart.bind(this);
@@ -96,7 +96,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args) {
+    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -113,7 +113,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         return track.id() === this.props.currentTrackId;
     }
 
-    showErrors(errors) {
+    showErrors(errors: ServiceResult<unknown, Error>[]) {
         this.props.showErrors(errors);
     }
 
@@ -121,19 +121,19 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         return template(this);
     }
 
-    onMouseDown(e) {
+    onMouseDown(e: React.MouseEvent<HTMLElement, MouseEvent> | React.TouchEvent<HTMLElement>) {
         console.log('onMouseDown');
-        const target = this.getTrNode(e.target);
+        const target = this.getTrNode(e.target as HTMLElement);
         if (target) {
-            target.setAttribute('draggable', true);
+            target.setAttribute('draggable', 'true');
             target.ondragstart = this.onDragStart;
             target.ondragend = this.onDragEnd;
         }
     }
 
-    onDragStart(e) {
+    onDragStart(e: DragEvent) {
         console.log('onDragStart');
-        const target = this.getTrNode(e.target);
+        const target = this.getTrNode(e.target as HTMLElement);
         if (target) {
             //       e.dataTransfer.setData('Text', '');
             e.dataTransfer.effectAllowed = 'move';
@@ -154,8 +154,8 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         }
     }
 
-    onDragEnter(e, el) {
-        const target = this.getTrNode(e.target);
+    onDragEnter(e: Event, el: HTMLElement) {
+        const target = this.getTrNode(e.target as HTMLElement);
         $(target).toggleClass('dragged-place', true);
         const rowIndex = elementIndex(target);
         console.log('onDragEnter TR index:', rowIndex - 1);
@@ -167,14 +167,14 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         }
     }
 
-    onDragLeave(e) {
-        const target = this.getTrNode(e.target);
+    onDragLeave(e: Event) {
+        const target = this.getTrNode(e.target as HTMLElement);
         $(target).toggleClass('dragged-place', false);
     }
 
-    onDragEnd(e) {
+    onDragEnd(e: DragEvent) {
         console.log('onDragEnd');
-        const target = this.getTrNode(e.target);
+        const target = this.getTrNode(e.target as HTMLElement);
         if (target) {
             $(target).removeAttr('draggable');
             target.ondragstart = null;
@@ -186,7 +186,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         }
     }
 
-    getTrNode(target) {
+    getTrNode(target: HTMLElement) {
         //     console.log('dragContainer:', this.refs.dragContainer)
         //     return closest(target, 'tr', this.refs.dragContainer.tableNode);
         return $(target).closest('li')[0];

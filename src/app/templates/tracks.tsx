@@ -10,10 +10,10 @@ export const template = (view: TracksView) => <>
     <ul className={cn(`${view.props.className} table-view`)}>
         {_.map(view.tracks, (item: TracksView['tracks'][0], index) => <li key={item.id()}>
             <div className="table-view-cell media"
-                onTouchStart={e => view.onMouseDown(e)}>
+                onTouchStart={e => view.onMouseDown(e)}
+            >
                 <span className="material-icons handle"
                     onMouseDown={e => view.onMouseDown(e)}
-
                 ></span>
                 <div className="info-list">
                     {item.isCached && <span className="info-item material-icons">delete</span>}

@@ -16,7 +16,7 @@ const config: IConfig = {
 class DataStorage {
 	static dbType = config.dbType;
 
-	static async create(callback: { (err, result: IStorage): void }, dbType = DataStorage.dbType) {
+	static async create(callback: { (err: Error, result: IStorage): void }, dbType = DataStorage.dbType) {
 		switch (dbType) {
 			case 'inMemory':
 				const { InMemoryStorage } = await import('./inMemoryStorage');

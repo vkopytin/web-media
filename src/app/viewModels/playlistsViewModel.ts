@@ -11,7 +11,7 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 class PlaylistsViewModel {
     errors$: BehaviorSubject<PlaylistsViewModel['errors']>;
-    @State errors = [] as ServiceResult<any, Error>[];
+    @State errors = [] as ServiceResult<unknown, Error>[];
 
     playlists$: BehaviorSubject<PlaylistsViewModel['playlists']>;
     @State playlists = [] as PlaylistsViewModelItem[];
@@ -152,7 +152,7 @@ class PlaylistsViewModel {
         }
     }
 
-    async loadTracks(...args) {
+    async loadTracks(...args: unknown[]) {
         if (!~args.indexOf('playlistTracks')) {
             return;
         }
@@ -204,7 +204,7 @@ class PlaylistsViewModel {
         await this.checkTracks([track]);
     }
 
-    async findTrackLyrics(track: TrackViewModelItem) {
+    async findTrackLyrics(track: TrackViewModelItem): Promise<void> {
         if (this.trackLyrics && this.trackLyrics.trackId === track.id()) {
             return this.trackLyrics = null;
         }
@@ -212,7 +212,7 @@ class PlaylistsViewModel {
             name: track.name(),
             artist: track.artist()
         });
-        if (assertNoErrors(lyricsResult, e => { })) {
+        if (assertNoErrors(lyricsResult, () => { })) {
             this.trackLyrics = {
                 trackId: track.id(),
                 lyrics: lyricsResult.error.message
@@ -240,7 +240,7 @@ class PlaylistsViewModel {
         } else if (oldPosition > newPosition) {
             res = await this.ss.reorderTrack(this.currentPlaylistId, oldPosition, newPosition);
         }
-        res.assert(e => this.errors = e);
+        res.assert(e => this.errors = [e]);
     }
 
     @isLoading

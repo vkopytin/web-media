@@ -52,7 +52,7 @@ class ArtistViewModelItem {
         spotifyResult.assert(e => this.errors = [e]);
     }
 
-    async loadData(...args) {
+    async loadData(...args: unknown[]) {
         if (!~args.indexOf('playlistTracks')) {
             return;
         }

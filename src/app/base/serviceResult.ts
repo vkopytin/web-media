@@ -7,7 +7,7 @@ class ServiceResult<T, E extends Error> {
         this.isError = !!error;
     }
 
-    is(a: new (...args) => E): boolean {
+    is(a: new (...args: unknown[]) => E): boolean {
 
         return this.error instanceof a;
     }

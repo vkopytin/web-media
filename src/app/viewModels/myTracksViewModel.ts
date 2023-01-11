@@ -80,7 +80,7 @@ class MyTracksViewModel {
         this.isLoading = true;
         this.loadData('myTracks');
         const res = await this.ss.fetchTracks(this.settings.offset, this.settings.limit + 1);
-        if (assertNoErrors(res, e => this.errors = e)) {
+        if (assertNoErrors(res, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
             this.isLoading = false;
             return;
         }
@@ -93,7 +93,7 @@ class MyTracksViewModel {
         this.isLoading = false;
     }
 
-    async loadData(...args) {
+    async loadData(...args: unknown[]) {
         if (!~args.indexOf('myTracks')) {
             return;
         }
@@ -106,7 +106,7 @@ class MyTracksViewModel {
             return;
         }
         const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
-        if (assertNoErrors(likedResult, e => this.errors = e)) {
+        if (assertNoErrors(likedResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
             return;
         }
         _.each(likedResult.val as boolean[], (liked, index) => {
@@ -124,7 +124,7 @@ class MyTracksViewModel {
         item.playTracks(this.tracks);
     }
 
-    async findTrackLyrics(track: TrackViewModelItem) {
+    async findTrackLyrics(track: TrackViewModelItem): Promise<void> {
         if (this.trackLyrics && this.trackLyrics.trackId === track.id()) {
             return this.trackLyrics = null;
         }
@@ -132,7 +132,7 @@ class MyTracksViewModel {
             name: track.name(),
             artist: track.artist()
         });
-        if (assertNoErrors(lyricsResult, e => { })) {
+        if (assertNoErrors(lyricsResult, () => { })) {
             this.trackLyrics = {
                 trackId: track.id(),
                 lyrics: lyricsResult.error.message

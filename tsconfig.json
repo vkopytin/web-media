@@ -5,16 +5,21 @@
         "moduleResolution": "node",
         "module": "commonjs",
         "target": "es5",
-        "noImplicitAny": false,
+        "noImplicitAny": true,
         "sourceMap": true,
         "jsx": "react",
         "allowJs": true,
         "allowUnreachableCode": true,
         "baseUrl": "static/js",
-        "importHelpers": true
+        "importHelpers": true,
+        "strict": false
     },
-//    "include": [ "**/*.ts" ],
-    "exclude": [ "**/node_modules/*", "**/server/*", "**/bundle/*" ],
+    //    "include": [ "**/*.ts" ],
+    "exclude": [
+        "**/node_modules/*",
+        "**/server/*",
+        "**/bundle/*"
+    ],
     "filesGlob": [
         "./src/*.d.ts"
     ]

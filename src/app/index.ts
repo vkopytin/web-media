@@ -3,10 +3,10 @@ import * as ReactDOM from 'react-dom';
 import './sass/ratchet.scss';
 
 
-const fromEntries = str => {
-    const obj = {};
-    str.replace(/([^=&]+)=([^&]*)/g, function (m, key, value) {
-        obj[decodeURIComponent(key)] = decodeURIComponent(value);
+const fromEntries = (str: string) => {
+    const obj = {} as { [key: string]: string };
+    str.replace(/([^=&]+)=([^&]*)/g, (m: unknown, key: string, value: string) => {
+        return obj[decodeURIComponent(key)] = decodeURIComponent(value);
     });
 
     return obj;
@@ -35,16 +35,15 @@ if (
         window.parent.postMessage(['accessToken', authInfo.access_token], '*');
     }
 } else if (!/state=onGenius-123/.test(window.location.hash)) {
-    
+
 }
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').then(registration => {
-        console.log('SW registered: ', registration);
-      }).catch(registrationError => {
-        console.log('SW registration failed: ', registrationError);
-      });
+        navigator.serviceWorker.register('./service-worker.js').then(registration => {
+            console.log('SW registered: ', registration);
+        }).catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+        });
     });
 }
-  

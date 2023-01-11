@@ -7,6 +7,7 @@ import { IResponseResult, ISpotifySong, IUserPlaylistsResult, IUserPlaylist } fr
 import { SpotifySyncServiceResult } from './results/spotifySyncServiceResult';
 import { SpotifyService } from './spotify';
 import { DataService } from './dataService';
+import { ServiceResult } from '../base/serviceResult';
 
 
 class SpotifySyncService extends withEvents(BaseService) {
@@ -48,13 +49,13 @@ class SpotifySyncService extends withEvents(BaseService) {
 
     async syncMyPlaylists() {
         try {
-        let res = [] as IUserPlaylist[];
-        for await (const playlists of this.listMyPlaylists()) {
-            for (const playlist of playlists) {
-                await this.data.createPlaylist(playlist);
+            let res = [] as IUserPlaylist[];
+            for await (const playlists of this.listMyPlaylists()) {
+                for (const playlist of playlists) {
+                    await this.data.createPlaylist(playlist);
+                }
+                res = [...res, ...playlists];
             }
-            res = [...res, ...playlists];
-        }
             return SpotifySyncServiceResult.success(res);
         } catch (ex) {
             return SpotifySyncServiceResult.error<IUserPlaylist[]>(ex);
@@ -100,7 +101,7 @@ class SpotifySyncService extends withEvents(BaseService) {
         while (offset < total) {
             const currentOffset = offset;
             const result = await this.spotify.fetchPlaylistTracks(playlistId, offset, this.limit + 1);
-            if (assertNoErrors(result, e => _.delay(() => { throw e; }))) {
+            if (assertNoErrors(result, (e: ServiceResult<unknown, Error>[]) => _.delay(() => { throw e; }))) {
                 return;
             }
             const response = result.val as IResponseResult<ISpotifySong>;
@@ -120,7 +121,7 @@ class SpotifySyncService extends withEvents(BaseService) {
         while (offset < total) {
             const currOffset = offset;
             const result = await this.spotify.fetchMyPlaylists(offset, this.limit + 1);
-            if (assertNoErrors(result, e => _.delay(() => { throw e; }))) {
+            if (assertNoErrors(result, (e: ServiceResult<unknown, Error>[]) => _.delay(() => { throw e; }))) {
                 return;
             }
             const response = result.val as IUserPlaylistsResult;
@@ -140,7 +141,7 @@ class SpotifySyncService extends withEvents(BaseService) {
         while (offset < total) {
             const currentOffset = offset,
                 result = await this.spotify.fetchTracks(offset, this.limit + 1);
-            if (assertNoErrors(result, e => _.delay(() => { throw e; }))) {
+            if (assertNoErrors(result, (e: ServiceResult<unknown, Error>[]) => _.delay(() => { throw e; }))) {
                 return;
             }
             const response = result.val as IResponseResult<ISpotifySong>;

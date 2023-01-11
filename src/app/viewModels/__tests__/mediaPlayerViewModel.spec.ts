@@ -4,7 +4,7 @@ import { DataStorage } from '../../data/dataStorage';
 import { Service } from '../../service';
 import { MediaPlayerViewModel } from '../mediaPlayerViewModel';
 
-let mockSrv;
+let mockSrv: any;
 
 jest.mock('../../adapter/spotify', () => {
     return {

@@ -1,6 +1,7 @@
 export interface ITask {
     isRunning: boolean;
-    exec(...args);
+    fails: number;
+    exec(...args: unknown[]): void;
 }
 
 export class Scheduler {
@@ -17,20 +18,21 @@ export class Scheduler {
         return Scheduler.inst;
     }
 
-    static Command(fn: (...args) => any) {
+    static Command(fn: (...args: unknown[]) => any) {
         const current = Scheduler.getCurrent();
 
         return {
             isRunning: false,
-            exec: (...args) => current.exec({
+            exec: (...args: unknown[]) => current.exec({
                 isRunning: true,
+                fails: 0,
                 exec: () => fn(...args)
             })
         };
     }
 
     constructor(public concurrency = 1) {
-        
+
     }
 
     async enqueue(task: ITask) {
@@ -61,11 +63,16 @@ export class Scheduler {
             await task.exec();
         } catch (ex) {
             setTimeout(() => {
+                if (task.fails < 3) {
+                    task.fails++;
+                    this.exec(task);
+                }
                 console.log(this.inProgress);
                 throw ex;
             });
         } finally {
             task.isRunning = false;
+            task.fails = 0;
             this.inProgress = this.inProgress.filter(a => a !== task);
             done();
         }

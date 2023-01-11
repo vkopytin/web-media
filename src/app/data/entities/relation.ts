@@ -2,7 +2,7 @@ import * as _ from 'underscore';
 import { IStorage, IStorageConfig } from '../iStorage';
 import { asAsync, asAsyncOf } from '../../utils';
 
-class Relation<T extends {}> {
+class Relation<T extends { [key: string]: unknown }> {
     tableName = '';
     leftKey = '';
     rightKey = '';
@@ -53,7 +53,7 @@ class Relation<T extends {}> {
 
     async update(pair: T) {
         const id = this.getId(pair);
-        const result = await asAsync(this.storage, this.storage.update, this.storeConfig, id, {
+        const result = await asAsync(this.storage, this.storage.update<T>, this.storeConfig, id, {
             id,
             ...pair
         });
@@ -67,7 +67,7 @@ class Relation<T extends {}> {
 
     async refresh(pair: T) {
         const id = this.getId(pair);
-        const record = await asAsync(this.storage, this.storage.getById, this.storeConfig, id);
+        const record = await asAsync(this.storage, this.storage.getById<T>, this.storeConfig, id);
         if (record) {
             return await this.update({
                 ...record,
@@ -82,7 +82,7 @@ class Relation<T extends {}> {
         return asAsync(this.storage, this.storage.getById, this.storeConfig, this.getId(pair));
     }
 
-    list(offset = 0, limit?) {
+    list(offset = 0, limit?: number) {
         return asAsyncOf(this.storage, this.storage.each as ((config: IStorageConfig, cb: (err?: any, result?: T, index?: number) => boolean) => any), this.storeConfig);
     }
 
@@ -95,7 +95,7 @@ class Relation<T extends {}> {
     }
 
     eachBy<K extends keyof T>(key: K, keyId: T[K]) {
-        return asAsyncOf(null, (cb: { (err?, result?, index?): boolean }) => {
+        return asAsyncOf(null, (cb: { (err?: unknown, result?: T, index?: number): boolean }) => {
             this.storage.each(this.storeConfig, (err, result: T, index) => {
                 if (_.isUndefined(result)) {
                     cb();

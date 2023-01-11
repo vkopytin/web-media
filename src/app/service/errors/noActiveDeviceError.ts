@@ -7,7 +7,7 @@ class NoActiveDeviceError extends Error {
         return SpotifyServiceResult.error<T, NoActiveDeviceError>(new NoActiveDeviceError(message, details));
     }
 
-    constructor(public msg, public details) {
+    constructor(public msg: string, public details: { stack?: string }) {
         super(msg);
 
         this.name = 'NoActiveDeviceError';

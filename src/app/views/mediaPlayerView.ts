@@ -3,10 +3,10 @@ import { BehaviorSubject } from 'rxjs';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/mediaPlayer';
 import { Binding, current, formatTime, Notifications } from '../utils';
-import { AppViewModel, MediaPlayerViewModel } from '../viewModels';
+import { MediaPlayerViewModel } from '../viewModels';
 
 export interface IMediaPlayerViewProps {
-    showErrors(errors: ServiceResult<any, Error>[]);
+    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
     currentTrackId$: BehaviorSubject<string>;
 }
 
@@ -15,7 +15,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     vm = current(MediaPlayerViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding<MediaPlayerView>({ didSet: (view, errors) => view.showErrors(errors) })
     errors: MediaPlayerView['vm']['errors'];
 
     currentTrackId$ = this.vm.currentTrackId$;
@@ -106,14 +106,13 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     @Binding()
     volumeCommand: MediaPlayerView['vm']['volumeCommand'];
 
-    constructor(props) {
+    constructor(props: IMediaPlayerViewProps) {
         super(props);
         // toDO: Find better solution
         this.currentTrackId$ = this.props.currentTrackId$;
     }
 
     componentDidMount() {
-        this.didRefresh = this.refresh;
         Notifications.observe(this, this.didRefresh);
     }
 
@@ -121,7 +120,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args) {
+    refresh(args: { inst: MediaPlayerView['errors$']; value: ServiceResult<unknown, Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -160,11 +159,11 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
         return formatTime(this.duration - this.timePlayed);
     }
 
-    showErrors(errors) {
+    showErrors(errors: ServiceResult<unknown, Error>[]) {
         this.props.showErrors(errors);
     }
 
-    logslider(position) {
+    logslider(position: number) {
         // position will be between 0 and 100
         var minp = 0;
         var maxp = 100;
@@ -179,7 +178,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
         return Math.exp(minv + scale * (position - minp));
     }
 
-    logposition(value) {
+    logposition(value: number) {
         // position will be between 0 and 100
         var minp = 0;
         var maxp = 100;

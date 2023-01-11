@@ -12,7 +12,7 @@ export function formatTime(ms: number) {
 const instances = new WeakMap();
 
 export function current<T extends {}, O extends {}>(
-    ctor: { new(...args): T },
+    ctor: { new(...args: unknown[]): T },
     options?: O
 ): T {
     if (instances.has(ctor)) {
@@ -26,9 +26,9 @@ export function current<T extends {}, O extends {}>(
 
 export function asyncQueue(concurrency = 1) {
     let running = 0;
-    const taskQueue = [];
+    const taskQueue = [] as Array<(a: () => void) => void>;
 
-    const runTask = (task) => {
+    const runTask = (task: (a: () => void) => void) => {
         const done = () => {
             running--;
             if (taskQueue.length > 0) {
@@ -44,16 +44,16 @@ export function asyncQueue(concurrency = 1) {
         }
     };
 
-    const enqueueTask = task => taskQueue.push(task);
+    const enqueueTask = (task: (a: () => void) => void) => taskQueue.push(task);
 
     return {
-        push: task => running < concurrency ? runTask(task) : enqueueTask(task)
+        push: (task: (a: () => void) => void) => running < concurrency ? runTask(task) : enqueueTask(task)
     };
 }
 
-export function assertNoErrors(...args) {
-    const fillErrors: (errors: any[]) => void = _.last(args);
-    const results = _.flatten(_.initial(args)) as any[];
+export function assertNoErrors(...args: unknown[]) {
+    const fillErrors = _.last(args) as (errors: unknown[]) => void;
+    const results = _.flatten(_.initial(args)) as { isError: boolean }[];
     const errors = _.filter(results, r => r.isError);
 
     !_.isEmpty(errors) && fillErrors(errors);
@@ -61,15 +61,15 @@ export function assertNoErrors(...args) {
     return errors.length > 0;
 }
 
-function asAsync<T1, T2, T3, T4, Y>(c, fn: { (a: T1, a1: T2, a2: T3, a3: T4, cb: { (err?, res?: Y): void }): void }, a: T1, a1: T2, a2: T3, a3: T4): Promise<Y>
-function asAsync<T1, T2, T3, Y>(c, fn: { (a: T1, a1: T2, a2: T3, cb: { (err?, res?: Y): void }): void }, a: T1, a1: T2, a3: T3): Promise<Y>
-function asAsync<T1, T2, Y>(c, fn: { (a: T1, a1: T2, cb: { (err?, res?: Y): void }): void }, a: T1, a1: T2): Promise<Y>
-function asAsync<T, Y>(c, fn: { (a: T, cb: { (err?, res?: Y): void }): void }, a: T): Promise<Y>
-function asAsync<Y>(c, fn: { (cb: { (err?, res?: Y): void }): void }): Promise<Y>
-function asAsync(c, fn, ...args) {
+function asAsync<T1, T2, T3, T4, Y>(c: unknown, fn: { (a: T1, a1: T2, a2: T3, a3: T4, cb: { (err?: unknown, res?: Y): void }): void }, a: T1, a1: T2, a2: T3, a3: T4): Promise<Y>
+function asAsync<T1, T2, T3, Y>(c: unknown, fn: { (a: T1, a1: T2, a2: T3, cb: { (err?: unknown, res?: Y): void }): void }, a: T1, a1: T2, a3: T3): Promise<Y>
+function asAsync<T1, T2, Y>(c: unknown, fn: { (a: T1, a1: T2, cb: { (err?: unknown, res?: Y): void }): void }, a: T1, a1: T2): Promise<Y>
+function asAsync<T, Y>(c: unknown, fn: { (a: T, cb: { (err?: unknown, res?: Y): void }): void }, a: T): Promise<Y>
+function asAsync<Y>(c: unknown, fn: { (cb: { (err?: unknown, res?: Y): void }): void }): Promise<Y>
+function asAsync(c: unknown, fn: Function, ...args: unknown[]) {
     return new Promise((resolve, reject) => {
         try {
-            fn.apply(c, [...args, (err?, res?) => {
+            fn.apply(c, [...args, (err?: unknown, res?: unknown) => {
                 if (err) {
                     return reject(err);
                 }
@@ -83,19 +83,19 @@ function asAsync(c, fn, ...args) {
 export { asAsync };
 export { asAsyncOf };
 
-function asAsyncOf<T1, T2, T3, T4, Y>(c, fn: { (a: T1, a1: T2, a2: T3, a3: T4, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2, a2: T3, a3: T4): AsyncGenerator<Y>
-function asAsyncOf<T1, T2, T3, Y>(c, fn: { (a: T1, a1: T2, a2: T3, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2, a3: T3): AsyncGenerator<Y>
-function asAsyncOf<T1, T2, Y>(c, fn: { (a: T1, a1: T2, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2): AsyncGenerator<Y>
-function asAsyncOf<T, Y>(c, fn: { (a: T, cb: { (err?, res?: Y, index?: number): boolean }): void }, a: T): AsyncGenerator<Y>
-function asAsyncOf<Y>(c, fn: { (cb: { (err?, res?: Y, index?: number): boolean }): void }): AsyncGenerator<Y>
-async function* asAsyncOf(context, fn, ...args) {
-    let next = (result?) => { };
-    let fail = (err) => { };
+function asAsyncOf<T1, T2, T3, T4, Y>(c: unknown, fn: { (a: T1, a1: T2, a2: T3, a3: T4, cb: { (err?: unknown, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2, a2: T3, a3: T4): AsyncGenerator<Y>
+function asAsyncOf<T1, T2, T3, Y>(c: unknown, fn: { (a: T1, a1: T2, a2: T3, cb: { (err?: unknown, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2, a3: T3): AsyncGenerator<Y>
+function asAsyncOf<T1, T2, Y>(c: unknown, fn: { (a: T1, a1: T2, cb: { (err?: unknown, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2): AsyncGenerator<Y>
+function asAsyncOf<T, Y>(c: unknown, fn: { (a: T, cb: { (err?: unknown, res?: Y, index?: number): boolean }): void }, a: T): AsyncGenerator<Y>
+function asAsyncOf<Y>(c: unknown, fn: { (cb: { (err?: unknown, res?: Y, index?: number): boolean }): void }): AsyncGenerator<Y>
+async function* asAsyncOf(context: unknown, fn: Function, ...args: unknown[]) {
+    let next = (result?: unknown) => { };
+    let fail = (err: Error) => { };
     let finish = {};
-    const items = [];
+    const items = [] as unknown[];
     let started = true;
     try {
-        fn.apply(context, [...args, function (err, result, index) {
+        fn.apply(context, [...args, function (err: Error, result: unknown, index: number) {
             const nextArgs = [].slice.call(arguments, 0);
             if (nextArgs.length === 0) {
                 started = false;
@@ -132,10 +132,10 @@ async function* asAsyncOf(context, fn, ...args) {
     }
 }
 
-export function debounce(func, wait = 0, cancelObj = 'canceled') {
-    let timerId, latestResolve, shouldCancel;
-    let allArgs = [];
-    return function (...args) {
+export function debounce<T extends Function>(func: T, wait = 0, cancelObj = 'canceled') {
+    let timerId: number, latestResolve: {}, shouldCancel: boolean;
+    let allArgs = [] as unknown[];
+    return function (...args: unknown[]) {
         allArgs = [...allArgs, ...args];
         if (!latestResolve) {
             return new Promise((resolve, reject) => {
@@ -151,7 +151,7 @@ export function debounce(func, wait = 0, cancelObj = 'canceled') {
         });
     }
 
-    async function invoke(args, resolve, reject) {
+    async function invoke(args: unknown[], resolve: (a: unknown) => void, reject: (a: unknown) => void) {
         if (shouldCancel && resolve !== latestResolve) {
             resolve(cancelObj)
         } else {
@@ -169,7 +169,7 @@ export function debounce(func, wait = 0, cancelObj = 'canceled') {
     }
 }
 
-export function isLoading<T extends { isLoading: boolean; }>(target: T, key, descriptor) {
+export function isLoading<T extends { isLoading: boolean; }>(target: T, key: string, descriptor: PropertyDescriptor) {
     // save a reference to the original method this way we keep the values currently in the
     // descriptor and don't overwrite what another decorator might have done to the descriptor.
     if (descriptor === undefined) {
@@ -178,7 +178,7 @@ export function isLoading<T extends { isLoading: boolean; }>(target: T, key, des
     const originalMethod = descriptor.value;
 
     //editing the descriptor/value parameter
-    descriptor.value = async function (this: T, ...args) {
+    descriptor.value = async function (this: T, ...args: unknown[]) {
         try {
             this.isLoading = true;
             return await originalMethod.apply(this, args);
@@ -192,8 +192,8 @@ export function isLoading<T extends { isLoading: boolean; }>(target: T, key, des
 }
 
 interface INotification {
-    value;
-    state;
+    value: unknown;
+    state: unknown;
 }
 
 interface ISignals {
@@ -208,23 +208,25 @@ export const Notifications = (function () {
     return {
         state,
         observe(obj: unknown, callback: Function) {
+            const dict = obj as { [key: string]: unknown };
             Object.keys(obj).forEach(key => {
-                const traits = GetTraits<ISignals>(obj[key], false);
+                const traits = GetTraits<ISignals>(dict[key], false);
                 if (!traits) {
                     return;
                 }
-                Notifications.attach(obj[key], obj);
-                Notifications.subscribe(obj[key], obj, callback);
+                Notifications.attach(dict[key], obj);
+                Notifications.subscribe(dict[key], obj, callback);
             });
         },
         stopObserving(obj: unknown, callback: Function) {
+            const dict = obj as { [key: string]: unknown };
             Object.keys(obj).forEach(key => {
-                const traits = GetTraits<ISignals>(obj[key], false);
+                const traits = GetTraits<ISignals>(dict[key], false);
                 if (!traits) {
                     return;
                 }
-                Notifications.detach(obj[key], obj);
-                Notifications.unsubscribe(obj[key], obj, callback);
+                Notifications.detach(dict[key], obj);
+                Notifications.unsubscribe(dict[key], obj, callback);
             });
         },
         next(value: INotification) {
@@ -245,27 +247,27 @@ export const Notifications = (function () {
                 });
             });
         },
-        attach<T>(state: BehaviorSubject<T>, obj: unknown) {
+        attach(state: unknown, obj: unknown) {
             const { observers } = GetTraits<ISignals>(state, false);
             observers.push(obj);
         },
-        detach<T>(state: BehaviorSubject<T>, obj: unknown) {
+        detach(state: unknown, obj: unknown) {
             const observers = GetTraits<ISignals>(state, false).observers.filter(o => o !== obj);
             GetTraits<ISignals>(state).observers = observers;
         },
-        subscribe<T>(state: BehaviorSubject<T>, view: unknown, callback: Function) {
+        subscribe(state: unknown, view: unknown, callback: Function) {
             const { callbacks } = GetTraits<ISignals>(state, false);
             callbacks.push([view, callback]);
         },
-        unsubscribe<T>(state: BehaviorSubject<T>, view: unknown, callback: Function) {
+        unsubscribe(state: unknown, view: unknown, callback: Function) {
             const callbacks = GetTraits<ISignals>(state).callbacks.filter(([a, b]) => a !== view && callback !== b);
             GetTraits<ISignals>(state, false).callbacks = callbacks;
         },
     };
 })();
 
-const objectTraits = new WeakMap<object, { [key: string]: any }>();
-export const GetTraits = <T>(obj, autoCreate = true) => {
+const objectTraits = new WeakMap<object, object>();
+export const GetTraits = <T extends {}>(obj: {}, autoCreate = true) => {
     if (autoCreate && !objectTraits.has(obj)) {
         objectTraits.set(obj, {});
     }
@@ -273,8 +275,8 @@ export const GetTraits = <T>(obj, autoCreate = true) => {
     return objectTraits.get(obj) as T;
 }
 
-export function State<T>(target: T, propName: string, descriptor?) {
-    function initState(v?) {
+export function State<T>(target: T, propName: string, descriptor?: PropertyDescriptor) {
+    function initState(v?: unknown) {
         let state = new BehaviorSubject<unknown>(null);
         Notifications.declare(state, propName);
 
@@ -305,16 +307,16 @@ export function State<T>(target: T, propName: string, descriptor?) {
     return Binding<T>()(target, propName, descriptor);
 }
 
-export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) => void } = {}) {
-    return function (target: T, propName: string, descriptor?): any {
-        const desc$ = Object.getOwnPropertyDescriptor(target, `${propName}$`);
+export function Binding<T>({ didSet }: { didSet?: (this: T, view: T, val: T[keyof T]) => void } = {}) {
+    return function (target: T, propName: string, descriptor?: PropertyDescriptor): any {
+        const desc$ = Object.getOwnPropertyDescriptor(target, `${String(propName)}$`);
         function initBinding(store$: BehaviorSubject<unknown>) {
             let state = store$;
-            const didSetCb = didSet && (value => {
+            const didSetCb = didSet && ((value: T[keyof T]) => {
                 didSet.call(this, this, value);
             });
             didSetCb && Notifications.subscribe(state, this, didSetCb);
-            Object.defineProperty(this, `${propName}$`, {
+            Object.defineProperty(this, `${String(propName)}$`, {
                 get() {
                     return state;
                 },
@@ -352,7 +354,7 @@ export function Binding<T = any>({ didSet }: { didSet?: (this: T, view: T, val) 
                 descriptor?.get?.();
                 return val;
             },
-            set(val) {
+            set(val: T[keyof T]) {
                 if (this[propName] !== val) {
                     this[`${propName}$`].next(val);
                     descriptor?.set?.(val);

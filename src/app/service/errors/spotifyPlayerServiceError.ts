@@ -7,7 +7,7 @@ class SpotifyPlayerServiceError extends Error {
         return SpotifyPlayerServiceResult.error(new SpotifyPlayerServiceError(message, details));
     }
 
-    constructor(public msg, public details) {
+    constructor(public msg: string, public details: { stack?: string }) {
         super(msg);
 
         this.name = 'SpotifyPlayerServiceError';

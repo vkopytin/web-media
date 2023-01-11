@@ -17,7 +17,7 @@ export class PlaylistRowsStore {
                 id: { unique: true }
             },
             position: {
-                position: { }
+                position: {}
             }
         },
         orderBy: 'position',
@@ -29,7 +29,7 @@ export class PlaylistRowsStore {
     }
 
     createTable() {
-        return asAsync(null, (cb: { (res?, result?) }) => {
+        return asAsync(null, (cb: { (res?: Error, result?: boolean): void }) => {
             this.storage.hasTable(this.storeConfig, (err, res) => {
                 if (err) {
                     return cb(err);
@@ -55,7 +55,7 @@ export class PlaylistRowsStore {
     }
 
     async refresh(myStore: IPlaylistRow) {
-        const record = await asAsync(this.storage, this.storage.getById, this.storeConfig, myStore.id);
+        const record = await asAsync(this.storage, this.storage.getById<{}>, this.storeConfig, myStore.id);
         if (record) {
             return await this.update({
                 ...record,
@@ -70,8 +70,8 @@ export class PlaylistRowsStore {
         return asAsync(this.storage, this.storage.getById, this.storeConfig, myStoreId);
     }
 
-    list(offset = 0, limit?) {
-        return asAsyncOf(null, (cb: { (res?, result?: IPlaylistRow, index?): boolean }) => {
+    list(offset = 0, limit?: number) {
+        return asAsyncOf(null, (cb: { (res?: {}, result?: IPlaylistRow, index?: number): boolean }) => {
             this.storage.each<IPlaylistRow>(this.storeConfig, (...args) => {
                 const index = args[2];
                 if (index < offset) {
@@ -86,7 +86,7 @@ export class PlaylistRowsStore {
     }
 
     where(where: Partial<IPlaylistRow>) {
-        return asAsyncOf(this.storage, this.storage.where, this.storeConfig, where);
+        return asAsyncOf(this.storage, this.storage.where<IPlaylistRow>, this.storeConfig, where);
     }
 
     count() {

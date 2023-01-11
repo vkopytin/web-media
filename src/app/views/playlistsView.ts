@@ -7,7 +7,7 @@ import { PlaylistsViewModel } from '../viewModels';
 
 export interface IPlaylistsViewProps {
     currentTrackId: string;
-    showErrors(errors: ServiceResult<any, Error>[]);
+    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
 }
 
 class PlaylistsView extends React.Component<IPlaylistsViewProps> {
@@ -15,7 +15,7 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
     vm = current(PlaylistsViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding<PlaylistsView>({ didSet: (view, errors) => view.showErrors(errors) })
     errors: PlaylistsView['vm']['errors'];
 
     playlists$ = this.vm.playlists$;
@@ -66,7 +66,7 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args) {
+    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -75,7 +75,7 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
         });
     }
 
-    showErrors(errors) {
+    showErrors(errors: ServiceResult<unknown, Error>[]) {
         this.props.showErrors(errors);
     }
 

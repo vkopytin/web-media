@@ -2,11 +2,11 @@ import React from 'react';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/devices';
 import { Binding, current, Notifications } from '../utils';
-import { AppViewModel } from '../viewModels';
+import { AppViewModel, DeviceViewModelItem } from '../viewModels';
 
 export interface IDevicesViewProps {
-    showErrors(errors: ServiceResult<any, Error>[]);
-    openShowDevices(showHide);
+    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
+    openShowDevices(showHide: boolean): void;
 }
 
 class DevicesView extends React.Component<IDevicesViewProps> {
@@ -14,7 +14,7 @@ class DevicesView extends React.Component<IDevicesViewProps> {
     vm = current(AppViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding<DevicesView>({ didSet: (view, errors) => view.showErrors(errors) })
     errors: DevicesView['vm']['errors'];
 
     switchDeviceCommand$ = this.vm.switchDeviceCommand$;
@@ -41,7 +41,7 @@ class DevicesView extends React.Component<IDevicesViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args) {
+    refresh(args: { inst: DevicesView['errors$']; value: ServiceResult<unknown, Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -50,12 +50,12 @@ class DevicesView extends React.Component<IDevicesViewProps> {
         });
     }
 
-    async switchDevice(device) {
+    async switchDevice(device: DeviceViewModelItem) {
         await this.switchDeviceCommand.exec(device);
         this.props.openShowDevices(false);
     }
 
-    showErrors(errors) {
+    showErrors(errors: ServiceResult<unknown, Error>[]) {
         this.props.showErrors(errors);
     }
 

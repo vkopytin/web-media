@@ -38,13 +38,13 @@ class HomeViewModel {
     selectTrackCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
     @State selectTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.selectedTrack = track);
 
-    likeTrackCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
+    likeTrackCommand$: BehaviorSubject<{ exec: (track: TrackViewModelItem) => Promise<void> }>;
     @State likeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.likeTrack(track));
 
-    unlikeTrackCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
+    unlikeTrackCommand$: BehaviorSubject<{ exec: (track: TrackViewModelItem) => Promise<void> }>;
     @State unlikeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.unlikeTrack(track));
 
-    findTrackLyricsCommand$: BehaviorSubject<{ exec: (track) => Promise<void> }>;
+    findTrackLyricsCommand$: BehaviorSubject<{ exec: (track: TrackViewModelItem) => Promise<void> }>;
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
 
     bannedTrackIds$: BehaviorSubject<HomeViewModel['bannedTrackIds']>;
@@ -72,7 +72,7 @@ class HomeViewModel {
 
     async connect() {
         const spotifyResult = await this.ss.service(SpotifyService);
-        if (assertNoErrors(spotifyResult, e => this.errors = e)) {
+        if (assertNoErrors(spotifyResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
             return;
         }
         const spotify = spotifyResult.val;
@@ -81,14 +81,14 @@ class HomeViewModel {
 
     @isLoading
     async fetchData(trackId?: string) {
-        const artistIds = [];
+        const artistIds = [] as string[];
         let trackIds = trackId ? [trackId] : [];
 
         if (!trackIds.length) {
             const tracksResult = this.selectedPlaylist ? await this.ss.fetchPlaylistTracks(this.selectedPlaylist.id(), 0, 20)
                 : await this.ss.fetchTracks(0, 20);
 
-            if (assertNoErrors(tracksResult, e => this.errors = e)) {
+            if (assertNoErrors(tracksResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                 return;
             }
 
@@ -98,14 +98,14 @@ class HomeViewModel {
 
         if (!trackIds.length) {
             const topTracksResult = await this.ss.listTopTracks();
-            if (assertNoErrors(topTracksResult, e => this.errors = e)) {
+            if (assertNoErrors(topTracksResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                 return;
             }
             const topTracks = topTracksResult.val as IResponseResult<ITrack>;
             trackIds = _.first(_.uniq(_.map(topTracks.items, (song) => song.id)), 5);
         }
         const res = await this.ss.fetchRecommendations('US', artistIds, trackIds);
-        if (assertNoErrors(res, e => this.errors = e)) {
+        if (assertNoErrors(res, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
             return;
         }
         const recomendations = res.val as IRecommendationsResult;
@@ -114,7 +114,7 @@ class HomeViewModel {
         this.checkTracks(newTracks);
     }
 
-    async loadData(...args) {
+    async loadData(...args: unknown[]) {
         if (!~args.indexOf('recommendations')) {
             return;
         }
@@ -164,7 +164,7 @@ class HomeViewModel {
         });
     }
 
-    async findTrackLyrics(track: TrackViewModelItem) {
+    async findTrackLyrics(track: TrackViewModelItem): Promise<void> {
         if (this.trackLyrics && this.trackLyrics.trackId === track.id()) {
 
             return this.trackLyrics = null;

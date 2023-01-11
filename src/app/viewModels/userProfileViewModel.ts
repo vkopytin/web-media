@@ -12,7 +12,7 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 class UserProfileViewModel {
     errors$: BehaviorSubject<UserProfileViewModel['errors']>;
-    @State errors = [] as ServiceResult<any, Error>[];
+    @State errors = [] as ServiceResult<{}, Error>[];
 
     isLoggedin$: BehaviorSubject<boolean>;
     @State isLoggedin = false;
@@ -50,7 +50,7 @@ class UserProfileViewModel {
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         await this.fetchData();
-        this.apiseedsKey$.subscribe(_.debounce((val) => {
+        this.apiseedsKey$.subscribe(_.debounce((val: string) => {
             this.saveApiseedsKey(val);
         }, 300));
         resolve(true);

@@ -25,7 +25,7 @@ export class ImagesStore {
     }
 
     createTable() {
-        return asAsync(null, (cb: { (res?, result?) }) => {
+        return asAsync(null, (cb: { (res?: Error, result?: boolean): void }) => {
             this.storage.hasTable(this.storeConfig, (err, res) => {
                 if (err) {
                     return cb(err);
@@ -51,7 +51,7 @@ export class ImagesStore {
     }
 
     async refresh(myStore: IImage) {
-        const record = await asAsync(this.storage, this.storage.getById, this.storeConfig, myStore.url);
+        const record = await asAsync(this.storage, this.storage.getById<IImage>, this.storeConfig, myStore.url);
         if (record) {
             return await this.update({
                 ...record,
@@ -66,8 +66,8 @@ export class ImagesStore {
         return asAsync(this.storage, this.storage.getById, this.storeConfig, myStoreId);
     }
 
-    list(offset = 0, limit?) {
-        return asAsyncOf(null, (cb: { (res?, result?: IImage, index?): boolean }) => {
+    list(offset = 0, limit?: number) {
+        return asAsyncOf(null, (cb: { (res?: unknown, result?: IImage, index?: number): boolean }) => {
             this.storage.each<IImage>(this.storeConfig, (...args) => {
                 const index = args[2];
                 if (index < offset) {

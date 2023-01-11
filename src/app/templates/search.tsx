@@ -100,8 +100,7 @@ export const template = (view: SearchView) => <>
                 <div className="table-view-cell media"
                     onClick={evnt => view.currentAlbum = view.currentAlbum?.id() === item.id() ? null : item}
                 >
-                    <span className="media-object pull-left player-left--32"
-                    >
+                    <span className="media-object pull-left player-left--32">
                         <div className="region">
                             <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
                             </div>
@@ -130,8 +129,7 @@ export const template = (view: SearchView) => <>
                 <div className="table-view-cell media"
                     onClick={evnt => view.currentPlaylist = view.currentPlaylist?.id() === item.id() ? null : item}
                 >
-                    <span className="media-object pull-left player-left--32"
-                    >
+                    <span className="media-object pull-left player-left--32">
                         <div className="region">
                             <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
                             </div>

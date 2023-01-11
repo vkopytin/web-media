@@ -71,7 +71,7 @@ class NewReleasesViewModel {
         if (spotifyResult.isError) {
             this.errors = [spotifyResult];
         }
-        if (assertNoErrors(spotifyResult, e => this.errors = e)) {
+        if (assertNoErrors(spotifyResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
             return;
         }
         spotifyResult.val.on('change:state', state => this.checkAlbums());
@@ -81,7 +81,7 @@ class NewReleasesViewModel {
 
     async fetchData() {
         const res = await this.ss.newReleases();
-        if (assertNoErrors(res, e => this.errors = e)) {
+        if (assertNoErrors(res, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
 
             return;
         }
@@ -91,7 +91,7 @@ class NewReleasesViewModel {
         this.checkAlbums();
 
         const featuredPlaylistsResult = await this.ss.featuredPlaylists();
-        if (assertNoErrors(res, e => this.errors = e)) {
+        if (assertNoErrors(res, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
 
             return;
         }
@@ -103,7 +103,7 @@ class NewReleasesViewModel {
         const currentAlbum = this.currentAlbum;
         if (currentAlbum) {
             const result = await this.ss.listAlbumTracks(currentAlbum.id());
-            if (assertNoErrors(result, e => this.errors = e)) {
+            if (assertNoErrors(result, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                 return;
             }
 
@@ -118,7 +118,7 @@ class NewReleasesViewModel {
             }, index));
         } else if (this.currentPlaylist) {
             const playlistTracksResult = await this.ss.fetchPlaylistTracks(this.currentPlaylist.id(), 0, 100);
-            if (assertNoErrors(playlistTracksResult, e => this.errors = e)) {
+            if (assertNoErrors(playlistTracksResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                 return;
             }
             const tracksResult = playlistTracksResult.val as IResponseResult<ISpotifySong>;
@@ -133,12 +133,12 @@ class NewReleasesViewModel {
         const albums = this.newReleases;
         const ids = _.map(albums, (album: AlbumViewModelItem) => album.id());
         const likedResult = await this.ss.hasAlbums(ids);
-        if (assertNoErrors(likedResult, e => this.errors = e)) {
+        if (assertNoErrors(likedResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
 
             return;
         }
 
-        const likedAlbums = [];
+        const likedAlbums = [] as AlbumViewModelItem[];
         _.each(likedResult.val as boolean[], (liked, index) => {
             albums[index].isLiked = liked;
             liked && likedAlbums.push(albums[index]);
@@ -148,14 +148,14 @@ class NewReleasesViewModel {
 
     async likeAlbum(album: AlbumViewModelItem) {
         const likedResult = await this.ss.addAlbums(album.id());
-        if (assertNoErrors(likedResult, e => this.errors = e)) {
+        if (assertNoErrors(likedResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
             return;
         }
     }
 
     async unlikeAlbum(album: AlbumViewModelItem) {
         const likedResult = await this.ss.removeAlbums(album.id());
-        if (assertNoErrors(likedResult, e => this.errors = e)) {
+        if (assertNoErrors(likedResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
             return;
         }
     }

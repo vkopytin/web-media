@@ -7,7 +7,7 @@ import { AlbumViewModelItem, NewReleasesViewModel } from '../viewModels';
 
 
 export interface INewReleasesViewProps {
-    showErrors(errors: ServiceResult<any, Error>[]);
+    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
     currentTrackId: string;
 }
 
@@ -16,7 +16,7 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
     vm = current(NewReleasesViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding<NewReleasesView>({ didSet: (view, errors) => view.showErrors(errors) })
     errors: NewReleasesView['vm']['errors'];
 
     newReleases$ = this.vm.newReleases$;
@@ -71,7 +71,7 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args) {
+    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[]; }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -84,7 +84,7 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
         return !!_.find(this.likedAlbums, (item: AlbumViewModelItem) => item.id() === album.id());
     }
 
-    showErrors(errors) {
+    showErrors(errors: ServiceResult<unknown, Error>[]) {
         this.props.showErrors(errors);
     }
 

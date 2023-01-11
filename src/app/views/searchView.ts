@@ -7,7 +7,7 @@ import { SearchViewModel, TrackViewModelItem } from '../viewModels';
 
 
 export interface ISearchViewProps {
-    showErrors(errors: ServiceResult<any, Error>[]);
+    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
     loadMore?: boolean;
     currentTrackId: string;
 }
@@ -17,7 +17,7 @@ class SearchView extends React.Component<ISearchViewProps> {
     vm = current(SearchViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding<SearchView>({ didSet: (view, errors) => view.showErrors(errors) })
     errors: SearchView['vm']['errors'];
 
     term$ = this.vm.term$;
@@ -76,7 +76,7 @@ class SearchView extends React.Component<ISearchViewProps> {
     @Binding()
     unlikeTrackCommand: SearchView['vm']['unlikeTrackCommand'];
 
-    searchTracks = _.debounce(term => {
+    searchTracks = _.debounce((term: string) => {
         this.term = term;
     }, 300);
 
@@ -88,13 +88,13 @@ class SearchView extends React.Component<ISearchViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    componentDidUpdate(prevProps: ISearchViewProps, prevState, snapshot) {
+    componentDidUpdate(prevProps: ISearchViewProps) {
         if (this.props.loadMore) {
             this.loadMoreCommand.exec();
         }
     }
 
-    refresh(args) {
+    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -107,7 +107,7 @@ class SearchView extends React.Component<ISearchViewProps> {
         return track.id() === this.props.currentTrackId;
     }
 
-    showErrors(errors) {
+    showErrors(errors: ServiceResult<unknown, Error>[]) {
         this.props.showErrors(errors);
     }
 
