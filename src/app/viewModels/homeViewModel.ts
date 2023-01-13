@@ -76,7 +76,7 @@ class HomeViewModel {
             return;
         }
         const spotify = spotifyResult.val;
-        spotify.on('change:state', (...args) => this.loadData(...args));
+        spotify?.on('change:state', (...args) => this.loadData(...args));
     }
 
     @isLoading
@@ -177,7 +177,7 @@ class HomeViewModel {
         lyricsResult.assert(e => {
             this.trackLyrics = {
                 trackId: track.id(),
-                lyrics: lyricsResult.error.message
+                lyrics: lyricsResult.error?.message || 'empy-error-message'
             };
 
             return this.errors = [e];

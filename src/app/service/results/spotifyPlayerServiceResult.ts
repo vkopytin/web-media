@@ -4,16 +4,16 @@ import { SpotifyPlayerService } from '../spotifyPlayer';
 
 class SpotifyPlayerServiceResult<T, E extends Error> extends ServiceResult<T, E> {
 
-    constructor(result: T, error: E) {
+    constructor(result: T, error: E | null) {
         super(result, error);
     }
 
     static success<T>(val: T) {
-        return new SpotifyPlayerServiceResult(val, null as Error);
+        return new SpotifyPlayerServiceResult(val, null as Error | null);
     }
 
     static error<Y extends Error>(val: Y) {
-        const error = new SpotifyPlayerServiceResult(null as SpotifyPlayerService, val);
+        const error = new SpotifyPlayerServiceResult(null as SpotifyPlayerService | null, val);
         error.isError = true;
 
         return error;

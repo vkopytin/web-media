@@ -63,7 +63,7 @@ class UserProfileViewModel {
     async fetchData() {
         const settingsResult = await this.ss.service(SettingsService);
         settingsResult.assert(e => this.errors = [e]).cata(() => {
-            this.apiseedsKey = settingsResult.val.apiseedsKey();
+            this.apiseedsKey = settingsResult.cata(val => val.apiseedsKey());
         });
         const spotifyTokenUrlResult = await this.ss.getSpotifyAuthUrl();
         spotifyTokenUrlResult.assert(e => this.errors = [e]).cata(spotifyAuthUrl => {
@@ -94,7 +94,7 @@ class UserProfileViewModel {
     async saveApiseedsKey(val: string) {
         const settingsResult = await this.ss.service(SettingsService);
         settingsResult.assert(e => this.errors = [e]).cata(settings => {
-            settingsResult.val.apiseedsKey(val);
+            settingsResult.map(v => v.apiseedsKey(val));
         });
     }
 

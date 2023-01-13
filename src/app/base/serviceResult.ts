@@ -3,7 +3,7 @@ import e from "express";
 class ServiceResult<T, E extends Error> {
     isError = false;
 
-    constructor(public val: T, public error: E) {
+    constructor(public val: T | null, public error: E | null) {
         this.isError = !!error;
     }
 
@@ -23,14 +23,14 @@ class ServiceResult<T, E extends Error> {
         if (this.isError) {
             return this as any;
         }
-        return new ServiceResult<R, Error>(done(this.val), null as any);
+        return new ServiceResult<R, Error>(done(this.val!), null as any);
     }
 
     cata<R>(done: (v: T) => R): R {
         if (this.isError) {
             return this as any;
         }
-        return done(this.val);
+        return done(this.val!);
     }
 }
 

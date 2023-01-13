@@ -21,7 +21,7 @@ class SpotifySyncService extends withEvents(BaseService) {
             return spotifyResult;
         }
         const spotify = spotifyResult.val;
-        return SpotifySyncServiceResult.success(new SpotifySyncService(connection, spotify, dataServiceResult.val));
+        return SpotifySyncServiceResult.success(new SpotifySyncService(connection, spotify!, dataServiceResult.val!));
     }
 
     limit = 49;

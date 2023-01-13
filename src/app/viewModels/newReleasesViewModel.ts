@@ -74,7 +74,7 @@ class NewReleasesViewModel {
         if (assertNoErrors(spotifyResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
             return;
         }
-        spotifyResult.val.on('change:state', state => this.checkAlbums());
+        spotifyResult.map(val => val.on('change:state', state => this.checkAlbums()));
         this.currentAlbum$.subscribe(() => _.delay(() => this.loadTracks()));
         this.currentPlaylist$.subscribe(() => _.delay(() => this.loadTracks()));
     }

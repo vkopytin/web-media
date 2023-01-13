@@ -279,9 +279,11 @@ export const GetTraits = <T extends {}>(obj: {}, autoCreate = true) => {
 }
 
 export function State<T>(target: T, propName: string, descriptor?: PropertyDescriptor) {
-    function initState(this: any, v?: unknown) {
-        let state = new BehaviorSubject<unknown>(null);
+    function initState(this: T, v?: T[keyof T]) {
+        let state = new BehaviorSubject<T[keyof T] | undefined>(v);
         Notifications.declare(state, propName);
+
+        descriptor?.set && state.subscribe(v => descriptor.set?.call(this, v));
 
         Object.defineProperty(this, `${propName}$`, {
             get() {

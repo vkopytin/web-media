@@ -19,7 +19,9 @@ class SearchViewModel {
     @State errors = [] as ServiceResult<any, Error>[];
 
     term$!: BehaviorSubject<SearchViewModel['term']>;
-    @State term = '';
+    @State set term(value: string) {
+        this.onChangeTerm();
+    }
 
     @State isLoading = false;
 
@@ -144,22 +146,22 @@ class SearchViewModel {
             return;
         }
         const search = res.val;
-        if ('tracks' in search && search.tracks) {
+        if (search?.tracks) {
             this.tracksAddRange(_.map(search.tracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, search.tracks!.offset + index)));
 
             this.settings.total = search.tracks.total;
             this.settings.offset = search.tracks.offset + Math.min(this.settings.limit, search.tracks.items.length);
-        } else if ('artists' in search && search.artists) {
+        } else if (search?.artists) {
             this.artistsAddRange(_.map(search.artists.items, (artist, index) => new ArtistViewModelItem(artist, search.artists!.offset + index)));
 
             this.settings.total = search.artists.total;
             this.settings.offset = search.artists.offset + Math.min(this.settings.limit, search.artists.items.length);
-        } else if ('albums' in search && search.albums) {
+        } else if (search?.albums) {
             this.albumsAddRange(_.map(search.albums.items, (album, index) => new AlbumViewModelItem(album)));
 
             this.settings.total = search.albums.total;
             this.settings.offset = search.albums.offset + Math.min(this.settings.limit, search.albums.items.length);
-        } else if ('playlists' in search && search.playlists) {
+        } else if (search?.playlists) {
             this.playlistsAddRange(_.map(search.playlists.items, (artist, index) => new PlaylistsViewModelItem(artist)));
 
             this.settings.total = search.playlists.total;

@@ -222,7 +222,7 @@ class PlaylistsViewModel {
         if (assertNoErrors(lyricsResult, () => { })) {
             this.trackLyrics = {
                 trackId: track.id(),
-                lyrics: lyricsResult.error.message
+                lyrics: lyricsResult.error?.message || 'unknown-error'
             };
             return;
         }

@@ -25,7 +25,7 @@ class LyricsService extends withEvents(BaseService) {
 
         return settingsResult.cata(({ key: accessToken }) => {
             const adapter = new LyricsAdapter(accessToken);
-    
+
             return LyricsServiceResult.success(new LyricsService(adapter));
         });
     }
@@ -44,7 +44,7 @@ class LyricsService extends withEvents(BaseService) {
                 lyrics.result.copyright.text
             ].join('\n'));
         } catch (ex) {
-            return returnErrorResult<string>('Unexpected error on requesting sptify recently played', ex);
+            return returnErrorResult<string>('Unexpected error on requesting sptify recently played', ex as Error);
         }
     }
 }

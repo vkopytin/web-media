@@ -89,7 +89,7 @@ export const template = (view: SearchView) => <>
                     <AlbumsView
                         showErrors={e => view.showErrors(e)}
                         currentTrackId={view.props.currentTrackId}
-                        uri={null}
+                        uri={''}
                         tracks={view.currentTracks}
                     />
                 </div>}

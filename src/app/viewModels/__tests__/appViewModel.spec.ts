@@ -96,7 +96,7 @@ describe('App View Model', () => {
     });
 
     it('Should catch error when fetch devices', async () => {
-        jest.spyOn(srv.spotifyService!.val.adapter, 'devices').mockImplementation(() => {
+        jest.spyOn(srv.spotifyService!.val!.adapter, 'devices').mockImplementation(() => {
             throw new Error('fake error');
         });
 

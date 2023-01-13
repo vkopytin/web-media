@@ -253,7 +253,7 @@ class MediaPlayerViewModel {
                     return await this.ss.play();
                 } else {
                     const playerResult = await this.ss.spotifyPlayer();
-                    await playerResult.val.resume();
+                    await playerResult.map(val => val.resume());
                     return playerResult;
                 }
             });
@@ -278,7 +278,7 @@ class MediaPlayerViewModel {
                 if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                     return next();
                 }
-                await playerResult.val.pause();
+                await playerResult.map(val => val.pause());
             }
             this.isPlaying = false;
 
@@ -299,7 +299,7 @@ class MediaPlayerViewModel {
                 if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                     return next();
                 }
-                await playerResult.val.previouseTrack();
+                await playerResult.map(val => val.previouseTrack());
             }
 
             next();
@@ -319,7 +319,7 @@ class MediaPlayerViewModel {
                 if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                     return next();
                 }
-                await playerResult.val.nextTrack();
+                await playerResult.map(val => val.nextTrack());
             }
 
             next();
@@ -340,7 +340,7 @@ class MediaPlayerViewModel {
                 if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                     return next();
                 }
-                const volume = await playerResult.val.getVolume();
+                const volume = await playerResult.cata(val => val.getVolume());
                 this.volume = volume * 1.1;
             }
 
@@ -362,7 +362,7 @@ class MediaPlayerViewModel {
                 if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
                     return next();
                 }
-                const volume = await playerResult.val.getVolume();
+                const volume = await playerResult.cata(val => val.getVolume());
                 this.volume = volume * 0.9;
             }
 
