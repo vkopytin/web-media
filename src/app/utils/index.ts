@@ -319,7 +319,7 @@ export function Binding<T>({ didSet }: { didSet?: (this: T, view: T, val: T[keyo
                 didSet.call(this, this, value);
             });
             didSetCb && Notifications.subscribe(state, this, didSetCb);
-            Object.defineProperty(this, `${String(propName)}$`, {
+            Object.defineProperty(this, `${propName}$`, {
                 get() {
                     return state;
                 },
