@@ -16,47 +16,47 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
 
     errors$ = this.vm.errors$;
     @Binding<PlaylistsView>({ didSet: (view, errors) => view.showErrors(errors) })
-    errors: PlaylistsView['vm']['errors'];
+    errors!: PlaylistsView['vm']['errors'];
 
     playlists$ = this.vm.playlists$;
     @Binding()
-    playlists: PlaylistsView['vm']['playlists'];
+    playlists!: PlaylistsView['vm']['playlists'];
 
     tracks$ = this.vm.tracks$;
     @Binding()
-    tracks: PlaylistsView['vm']['tracks'];
+    tracks!: PlaylistsView['vm']['tracks'];
 
     isLoading$ = this.vm.isLoading$;
     @Binding()
-    isLoading: PlaylistsView['vm']['isLoading'];
+    isLoading!: PlaylistsView['vm']['isLoading'];
 
     likedTracks$ = this.vm.likedTracks$;
     @Binding()
-    likedTracks: PlaylistsView['vm']['likedTracks'];
+    likedTracks!: PlaylistsView['vm']['likedTracks'];
 
     currentPlaylistId$ = this.vm.currentPlaylistId$;
     @Binding()
-    currentPlaylistId: PlaylistsView['vm']['currentPlaylistId'];
+    currentPlaylistId!: PlaylistsView['vm']['currentPlaylistId'];
 
     newPlaylistName$ = this.vm.newPlaylistName$;
     @Binding()
-    newPlaylistName: PlaylistsView['vm']['newPlaylistName'];
+    newPlaylistName!: PlaylistsView['vm']['newPlaylistName'];
 
     selectPlaylistCommand$ = this.vm.selectPlaylistCommand$;
     @Binding()
-    selectPlaylistCommand: PlaylistsView['vm']['selectPlaylistCommand'];
+    selectPlaylistCommand!: PlaylistsView['vm']['selectPlaylistCommand'];
 
     loadMoreCommand$ = this.vm.loadMoreCommand$;
     @Binding()
-    loadMoreCommand: PlaylistsView['vm']['loadMoreCommand'];
+    loadMoreCommand!: PlaylistsView['vm']['loadMoreCommand'];
 
     loadMoreTracksCommand$ = this.vm.loadMoreTracksCommand$;
     @Binding()
-    loadMoreTracksCommand: PlaylistsView['vm']['loadMoreTracksCommand'];
+    loadMoreTracksCommand!: PlaylistsView['vm']['loadMoreTracksCommand'];
 
     createPlaylistCommand$ = this.vm.createPlaylistCommand$;
     @Binding()
-    createPlaylistCommand: PlaylistsView['vm']['createPlaylistCommand'];
+    createPlaylistCommand!: PlaylistsView['vm']['createPlaylistCommand'];
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

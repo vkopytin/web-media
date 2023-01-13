@@ -18,47 +18,47 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
 
     errors$ = this.vm.errors$;
     @Binding<UserProfileView>({ didSet: (view, errors) => view.showErrors(errors) })
-    errors: UserProfileView['vm']['errors'];
+    errors!: UserProfileView['vm']['errors'];
 
     openLogin$ = this.props.openLogin$;
     @Binding()
-    openLogin: boolean;
+    openLogin!: boolean;
 
     isLoggedin$ = this.vm.isLoggedin$;
     @Binding()
-    isLoggedin: UserProfileView['vm']['isLoggedin'];
+    isLoggedin!: UserProfileView['vm']['isLoggedin'];
 
     profile$ = this.vm.profile$;
     @Binding()
-    profile: UserProfileView['vm']['profile'];
+    profile!: UserProfileView['vm']['profile'];
 
     currentTrackId$ = this.vm.currentTrackId$;
     @Binding()
-    currentTrackId: UserProfileView['vm']['currentTrackId'];
+    currentTrackId!: UserProfileView['vm']['currentTrackId'];
 
     topTracks$ = this.vm.topTracks$;
     @Binding()
-    topTracks: UserProfileView['vm']['topTracks'];
+    topTracks!: UserProfileView['vm']['topTracks'];
 
     tracks$ = this.vm.tracks$;
     @Binding()
-    tracks: UserProfileView['vm']['tracks'];
+    tracks!: UserProfileView['vm']['tracks'];
 
     spotifyAuthUrl$ = this.vm.spotifyAuthUrl$;
     @Binding()
-    spotifyAuthUrl: UserProfileView['vm']['spotifyAuthUrl'];
+    spotifyAuthUrl!: UserProfileView['vm']['spotifyAuthUrl'];
 
     geniusAuthUrl$ = this.vm.geniusAuthUrl$;
     @Binding()
-    geniusAuthUrl: UserProfileView['vm']['geniusAuthUrl'];
+    geniusAuthUrl!: UserProfileView['vm']['geniusAuthUrl'];
 
     apiseedsKey$ = this.vm.apiseedsKey$;
     @Binding()
-    apiseedsKey: UserProfileView['vm']['apiseedsKey'];
+    apiseedsKey!: UserProfileView['vm']['apiseedsKey'];
 
     logoutCommand$ = this.vm.logoutCommand$;
     @Binding()
-    logoutCommand: UserProfileView['vm']['logoutCommand'];
+    logoutCommand!: UserProfileView['vm']['logoutCommand'];
 
     doLogout = false;
 

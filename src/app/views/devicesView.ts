@@ -15,23 +15,23 @@ class DevicesView extends React.Component<IDevicesViewProps> {
 
     errors$ = this.vm.errors$;
     @Binding<DevicesView>({ didSet: (view, errors) => view.showErrors(errors) })
-    errors: DevicesView['vm']['errors'];
+    errors!: DevicesView['vm']['errors'];
 
     switchDeviceCommand$ = this.vm.switchDeviceCommand$;
     @Binding()
-    switchDeviceCommand: DevicesView['vm']['switchDeviceCommand'];
+    switchDeviceCommand!: DevicesView['vm']['switchDeviceCommand'];
 
     devices$ = this.vm.devices$;
     @Binding()
-    devices: DevicesView['vm']['devices'];
+    devices!: DevicesView['vm']['devices'];
 
     currentDevice$ = this.vm.currentDevice$;
     @Binding()
-    currentDevice: DevicesView['vm']['currentDevice'];
+    currentDevice!: DevicesView['vm']['currentDevice'];
 
     refreshDevicesCommand$ = this.vm.refreshDevicesCommand$;
     @Binding()
-    refreshDevicesCommand: DevicesView['vm']['refreshDevicesCommand'];
+    refreshDevicesCommand!: DevicesView['vm']['refreshDevicesCommand'];
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

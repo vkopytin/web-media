@@ -12,7 +12,7 @@
         "allowUnreachableCode": true,
         "baseUrl": "static/js",
         "importHelpers": true,
-        "strict": false
+        "strict": true
     },
     //    "include": [ "**/*.ts" ],
     "exclude": [

@@ -12,7 +12,7 @@ export function formatTime(ms: number) {
 const instances = new WeakMap();
 
 export function current<T extends {}, O extends {}>(
-    ctor: { new(...args: unknown[]): T },
+    ctor: { new(...args: any[]): T },
     options?: O
 ): T {
     if (instances.has(ctor)) {
@@ -32,7 +32,7 @@ export function asyncQueue(concurrency = 1) {
         const done = () => {
             running--;
             if (taskQueue.length > 0) {
-                runTask(taskQueue.shift());
+                runTask(taskQueue.shift() as (a: () => void) => void);
             }
         };
         running++;
@@ -110,7 +110,7 @@ async function* asAsyncOf(context: unknown, fn: Function, ...args: unknown[]) {
             next(result);
         }]);
     } catch (ex) {
-        fail(ex);
+        fail(ex as Error);
     }
     while (true) {
         const promise = started ? new Promise((resolve, error) => {
@@ -133,9 +133,9 @@ async function* asAsyncOf(context: unknown, fn: Function, ...args: unknown[]) {
 }
 
 export function debounce<T extends Function>(func: T, wait = 0, cancelObj = 'canceled') {
-    let timerId: number, latestResolve: {}, shouldCancel: boolean;
+    let timerId: number | null, latestResolve: {} | null, shouldCancel: boolean;
     let allArgs = [] as unknown[];
-    return function (...args: unknown[]) {
+    return function (this: unknown, ...args: unknown[]) {
         allArgs = [...allArgs, ...args];
         if (!latestResolve) {
             return new Promise((resolve, reject) => {
@@ -151,7 +151,7 @@ export function debounce<T extends Function>(func: T, wait = 0, cancelObj = 'can
         });
     }
 
-    async function invoke(args: unknown[], resolve: (a: unknown) => void, reject: (a: unknown) => void) {
+    async function invoke(this: unknown, args: unknown[], resolve: (a: unknown) => void, reject: (a: unknown) => void) {
         if (shouldCancel && resolve !== latestResolve) {
             resolve(cancelObj)
         } else {
@@ -163,22 +163,22 @@ export function debounce<T extends Function>(func: T, wait = 0, cancelObj = 'can
                 reject(ex);
             }
             shouldCancel = false;
-            clearTimeout(timerId);
+            clearTimeout(timerId as number);
             timerId = latestResolve = null;
         }
     }
 }
 
-export function isLoading<T extends { isLoading: boolean; }>(target: T, key: string, descriptor: PropertyDescriptor) {
+export function isLoading<T extends { isLoading: boolean; }>(target: T, key: string, descriptor?: PropertyDescriptor) {
     // save a reference to the original method this way we keep the values currently in the
     // descriptor and don't overwrite what another decorator might have done to the descriptor.
     if (descriptor === undefined) {
         descriptor = Object.getOwnPropertyDescriptor(target, key);
     }
-    const originalMethod = descriptor.value;
+    const originalMethod = descriptor?.value;
 
     //editing the descriptor/value parameter
-    descriptor.value = async function (this: T, ...args: unknown[]) {
+    const value = async function (this: T, ...args: unknown[]) {
         try {
             this.isLoading = true;
             return await originalMethod.apply(this, args);
@@ -188,12 +188,15 @@ export function isLoading<T extends { isLoading: boolean; }>(target: T, key: str
     };
 
     // return edited descriptor as opposed to overwriting the descriptor
-    return descriptor;
+    return {
+        ...descriptor,
+        value,
+    };
 }
 
 interface INotification {
     value: unknown;
-    state: unknown;
+    state: {};
 }
 
 interface ISignals {
@@ -208,8 +211,8 @@ export const Notifications = (function () {
     return {
         state,
         observe(obj: unknown, callback: Function) {
-            const dict = obj as { [key: string]: unknown };
-            Object.keys(obj).forEach(key => {
+            const dict = obj as { [key: string]: {} };
+            Object.keys(dict).forEach(key => {
                 const traits = GetTraits<ISignals>(dict[key], false);
                 if (!traits) {
                     return;
@@ -219,8 +222,8 @@ export const Notifications = (function () {
             });
         },
         stopObserving(obj: unknown, callback: Function) {
-            const dict = obj as { [key: string]: unknown };
-            Object.keys(obj).forEach(key => {
+            const dict = obj as { [key: string]: {} };
+            Object.keys(dict).forEach(key => {
                 const traits = GetTraits<ISignals>(dict[key], false);
                 if (!traits) {
                     return;
@@ -247,19 +250,19 @@ export const Notifications = (function () {
                 });
             });
         },
-        attach(state: unknown, obj: unknown) {
+        attach(state: {}, obj: unknown) {
             const { observers } = GetTraits<ISignals>(state, false);
             observers.push(obj);
         },
-        detach(state: unknown, obj: unknown) {
+        detach(state: {}, obj: unknown) {
             const observers = GetTraits<ISignals>(state, false).observers.filter(o => o !== obj);
             GetTraits<ISignals>(state).observers = observers;
         },
-        subscribe(state: unknown, view: unknown, callback: Function) {
+        subscribe(state: {}, view: unknown, callback: Function) {
             const { callbacks } = GetTraits<ISignals>(state, false);
             callbacks.push([view, callback]);
         },
-        unsubscribe(state: unknown, view: unknown, callback: Function) {
+        unsubscribe(state: {}, view: unknown, callback: Function) {
             const callbacks = GetTraits<ISignals>(state).callbacks.filter(([a, b]) => a !== view && callback !== b);
             GetTraits<ISignals>(state, false).callbacks = callbacks;
         },
@@ -276,7 +279,7 @@ export const GetTraits = <T extends {}>(obj: {}, autoCreate = true) => {
 }
 
 export function State<T>(target: T, propName: string, descriptor?: PropertyDescriptor) {
-    function initState(v?: unknown) {
+    function initState(this: any, v?: unknown) {
         let state = new BehaviorSubject<unknown>(null);
         Notifications.declare(state, propName);
 
@@ -310,7 +313,7 @@ export function State<T>(target: T, propName: string, descriptor?: PropertyDescr
 export function Binding<T>({ didSet }: { didSet?: (this: T, view: T, val: T[keyof T]) => void } = {}) {
     return function (target: T, propName: string, descriptor?: PropertyDescriptor): any {
         const desc$ = Object.getOwnPropertyDescriptor(target, `${String(propName)}$`);
-        function initBinding(store$: BehaviorSubject<unknown>) {
+        function initBinding(this: T, store$: BehaviorSubject<unknown>) {
             let state = store$;
             const didSetCb = didSet && ((value: T[keyof T]) => {
                 didSet.call(this, this, value);
@@ -349,14 +352,14 @@ export function Binding<T>({ didSet }: { didSet?: (this: T, view: T, val: T[keyo
         Object.defineProperty(target, `${propName}$`, storeOpts);
 
         const opts = {
-            get() {
-                const val = this[`${propName}$`].getValue();
+            get(this: T): T[keyof T] {
+                const val = (this[`${propName}$` as keyof T] as BehaviorSubject<unknown>).getValue() as any;
                 descriptor?.get?.();
                 return val;
             },
-            set(val: T[keyof T]) {
-                if (this[propName] !== val) {
-                    this[`${propName}$`].next(val);
+            set(this: T, val: T[keyof T]) {
+                if (this[propName as keyof T] !== val) {
+                    (this[`${propName}$` as keyof T] as BehaviorSubject<unknown>).next(val);
                     descriptor?.set?.(val);
                 }
             },

@@ -9,23 +9,23 @@ import { Scheduler } from '../utils/scheduler';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 class MyTracksViewModel {
-    errors$: BehaviorSubject<MyTracksViewModel['errors']>;
+    errors$!: BehaviorSubject<MyTracksViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    tracks$: BehaviorSubject<MyTracksViewModel['tracks']>;
+    tracks$!: BehaviorSubject<MyTracksViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
 
-    likedTracks$: BehaviorSubject<MyTracksViewModel['likedTracks']>;
+    likedTracks$!: BehaviorSubject<MyTracksViewModel['likedTracks']>;
     @State likedTracks = [] as TrackViewModelItem[];
 
-    isLoading$: BehaviorSubject<MyTracksViewModel['isLoading']>;
+    isLoading$!: BehaviorSubject<MyTracksViewModel['isLoading']>;
     @State isLoading = false;
 
-    selectedItem$: BehaviorSubject<MyTracksViewModel['selectedItem']>;
-    @State selectedItem = null as TrackViewModelItem;
+    selectedItem$!: BehaviorSubject<MyTracksViewModel['selectedItem']>;
+    @State selectedItem: TrackViewModelItem | null = null;
 
-    trackLyrics$: BehaviorSubject<MyTracksViewModel['trackLyrics']>;
-    @State trackLyrics = null as { trackId: string; lyrics: string };
+    trackLyrics$!: BehaviorSubject<MyTracksViewModel['trackLyrics']>;
+    @State trackLyrics: { trackId: string; lyrics: string } | null = null;
 
     settings = {
         total: 0,
@@ -33,9 +33,9 @@ class MyTracksViewModel {
         offset: 0
     };
 
-    loadMoreCommand$: BehaviorSubject<MyTracksViewModel['loadMoreCommand']>;
+    loadMoreCommand$!: BehaviorSubject<MyTracksViewModel['loadMoreCommand']>;
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
-    findTrackLyricsCommand$: BehaviorSubject<MyTracksViewModel['findTrackLyricsCommand']>;
+    findTrackLyricsCommand$!: BehaviorSubject<MyTracksViewModel['findTrackLyricsCommand']>;
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
@@ -126,7 +126,8 @@ class MyTracksViewModel {
 
     async findTrackLyrics(track: TrackViewModelItem): Promise<void> {
         if (this.trackLyrics && this.trackLyrics.trackId === track.id()) {
-            return this.trackLyrics = null;
+            this.trackLyrics = null;
+            return;
         }
         const lyricsResult = await this.ss.findTrackLyrics({
             name: track.name(),

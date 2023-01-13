@@ -9,7 +9,7 @@ export class Scheduler {
     tasks: ITask[] = [];
     inProgress: ITask[] = [];
 
-    static inst: Scheduler = null;
+    static inst: Scheduler | null = null;
 
     static getCurrent(): Scheduler {
         if (Scheduler.inst === null) {
@@ -18,7 +18,7 @@ export class Scheduler {
         return Scheduler.inst;
     }
 
-    static Command(fn: (...args: unknown[]) => any) {
+    static Command<T extends Function>(fn: T) {
         const current = Scheduler.getCurrent();
 
         return {
@@ -53,7 +53,7 @@ export class Scheduler {
         const done = async () => {
             this.running--;
             if (this.tasks.length > 0) {
-                await this.run(this.tasks.shift());
+                await this.run(this.tasks.shift() as ITask);
             }
         };
         this.running++;

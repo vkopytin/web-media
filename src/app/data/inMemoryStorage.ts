@@ -9,17 +9,17 @@ class InMemoryStorage implements IStorage {
     constructor(public connection: string) {
     }
 
-    initializeStructure(cb: { (err?: Error, res?: boolean): void }) {
+    initializeStructure(cb: { (err?: Error | null, res?: boolean): void }): void {
         cb(null, true);
     }
 
-    hasTable(config: IStorageConfig, cb: { (err: Error, res?: boolean): void }) {
+    hasTable(config: IStorageConfig, cb: { (err?: Error | null, res?: boolean): void }) {
         const tableName = config.name;
 
         cb(null, tableName in this.db);
     }
 
-    createTable(config: IStorageConfig, cb: { (err: Error, res?: boolean): void }) {
+    createTable(config: IStorageConfig, cb: { (err: Error | null, res?: boolean): void }) {
         const tableName = config.name;
         try {
             if (!this.db[tableName]) {
@@ -28,11 +28,11 @@ class InMemoryStorage implements IStorage {
 
             cb(null, true);
         } catch (ex) {
-            cb(ex);
+            cb(ex as Error);
         }
     }
 
-    create(config: IStorageConfig, data: { id: string; }, cb: { (err: Error, res?: unknown): void }) {
+    create(config: IStorageConfig, data: { id: string; }, cb: { (err: Error | null, res?: unknown): void }) {
         const tableName = config.name;
         try {
             if (data.id in this.db[tableName]) {
@@ -42,11 +42,11 @@ class InMemoryStorage implements IStorage {
 
             cb(null, data.id);
         } catch (ex) {
-            cb(ex);
+            cb(ex as Error);
         }
     }
 
-    update<T>(config: IStorageConfig, id: string, data: { id: string }, cb: { (err: Error, res?: T): void }) {
+    update<T>(config: IStorageConfig, id: string, data: { id: string }, cb: { (err: Error | null, res?: T): void }) {
         const tableName = config.name;
         try {
             const item = this.db[tableName][id];
@@ -61,36 +61,36 @@ class InMemoryStorage implements IStorage {
 
             cb(null, data.id as unknown as T);
         } catch (ex) {
-            cb(ex, null);
+            cb(ex as Error);
         }
 
         return true;
     }
 
-    delete(config: IStorageConfig, id: string, cb: { (err: Error, result?: boolean): void }) {
+    delete(config: IStorageConfig, id: string, cb: { (err: Error | null, result?: boolean): void }) {
         const tableName = config.name;
         try {
             delete this.db[tableName][id];
             cb(null, true);
         } catch (ex) {
-            cb(ex);
+            cb(ex as Error);
         }
     }
 
-    getById<T>(config: IStorageConfig, id: string, cb: { (err: Error, res?: T): void }) {
+    getById<T>(config: IStorageConfig, id: string, cb: { (err: Error | null, res?: T): void }) {
         const tableName = config.name;
         try {
             cb(null, (this.db[tableName][id] || undefined) as T);
         } catch (ex) {
-            cb(ex);
+            cb(ex as Error);
         }
     }
 
-    where<T>(config: IStorageConfig, where: { [key: string]: any }, cb: { (err?: Error, result?: T): boolean }) {
+    where<T>(config: IStorageConfig, where: { [key: string]: any }, cb: { (err?: Error | null, result?: T): boolean }) {
 
     }
 
-    each<T>(config: IStorageConfig, cb: { (err?: Error, record?: T, index?: number): boolean }) {
+    each<T>(config: IStorageConfig, cb: { (err?: Error | null, record?: T, index?: number): boolean }) {
         const tableName = config.name;
         let index = 0;
         for (const key in this.db[tableName]) {
@@ -101,7 +101,7 @@ class InMemoryStorage implements IStorage {
                         return;
                     }
                 } catch (ex) {
-                    cb(ex, null);
+                    cb(ex as Error);
                 }
             }
         }
@@ -111,7 +111,7 @@ class InMemoryStorage implements IStorage {
         return true;
     }
 
-    getCount(config: IStorageConfig, cb: { (err: Error, res?: number): void }) {
+    getCount(config: IStorageConfig, cb: { (err: Error | null, res?: number): void }) {
         const tableName = config.name;
         try {
             let count = 0;
@@ -123,7 +123,7 @@ class InMemoryStorage implements IStorage {
 
             cb(null, count);
         } catch (ex) {
-            cb(ex);
+            cb(ex as Error);
         }
     }
 

@@ -16,95 +16,95 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
 
     errors$ = this.vm.errors$;
     @Binding<MediaPlayerView>({ didSet: (view, errors) => view.showErrors(errors) })
-    errors: MediaPlayerView['vm']['errors'];
+    errors!: MediaPlayerView['vm']['errors'];
 
     currentTrackId$ = this.vm.currentTrackId$;
     @Binding()
-    currentTrackId: MediaPlayerView['vm']['currentTrackId'];
+    currentTrackId!: MediaPlayerView['vm']['currentTrackId'];
 
     queue$ = this.vm.queue$;
     @Binding()
-    queue: MediaPlayerView['vm']['queue'];
+    queue!: MediaPlayerView['vm']['queue'];
 
     timePlayed$ = this.vm.timePlayed$;
     @Binding()
-    timePlayed: MediaPlayerView['vm']['timePlayed'];
+    timePlayed!: MediaPlayerView['vm']['timePlayed'];
 
     duration$ = this.vm.duration$;
     @Binding()
-    duration: MediaPlayerView['vm']['duration'];
+    duration!: MediaPlayerView['vm']['duration'];
 
     isPlaying$ = this.vm.isPlaying$;
     @Binding()
-    isPlaying: MediaPlayerView['vm']['isPlaying'];
+    isPlaying!: MediaPlayerView['vm']['isPlaying'];
 
     trackName$ = this.vm.trackName$;
     @Binding()
-    trackName: MediaPlayerView['vm']['trackName'];
+    trackName!: MediaPlayerView['vm']['trackName'];
 
     albumName$ = this.vm.albumName$;
     @Binding()
-    albumName: MediaPlayerView['vm']['albumName'];
+    albumName!: MediaPlayerView['vm']['albumName'];
 
     artistName$ = this.vm.artistName$;
     @Binding()
-    artistName: MediaPlayerView['vm']['artistName'];
+    artistName!: MediaPlayerView['vm']['artistName'];
 
     volume$ = this.vm.volume$;
     @Binding()
-    volume: MediaPlayerView['vm']['volume'];
+    volume!: MediaPlayerView['vm']['volume'];
 
     thumbnailUrl$ = this.vm.thumbnailUrl$;
     @Binding()
-    thumbnailUrl: MediaPlayerView['vm']['thumbnailUrl'];
+    thumbnailUrl!: MediaPlayerView['vm']['thumbnailUrl'];
 
     isLiked$ = this.vm.isLiked$;
     @Binding()
-    isLiked: MediaPlayerView['vm']['isLiked'];
+    isLiked!: MediaPlayerView['vm']['isLiked'];
 
     resumeCommand$ = this.vm.resumeCommand$;
     @Binding()
-    resumeCommand: MediaPlayerView['vm']['resumeCommand'];
+    resumeCommand!: MediaPlayerView['vm']['resumeCommand'];
 
     pauseCommand$ = this.vm.pauseCommand$;
     @Binding()
-    pauseCommand: MediaPlayerView['vm']['pauseCommand'];
+    pauseCommand!: MediaPlayerView['vm']['pauseCommand'];
 
     prevCommand$ = this.vm.prevCommand$;
     @Binding()
-    prevCommand: MediaPlayerView['vm']['prevCommand'];
+    prevCommand!: MediaPlayerView['vm']['prevCommand'];
 
     nextCommand$ = this.vm.nextCommand$;
     @Binding()
-    nextCommand: MediaPlayerView['vm']['nextCommand'];
+    nextCommand!: MediaPlayerView['vm']['nextCommand'];
 
     volumeUpCommand$ = this.vm.volumeUpCommand$;
     @Binding()
-    volumeUpCommand: MediaPlayerView['vm']['volumeUpCommand'];
+    volumeUpCommand!: MediaPlayerView['vm']['volumeUpCommand'];
 
     volumeDownCommand$ = this.vm.volumeDownCommand$;
     @Binding()
-    volumeDownCommand: MediaPlayerView['vm']['volumeDownCommand'];
+    volumeDownCommand!: MediaPlayerView['vm']['volumeDownCommand'];
 
     refreshPlaybackCommand$ = this.vm.refreshPlaybackCommand$;
     @Binding()
-    refreshPlaybackCommand: MediaPlayerView['vm']['refreshPlaybackCommand'];
+    refreshPlaybackCommand!: MediaPlayerView['vm']['refreshPlaybackCommand'];
 
     likeSongCommand$ = this.vm.likeSongCommand$;
     @Binding()
-    likeSongCommand: MediaPlayerView['vm']['likeSongCommand'];
+    likeSongCommand!: MediaPlayerView['vm']['likeSongCommand'];
 
     unlikeSongCommand$ = this.vm.unlikeSongCommand$;
     @Binding()
-    unlikeSongCommand: MediaPlayerView['vm']['unlikeSongCommand'];
+    unlikeSongCommand!: MediaPlayerView['vm']['unlikeSongCommand'];
 
     seekPlaybackCommand$ = this.vm.seekPlaybackCommand$;
     @Binding()
-    seekPlaybackCommand: MediaPlayerView['vm']['seekPlaybackCommand'];
+    seekPlaybackCommand!: MediaPlayerView['vm']['seekPlaybackCommand'];
 
     volumeCommand$ = this.vm.volumeCommand$;
     @Binding()
-    volumeCommand: MediaPlayerView['vm']['volumeCommand'];
+    volumeCommand!: MediaPlayerView['vm']['volumeCommand'];
 
     constructor(props: IMediaPlayerViewProps) {
         super(props);

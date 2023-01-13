@@ -13,15 +13,15 @@ import { BannedTracksStore } from '../entities/bannedTracksStore';
 export function initializeStructure() {
     return asAsync(() => { }, cb => {
         DataStorage.create((err, storage) => {
-            const recordsStore = new RecordsStore(storage);
-            const tracksStore = new TracksStore(storage);
-            const playlistsStore = new PlaylistsStore(storage);
-            const albumsStore = new AlbumsStore(storage);
-            const artistsStore = new ArtistsStore(storage);
-            const imagesStore = new ImagesStore(storage);
-            const playlistRows = new PlaylistRowsStore(storage);
-            const bannedTracksStore = new BannedTracksStore(storage);
-            storage.initializeStructure(async (err, isInitializing) => {
+            const recordsStore = new RecordsStore(storage!);
+            const tracksStore = new TracksStore(storage!);
+            const playlistsStore = new PlaylistsStore(storage!);
+            const albumsStore = new AlbumsStore(storage!);
+            const artistsStore = new ArtistsStore(storage!);
+            const imagesStore = new ImagesStore(storage!);
+            const playlistRows = new PlaylistRowsStore(storage!);
+            const bannedTracksStore = new BannedTracksStore(storage!);
+            storage!.initializeStructure(async (err, isInitializing) => {
                 try {
                     if (!isInitializing) {
 

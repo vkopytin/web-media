@@ -10,34 +10,34 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 class PlaylistsViewModel {
-    errors$: BehaviorSubject<PlaylistsViewModel['errors']>;
+    errors$!: BehaviorSubject<PlaylistsViewModel['errors']>;
     @State errors = [] as ServiceResult<unknown, Error>[];
 
-    playlists$: BehaviorSubject<PlaylistsViewModel['playlists']>;
+    playlists$!: BehaviorSubject<PlaylistsViewModel['playlists']>;
     @State playlists = [] as PlaylistsViewModelItem[];
 
-    tracks$: BehaviorSubject<PlaylistsViewModel['tracks']>;
+    tracks$!: BehaviorSubject<PlaylistsViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
 
-    isLoading$: BehaviorSubject<PlaylistsViewModel['isLoading']>;
+    isLoading$!: BehaviorSubject<PlaylistsViewModel['isLoading']>;
     @State isLoading = false;
 
-    likedTracks$: BehaviorSubject<PlaylistsViewModel['likedTracks']>;
+    likedTracks$!: BehaviorSubject<PlaylistsViewModel['likedTracks']>;
     @State likedTracks = [] as TrackViewModelItem[];
 
-    currentPlaylistId$: BehaviorSubject<PlaylistsViewModel['currentPlaylistId']>;
+    currentPlaylistId$!: BehaviorSubject<PlaylistsViewModel['currentPlaylistId']>;
     @State currentPlaylistId = '';
 
-    newPlaylistName$: BehaviorSubject<PlaylistsViewModel['newPlaylistName']>;
+    newPlaylistName$!: BehaviorSubject<PlaylistsViewModel['newPlaylistName']>;
     @State newPlaylistName = '';
 
-    selectedItem$: BehaviorSubject<PlaylistsViewModel['selectedItem']>;
-    @State selectedItem = null as TrackViewModelItem;
+    selectedItem$!: BehaviorSubject<PlaylistsViewModel['selectedItem']>;
+    @State selectedItem: TrackViewModelItem | null = null;
 
-    trackLyrics$: BehaviorSubject<PlaylistsViewModel['trackLyrics']>;
-    @State trackLyrics = null as { trackId: string; lyrics: string };
+    trackLyrics$!: BehaviorSubject<PlaylistsViewModel['trackLyrics']>;
+    @State trackLyrics: { trackId: string; lyrics: string } | null = null;
 
-    bannedTrackIds$: BehaviorSubject<PlaylistsViewModel['bannedTrackIds']>;
+    bannedTrackIds$!: BehaviorSubject<PlaylistsViewModel['bannedTrackIds']>;
     @State bannedTrackIds = [] as string[];
 
     settings = {
@@ -59,29 +59,29 @@ class PlaylistsViewModel {
         newPlaylistName: '',
     };
 
-    selectPlaylistCommand$: BehaviorSubject<PlaylistsViewModel['selectPlaylistCommand']>;
+    selectPlaylistCommand$!: BehaviorSubject<PlaylistsViewModel['selectPlaylistCommand']>;
     @State selectPlaylistCommand = Scheduler.Command((playlistId: string) => {
         this.currentPlaylistId = playlistId;
         this.fetchTracks();
     });
-    loadMoreCommand$: BehaviorSubject<PlaylistsViewModel['loadMoreCommand']>;
+    loadMoreCommand$!: BehaviorSubject<PlaylistsViewModel['loadMoreCommand']>;
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
-    loadMoreTracksCommand$: BehaviorSubject<PlaylistsViewModel['loadMoreTracksCommand']>;
+    loadMoreTracksCommand$!: BehaviorSubject<PlaylistsViewModel['loadMoreTracksCommand']>;
     @State loadMoreTracksCommand = Scheduler.Command(() => this.loadMoreTracks());
-    createPlaylistCommand$: BehaviorSubject<PlaylistsViewModel['createPlaylistCommand']>;
+    createPlaylistCommand$!: BehaviorSubject<PlaylistsViewModel['createPlaylistCommand']>;
     @State createPlaylistCommand = Scheduler.Command((isPublic: boolean) => this.createNewPlaylist(isPublic));
-    likeTrackCommand$: BehaviorSubject<PlaylistsViewModel['likeTrackCommand']>;
+    likeTrackCommand$!: BehaviorSubject<PlaylistsViewModel['likeTrackCommand']>;
     @State likeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.likeTrack(track));
-    unlikeTrackCommand$: BehaviorSubject<PlaylistsViewModel['unlikeTrackCommand']>;
+    unlikeTrackCommand$!: BehaviorSubject<PlaylistsViewModel['unlikeTrackCommand']>;
     @State unlikeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.unlikeTrack(track));
-    findTrackLyricsCommand$: BehaviorSubject<PlaylistsViewModel['findTrackLyricsCommand']>;
+    findTrackLyricsCommand$!: BehaviorSubject<PlaylistsViewModel['findTrackLyricsCommand']>;
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
-    reorderTrackCommand$: BehaviorSubject<PlaylistsViewModel['reorderTrackCommand']>;
+    reorderTrackCommand$!: BehaviorSubject<PlaylistsViewModel['reorderTrackCommand']>;
     @State reorderTrackCommand = Scheduler.Command((track: TrackViewModelItem, beforeTrack: TrackViewModelItem) => this.reorderTrack(track, beforeTrack));
 
-    bannTrackCommand$: BehaviorSubject<PlaylistsViewModel['bannTrackCommand']>;
+    bannTrackCommand$!: BehaviorSubject<PlaylistsViewModel['bannTrackCommand']>;
     @State bannTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.bannTrack(track));
-    removeBannFromTrackCommand$: BehaviorSubject<PlaylistsViewModel['removeBannFromTrackCommand']>;
+    removeBannFromTrackCommand$!: BehaviorSubject<PlaylistsViewModel['removeBannFromTrackCommand']>;
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
@@ -185,8 +185,14 @@ class PlaylistsViewModel {
             return;
         }
         const meResult = await this.ss.profile();
-        const spotifyResult = await meResult.cata(me => this.ss.createNewPlaylist(
-            me.id,
+        const meId = meResult.map(me => {
+            if (me.id) {
+                return me.id;
+            }
+            throw new Error('My profile Id is empty');
+        });
+        const spotifyResult = await meId.cata(id => this.ss.createNewPlaylist(
+            id,
             this.newPlaylistName,
             '',
             isPublic
@@ -206,7 +212,8 @@ class PlaylistsViewModel {
 
     async findTrackLyrics(track: TrackViewModelItem): Promise<void> {
         if (this.trackLyrics && this.trackLyrics.trackId === track.id()) {
-            return this.trackLyrics = null;
+            this.trackLyrics = null;
+            return;
         }
         const lyricsResult = await this.ss.findTrackLyrics({
             name: track.name(),
@@ -240,7 +247,7 @@ class PlaylistsViewModel {
         } else if (oldPosition > newPosition) {
             res = await this.ss.reorderTrack(this.currentPlaylistId, oldPosition, newPosition);
         }
-        res.assert(e => this.errors = [e]);
+        res?.assert(e => this.errors = [e]);
     }
 
     @isLoading

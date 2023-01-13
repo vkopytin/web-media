@@ -16,15 +16,15 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
 
     errors$ = this.vm.errors$;
     @Binding<PickPlaylistsView>({ didSet: (view, errors) => view.showErrors(errors) })
-    errors: PickPlaylistsView['vm']['errors'];
+    errors!: PickPlaylistsView['vm']['errors'];
 
     playlists$ = this.vm.playlists$;
     @Binding()
-    playlists: PickPlaylistsView['vm']['playlists'];
+    playlists!: PickPlaylistsView['vm']['playlists'];
 
     selectedPlaylist$ = this.homeVm.selectedPlaylist$;
     @Binding()
-    selectedPlaylist: PickPlaylistsView['homeVm']['selectedPlaylist'];
+    selectedPlaylist!: PickPlaylistsView['homeVm']['selectedPlaylist'];
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

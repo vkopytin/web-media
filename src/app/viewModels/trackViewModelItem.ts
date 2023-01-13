@@ -14,31 +14,31 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 class TrackViewModelItem {
     mediaPlayerViewModel = current(MediaPlayerViewModel);
 
-    errors$: BehaviorSubject<TrackViewModelItem['errors']>;
+    errors$!: BehaviorSubject<TrackViewModelItem['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    isLiked$: BehaviorSubject<TrackViewModelItem['isLiked']>;
+    isLiked$!: BehaviorSubject<TrackViewModelItem['isLiked']>;
     @State isLiked = false;
 
-    isCached$: BehaviorSubject<TrackViewModelItem['isCached']>;
+    isCached$!: BehaviorSubject<TrackViewModelItem['isCached']>;
     @State isCached = false;
 
-    trackPlaylists$: BehaviorSubject<TrackViewModelItem['trackPlaylists']>;
+    trackPlaylists$!: BehaviorSubject<TrackViewModelItem['trackPlaylists']>;
     @State trackPlaylists = [] as PlaylistsViewModelItem[];
 
-    isBanned$: BehaviorSubject<TrackViewModelItem['isBanned']>;
+    isBanned$!: BehaviorSubject<TrackViewModelItem['isBanned']>;
     @State isBanned = false;
 
-    isLoading$: BehaviorSubject<PlaylistsViewModel['isLoading']>;
+    isLoading$!: BehaviorSubject<PlaylistsViewModel['isLoading']>;
     @State isLoading = false;
 
-    addToPlaylistCommand$: BehaviorSubject<TrackViewModelItem['addToPlaylistCommand']>;
+    addToPlaylistCommand$!: BehaviorSubject<TrackViewModelItem['addToPlaylistCommand']>;
     @State addToPlaylistCommand = Scheduler.Command((track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.addToPlaylist(track, playlist));
 
-    removeFromPlaylistCommand$: BehaviorSubject<TrackViewModelItem['removeFromPlaylistCommand']>;
+    removeFromPlaylistCommand$!: BehaviorSubject<TrackViewModelItem['removeFromPlaylistCommand']>;
     @State removeFromPlaylistCommand = Scheduler.Command((track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist));
 
-    playTracksCommand$: BehaviorSubject<TrackViewModelItem['playTracksCommand']>;
+    playTracksCommand$!: BehaviorSubject<TrackViewModelItem['playTracksCommand']>;
     @State playTracksCommand = Scheduler.Command((tracks: TrackViewModelItem[]) => this.playTracks(tracks));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
@@ -98,7 +98,7 @@ class TrackViewModelItem {
             return 0;
         }
 
-        return formatTime(this.song.track.duration_ms);
+        return formatTime(this.song.track?.duration_ms || 0);
     }
 
     uri() {
@@ -136,13 +136,13 @@ class TrackViewModelItem {
     }
 
     async play(playlistUri: string) {
-        const playResult = await this.ss.play(null, playlistUri, this.uri());
+        const playResult = await this.ss.play('', playlistUri, this.uri());
         playResult.assert(e => this.errors = [e]).map(() => this.mediaPlayerViewModel.fetchDataInternal());
     }
 
     async playTracks(tracks: TrackViewModelItem[]) {
         const allowedTracks = _.filter(tracks, track => !track.isBanned);
-        const playResult = await this.ss.play(null, _.map(allowedTracks, item => item.uri()), this.uri());
+        const playResult = await this.ss.play('', _.map(allowedTracks, item => item.uri()), this.uri());
         playResult.assert(e => this.errors = [e]).map(() => this.mediaPlayerViewModel.fetchDataInternal());
     }
 

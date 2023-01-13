@@ -12,13 +12,13 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 class ArtistViewModelItem {
     appViewModel = current(AppViewModel);
 
-    errors$: BehaviorSubject<ArtistViewModelItem['errors']>;
+    errors$!: BehaviorSubject<ArtistViewModelItem['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    playlists$: BehaviorSubject<ArtistViewModelItem['playlists']>;
+    playlists$!: BehaviorSubject<ArtistViewModelItem['playlists']>;
     @State playlists = [] as PlaylistsViewModelItem[];
 
-    isLiked$: BehaviorSubject<ArtistViewModelItem['playlists']>;
+    isLiked$!: BehaviorSubject<ArtistViewModelItem['playlists']>;
     @State isLiked = false;
 
     isInit = _.delay(() => {

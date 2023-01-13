@@ -11,31 +11,31 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class UserProfileViewModel {
-    errors$: BehaviorSubject<UserProfileViewModel['errors']>;
+    errors$!: BehaviorSubject<UserProfileViewModel['errors']>;
     @State errors = [] as ServiceResult<{}, Error>[];
 
-    isLoggedin$: BehaviorSubject<boolean>;
+    isLoggedin$!: BehaviorSubject<boolean>;
     @State isLoggedin = false;
 
-    profile$: BehaviorSubject<UserProfileViewModel['profile']>;
+    profile$!: BehaviorSubject<UserProfileViewModel['profile']>;
     @State profile: IUserInfo = {};
 
-    topTracks$: BehaviorSubject<UserProfileViewModel['topTracks']>;
+    topTracks$!: BehaviorSubject<UserProfileViewModel['topTracks']>;
     @State topTracks = [] as TrackViewModelItem[];
 
-    tracks$: BehaviorSubject<UserProfileViewModel['tracks']>;
+    tracks$!: BehaviorSubject<UserProfileViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
 
-    spotifyAuthUrl$: BehaviorSubject<UserProfileViewModel['spotifyAuthUrl']>;
+    spotifyAuthUrl$!: BehaviorSubject<UserProfileViewModel['spotifyAuthUrl']>;
     @State spotifyAuthUrl = '';
 
-    geniusAuthUrl$: BehaviorSubject<UserProfileViewModel['geniusAuthUrl']>;
+    geniusAuthUrl$!: BehaviorSubject<UserProfileViewModel['geniusAuthUrl']>;
     @State geniusAuthUrl = '';
 
-    apiseedsKey$: BehaviorSubject<UserProfileViewModel['apiseedsKey']>;
+    apiseedsKey$!: BehaviorSubject<UserProfileViewModel['apiseedsKey']>;
     @State apiseedsKey = '';
 
-    logoutCommand$: BehaviorSubject<UserProfileViewModel['logoutCommand']>;
+    logoutCommand$!: BehaviorSubject<UserProfileViewModel['logoutCommand']>;
     @State logoutCommand = Scheduler.Command(() => this.logout());
 
     currentTrackId$ = this.appViewModel.currentTrackId$;

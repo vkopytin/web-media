@@ -29,7 +29,7 @@ class RecordsStore {
     }
 
     createTable() {
-        return asAsync(null, (cb: { (res?: Error, result?: boolean): void }) => {
+        return asAsync(null, (cb: { (res?: Error | null, result?: boolean): void }) => {
             this.storage.hasTable(this.storeConfig, (err, res) => {
                 if (err) {
                     return cb(err);
@@ -73,9 +73,9 @@ class RecordsStore {
     list(offset = 0, limit?: number) {
         return asAsyncOf(null, (cb: { (res?: unknown, result?: IRecord, index?: number): boolean }) => {
             this.storage.each<IRecord>(this.storeConfig, (...args) => {
-                const index = args[2];
+                const index = args[2] || 0;
                 if (index < offset) {
-                    return;
+                    return true;
                 }
                 if (limit && ((index + 1) > (offset + limit))) {
                     return cb();

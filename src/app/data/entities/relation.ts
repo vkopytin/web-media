@@ -96,15 +96,16 @@ class Relation<T extends { [key: string]: unknown }> {
 
     eachBy<K extends keyof T>(key: K, keyId: T[K]) {
         return asAsyncOf(null, (cb: { (err?: unknown, result?: T, index?: number): boolean }) => {
-            this.storage.each(this.storeConfig, (err, result: T, index) => {
+            this.storage.each(this.storeConfig, (err, result?: T, index?) => {
                 if (_.isUndefined(result)) {
                     cb();
                     return true;
                 }
-                if (result[key] === keyId) {
+                if (result && result[key] === keyId) {
                     cb(err, result, index);
-                    return;
+                    return false;
                 }
+                return true;
             });
         });
     }

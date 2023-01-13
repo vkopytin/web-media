@@ -28,7 +28,7 @@ export class PlaylistsStore {
     }
 
     createTable() {
-        return asAsync(null, (cb: { (res?: Error, result?: boolean): void }) => {
+        return asAsync(null, (cb: { (res?: Error | null, result?: boolean): void }) => {
             this.storage.hasTable(this.storeConfig, (err, res) => {
                 if (err) {
                     return cb(err);
@@ -72,9 +72,9 @@ export class PlaylistsStore {
     list(offset = 0, limit?: number) {
         return asAsyncOf(null, (cb: { (res?: unknown, result?: IPlaylist, index?: number): boolean }) => {
             this.storage.each<IPlaylist>(this.storeConfig, (...args) => {
-                const index = args[2];
+                const index = args[2] || 0;
                 if (index < offset) {
-                    return;
+                    return true;
                 }
                 if (limit && ((index + 1) > (offset + limit))) {
                     return cb();

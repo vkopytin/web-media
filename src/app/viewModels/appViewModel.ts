@@ -14,43 +14,43 @@ import { TrackViewModelItem } from './trackViewModelItem';
 type PanelType = 'home' | 'playlists' | 'profile' | 'releases' | 'search' | 'tracks';
 
 class AppViewModel {
-    openLogin$: BehaviorSubject<AppViewModel['openLogin']>;
+    openLogin$!: BehaviorSubject<AppViewModel['openLogin']>;
     @State openLogin = false;
 
-    currentPanel$: BehaviorSubject<PanelType>;
+    currentPanel$!: BehaviorSubject<PanelType>;
     @State currentPanel: PanelType = 'home';
 
-    devices$: BehaviorSubject<DeviceViewModelItem[]>;
+    devices$!: BehaviorSubject<DeviceViewModelItem[]>;
     @State devices: DeviceViewModelItem[] = [];
 
-    profile$: BehaviorSubject<IUserInfo>;
+    profile$!: BehaviorSubject<IUserInfo>;
     @State profile: IUserInfo = {};
 
-    refreshDevicesCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
+    refreshDevicesCommand$!: BehaviorSubject<{ exec: () => Promise<void> }>;
     @State refreshDevicesCommand = Scheduler.Command(() => this.updateDevices());
 
-    switchDeviceCommand$: BehaviorSubject<{ exec: (a: unknown) => Promise<void> }>;
+    switchDeviceCommand$!: BehaviorSubject<{ exec: (a: unknown) => Promise<void> }>;
     @State switchDeviceCommand = Scheduler.Command((device: DeviceViewModelItem) => this.switchDevice(device));
 
-    refreshTokenCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
+    refreshTokenCommand$!: BehaviorSubject<{ exec: () => Promise<void> }>;
     @State refreshTokenCommand = Scheduler.Command(() => this.refreshToken());
 
-    currentTrackId$: BehaviorSubject<string>;
+    currentTrackId$!: BehaviorSubject<string>;
     @State currentTrackId = '';
 
-    topTracks$: BehaviorSubject<TrackViewModelItem[]>;
+    topTracks$!: BehaviorSubject<TrackViewModelItem[]>;
     @State topTracks = [] as TrackViewModelItem[];
 
-    currentDevice$: BehaviorSubject<DeviceViewModelItem>;
-    @State currentDevice = null as DeviceViewModelItem;
+    currentDevice$!: BehaviorSubject<DeviceViewModelItem>;
+    @State currentDevice = null as (DeviceViewModelItem | null);
 
-    autoRefreshUrl$: BehaviorSubject<string>;
+    autoRefreshUrl$!: BehaviorSubject<string>;
     @State autoRefreshUrl = '';
 
-    errors$: BehaviorSubject<AppViewModel['errors']>;
+    errors$!: BehaviorSubject<AppViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    isSyncing$: BehaviorSubject<AppViewModel['isSyncing']>;
+    isSyncing$!: BehaviorSubject<AppViewModel['isSyncing']>;
     @State isSyncing = 0;
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {

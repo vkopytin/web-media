@@ -13,7 +13,7 @@ export interface ITracksViewProps {
 }
 
 function elementIndex(el: HTMLElement) {
-    const nodes = Array.prototype.slice.call(el.parentNode.childNodes);
+    const nodes = Array.prototype.slice.call(el.parentNode?.childNodes || []);
     const index = nodes.indexOf(el);
     return index + 1;
 }
@@ -34,51 +34,51 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
 
     errors$ = this.vm.errors$;
     @Binding<TracksView>({ didSet: (view, errors) => view.showErrors(errors) })
-    errors: TracksView['vm']['errors'];
+    errors!: TracksView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
     @Binding()
-    tracks: TracksView['vm']['tracks'];
+    tracks!: TracksView['vm']['tracks'];
 
     likedTracks$ = this.vm.likedTracks$;
     @Binding()
-    likedTracks: TracksView['vm']['likedTracks'];
+    likedTracks!: TracksView['vm']['likedTracks'];
 
     selectedItem$ = this.vm.selectedItem$;
     @Binding()
-    selectedItem: TracksView['vm']['selectedItem'];
+    selectedItem!: TracksView['vm']['selectedItem'];
 
     trackLyrics$ = this.vm.trackLyrics$;
     @Binding()
-    trackLyrics: TracksView['vm']['trackLyrics'];
+    trackLyrics!: TracksView['vm']['trackLyrics'];
 
     bannedTrackIds$ = this.vm.bannedTrackIds$;
     @Binding()
-    bannedTrackIds: TracksView['vm']['bannedTrackIds'];
+    bannedTrackIds!: TracksView['vm']['bannedTrackIds'];
 
     likeTrackCommand$ = this.vm.likeTrackCommand$;
     @Binding()
-    likeTrackCommand: TracksView['vm']['likeTrackCommand'];
+    likeTrackCommand!: TracksView['vm']['likeTrackCommand'];
 
     unlikeTrackCommand$ = this.vm.unlikeTrackCommand$;
     @Binding()
-    unlikeTrackCommand: TracksView['vm']['unlikeTrackCommand'];
+    unlikeTrackCommand!: TracksView['vm']['unlikeTrackCommand'];
 
     findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
     @Binding()
-    findTrackLyricsCommand: TracksView['vm']['findTrackLyricsCommand'];
+    findTrackLyricsCommand!: TracksView['vm']['findTrackLyricsCommand'];
 
     reorderTrackCommand$ = this.vm.reorderTrackCommand$;
     @Binding()
-    reorderTrackCommand: TracksView['vm']['reorderTrackCommand'];
+    reorderTrackCommand!: TracksView['vm']['reorderTrackCommand'];
 
     bannTrackCommand$ = this.vm.bannTrackCommand$;
     @Binding()
-    bannTrackCommand: TracksView['vm']['bannTrackCommand'];
+    bannTrackCommand!: TracksView['vm']['bannTrackCommand'];
 
     removeBannFromTrackCommand$ = this.vm.removeBannFromTrackCommand$;
     @Binding()
-    removeBannFromTrackCommand: TracksView['vm']['removeBannFromTrackCommand'];
+    removeBannFromTrackCommand!: TracksView['vm']['removeBannFromTrackCommand'];
 
     constructor(props: ITracksViewProps) {
         super(props);
@@ -136,16 +136,20 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         const target = this.getTrNode(e.target as HTMLElement);
         if (target) {
             //       e.dataTransfer.setData('Text', '');
-            e.dataTransfer.effectAllowed = 'move';
+            if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'move';
+            }
             console.log('target.parentElement:', target.parentElement);
-            target.parentElement.ondragenter = e => this.onDragEnter(e, target);
-            target.parentElement.ondragover = function (ev) {
-                //         console.log('Tbody ondragover:',ev)
-                //         ev.target.dataTransfer.effectAllowed = 'none'
-                ev.preventDefault();
-                return true;
-            };
-            target.parentElement.ondragleave = e => this.onDragLeave(e);
+            if (target.parentElement) {
+                target.parentElement.ondragenter = e => this.onDragEnter(e, target);
+                target.parentElement.ondragover = function (ev) {
+                    //         console.log('Tbody ondragover:',ev)
+                    //         ev.target.dataTransfer.effectAllowed = 'none'
+                    ev.preventDefault();
+                    return true;
+                };
+                target.parentElement.ondragleave = e => this.onDragLeave(e);
+            }
             const rowIndex = elementIndex(target);
             const dragIndex = rowIndex - 1;
             console.log('dragIndex:', dragIndex);
@@ -179,8 +183,10 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
             $(target).removeAttr('draggable');
             target.ondragstart = null;
             target.ondragend = null;
-            target.parentElement.ondragenter = null;
-            target.parentElement.ondragover = null;
+            if (target.parentElement) {
+                target.parentElement.ondragenter = null;
+                target.parentElement.ondragover = null;
+            }
             this.changeRowIndex();
             $('li', $(target).parent()).toggleClass('dragged-place', false);
         }

@@ -15,49 +15,49 @@ import { TrackViewModelItem } from './trackViewModelItem';
 const searchQueue = asyncQueue();
 
 class SearchViewModel {
-    errors$: BehaviorSubject<SearchViewModel['errors']>;
+    errors$!: BehaviorSubject<SearchViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    term$: BehaviorSubject<SearchViewModel['term']>;
+    term$!: BehaviorSubject<SearchViewModel['term']>;
     @State term = '';
 
     @State isLoading = false;
 
-    tracks$: BehaviorSubject<SearchViewModel['tracks']>;
+    tracks$!: BehaviorSubject<SearchViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
-    artists$: BehaviorSubject<SearchViewModel['artists']>;
+    artists$!: BehaviorSubject<SearchViewModel['artists']>;
     @State artists = [] as ArtistViewModelItem[];
-    albums$: BehaviorSubject<SearchViewModel['albums']>;
+    albums$!: BehaviorSubject<SearchViewModel['albums']>;
     @State albums = [] as AlbumViewModelItem[];
-    playlists$: BehaviorSubject<SearchViewModel['playlists']>;
+    playlists$!: BehaviorSubject<SearchViewModel['playlists']>;
     @State playlists = [] as PlaylistsViewModelItem[];
-    searchType$: BehaviorSubject<SearchViewModel['searchType']>;
+    searchType$!: BehaviorSubject<SearchViewModel['searchType']>;
     @State searchType: ISearchType = 'track';
-    currentArtist$: BehaviorSubject<SearchViewModel['currentArtist']>;
-    @State currentArtist = null as ArtistViewModelItem;
-    currentAlbum$: BehaviorSubject<SearchViewModel['currentAlbum']>;
-    @State currentAlbum = null as AlbumViewModelItem;
-    currentPlaylist$: BehaviorSubject<SearchViewModel['currentPlaylist']>;
-    @State currentPlaylist = null as PlaylistsViewModelItem;
-    currentTracks$: BehaviorSubject<SearchViewModel['currentTracks']>;
+    currentArtist$!: BehaviorSubject<SearchViewModel['currentArtist']>;
+    @State currentArtist: ArtistViewModelItem | null = null;
+    currentAlbum$!: BehaviorSubject<SearchViewModel['currentAlbum']>;
+    @State currentAlbum: AlbumViewModelItem | null = null;
+    currentPlaylist$!: BehaviorSubject<SearchViewModel['currentPlaylist']>;
+    @State currentPlaylist: PlaylistsViewModelItem | null = null;
+    currentTracks$!: BehaviorSubject<SearchViewModel['currentTracks']>;
     @State currentTracks = [] as TrackViewModelItem[];
-    selectedItem$: BehaviorSubject<SearchViewModel['selectedItem']>;
-    @State selectedItem = null as TrackViewModelItem;
+    selectedItem$!: BehaviorSubject<SearchViewModel['selectedItem']>;
+    @State selectedItem: TrackViewModelItem | null = null;
 
     settings = {
         offset: 0,
         total: 0,
         limit: 20,
-        currentMediaUri: null as string,
+        currentMediaUri: null as string | null,
     };
 
-    loadMoreCommand$: BehaviorSubject<SearchViewModel['loadMoreCommand']>;
+    loadMoreCommand$!: BehaviorSubject<SearchViewModel['loadMoreCommand']>;
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
 
-    likeTrackCommand$: BehaviorSubject<SearchViewModel['likeTrackCommand']>;
+    likeTrackCommand$!: BehaviorSubject<SearchViewModel['likeTrackCommand']>;
     @State likeTrackCommand = Scheduler.Command(() => { });
 
-    unlikeTrackCommand$: BehaviorSubject<SearchViewModel['unlikeTrackCommand']>;
+    unlikeTrackCommand$!: BehaviorSubject<SearchViewModel['unlikeTrackCommand']>;
     @State unlikeTrackCommand = Scheduler.Command(() => { });
 
     onChangeTerm = _.debounce(() => {
@@ -109,22 +109,22 @@ class SearchViewModel {
             return;
         }
         const search = res.val as ISearchResult;
-        if ('tracks' in search) {
-            this.settings.total = search.tracks.total;
+        if ('tracks' in search && search.tracks) {
+            this.settings.total = search.tracks.total || 0;
             this.settings.offset = search.tracks.offset + Math.min(this.settings.limit, search.tracks.items.length);
 
             this.tracks = _.map(search.tracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
-        } else if ('artists' in search) {
+        } else if ('artists' in search && search.artists) {
             this.settings.total = search.artists.total;
             this.settings.offset = search.artists.offset + Math.min(this.settings.limit, search.artists.items.length);
 
             this.artists = _.map(search.artists.items, (artist, index) => new ArtistViewModelItem(artist, index));
-        } else if ('albums' in search) {
+        } else if ('albums' in search && search.albums) {
             this.settings.total = search.albums.total;
             this.settings.offset = search.albums.offset + Math.min(this.settings.limit, search.albums.items.length);
 
             this.albums = _.map(search.albums.items, (album, index) => new AlbumViewModelItem(album));
-        } else if ('playlists' in search) {
+        } else if ('playlists' in search && search.playlists) {
             this.settings.total = search.playlists.total;
             this.settings.offset = search.playlists.offset + Math.min(this.settings.limit, search.playlists.items.length);
 
@@ -144,22 +144,22 @@ class SearchViewModel {
             return;
         }
         const search = res.val;
-        if ('tracks' in search) {
-            this.tracksAddRange(_.map(search.tracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, search.tracks.offset + index)));
+        if ('tracks' in search && search.tracks) {
+            this.tracksAddRange(_.map(search.tracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, search.tracks!.offset + index)));
 
             this.settings.total = search.tracks.total;
             this.settings.offset = search.tracks.offset + Math.min(this.settings.limit, search.tracks.items.length);
-        } else if ('artists' in search) {
-            this.artistsAddRange(_.map(search.artists.items, (artist, index) => new ArtistViewModelItem(artist, search.artists.offset + index)));
+        } else if ('artists' in search && search.artists) {
+            this.artistsAddRange(_.map(search.artists.items, (artist, index) => new ArtistViewModelItem(artist, search.artists!.offset + index)));
 
             this.settings.total = search.artists.total;
             this.settings.offset = search.artists.offset + Math.min(this.settings.limit, search.artists.items.length);
-        } else if ('albums' in search) {
+        } else if ('albums' in search && search.albums) {
             this.albumsAddRange(_.map(search.albums.items, (album, index) => new AlbumViewModelItem(album)));
 
             this.settings.total = search.albums.total;
             this.settings.offset = search.albums.offset + Math.min(this.settings.limit, search.albums.items.length);
-        } else if ('playlists' in search) {
+        } else if ('playlists' in search && search.playlists) {
             this.playlistsAddRange(_.map(search.playlists.items, (artist, index) => new PlaylistsViewModelItem(artist)));
 
             this.settings.total = search.playlists.total;
@@ -173,21 +173,21 @@ class SearchViewModel {
         this.currentTracks = [];
 
         if (this.searchType === 'album' && this.currentAlbum) {
-            const albumTrackssResult = await spotifyResult.cata(s => s.listAlbumTracks(this.currentAlbum.id()));
+            const albumTrackssResult = await spotifyResult.cata(s => s.listAlbumTracks(this.currentAlbum!.id()));
 
             return albumTrackssResult.assert(e => this.errors = [e])
                 .cata(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem({ track: item } as any, index)));
         }
 
         if (this.searchType === 'playlist' && this.currentPlaylist) {
-            const playlistTracksResult = await spotifyResult.cata(s => s.fetchPlaylistTracks(this.currentPlaylist.id()));
+            const playlistTracksResult = await spotifyResult.cata(s => s.fetchPlaylistTracks(this.currentPlaylist!.id()));
 
             return playlistTracksResult.assert(e => this.errors = [e])
                 .cata(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem(item, index)));
         }
 
         if (this.searchType === 'artist' && this.currentArtist) {
-            const artistTracksResult = await spotifyResult.cata(s => s.fetchArtistTopTracks(this.currentArtist.id(), 'US'));
+            const artistTracksResult = await spotifyResult.cata(s => s.fetchArtistTopTracks(this.currentArtist!.id(), 'US'));
 
             return artistTracksResult.assert(e => this.errors = [e])
                 .cata(tr => this.currentTracks = _.map(tr.tracks, (item, index) => new TrackViewModelItem({ track: item } as any, index)));

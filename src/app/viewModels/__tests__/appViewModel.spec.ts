@@ -92,11 +92,11 @@ describe('App View Model', () => {
         await vm.updateDevices();
 
         expect(vm.devices[0].id()).toBe('device-01');
-        expect(vm.currentDevice.id()).toBe('device-01');
+        expect(vm.currentDevice!.id()).toBe('device-01');
     });
 
     it('Should catch error when fetch devices', async () => {
-        jest.spyOn(srv.spotifyService.val.adapter, 'devices').mockImplementation(() => {
+        jest.spyOn(srv.spotifyService!.val.adapter, 'devices').mockImplementation(() => {
             throw new Error('fake error');
         });
 
@@ -106,13 +106,13 @@ describe('App View Model', () => {
         console.log(vm.errors[0].error);
 
         expect(vm.devices[0].id()).toBe('device-01');
-        expect(vm.currentDevice.id()).toBe('device-01');
+        expect(vm.currentDevice!.id()).toBe('device-01');
     });
 
     it('Should switch device', async () => {
-        await vm.switchDevice(vm.currentDevice);
+        await vm.switchDevice(vm.currentDevice!);
 
         expect(vm.devices[0].id()).toBe('device-01');
-        expect(vm.currentDevice.id()).toBe('device-01');
+        expect(vm.currentDevice!.id()).toBe('device-01');
     });
 });

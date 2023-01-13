@@ -15,69 +15,69 @@ import { TrackViewModelItem } from './trackViewModelItem';
 const lockSection = asyncQueue();
 
 class MediaPlayerViewModel {
-    errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
+    errors$!: BehaviorSubject<ServiceResult<any, Error>[]>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    queue$: BehaviorSubject<MediaPlayerViewModel['queue']>;
+    queue$!: BehaviorSubject<MediaPlayerViewModel['queue']>;
     @State queue = [] as TrackViewModelItem[];
 
-    timePlayed$: BehaviorSubject<MediaPlayerViewModel['timePlayed']>;
+    timePlayed$!: BehaviorSubject<MediaPlayerViewModel['timePlayed']>;
     @State timePlayed = 1;
 
-    duration$: BehaviorSubject<MediaPlayerViewModel['duration']>;
+    duration$!: BehaviorSubject<MediaPlayerViewModel['duration']>;
     @State duration = 3.14 * 60 * 1000;
 
-    isPlaying$: BehaviorSubject<MediaPlayerViewModel['isPlaying']>;
+    isPlaying$!: BehaviorSubject<MediaPlayerViewModel['isPlaying']>;
     @State isPlaying = false;
 
-    trackName$: BehaviorSubject<MediaPlayerViewModel['trackName']>;
+    trackName$!: BehaviorSubject<MediaPlayerViewModel['trackName']>;
     @State trackName = '';
 
-    albumName$: BehaviorSubject<MediaPlayerViewModel['albumName']>;
+    albumName$!: BehaviorSubject<MediaPlayerViewModel['albumName']>;
     @State albumName = '';
 
-    artistName$: BehaviorSubject<MediaPlayerViewModel['artistName']>;
+    artistName$!: BehaviorSubject<MediaPlayerViewModel['artistName']>;
     @State artistName = '';
 
-    volume$: BehaviorSubject<MediaPlayerViewModel['volume']>;
+    volume$!: BehaviorSubject<MediaPlayerViewModel['volume']>;
     @State volume = 50;
 
-    thumbnailUrl$: BehaviorSubject<MediaPlayerViewModel['thumbnailUrl']>;
+    thumbnailUrl$!: BehaviorSubject<MediaPlayerViewModel['thumbnailUrl']>;
     @State thumbnailUrl = '';
 
-    isLiked$: BehaviorSubject<MediaPlayerViewModel['isLiked']>;
+    isLiked$!: BehaviorSubject<MediaPlayerViewModel['isLiked']>;
     @State isLiked = false;
 
-    currentTrack$: BehaviorSubject<MediaPlayerViewModel['currentTrack']>;
-    @State currentTrack = null as ITrack;
+    currentTrack$!: BehaviorSubject<MediaPlayerViewModel['currentTrack']>;
+    @State currentTrack: ITrack | null = null;
 
-    currentTrackUri$: BehaviorSubject<MediaPlayerViewModel['currentTrackUri']>;
+    currentTrackUri$!: BehaviorSubject<MediaPlayerViewModel['currentTrackUri']>;
     @State currentTrackUri = '';
 
-    tracks$: BehaviorSubject<MediaPlayerViewModel['tracks']>;
-    @State tracks = null as TrackViewModelItem[];
+    tracks$!: BehaviorSubject<MediaPlayerViewModel['tracks']>;
+    @State tracks: TrackViewModelItem[] | null = null;
 
-    resumeCommand$: BehaviorSubject<MediaPlayerViewModel['resumeCommand']>;
+    resumeCommand$!: BehaviorSubject<MediaPlayerViewModel['resumeCommand']>;
     @State resumeCommand = Scheduler.Command(() => this.play());
-    pauseCommand$: BehaviorSubject<MediaPlayerViewModel['pauseCommand']>;
+    pauseCommand$!: BehaviorSubject<MediaPlayerViewModel['pauseCommand']>;
     @State pauseCommand = Scheduler.Command(() => this.pause());
-    prevCommand$: BehaviorSubject<MediaPlayerViewModel['prevCommand']>;
+    prevCommand$!: BehaviorSubject<MediaPlayerViewModel['prevCommand']>;
     @State prevCommand = Scheduler.Command(() => this.previous());
-    nextCommand$: BehaviorSubject<MediaPlayerViewModel['nextCommand']>;
+    nextCommand$!: BehaviorSubject<MediaPlayerViewModel['nextCommand']>;
     @State nextCommand = Scheduler.Command(() => this.next());
-    volumeUpCommand$: BehaviorSubject<MediaPlayerViewModel['volumeUpCommand']>;
+    volumeUpCommand$!: BehaviorSubject<MediaPlayerViewModel['volumeUpCommand']>;
     @State volumeUpCommand = Scheduler.Command(() => this.volumeUp());
-    volumeCommand$: BehaviorSubject<MediaPlayerViewModel['volumeCommand']>;
+    volumeCommand$!: BehaviorSubject<MediaPlayerViewModel['volumeCommand']>;
     @State volumeCommand = Scheduler.Command((percent: number) => this.setVolume(percent));
-    volumeDownCommand$: BehaviorSubject<MediaPlayerViewModel['volumeDownCommand']>;
+    volumeDownCommand$!: BehaviorSubject<MediaPlayerViewModel['volumeDownCommand']>;
     @State volumeDownCommand = Scheduler.Command(() => this.volumeDown());
-    refreshPlaybackCommand$: BehaviorSubject<MediaPlayerViewModel['refreshPlaybackCommand']>;
+    refreshPlaybackCommand$!: BehaviorSubject<MediaPlayerViewModel['refreshPlaybackCommand']>;
     @State refreshPlaybackCommand = Scheduler.Command(() => this.fetchData());
-    likeSongCommand$: BehaviorSubject<MediaPlayerViewModel['likeSongCommand']>;
+    likeSongCommand$!: BehaviorSubject<MediaPlayerViewModel['likeSongCommand']>;
     @State likeSongCommand = Scheduler.Command(() => this.likeTrack());
-    unlikeSongCommand$: BehaviorSubject<MediaPlayerViewModel['unlikeSongCommand']>;
+    unlikeSongCommand$!: BehaviorSubject<MediaPlayerViewModel['unlikeSongCommand']>;
     @State unlikeSongCommand = Scheduler.Command(() => this.unlikeTrack());
-    seekPlaybackCommand$: BehaviorSubject<MediaPlayerViewModel['seekPlaybackCommand']>;
+    seekPlaybackCommand$!: BehaviorSubject<MediaPlayerViewModel['seekPlaybackCommand']>;
     @State seekPlaybackCommand = Scheduler.Command((percent: number) => this.manualSeek(percent));
 
     currentTrackId$ = this.appViewModel.currentTrackId$;
@@ -135,7 +135,7 @@ class MediaPlayerViewModel {
         this.trackName = state.track_window.current_track.name;
         this.albumName = state.track_window.current_track.album.name;
         this.artistName = artist.name;
-        this.thumbnailUrl = _.first(state.track_window.current_track.album.images).url;
+        this.thumbnailUrl = _.first(state.track_window.current_track.album.images)?.url || '';
         this.autoSeek();
         this.checkTrackExists();
 
@@ -145,9 +145,9 @@ class MediaPlayerViewModel {
             await settingsResult.assert(async () => {
                 const volume = await player.getVolume();
                 return this.volume = volume;
-            }).cata(settings => {
-                player.setVolume(settings.volume);
-                this.volume = settings.volume;
+            }).map(settings => settings?.volume || this.volume).cata(volume => {
+                player.setVolume(volume);
+                this.volume = volume;
             });
         });
     }
@@ -162,13 +162,13 @@ class MediaPlayerViewModel {
                 this.currentTrackUri = currentlyPlaying.item.uri;
                 this.currentTrackId = currentlyPlaying.item.id;
                 this.volume = currentlyPlaying.device.volume_percent;
-                this.duration = currentlyPlaying.item.duration_ms;
+                this.duration = currentlyPlaying.item.duration_ms || 0;
                 this.timePlayed = currentlyPlaying.progress_ms;
                 this.isPlaying = currentlyPlaying.is_playing;
                 this.trackName = currentlyPlaying.item.name;
                 this.albumName = currentlyPlaying.item.album.name;
                 this.artistName = artist.name;
-                this.thumbnailUrl = _.first(currentlyPlaying.item.album.images).url;
+                this.thumbnailUrl = _.first(currentlyPlaying.item.album.images)?.url || '';
                 this.autoSeek();
                 this.checkTrackExists();
             } else {
@@ -180,7 +180,7 @@ class MediaPlayerViewModel {
     async checkTrackExists() {
         const trackExistsResult = await this.ss.hasTracks(this.currentTrackId);
         trackExistsResult.assert(e => this.errors = [e])
-            .cata(r => this.isLiked = _.first(r));
+            .cata(r => this.isLiked = _.first(r) || false);
     }
 
     async monitorPlybackInternal() {
@@ -372,6 +372,9 @@ class MediaPlayerViewModel {
 
     async likeTrack() {
         lockSection.push(async (next) => {
+            if (!this.currentTrack) {
+                return;
+            }
             const stateResult = await this.ss.addTracks(this.currentTrack);
             stateResult.assert(e => this.errors = [e]);
 
@@ -381,6 +384,9 @@ class MediaPlayerViewModel {
 
     async unlikeTrack() {
         lockSection.push(async (next) => {
+            if (!this.currentTrack) {
+                return;
+            }
             const stateResult = await this.ss.removeTracks(this.currentTrack);
             stateResult.assert(e => this.errors = [e]);
 

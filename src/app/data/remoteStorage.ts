@@ -3,56 +3,56 @@ import { IStorage, IStorageConfig } from './iStorage';
 
 
 class RemoteStorage implements IStorage {
-    constructor(public connection: string) {
+    constructor(public connection: string | null) {
     }
 
-    initializeStructure(cb: { (err?: Error, res?: boolean): void }): void {
+    initializeStructure(cb: { (err?: Error | null, res?: boolean): void }): void {
         cb(null, false);
     }
 
-    hasTable(config: IStorageConfig, cb: { (err: Error, res?: boolean): void }) {
+    hasTable(config: IStorageConfig, cb: { (err: Error | null, res?: boolean): void }) {
         cb(null, false);
     }
 
-    createTable(config: IStorageConfig, cb: { (err: Error, res?: boolean): void }) {
+    createTable(config: IStorageConfig, cb: { (err: Error | null, res?: boolean): void }) {
         try {
             cb(null, false);
         } catch (ex) {
-            cb(ex);
+            cb(ex as Error);
         }
     }
 
-    create<T>(config: IStorageConfig, data: { id: unknown; }, cb: { (err: Error, res?: T): void }) {
+    create<T>(config: IStorageConfig, data: { id: unknown; }, cb: { (err: Error | null, res?: T | null): void }) {
         try {
             cb(null, null);
         } catch (ex) {
-            cb(ex);
+            cb(ex as Error);
         }
     }
 
-    update<T>(config: IStorageConfig, id: unknown, data: {}, cb: { (err: Error, res?: T): void }) {
+    update<T>(config: IStorageConfig, id: unknown, data: {}, cb: { (err: Error | null, res?: T | null): void }) {
         try {
             cb(null, null);
         } catch (ex) {
-            cb(ex, null);
+            cb(ex as Error, null);
         }
 
         return true;
     }
 
-    delete(config: IStorageConfig, id: string, cb: { (err: Error, result?: boolean): void }) {
+    delete(config: IStorageConfig, id: string, cb: { (err: Error | null, result?: boolean): void }) {
         try {
             cb(null, false);
         } catch (ex) {
-            cb(ex);
+            cb(ex as Error);
         }
     }
 
-    getById<T>(config: IStorageConfig, id: string, cb: { (err: Error, res?: T): void }) {
+    getById<T>(config: IStorageConfig, id: string, cb: { (err: Error | null, res?: T | null): void }) {
         try {
             cb(null, null);
         } catch (ex) {
-            cb(ex);
+            cb(ex as Error);
         }
     }
 
@@ -68,13 +68,13 @@ class RemoteStorage implements IStorage {
         return true;
     }
 
-    getCount(config: IStorageConfig, cb: { (err: Error, res?: number): void }): void {
+    getCount(config: IStorageConfig, cb: { (err: Error | null, res?: number): void }): void {
         try {
             let count = 0;
 
             cb(null, count);
         } catch (ex) {
-            cb(ex);
+            cb(ex as Error);
         }
     }
 

@@ -5,15 +5,15 @@ import { SettingsServiceUnexpectedError } from './errors/settingsServiceUnexpect
 
 
 export interface ISettings {
-    genius?: {
+    genius: {
         accessToken?: string;
         code?: string;
     };
-    spotify?: {
+    spotify: {
         accessToken?: string;
         volume?: number;
     };
-    apiseeds?: {
+    apiseeds: {
         key: string;
     }
 }
@@ -69,7 +69,7 @@ class SettingsService extends BaseService {
                 window.location.replace(window.location.pathname);
             }
 
-            if ('code' in authInfo && /onGenius-1/.test(authInfo.state)) {
+            if ('code' in authInfo && /onGenius-1/.test(authInfo.state) && authInfo.code) {
                 document.cookie = 'gcode=' + btoa(authInfo.code);
                 defaultSettings.genius.code = authInfo.code;
                 window.location.replace(window.location.pathname);
@@ -77,13 +77,13 @@ class SettingsService extends BaseService {
 
             return SettingsServiceResult.success(new SettingsService(defaultSettings));
         } catch (ex) {
-            return SettingsServiceUnexpectedError.create('Unexpected settings fetch error', ex);
+            return SettingsServiceUnexpectedError.create('Unexpected settings fetch error', ex as Error);
         }
     }
 
-    config: ISettings = {};
+    config: ISettings = { apiseeds: { key: '' }, genius: {}, spotify: {} };
 
-    constructor(settings: ISettings = {}) {
+    constructor(settings: ISettings = { apiseeds: { key: '' }, genius: {}, spotify: {} }) {
         super();
 
         this.config = settings;
@@ -99,7 +99,7 @@ class SettingsService extends BaseService {
     }
 
     apiseedsKey(val?: string) {
-        if (arguments.length && val !== this.config.apiseeds.key) {
+        if (arguments.length && val && val !== this.config.apiseeds.key) {
             this.config.apiseeds.key = val;
             document.cookie = 'apsk=' + val;
         }

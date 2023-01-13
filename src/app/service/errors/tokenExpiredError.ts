@@ -12,7 +12,7 @@ class TokenExpiredError extends Error {
 
         this.name = 'TokenExpiredError';
         if ('stack' in details) {
-            this.stack = [].concat(msg, details.stack).join('\r\n');
+            this.stack = ([] as string[]).concat(msg, details.stack || '').join('\r\n');
         }
 
         Object.setPrototypeOf(this, TokenExpiredError.prototype);

@@ -18,58 +18,58 @@ class AppView extends React.Component<IAppViewProps> {
 
     errors$ = this.vm.errors$;
     @Binding<AppView>({ didSet: (view, errors) => view.showErrors(errors) })
-    errors: AppView['vm']['errors'];
+    errors!: AppView['vm']['errors'];
 
     openLogin$ = this.vm.openLogin$;
     @Binding()
-    openLogin: AppView['vm']['openLogin'];
+    openLogin!: AppView['vm']['openLogin'];
 
     currentPanel$ = this.vm.currentPanel$;
     @Binding()
-    currentPanel: AppView['vm']['currentPanel'];
+    currentPanel!: AppView['vm']['currentPanel'];
 
     devices$ = this.vm.devices$;
     @Binding()
-    devices: AppView['vm']['devices'];
+    devices!: AppView['vm']['devices'];
 
     profile$ = this.vm.profile$;
     @Binding()
-    profile: AppView['vm']['profile'];
+    profile!: AppView['vm']['profile'];
 
     currentTrackId$ = this.vm.currentTrackId$;
     @Binding()
-    currentTrackId: AppView['vm']['currentTrackId'];
+    currentTrackId!: AppView['vm']['currentTrackId'];
 
     topTracks$ = this.vm.topTracks$;
     @Binding()
-    topTracks: AppView['vm']['topTracks'];
+    topTracks!: AppView['vm']['topTracks'];
 
     currentDevice$ = this.vm.currentDevice$;
     @Binding()
-    currentDevice: AppView['vm']['currentDevice'];
+    currentDevice!: AppView['vm']['currentDevice'];
 
     refreshDevicesCommand$ = this.vm.refreshDevicesCommand$;
     @Binding()
-    refreshDevicesCommand: AppView['vm']['refreshDevicesCommand'];
+    refreshDevicesCommand!: AppView['vm']['refreshDevicesCommand'];
 
     refreshTokenCommand$ = this.vm.refreshTokenCommand$;
     @Binding()
-    refreshTokenCommand: AppView['vm']['refreshTokenCommand'];
+    refreshTokenCommand!: AppView['vm']['refreshTokenCommand'];
 
     autoRefreshUrl$ = this.vm.autoRefreshUrl$;
     @Binding()
-    autoRefreshUrl: AppView['vm']['autoRefreshUrl'];
+    autoRefreshUrl!: AppView['vm']['autoRefreshUrl'];
 
     isSyncing$ = this.vm.isSyncing$;
     @Binding()
-    isSyncing: AppView['vm']['isSyncing'];
+    isSyncing!: AppView['vm']['isSyncing'];
 
     state = {
         prevPanel: 'home',
         showSelectDevices: 'hide' as 'show' | 'hide' | '',
         scrolledToBottom: false
     };
-    elScroller = null as HTMLElement;
+    elScroller = null as HTMLElement | null;
     onPageScroll = _.debounce(() => this.onPageScrollInternal(), 500);
 
     componentDidMount() {
@@ -141,11 +141,15 @@ class AppView extends React.Component<IAppViewProps> {
         if (elementScroll) {
             return this.getElementBottomDistance();
         }
+        return 0;
     }
 
     getElementBottomDistance() {
+        if (!this.elScroller) {
+            return 0;
+        }
         const scroller = this.elScroller,
-            bottom = scroller.scrollHeight,
+            bottom = scroller?.scrollHeight,
             scrollY = scroller.scrollTop + scroller.clientHeight;
         return bottom - scrollY;
     }

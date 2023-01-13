@@ -15,59 +15,59 @@ class HomeView extends React.Component<IHomeViewProps> {
 
     errors$ = this.vm.errors$;
     @Binding<HomeView>({ didSet: (view, errors) => view.showErrors(errors) })
-    errors: HomeView['vm']['errors'];
+    errors!: HomeView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
     @Binding()
-    tracks: HomeView['vm']['tracks'];
+    tracks!: HomeView['vm']['tracks'];
 
     likedTracks$ = this.vm.likedTracks$;
     @Binding()
-    likedTracks: HomeView['vm']['likedTracks'];
+    likedTracks!: HomeView['vm']['likedTracks'];
 
     isLoading$ = this.vm.isLoading$;
     @Binding()
-    isLoading: HomeView['vm']['isLoading'];
+    isLoading!: HomeView['vm']['isLoading'];
 
     selectedTrack$ = this.vm.selectedTrack$;
     @Binding()
-    selectedTrack: HomeView['vm']['selectedTrack'];
+    selectedTrack!: HomeView['vm']['selectedTrack'];
 
     trackLyrics$ = this.vm.trackLyrics$;
     @Binding()
-    trackLyrics: HomeView['vm']['trackLyrics'];
+    trackLyrics!: HomeView['vm']['trackLyrics'];
 
     bannedTrackIds$ = this.vm.bannedTrackIds$;
     @Binding()
-    bannedTrackIds: HomeView['vm']['bannedTrackIds'];
+    bannedTrackIds!: HomeView['vm']['bannedTrackIds'];
 
     refreshCommand$ = this.vm.refreshCommand$;
     @Binding()
-    refreshCommand: HomeView['vm']['refreshCommand'];
+    refreshCommand!: HomeView['vm']['refreshCommand'];
 
     selectTrackCommand$ = this.vm.selectTrackCommand$;
     @Binding()
-    selectTrackCommand: HomeView['vm']['selectTrackCommand'];
+    selectTrackCommand!: HomeView['vm']['selectTrackCommand'];
 
     likeTrackCommand$ = this.vm.likeTrackCommand$;
     @Binding()
-    likeTrackCommand: HomeView['vm']['likeTrackCommand'];
+    likeTrackCommand!: HomeView['vm']['likeTrackCommand'];
 
     unlikeTrackCommand$ = this.vm.unlikeTrackCommand$;
     @Binding()
-    unlikeTrackCommand: HomeView['vm']['unlikeTrackCommand'];
+    unlikeTrackCommand!: HomeView['vm']['unlikeTrackCommand'];
 
     findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
     @Binding()
-    findTrackLyricsCommand: HomeView['vm']['findTrackLyricsCommand'];
+    findTrackLyricsCommand!: HomeView['vm']['findTrackLyricsCommand'];
 
     bannTrackCommand$ = this.vm.bannTrackCommand$;
     @Binding()
-    bannTrackCommand: HomeView['vm']['bannTrackCommand'];
+    bannTrackCommand!: HomeView['vm']['bannTrackCommand'];
 
     removeBannFromTrackCommand$ = this.vm.removeBannFromTrackCommand$;
     @Binding()
-    removeBannFromTrackCommand: HomeView['vm']['removeBannFromTrackCommand'];
+    removeBannFromTrackCommand!: HomeView['vm']['removeBannFromTrackCommand'];
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

@@ -36,9 +36,9 @@ class DataService extends withEvents(BaseService) {
                 }
 
                 try {
-                    const tracksStore = new TracksStore(storage);
-                    const albumsStore = new AlbumsStore(storage);
-                    const artistsStore = new ArtistsStore(storage);
+                    const tracksStore = new TracksStore(storage!);
+                    const albumsStore = new AlbumsStore(storage!);
+                    const artistsStore = new ArtistsStore(storage!);
                     const res = await tracksStore.refresh(track);
 
                     await albumsStore.refresh(track.album);
@@ -60,8 +60,8 @@ class DataService extends withEvents(BaseService) {
                 }
 
                 try {
-                    const playlistsStore = new PlaylistsStore(storage);
-                    const imagesStore = new ImagesStore(storage);
+                    const playlistsStore = new PlaylistsStore(storage!);
+                    const imagesStore = new ImagesStore(storage!);
                     const res = await playlistsStore.refresh(playlist);
                     await Promise.all(playlist.images.map(image => imagesStore.refresh(image)));
 
@@ -81,7 +81,7 @@ class DataService extends withEvents(BaseService) {
                 }
 
                 try {
-                    const playlistRowsStore = new PlaylistRowsStore(storage);
+                    const playlistRowsStore = new PlaylistRowsStore(storage!);
                     const indexStr = '0000000000000000' + index;
                     const id = `${indexStr.substr(-8)}:${playlist.id}`;
                     playlistRowsStore.refresh({
@@ -108,7 +108,7 @@ class DataService extends withEvents(BaseService) {
                 }
 
                 try {
-                    const playlistRowsStore = new PlaylistRowsStore(storage);
+                    const playlistRowsStore = new PlaylistRowsStore(storage!);
                     const rows = playlistRowsStore.where({
                         playlistId,
                         trackId: song.track.id
@@ -133,14 +133,14 @@ class DataService extends withEvents(BaseService) {
 
                 try {
                     const res = [] as IUserPlaylist[];
-                    const playlistRowsStore = new PlaylistRowsStore(storage);
+                    const playlistRowsStore = new PlaylistRowsStore(storage!);
                     for await (const row of playlistRowsStore.where({ trackId: track.id })) {
                         res.push((row as IPlaylistRow).playlist as IUserPlaylist);
                     }
 
                     resolve(DataServiceResult.success(res));
                 } catch (ex) {
-                    reject(DataServiceResult.error(ex));
+                    reject(DataServiceResult.error(ex as Error));
                 }
             });
         });
@@ -154,12 +154,12 @@ class DataService extends withEvents(BaseService) {
                 }
 
                 try {
-                    const bannedTracksStore = new BannedTracksStore(storage);
+                    const bannedTracksStore = new BannedTracksStore(storage!);
                     await bannedTracksStore.refresh({ id: trackId } as ITrack);
 
                     resolve(DataServiceResult.success(true));
                 } catch (ex) {
-                    reject(DataServiceResult.error(ex));
+                    reject(DataServiceResult.error(ex as Error));
                 }
             });
         });
@@ -173,12 +173,12 @@ class DataService extends withEvents(BaseService) {
                 }
 
                 try {
-                    const bannedTracksStore = new BannedTracksStore(storage);
+                    const bannedTracksStore = new BannedTracksStore(storage!);
                     await bannedTracksStore.delete(trackId);
 
                     resolve(DataServiceResult.success(true));
                 } catch (ex) {
-                    reject(DataServiceResult.error(ex));
+                    reject(DataServiceResult.error(ex as Error));
                 }
             });
         });
@@ -192,19 +192,19 @@ class DataService extends withEvents(BaseService) {
                 }
 
                 try {
-                    const bannedTracksStore = new BannedTracksStore(storage);
+                    const bannedTracksStore = new BannedTracksStore(storage!);
                     const track = await bannedTracksStore.get(trackId);
 
                     resolve(DataServiceResult.success(!!track));
                 } catch (ex) {
-                    reject(DataServiceResult.error(ex));
+                    reject(DataServiceResult.error(ex as Error));
                 }
             });
         });
     }
 
     async listBannedTracks(trackIds: string[]) {
-        trackIds = [].concat(trackIds).sort();
+        trackIds = ([] as string[]).concat(trackIds).sort();
         return new Promise<DataServiceResult<string[], Error>>((resolve, reject) => {
             DataStorage.create(async (err, storage) => {
                 if (err) {
@@ -213,7 +213,7 @@ class DataService extends withEvents(BaseService) {
 
                 try {
                     const bannedIds = [] as string[];
-                    const bannedTracksStore = new BannedTracksStore(storage);
+                    const bannedTracksStore = new BannedTracksStore(storage!);
                     for await (const track of bannedTracksStore.list()) {
                         if (trackIds.indexOf(track.id) !== -1) {
                             bannedIds.push(track.id);
@@ -222,7 +222,7 @@ class DataService extends withEvents(BaseService) {
 
                     resolve(DataServiceResult.success(bannedIds));
                 } catch (ex) {
-                    reject(DataServiceResult.error(ex));
+                    reject(DataServiceResult.error(ex as Error));
                 }
             });
         });

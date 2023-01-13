@@ -17,51 +17,51 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
 
     errors$ = this.vm.errors$;
     @Binding<NewReleasesView>({ didSet: (view, errors) => view.showErrors(errors) })
-    errors: NewReleasesView['vm']['errors'];
+    errors!: NewReleasesView['vm']['errors'];
 
     newReleases$ = this.vm.newReleases$;
     @Binding()
-    newReleases: NewReleasesView['vm']['newReleases'];
+    newReleases!: NewReleasesView['vm']['newReleases'];
 
     featuredPlaylists$ = this.vm.featuredPlaylists$;
     @Binding()
-    featuredPlaylists: NewReleasesView['vm']['featuredPlaylists'];
+    featuredPlaylists!: NewReleasesView['vm']['featuredPlaylists'];
 
     currentAlbum$ = this.vm.currentAlbum$;
     @Binding()
-    currentAlbum: NewReleasesView['vm']['currentAlbum'];
+    currentAlbum!: NewReleasesView['vm']['currentAlbum'];
 
     currentPlaylist$ = this.vm.currentPlaylist$;
     @Binding()
-    currentPlaylist: NewReleasesView['vm']['currentPlaylist'];
+    currentPlaylist!: NewReleasesView['vm']['currentPlaylist'];
 
     tracks$ = this.vm.tracks$;
     @Binding()
-    tracks: NewReleasesView['vm']['tracks'];
+    tracks!: NewReleasesView['vm']['tracks'];
 
     likedAlbums$ = this.vm.likedAlbums$;
     @Binding()
-    likedAlbums: NewReleasesView['vm']['likedAlbums'];
+    likedAlbums!: NewReleasesView['vm']['likedAlbums'];
 
     currentTracks$ = this.vm.currentTracks$;
     @Binding()
-    currentTracks: NewReleasesView['vm']['currentTracks'];
+    currentTracks!: NewReleasesView['vm']['currentTracks'];
 
     selectAlbumCommand$ = this.vm.selectAlbumCommand$;
     @Binding()
-    selectAlbumCommand: NewReleasesView['vm']['selectAlbumCommand'];
+    selectAlbumCommand!: NewReleasesView['vm']['selectAlbumCommand'];
 
     selectPlaylistCommand$ = this.vm.selectPlaylistCommand$;
     @Binding()
-    selectPlaylistCommand: NewReleasesView['vm']['selectPlaylistCommand'];
+    selectPlaylistCommand!: NewReleasesView['vm']['selectPlaylistCommand'];
 
     likeAlbumCommand$ = this.vm.likeAlbumCommand$;
     @Binding()
-    likeAlbumCommand: NewReleasesView['vm']['likeAlbumCommand'];
+    likeAlbumCommand!: NewReleasesView['vm']['likeAlbumCommand'];
 
     unlikeAlbumCommand$ = this.vm.unlikeAlbumCommand$;
     @Binding()
-    unlikeAlbumCommand: NewReleasesView['vm']['unlikeAlbumCommand'];
+    unlikeAlbumCommand!: NewReleasesView['vm']['unlikeAlbumCommand'];
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

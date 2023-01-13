@@ -17,15 +17,15 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
 
     errors$ = this.vm.errors$;
     @Binding<AlbumsView>({ didSet: (view, errors) => view.showErrors(errors) })
-    errors: AlbumsView['vm']['errors'];
+    errors!: AlbumsView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
     @Binding()
-    tracks: AlbumsView['vm']['tracks'];
+    tracks!: AlbumsView['vm']['tracks'];
 
     selectedItem$ = this.vm.selectedItem$;
     @Binding()
-    selectedItem: AlbumsView['vm']['selectedItem'];
+    selectedItem!: AlbumsView['vm']['selectedItem'];
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

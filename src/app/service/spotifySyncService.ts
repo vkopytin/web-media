@@ -43,7 +43,7 @@ class SpotifySyncService extends withEvents(BaseService) {
                 return SpotifySyncServiceResult.success(true);
             });
         } catch (ex) {
-            return SpotifySyncServiceResult.error<boolean>(ex);
+            return SpotifySyncServiceResult.error<boolean>(ex as Error);
         }
     }
 
@@ -58,7 +58,7 @@ class SpotifySyncService extends withEvents(BaseService) {
             }
             return SpotifySyncServiceResult.success(res);
         } catch (ex) {
-            return SpotifySyncServiceResult.error<IUserPlaylist[]>(ex);
+            return SpotifySyncServiceResult.error<IUserPlaylist[]>(ex as Error);
         }
     }
 

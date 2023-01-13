@@ -12,7 +12,7 @@ class SpotifyPlayerServiceError extends Error {
 
         this.name = 'SpotifyPlayerServiceError';
         if ('stack' in details) {
-            this.stack = [].concat(msg, details.stack).join('\r\n');
+            this.stack = ([] as string[]).concat(msg, details.stack || '').join('\r\n');
         }
 
         Object.setPrototypeOf(this, SpotifyPlayerServiceError.prototype);

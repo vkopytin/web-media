@@ -7,7 +7,7 @@ function unsafeHtml(html: string) {
     el.innerHTML = html;
 
     const els = el.getElementsByTagName('script');
-    for (let el of [].slice.call(els, 0)) {
+    for (let el of ([] as HTMLScriptElement[]).slice.call(els, 0)) {
         el.parentElement?.removeChild(el);
     }
 

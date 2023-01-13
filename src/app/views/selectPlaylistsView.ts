@@ -20,31 +20,31 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
 
     errors$ = this.vm.errors$;
     @Binding<SelectPlaylistsView>({ didSet: (view, errors) => view.showErrors(errors) })
-    errors: SelectPlaylistsView['vm']['errors'];
+    errors!: SelectPlaylistsView['vm']['errors'];
 
     // playlists
     trackPlaylists$ = this.vm.trackPlaylists$;
     @Binding()
-    trackPlaylists: SelectPlaylistsView['vm']['trackPlaylists'];
+    trackPlaylists!: SelectPlaylistsView['vm']['trackPlaylists'];
 
     //items
     playlists$ = this.playlistsViewModel.playlists$;
     @Binding()
-    playlists: SelectPlaylistsView['playlistsViewModel']['playlists'];
+    playlists!: SelectPlaylistsView['playlistsViewModel']['playlists'];
 
     isLoading$ = this.playlistsViewModel.isLoading$;
     @Binding()
-    isLoading: SelectPlaylistsView['playlistsViewModel']['isLoading'];
+    isLoading!: SelectPlaylistsView['playlistsViewModel']['isLoading'];
 
     fetchData = () => this.playlistsViewModel.fetchData();
 
     addToPlaylistCommand$ = this.vm.addToPlaylistCommand$;
     @Binding()
-    addToPlaylistCommand: SelectPlaylistsView['vm']['removeFromPlaylistCommand'];
+    addToPlaylistCommand!: SelectPlaylistsView['vm']['removeFromPlaylistCommand'];
 
     removeFromPlaylistCommand$ = this.vm.removeFromPlaylistCommand$;
     @Binding()
-    removeFromPlaylistCommand: SelectPlaylistsView['vm']['removeFromPlaylistCommand'];
+    removeFromPlaylistCommand!: SelectPlaylistsView['vm']['removeFromPlaylistCommand'];
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

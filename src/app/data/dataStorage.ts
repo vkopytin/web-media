@@ -16,11 +16,11 @@ const config: IConfig = {
 class DataStorage {
 	static dbType = config.dbType;
 
-	static async create(callback: { (err: Error, result: IStorage): void }, dbType = DataStorage.dbType) {
+	static async create(callback: { (err: Error | null, result: IStorage | null): void }, dbType = DataStorage.dbType) {
 		switch (dbType) {
 			case 'inMemory':
 				const { InMemoryStorage } = await import('./inMemoryStorage');
-				const uow = new InMemoryStorage(null);
+				const uow = new InMemoryStorage('');
 				await callback(null, uow);
 				break;
 			case 'indexedDb':
@@ -31,7 +31,7 @@ class DataStorage {
 					await callback(null, uow);
 
 				} catch (ex) {
-					await callback(ex, null);
+					await callback(ex as Error, null);
 				}
 				break;
 			case 'remote':

@@ -41,14 +41,14 @@ class SpotifyService extends withEvents(BaseService) {
 
             return settingsResult
                 .cata(s => SpotifyServiceResult.success(new SpotifyService(
-                    new SpotifyAdapter(s.accessToken)
+                    new SpotifyAdapter(s?.accessToken || '')
                 )));
         } catch (ex) {
-            return returnErrorResult<SpotifyService>('Unexpected error on requesting spotify service', ex);
+            return returnErrorResult<SpotifyService>('Unexpected error on requesting spotify service', ex as Error);
         }
     }
 
-    currentProfile: IUserInfo = null;
+    currentProfile: IUserInfo | null = null;
     onStateChanged = debounce(this.onStateChangedInternal, 500);
 
     constructor(public adapter: SpotifyAdapter) {
@@ -71,51 +71,51 @@ class SpotifyService extends withEvents(BaseService) {
             this.onStateChanged(res);
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IPlayerResult>('Unexpected error on requesting spotify seek', ex);
+            return returnErrorResult<IPlayerResult>('Unexpected error on requesting spotify seek', ex as Error);
         }
     }
 
-    async play(deviceId: string = null, tracksUriList: string | string[] = null, indexOrUri: number | string = null) {
+    async play(deviceId?: string, tracksUriList?: string | string[], indexOrUri: number | string = '') {
         try {
             const res = await this.adapter.play(deviceId, tracksUriList, indexOrUri);
 
             this.onStateChanged(res);
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting spotify play', ex);
+            return returnErrorResult('Unexpected error on requesting spotify play', ex as Error);
         }
     }
 
-    async pause(deviceId: string = null) {
+    async pause(deviceId = '') {
         try {
             const res = await this.adapter.pause(deviceId);
 
             this.onStateChanged(res);
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting spotify pause', ex);
+            return returnErrorResult('Unexpected error on requesting spotify pause', ex as Error);
         }
     }
 
-    async next(deviceId: string = null) {
+    async next(deviceId = '') {
         try {
             const res = await this.adapter.next(deviceId);
 
             this.onStateChanged(res);
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting spotify next', ex);
+            return returnErrorResult('Unexpected error on requesting spotify next', ex as Error);
         }
     }
 
-    async previous(deviceId: string = null) {
+    async previous(deviceId: string = '') {
         try {
             const res = await this.adapter.previous(deviceId);
 
             this.onStateChanged(res);
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting spotify previous', ex);
+            return returnErrorResult('Unexpected error on requesting spotify previous', ex as Error);
         }
     }
 
@@ -126,7 +126,7 @@ class SpotifyService extends withEvents(BaseService) {
             this.onStateChanged(res);
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify volume', ex);
+            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify volume', ex as Error);
         }
     }
 
@@ -136,7 +136,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IUserInfo>('Unexpected error on requesting spotify profile', ex);
+            return returnErrorResult<IUserInfo>('Unexpected error on requesting spotify profile', ex as Error);
         }
     }
 
@@ -146,7 +146,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(!!profile);
         } catch (ex) {
-            return returnErrorResult<boolean>('Unexpected error on requesting spotify service', ex);
+            return returnErrorResult<boolean>('Unexpected error on requesting spotify service', ex as Error);
         }
     }
 
@@ -162,7 +162,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res.items);
         } catch (ex) {
-            return returnErrorResult<ISpotifySong[]>('Unexpected error on requesting spotify recently played', ex);
+            return returnErrorResult<ISpotifySong[]>('Unexpected error on requesting spotify recently played', ex as Error);
         }
     }
 
@@ -172,7 +172,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res.devices);
         } catch (ex) {
-            return returnErrorResult<IDevice[]>('Unexpected error on requesting spotify list devices', ex);
+            return returnErrorResult<IDevice[]>('Unexpected error on requesting spotify list devices', ex as Error);
         }
     }
 
@@ -189,17 +189,20 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IRecommendationsResult>('Unexpected error on requesting spotify fetch recommendations', ex);
+            return returnErrorResult<IRecommendationsResult>('Unexpected error on requesting spotify fetch recommendations', ex as Error);
         }
     }
 
     async userPlaylists(user: IUserInfo) {
+        if (!user.id) {
+            throw new Error('Can\'t fetch playlist. Empty id');
+        }
         try {
             const res = await this.adapter.userPlaylists(user.id);
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IUserPlaylistsResult>('Unexpected error on requesting spotify user playlists', ex);
+            return returnErrorResult<IUserPlaylistsResult>('Unexpected error on requesting spotify user playlists', ex as Error);
         }
     }
 
@@ -209,7 +212,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IUserPlaylistsResult>('Unexpected error on requesting spotify fetch my playlists', ex);
+            return returnErrorResult<IUserPlaylistsResult>('Unexpected error on requesting spotify fetch my playlists', ex as Error);
         }
     }
 
@@ -219,7 +222,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify fetch playlist tracks', ex);
+            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify fetch playlist tracks', ex as Error);
         }
     }
 
@@ -229,7 +232,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ITrack>>('Unexpected error on requesting spotify list top tracks', ex);
+            return returnErrorResult<IResponseResult<ITrack>>('Unexpected error on requesting spotify list top tracks', ex as Error);
         }
     }
 
@@ -239,7 +242,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<ITopTracksResult>('Unexpected error on requesting spotify fetch artists top tracks', ex);
+            return returnErrorResult<ITopTracksResult>('Unexpected error on requesting spotify fetch artists top tracks', ex as Error);
         }
     }
 
@@ -251,7 +254,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify add tracks', ex);
+            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify add tracks', ex as Error);
         }
     }
 
@@ -263,7 +266,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify remove tracks', ex);
+            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify remove tracks', ex as Error);
         }
     }
 
@@ -273,7 +276,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<boolean[]>('Unexpected error on requesting spotify has tracks', ex);
+            return returnErrorResult<boolean[]>('Unexpected error on requesting spotify has tracks', ex as Error);
         }
     }
 
@@ -283,7 +286,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ITrack>>('Unexpected error on requesting spotify list album tracks', ex);
+            return returnErrorResult<IResponseResult<ITrack>>('Unexpected error on requesting spotify list album tracks', ex as Error);
         }
     }
 
@@ -293,7 +296,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<IAlbum>>('Unexpected error on requesting spotify fetch new releases', ex);
+            return returnErrorResult<IResponseResult<IAlbum>>('Unexpected error on requesting spotify fetch new releases', ex as Error);
         }
     }
 
@@ -303,7 +306,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<ISearchResult>('Unexpected error on requesting spotify featured playlists', ex);
+            return returnErrorResult<ISearchResult>('Unexpected error on requesting spotify featured playlists', ex as Error);
         }
     }
 
@@ -313,18 +316,18 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<ISearchResult>('Unexpected error on requesting spotify search', ex);
+            return returnErrorResult<ISearchResult>('Unexpected error on requesting spotify search', ex as Error);
         }
     }
 
-    async player(deviceId = '', play: boolean = null) {
+    async player(deviceId = '', play: boolean | null = null) {
         try {
             const res = await this.adapter.player(deviceId, play);
 
             play !== null && this.onStateChanged(res);
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IPlayerResult>('Unexpected error on requesting spotify player', ex);
+            return returnErrorResult<IPlayerResult>('Unexpected error on requesting spotify player', ex as Error);
         }
     }
 
@@ -334,7 +337,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<ICurrentlyPlayingResult>('Unexpected error on requesting spotify currently playing', ex);
+            return returnErrorResult<ICurrentlyPlayingResult>('Unexpected error on requesting spotify currently playing', ex as Error);
         }
     }
 
@@ -344,7 +347,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify fetch tracks', ex);
+            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify fetch tracks', ex as Error);
         }
     }
 
@@ -354,7 +357,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting spotify fetch albums', ex);
+            return returnErrorResult('Unexpected error on requesting spotify fetch albums', ex as Error);
         }
     }
 
@@ -366,7 +369,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting spotify add albums', ex);
+            return returnErrorResult('Unexpected error on requesting spotify add albums', ex as Error);
         }
     }
 
@@ -378,7 +381,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting spotify remove albums', ex);
+            return returnErrorResult('Unexpected error on requesting spotify remove albums', ex as Error);
         }
     }
 
@@ -388,7 +391,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting spotify has albums', ex);
+            return returnErrorResult('Unexpected error on requesting spotify has albums', ex as Error);
         }
     }
 
@@ -398,7 +401,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting spotify crate new playlist', ex);
+            return returnErrorResult('Unexpected error on requesting spotify crate new playlist', ex as Error);
         }
     }
 
@@ -408,7 +411,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify add tracks to playlist', ex);
+            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify add tracks to playlist', ex as Error);
         }
     }
 
@@ -418,7 +421,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify remove tracks from playlist', ex);
+            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify remove tracks from playlist', ex as Error);
         }
     }
 
@@ -428,7 +431,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting spotify reorder tracks', ex);
+            return returnErrorResult('Unexpected error on requesting spotify reorder tracks', ex as Error);
         }
     }
 }

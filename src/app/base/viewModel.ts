@@ -7,7 +7,7 @@ export interface IDefaultViewModelProps {
 }
 
 class ViewModel<S extends IDefaultViewModelProps = IDefaultViewModelProps> extends Events {
-    settings = { errors: [] } as S;
+    settings = { errors: [] } as unknown as S;
 
     prop<K extends keyof S>(propName: K, val?: S[K]): S[K] {
         if (arguments.length > 1 && val !== (this.settings as any)[propName]) {

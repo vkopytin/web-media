@@ -12,48 +12,48 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class NewReleasesViewModel {
-    errors$: BehaviorSubject<ServiceResult<any, Error>[]>;
+    errors$!: BehaviorSubject<ServiceResult<any, Error>[]>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    newReleases$: BehaviorSubject<NewReleasesViewModel['newReleases']>;
+    newReleases$!: BehaviorSubject<NewReleasesViewModel['newReleases']>;
     @State newReleases = [] as AlbumViewModelItem[];
 
-    featuredPlaylists$: BehaviorSubject<NewReleasesViewModel['featuredPlaylists']>;
+    featuredPlaylists$!: BehaviorSubject<NewReleasesViewModel['featuredPlaylists']>;
     @State featuredPlaylists = [] as PlaylistsViewModelItem[];
 
-    currentAlbum$: BehaviorSubject<NewReleasesViewModel['currentAlbum']>;
-    @State currentAlbum = null as AlbumViewModelItem;
+    currentAlbum$!: BehaviorSubject<NewReleasesViewModel['currentAlbum']>;
+    @State currentAlbum: AlbumViewModelItem | null = null;
 
-    currentPlaylist$: BehaviorSubject<NewReleasesViewModel['currentPlaylist']>;
-    @State currentPlaylist = null as PlaylistsViewModelItem;
+    currentPlaylist$!: BehaviorSubject<NewReleasesViewModel['currentPlaylist']>;
+    @State currentPlaylist: PlaylistsViewModelItem | null = null;
 
-    currentTracks$: BehaviorSubject<NewReleasesViewModel['currentTracks']>;
+    currentTracks$!: BehaviorSubject<NewReleasesViewModel['currentTracks']>;
     @State currentTracks = [] as TrackViewModelItem[];
 
-    tracks$: BehaviorSubject<NewReleasesViewModel['tracks']>;
+    tracks$!: BehaviorSubject<NewReleasesViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
 
-    likedAlbums$: BehaviorSubject<NewReleasesViewModel['likedAlbums']>;
+    likedAlbums$!: BehaviorSubject<NewReleasesViewModel['likedAlbums']>;
     @State likedAlbums = [] as AlbumViewModelItem[];
 
-    selectAlbumCommand$: BehaviorSubject<NewReleasesViewModel['selectAlbumCommand']>;
+    selectAlbumCommand$!: BehaviorSubject<NewReleasesViewModel['selectAlbumCommand']>;
     @State selectAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => {
         this.currentPlaylist = null;
         this.currentAlbum = album;
         this.loadTracks();
     });
 
-    selectPlaylistCommand$: BehaviorSubject<NewReleasesViewModel['selectPlaylistCommand']>;
+    selectPlaylistCommand$!: BehaviorSubject<NewReleasesViewModel['selectPlaylistCommand']>;
     @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => {
         this.currentAlbum = null;
         this.currentPlaylist = playlist;
         this.loadTracks();
     });
 
-    likeAlbumCommand$: BehaviorSubject<NewReleasesViewModel['likeAlbumCommand']>;
+    likeAlbumCommand$!: BehaviorSubject<NewReleasesViewModel['likeAlbumCommand']>;
     @State likeAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.likeAlbum(album));
 
-    unlikeAlbumCommand$: BehaviorSubject<NewReleasesViewModel['unlikeAlbumCommand']>;
+    unlikeAlbumCommand$!: BehaviorSubject<NewReleasesViewModel['unlikeAlbumCommand']>;
     @State unlikeAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.unlikeAlbum(album));
 
     isInit = new Promise(resume => _.delay(async () => {
@@ -96,7 +96,7 @@ class NewReleasesViewModel {
             return;
         }
         const featuredPlaylists = featuredPlaylistsResult.val as ISearchResult;
-        this.featuredPlaylists = _.map(featuredPlaylists.playlists.items, playlist => new PlaylistsViewModelItem(playlist));
+        this.featuredPlaylists = _.map(featuredPlaylists.playlists?.items || [], playlist => new PlaylistsViewModelItem(playlist));
     }
 
     async loadTracks() {

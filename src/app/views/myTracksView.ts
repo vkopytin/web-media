@@ -16,35 +16,35 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
 
     errors$ = this.vm.errors$;
     @Binding<MyTracksView>({ didSet: (view, errors) => view.showErrors(errors) })
-    errors: MyTracksView['vm']['errors'];
+    errors!: MyTracksView['vm']['errors'];
 
     tracks$ = this.vm.tracks$;
     @Binding()
-    tracks: MyTracksView['vm']['tracks'];
+    tracks!: MyTracksView['vm']['tracks'];
 
     likedTracks$ = this.vm.likedTracks$;
     @Binding()
-    likedTracks: MyTracksView['vm']['likedTracks'];
+    likedTracks!: MyTracksView['vm']['likedTracks'];
 
     isLoading$ = this.vm.isLoading$;
     @Binding()
-    isLoading: MyTracksView['vm']['isLoading'];
+    isLoading!: MyTracksView['vm']['isLoading'];
 
     selectedItem$ = this.vm.selectedItem$;
     @Binding()
-    selectedItem: MyTracksView['vm']['selectedItem'];
+    selectedItem!: MyTracksView['vm']['selectedItem'];
 
     trackLyrics$ = this.vm.trackLyrics$;
     @Binding()
-    trackLyrics: MyTracksView['vm']['trackLyrics'];
+    trackLyrics!: MyTracksView['vm']['trackLyrics'];
 
     loadMoreCommand$ = this.vm.loadMoreCommand$;
     @Binding()
-    loadMoreCommand: MyTracksView['vm']['loadMoreCommand'];
+    loadMoreCommand!: MyTracksView['vm']['loadMoreCommand'];
 
     findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
     @Binding()
-    findTrackLyricsCommand: MyTracksView['vm']['findTrackLyricsCommand'];
+    findTrackLyricsCommand!: MyTracksView['vm']['findTrackLyricsCommand'];
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

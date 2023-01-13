@@ -18,63 +18,63 @@ class SearchView extends React.Component<ISearchViewProps> {
 
     errors$ = this.vm.errors$;
     @Binding<SearchView>({ didSet: (view, errors) => view.showErrors(errors) })
-    errors: SearchView['vm']['errors'];
+    errors!: SearchView['vm']['errors'];
 
     term$ = this.vm.term$;
     @Binding()
-    term: SearchView['vm']['term'];
+    term!: SearchView['vm']['term'];
 
     tracks$ = this.vm.tracks$;
     @Binding()
-    tracks: SearchView['vm']['tracks'];
+    tracks!: SearchView['vm']['tracks'];
 
     artists$ = this.vm.artists$;
     @Binding()
-    artists: SearchView['vm']['artists'];
+    artists!: SearchView['vm']['artists'];
 
     albums$ = this.vm.albums$;
     @Binding()
-    albums: SearchView['vm']['albums'];
+    albums!: SearchView['vm']['albums'];
 
     playlists$ = this.vm.playlists$;
     @Binding()
-    playlists: SearchView['vm']['playlists'];
+    playlists!: SearchView['vm']['playlists'];
 
     searchType$ = this.vm.searchType$;
     @Binding()
-    searchType: SearchView['vm']['searchType'];
+    searchType!: SearchView['vm']['searchType'];
 
     currentAlbum$ = this.vm.currentAlbum$;
     @Binding()
-    currentAlbum: SearchView['vm']['currentAlbum'];
+    currentAlbum!: SearchView['vm']['currentAlbum'];
 
     currentPlaylist$ = this.vm.currentPlaylist$;
     @Binding()
-    currentPlaylist: SearchView['vm']['currentPlaylist'];
+    currentPlaylist!: SearchView['vm']['currentPlaylist'];
 
     currentArtist$ = this.vm.currentArtist$;
     @Binding()
-    currentArtist: SearchView['vm']['currentArtist'];
+    currentArtist!: SearchView['vm']['currentArtist'];
 
     currentTracks$ = this.vm.currentTracks$;
     @Binding()
-    currentTracks: SearchView['vm']['currentTracks'];
+    currentTracks!: SearchView['vm']['currentTracks'];
 
     selectedItem$ = this.vm.selectedItem$;
     @Binding()
-    selectedItem: SearchView['vm']['selectedItem'];
+    selectedItem!: SearchView['vm']['selectedItem'];
 
     loadMoreCommand$ = this.vm.loadMoreCommand$;
     @Binding()
-    loadMoreCommand: SearchView['vm']['loadMoreCommand'];
+    loadMoreCommand!: SearchView['vm']['loadMoreCommand'];
 
     likeTrackCommand$ = this.vm.likeTrackCommand$;
     @Binding()
-    likeTrackCommand: SearchView['vm']['likeTrackCommand'];
+    likeTrackCommand!: SearchView['vm']['likeTrackCommand'];
 
     unlikeTrackCommand$ = this.vm.unlikeTrackCommand$;
     @Binding()
-    unlikeTrackCommand: SearchView['vm']['unlikeTrackCommand'];
+    unlikeTrackCommand!: SearchView['vm']['unlikeTrackCommand'];
 
     searchTracks = _.debounce((term: string) => {
         this.term = term;

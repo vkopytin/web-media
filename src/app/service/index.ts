@@ -23,11 +23,11 @@ const lockLoginService = asyncQueue();
 const lockLyricsServiceResult = asyncQueue();
 
 class Service {
-    settingsService: ServiceResult<SettingsService, Error> = null;
-    spotifyService: ServiceResult<SpotifyService, Error> = null;
-    spotifyPlayerService: ServiceResult<SpotifyPlayerService, Error> = null;
-    spotifySyncService: ServiceResult<SpotifySyncService, Error> = null;
-    dataService: ServiceResult<DataService, Error> = null;
+    settingsService: ServiceResult<SettingsService, Error> | null = null;
+    spotifyService: ServiceResult<SpotifyService, Error> | null = null;
+    spotifyPlayerService: ServiceResult<SpotifyPlayerService, Error> | null = null;
+    spotifySyncService: ServiceResult<SpotifySyncService, Error> | null = null;
+    dataService: ServiceResult<DataService, Error> | null = null;
 
     service<T extends {}, O extends {}>(
         ctor: { prototype: T },
@@ -278,7 +278,7 @@ class Service {
     }
 
     async addTracks(tracks: ITrack | ITrack[]) {
-        const arrTracks = [].concat(tracks);
+        const arrTracks = ([] as ITrack[]).concat(tracks);
         const spotify = await this.service(SpotifyService);
         const result = await spotify.cata(s => s.addTracks(_.map(arrTracks, t => t.id)));
 
@@ -286,7 +286,7 @@ class Service {
     }
 
     async removeTracks(tracks: ITrack | ITrack[]) {
-        const arrTracks = [].concat(tracks);
+        const arrTracks = ([] as ITrack[]).concat(tracks);
         const spotify = await this.service(SpotifyService);
         const result = await spotify.cata(s => s.removeTracks(_.map(arrTracks, t => t.id)));
 
@@ -355,28 +355,28 @@ class Service {
         return result;
     }
 
-    async play(deviceId: string = null, tracksUriList: string | string[] = null, indexOrUri: number | string = null) {
+    async play(deviceId?: string, tracksUriList?: string | string[], indexOrUri: number | string = '') {
         const spotify = await this.service(SpotifyService);
         const result = spotify.cata(s => s.play(deviceId, tracksUriList, indexOrUri));
 
         return result;
     }
 
-    async pause(deviceId: string = null) {
+    async pause(deviceId = '') {
         const spotify = await this.service(SpotifyService);
         const result = spotify.cata(s => s.pause(deviceId));
 
         return result;
     }
 
-    async next(deviceId: string = null) {
+    async next(deviceId = '') {
         const spotify = await this.service(SpotifyService);
         const result = spotify.cata(s => s.next(deviceId));
 
         return result;
     }
 
-    async previous(deviceId: string = null) {
+    async previous(deviceId = '') {
         const spotify = await this.service(SpotifyService);
         const result = spotify.cata(s => s.previous(deviceId));
 
@@ -404,7 +404,7 @@ class Service {
         return result;
     }
 
-    async player(deviceId = '', play: boolean = null) {
+    async player(deviceId = '', play: boolean | null = null) {
         const spotify = await this.service(SpotifyService);
         const result = await spotify.cata(spotify => spotify.player(deviceId, play));
 
@@ -464,9 +464,9 @@ class Service {
     }
 
     async addTrackToPlaylist(tracks: ITrack | ITrack[], playlist: IUserPlaylist) {
-        tracks = [].concat(tracks);
+        tracks = ([] as ITrack[]).concat(tracks);
         const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.addTrackToPlaylist(_.map([].concat(tracks), t => t.uri), playlist.id));
+        const result = await spotify.cata(s => s.addTrackToPlaylist(_.map(([] as ITrack[]).concat(tracks), t => t.uri), playlist.id));
 
         const dataResult = await result.cata(() => this.service(DataService));
         for (const track of tracks) {
@@ -481,7 +481,7 @@ class Service {
     }
 
     async removeTrackFromPlaylist(tracks: ITrack | ITrack[], playlistId: string) {
-        const arrTracks = [].concat(tracks);
+        const arrTracks = ([] as ITrack[]).concat(tracks);
         const spotify = await this.service(SpotifyService);
         const result = await spotify.cata(s => s.removeTrackFromPlaylist(_.map(arrTracks, t => t.uri), playlistId));
 

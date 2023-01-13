@@ -7,7 +7,7 @@ class ServiceResult<T, E extends Error> {
         this.isError = !!error;
     }
 
-    is(a: new (...args: unknown[]) => E): boolean {
+    is(a: new (...args: any[]) => E): boolean {
 
         return this.error instanceof a;
     }
@@ -23,7 +23,7 @@ class ServiceResult<T, E extends Error> {
         if (this.isError) {
             return this as any;
         }
-        return new ServiceResult<R, Error>(done(this.val), null);
+        return new ServiceResult<R, Error>(done(this.val), null as any);
     }
 
     cata<R>(done: (v: T) => R): R {

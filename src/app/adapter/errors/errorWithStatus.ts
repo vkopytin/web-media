@@ -10,7 +10,7 @@ class ErrorWithStatus extends Error {
         );
     }
 
-    constructor(public msg: string, public status: number, public statusText: string, public details: {}) {
+    constructor(public msg: string, public status: number, public statusText: string, public details?: {}) {
         super(msg);
 
         this.name = 'ErrorWithStatus';

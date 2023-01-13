@@ -247,8 +247,8 @@ class SpotifyAdapter {
                 },
                 data: {
                     market,
-                    seed_artists: [].concat(seedArtists).join(','),
-                    seed_tracks: [].concat(seedTracks).join(','),
+                    seed_artists: ([] as string[]).concat(seedArtists).join(','),
+                    seed_tracks: ([] as string[]).concat(seedTracks).join(','),
                     min_energy: minEnergy,
                     min_popularity: minPopularity,
                     limit
@@ -336,7 +336,7 @@ class SpotifyAdapter {
                 },
                 contentType: 'application/json',
                 data: JSON.stringify({
-                    uris: [].concat(trackUris)
+                    uris: ([] as string[]).concat(trackUris)
                 }),
                 success(response) {
                     resolve(response);
@@ -358,7 +358,7 @@ class SpotifyAdapter {
                 },
                 contentType: 'application/json',
                 data: JSON.stringify({
-                    uris: [].concat(trackUris)
+                    uris: ([] as string[]).concat(trackUris)
                 }),
                 success(response) {
                     resolve(response);
@@ -445,7 +445,7 @@ class SpotifyAdapter {
         });
     }
 
-    play(deviceId: string = null, tracksUriList: string | string[] = null, indexOrUri: number | string = null) {
+    play(deviceId?: string, tracksUriList?: string | string[], indexOrUri: number | string = '') {
         const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/player/play'];
         deviceId && urlParts.push($.param({
@@ -454,7 +454,7 @@ class SpotifyAdapter {
         const numberRx = /^\d+$/i;
         const position = numberRx.test('' + indexOrUri) ? +indexOrUri : -1;
         const uri = (!numberRx.test('' + indexOrUri)) ? indexOrUri : '';
-        const uris = [].concat(tracksUriList);
+        const uris = ([] as string[]).concat(tracksUriList || []);
         const contextUri = uris.length === 1 ? uris[0] : '';
         return new Promise<any>((resolve, reject) => {
             $.ajax({
@@ -613,7 +613,7 @@ class SpotifyAdapter {
         });
     }
 
-    player(deviceId = '', play = null as boolean) {
+    player(deviceId = '', play = null as boolean | null) {
         const ready = delayWithin();
         return new Promise<IPlayerResult>((resolve, reject) => {
             $.ajax({
@@ -625,7 +625,7 @@ class SpotifyAdapter {
                 ...play === null ? {} : {
                     contentType: 'application/json',
                     data: JSON.stringify({
-                        device_ids: [].concat(deviceId),
+                        device_ids: ([] as string[]).concat(deviceId),
                         play: play
                     })
                 },
@@ -727,7 +727,7 @@ class SpotifyAdapter {
         const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/tracks'];
         urlParts.push($.param({
-            ids: [].concat(trackIds).join(',')
+            ids: ([] as string[]).concat(trackIds).join(',')
         }));
         return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
@@ -752,7 +752,7 @@ class SpotifyAdapter {
         const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/tracks'];
         urlParts.push($.param({
-            ids: [].concat(trackIds).join(',')
+            ids: ([] as string[]).concat(trackIds).join(',')
         }));
         return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
@@ -777,7 +777,7 @@ class SpotifyAdapter {
         const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/tracks/contains'];
         urlParts.push($.param({
-            ids: [].concat(trackIds).join(',')
+            ids: ([] as string[]).concat(trackIds).join(',')
         }));
         return new Promise<boolean[]>((resolve, reject) => {
             $.ajax({
@@ -823,7 +823,7 @@ class SpotifyAdapter {
         const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/albums'];
         urlParts.push($.param({
-            ids: [].concat(albumIds).join(',')
+            ids: ([] as string[]).concat(albumIds).join(',')
         }));
         return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
@@ -848,7 +848,7 @@ class SpotifyAdapter {
         const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/albums'];
         urlParts.push($.param({
-            ids: [].concat(albumIds).join(',')
+            ids: ([] as string[]).concat(albumIds).join(',')
         }));
         return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
             $.ajax({
@@ -873,7 +873,7 @@ class SpotifyAdapter {
         const ready = delayWithin();
         const urlParts = ['https://api.spotify.com/v1/me/albums/contains'];
         urlParts.push($.param({
-            ids: [].concat(albumIds).join(',')
+            ids: ([] as string[]).concat(albumIds).join(',')
         }));
         return new Promise<boolean[]>((resolve, reject) => {
             $.ajax({

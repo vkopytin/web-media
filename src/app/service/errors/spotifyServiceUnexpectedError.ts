@@ -13,7 +13,7 @@ class SpotifyServiceUnexpectedError extends Error {
 
         this.name = 'SpotifyServiceUnexpectedError';
         if ('stack' in details) {
-            this.stack = [].concat(msg, details.stack).join('\r\n');
+            this.stack = ([] as string[]).concat(msg, details.stack || '').join('\r\n');
         }
 
         Object.setPrototypeOf(this, SpotifyServiceUnexpectedError.prototype);

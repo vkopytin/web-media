@@ -11,49 +11,49 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class HomeViewModel {
-    errors$: BehaviorSubject<HomeViewModel['errors']>;
+    errors$!: BehaviorSubject<HomeViewModel['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    tracks$: BehaviorSubject<HomeViewModel['tracks']>;
+    tracks$!: BehaviorSubject<HomeViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
 
-    likedTracks$: BehaviorSubject<HomeViewModel['likedTracks']>;
+    likedTracks$!: BehaviorSubject<HomeViewModel['likedTracks']>;
     @State likedTracks = [] as TrackViewModelItem[];
 
-    isLoading$: BehaviorSubject<HomeViewModel['isLoading']>;
+    isLoading$!: BehaviorSubject<HomeViewModel['isLoading']>;
     @State isLoading = false;
 
-    selectedTrack$: BehaviorSubject<HomeViewModel['selectedTrack']>;
-    @State selectedTrack = null as TrackViewModelItem;
+    selectedTrack$!: BehaviorSubject<HomeViewModel['selectedTrack']>;
+    @State selectedTrack: TrackViewModelItem | null = null;
 
-    trackLyrics$: BehaviorSubject<HomeViewModel['trackLyrics']>;
-    @State trackLyrics = null as { trackId: string; lyrics: string };
+    trackLyrics$!: BehaviorSubject<HomeViewModel['trackLyrics']>;
+    @State trackLyrics: { trackId: string; lyrics: string } | null = null;
 
-    selectedPlaylist$: BehaviorSubject<HomeViewModel['selectedPlaylist']>;
-    @State selectedPlaylist = null as PlaylistsViewModelItem;
+    selectedPlaylist$!: BehaviorSubject<HomeViewModel['selectedPlaylist']>;
+    @State selectedPlaylist: PlaylistsViewModelItem | null = null;
 
-    refreshCommand$: BehaviorSubject<HomeViewModel['refreshCommand']>;
+    refreshCommand$!: BehaviorSubject<HomeViewModel['refreshCommand']>;
     @State refreshCommand = Scheduler.Command((trackId?: string) => this.fetchData(trackId));
 
-    selectTrackCommand$: BehaviorSubject<{ exec: () => Promise<void> }>;
+    selectTrackCommand$!: BehaviorSubject<{ exec: () => Promise<void> }>;
     @State selectTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.selectedTrack = track);
 
-    likeTrackCommand$: BehaviorSubject<{ exec: (track: TrackViewModelItem) => Promise<void> }>;
+    likeTrackCommand$!: BehaviorSubject<{ exec: (track: TrackViewModelItem) => Promise<void> }>;
     @State likeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.likeTrack(track));
 
-    unlikeTrackCommand$: BehaviorSubject<{ exec: (track: TrackViewModelItem) => Promise<void> }>;
+    unlikeTrackCommand$!: BehaviorSubject<{ exec: (track: TrackViewModelItem) => Promise<void> }>;
     @State unlikeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.unlikeTrack(track));
 
-    findTrackLyricsCommand$: BehaviorSubject<{ exec: (track: TrackViewModelItem) => Promise<void> }>;
+    findTrackLyricsCommand$!: BehaviorSubject<{ exec: (track: TrackViewModelItem) => Promise<void> }>;
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
 
-    bannedTrackIds$: BehaviorSubject<HomeViewModel['bannedTrackIds']>;
+    bannedTrackIds$!: BehaviorSubject<HomeViewModel['bannedTrackIds']>;
     @State bannedTrackIds = [] as string[];
 
-    bannTrackCommand$: BehaviorSubject<HomeViewModel['bannTrackCommand']>;
+    bannTrackCommand$!: BehaviorSubject<HomeViewModel['bannTrackCommand']>;
     @State bannTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.bannTrack(track));
 
-    removeBannFromTrackCommand$: BehaviorSubject<HomeViewModel['removeBannFromTrackCommand']>;
+    removeBannFromTrackCommand$!: BehaviorSubject<HomeViewModel['removeBannFromTrackCommand']>;
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
@@ -166,8 +166,8 @@ class HomeViewModel {
 
     async findTrackLyrics(track: TrackViewModelItem): Promise<void> {
         if (this.trackLyrics && this.trackLyrics.trackId === track.id()) {
-
-            return this.trackLyrics = null;
+            this.trackLyrics = null;
+            return;
         }
 
         const lyricsResult = await this.ss.findTrackLyrics({

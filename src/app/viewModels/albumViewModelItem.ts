@@ -5,10 +5,10 @@ import { ServiceResult } from '../base/serviceResult';
 import { State } from '../utils';
 
 class AlbumViewModelItem {
-    errors$: BehaviorSubject<AlbumViewModelItem['errors']>;
+    errors$!: BehaviorSubject<AlbumViewModelItem['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
-    isLiked$: BehaviorSubject<AlbumViewModelItem['isLiked']>;
+    isLiked$!: BehaviorSubject<AlbumViewModelItem['isLiked']>;
     @State isLiked = false;
 
     constructor(public album: IAlbum) {

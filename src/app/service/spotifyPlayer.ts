@@ -85,7 +85,7 @@ interface IPlayer {
     seek(number: number): Promise<void>;
     previousTrack(): Promise<void>;
     nextTrack(): Promise<void>;
-    connect(): Promise<(success: boolean) => void>;
+    connect(): Promise<((success: boolean) => void) | null>;
     getCurrentState(): Promise<IWebPlaybackState>;
     disconnect(): void;
     _options: {
@@ -109,7 +109,7 @@ class SpotifyPlayerService extends withEvents(BaseService) {
             const settingsResult = await connection.settings('spotify');
             const spotifySettings = settingsResult.val as ISettings['spotify'];
             console.log('*** Requesting OAuth Token ***');
-            cb(spotifySettings.accessToken);
+            cb(spotifySettings?.accessToken || '');
         };
         const settingsResult = await connection.settings('spotify');
         const name = process.env.PLAYER_NAME || 'Dev Player for Spotify';
@@ -155,7 +155,7 @@ class SpotifyPlayerService extends withEvents(BaseService) {
             });
         } catch (ex) {
 
-            return SpotifyPlayerServiceUnexpectedError.create('Unexpected error while creating spotify player', ex);
+            return SpotifyPlayerServiceUnexpectedError.create('Unexpected error while creating spotify player', ex as Error);
         }
     }
 
