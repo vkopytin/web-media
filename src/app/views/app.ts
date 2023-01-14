@@ -7,10 +7,13 @@ import { template } from '../templates/app';
 import { Binding, current, Notifications } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel, TrackViewModelItem } from '../viewModels';
+import { Core } from '../viewModels/core';
 
 export interface IAppViewProps {
 
 }
+
+const core = new Core();
 
 class AppView extends React.Component<IAppViewProps> {
     didRefresh: AppView['refresh'] = this.refresh.bind(this);

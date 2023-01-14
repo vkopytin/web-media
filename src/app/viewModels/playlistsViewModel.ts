@@ -90,7 +90,7 @@ class PlaylistsViewModel {
         resolve(true);
     }));
 
-    constructor(private ss = current(Service)) {
+    constructor(private ss: Service) {
 
     }
 

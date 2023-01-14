@@ -4,7 +4,7 @@ import { IUserInfo } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SettingsService } from '../service/settings';
-import { Binding, current, State } from '../utils';
+import { Binding, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
 import { TrackViewModelItem } from './trackViewModelItem';
@@ -56,7 +56,7 @@ class UserProfileViewModel {
         resolve(true);
     }));
 
-    constructor(private appViewModel = current(AppViewModel), private ss = current(Service)) {
+    constructor(private appViewModel: AppViewModel, private ss: Service) {
 
     }
 

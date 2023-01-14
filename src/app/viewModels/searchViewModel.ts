@@ -4,9 +4,10 @@ import { ISearchResult, ISearchType, ISpotifySong } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { asyncQueue, current, State } from '../utils';
+import { asyncQueue, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AlbumViewModelItem } from './albumViewModelItem';
+import { AppViewModel } from './appViewModel';
 import { ArtistViewModelItem } from './artistViewModelItem';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
@@ -19,9 +20,7 @@ class SearchViewModel {
     @State errors = [] as ServiceResult<any, Error>[];
 
     term$!: BehaviorSubject<SearchViewModel['term']>;
-    @State set term(value: string) {
-        this.onChangeTerm();
-    }
+    @State term = '';
 
     @State isLoading = false;
 
@@ -94,7 +93,7 @@ class SearchViewModel {
         resolve(true);
     }, 100));
 
-    constructor(private ss = current(Service)) {
+    constructor(private appViewModel: AppViewModel, private ss: Service) {
         this.ss.spotifyPlayer();
     }
 
@@ -152,7 +151,7 @@ class SearchViewModel {
             this.settings.total = search.tracks.total;
             this.settings.offset = search.tracks.offset + Math.min(this.settings.limit, search.tracks.items.length);
         } else if (search?.artists) {
-            this.artistsAddRange(_.map(search.artists.items, (artist, index) => new ArtistViewModelItem(artist, search.artists!.offset + index)));
+            this.artistsAddRange(_.map(search.artists.items, (artist, index) => new ArtistViewModelItem(artist, search.artists!.offset + index, this.appViewModel, this.ss)));
 
             this.settings.total = search.artists.total;
             this.settings.offset = search.artists.offset + Math.min(this.settings.limit, search.artists.items.length);

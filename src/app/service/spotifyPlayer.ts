@@ -61,7 +61,7 @@ export interface IWebPlaybackState {
     // once-repeat is 1 and full repeat is 2.
     shuffle: boolean; // True if shuffled, false otherwise.
     track_window: {
-        current_track: IWebPlaybackTrack;                        // The track currently on local playback
+        current_track: IWebPlaybackTrack | null;                        // The track currently on local playback
         previous_tracks: Array<IWebPlaybackTrack>; // Previously played tracks. Number can vary.
         next_tracks: Array<IWebPlaybackTrack>;     // Tracks queued next. Number can vary.
     };

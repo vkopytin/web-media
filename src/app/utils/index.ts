@@ -11,17 +11,20 @@ export function formatTime(ms: number) {
 
 const instances = new WeakMap();
 
-export function current<T extends {}, O extends {}>(
+export function current<T extends {}>(
     ctor: { new(...args: any[]): T },
-    options?: O
+    ...options: unknown[]
 ): T {
     if (instances.has(ctor)) {
         return instances.get(ctor);
     }
-    const inst = new ctor(options);
-    instances.set(ctor, inst);
+    if (ctor.length === options.length) {
+        const inst = new ctor(...options);
+        instances.set(ctor, inst);
+        return inst;
+    }
 
-    return inst;
+    throw new Error('[IoC] Conflict. Probably compnenent was not initialized before. And it is not ready to be used from here.');
 }
 
 export function asyncQueue(concurrency = 1) {
@@ -280,19 +283,15 @@ export const GetTraits = <T extends {}>(obj: {}, autoCreate = true) => {
 
 export function State<T>(target: T, propName: string, descriptor?: PropertyDescriptor) {
     function initState(this: T, v?: T[keyof T]) {
-        let state = new BehaviorSubject<T[keyof T] | undefined>(v);
+        let state = new BehaviorSubject<T[keyof T] | null>(null);
         Notifications.declare(state, propName);
-
-        descriptor?.set && state.subscribe(v => descriptor.set?.call(this, v));
 
         Object.defineProperty(this, `${propName}$`, {
             get() {
                 return state;
             },
             set(v) {
-                if (v !== state) {
-                    state = v;
-                }
+                throw new Error(`State can't change once declared.`)
             },
             enumerable: true,
             configurable: true

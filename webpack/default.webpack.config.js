@@ -59,11 +59,11 @@ module.exports = (options, workingDir) => {
     },
     plugins: [
       new HtmlWebpackPlugin({
-      //   filename: '../public/index.html',
-      //   template: path.resolve(workingDir, '..', 'src', 'html.mustache'),
-      //   inject: false,
-      //   alwaysWriteToDisk: true,
-      //   path: !DEBUG ? '/public' : ''
+        //   filename: '../public/index.html',
+        //   template: path.resolve(workingDir, '..', 'src', 'html.mustache'),
+        //   inject: false,
+        //   alwaysWriteToDisk: true,
+        //   path: !DEBUG ? '/public' : ''
         template: 'index.html'
       }),
       // new HtmlWebpackHarddiskPlugin(),
@@ -145,7 +145,6 @@ module.exports = (options, workingDir) => {
       }, {
         test: /\.js$/,
         loader: 'babel-loader',
-        exclude: /node_modules/
       }, {
         test: /\.tsx?$/,
         loader: 'ts-loader',
@@ -182,15 +181,15 @@ module.exports = (options, workingDir) => {
         ],
       }, {
         test: /\.s[ac]ss$/i,
-          use: (process.env.NODE_ENV === 'development' ? [
-            // Creates `style` nodes from JS strings
-            'style-loader'
-          ] : [{
+        use: (process.env.NODE_ENV === 'development' ? [
+          // Creates `style` nodes from JS strings
+          'style-loader'
+        ] : [{
           loader: MiniCssExtractPlugin.loader,
           options: {
-              hmr: process.env.NODE_ENV === 'development',
+            hmr: process.env.NODE_ENV === 'development',
           },
-      }]).concat([
+        }]).concat([
           // Translates CSS into CommonJS
           'css-loader',
           // Compiles Sass to CSS

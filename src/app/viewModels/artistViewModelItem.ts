@@ -10,8 +10,6 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 
 class ArtistViewModelItem {
-    appViewModel = current(AppViewModel);
-
     errors$!: BehaviorSubject<ArtistViewModelItem['errors']>;
     @State errors = [] as ServiceResult<any, Error>[];
 
@@ -26,7 +24,10 @@ class ArtistViewModelItem {
         this.loadData('playlistTracks');
     });
 
-    constructor(public artist: IArtist, private index: number, private ss = current(Service)) {
+    constructor(public artist: IArtist, private index: number,
+        private appViewModel = current(AppViewModel),
+        private ss = current(Service)
+    ) {
 
     }
 

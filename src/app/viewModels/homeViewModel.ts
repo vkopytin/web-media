@@ -4,7 +4,7 @@ import { IRecommendationsResult, IResponseResult, ISpotifySong, ITrack } from '.
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, current, isLoading, State } from '../utils';
+import { assertNoErrors, isLoading, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
@@ -66,7 +66,7 @@ class HomeViewModel {
         resolve(true);
     }, 100));
 
-    constructor(private ss = current(Service)) {
+    constructor(private ss: Service) {
         this.ss.spotifyPlayer();
     }
 

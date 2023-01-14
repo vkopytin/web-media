@@ -62,7 +62,7 @@ class NewReleasesViewModel {
         resume(true);
     }));
 
-    constructor(private ss = current(Service)) {
+    constructor(private ss: Service) {
 
     }
 

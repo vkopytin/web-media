@@ -93,7 +93,7 @@ class MediaPlayerViewModel {
         resolve(true);
     }));
 
-    constructor(private appViewModel = current(AppViewModel), private ss = current(Service)) {
+    constructor(private appViewModel: AppViewModel, private ss: Service) {
 
     }
 
@@ -125,17 +125,17 @@ class MediaPlayerViewModel {
         if (!state) {
             return;
         }
-        const [artist] = state.track_window.current_track.artists;
+        const [artist] = state.track_window.current_track?.artists || [];
         this.currentTrack = state.track_window.current_track as any;
-        this.currentTrackUri = state.track_window.current_track.uri;
-        this.currentTrackId = state.track_window.current_track.id;
+        this.currentTrackUri = state.track_window.current_track?.uri || '';
+        this.currentTrackId = state.track_window.current_track?.id || '';
+        this.trackName = state.track_window.current_track?.name || '';
+        this.albumName = state.track_window.current_track?.album.name || '';
+        this.thumbnailUrl = _.first(state.track_window.current_track?.album?.images || [])?.url || '';
         this.duration = state.duration;
         this.timePlayed = state.position;
         this.isPlaying = !state.paused;
-        this.trackName = state.track_window.current_track.name;
-        this.albumName = state.track_window.current_track.album.name;
         this.artistName = artist.name;
-        this.thumbnailUrl = _.first(state.track_window.current_track.album.images)?.url || '';
         this.autoSeek();
         this.checkTrackExists();
 
