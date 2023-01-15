@@ -7,6 +7,7 @@ import { PlaylistsViewModel } from '../viewModels';
 
 export interface IPlaylistsViewProps {
     currentTrackId: string;
+    loadMore?: boolean;
     showErrors<T>(errors: ServiceResult<T, Error>[]): void;
 }
 
@@ -64,6 +65,12 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
 
     componentWillUnmount() {
         Notifications.stopObserving(this, this.didRefresh);
+    }
+
+    componentDidUpdate(prevProps: IPlaylistsViewProps) {
+        if (this.props.loadMore) {
+            this.loadMoreCommand.exec();
+        }
     }
 
     refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {

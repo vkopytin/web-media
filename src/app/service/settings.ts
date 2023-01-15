@@ -34,51 +34,47 @@ const getCookie = (key: string) => {
 }
 
 class SettingsService extends BaseService {
-    static create(connection: Service) {
-        try {
-            let sToken = getCookie('spat');
-            let gToken = getCookie('gsat');
-            let gCode = getCookie('gcode');
-            const apiseesKey = getCookie('apsk');
-            const volume = +(getCookie('lastVolume') || 50);
-            const urlParams = window.location.search.replace(/^\?/, '') || '';
-            const hashData = window.location.hash.replace(/^#/, '') || '';
-            const authInfo = fromEntries(hashData + '&' + urlParams) as {
-                access_token: string;
-                state: string;
-                code?: string;
-            };
-            const defaultSettings: ISettings = {
-                spotify: {
-                    accessToken: sToken && atob(sToken),
-                    volume: volume,
-                },
-                genius: {
-                    accessToken: gToken && atob(gToken),
-                    code: gCode && atob(gCode)
-                },
-                apiseeds: {
-                    key: apiseesKey
-                }
-            };
-
-            if ('access_token' in authInfo && /onSpotify-1/.test(authInfo.state)) {
-                document.cookie = 'spat=' + btoa(authInfo.access_token);
-                defaultSettings.spotify.accessToken = authInfo.access_token;
-
-                window.location.replace(window.location.pathname);
+    static makeDefaultSettings() {
+        let sToken = getCookie('spat');
+        let gToken = getCookie('gsat');
+        let gCode = getCookie('gcode');
+        const apiseesKey = getCookie('apsk');
+        const volume = +(getCookie('lastVolume') || 50);
+        const urlParams = window.location.search.replace(/^\?/, '') || '';
+        const hashData = window.location.hash.replace(/^#/, '') || '';
+        const authInfo = fromEntries(hashData + '&' + urlParams) as {
+            access_token: string;
+            state: string;
+            code?: string;
+        };
+        const defaultSettings: ISettings = {
+            spotify: {
+                accessToken: sToken && atob(sToken),
+                volume: volume,
+            },
+            genius: {
+                accessToken: gToken && atob(gToken),
+                code: gCode && atob(gCode)
+            },
+            apiseeds: {
+                key: apiseesKey
             }
+        };
 
-            if ('code' in authInfo && /onGenius-1/.test(authInfo.state) && authInfo.code) {
-                document.cookie = 'gcode=' + btoa(authInfo.code);
-                defaultSettings.genius.code = authInfo.code;
-                window.location.replace(window.location.pathname);
-            }
+        if ('access_token' in authInfo && /onSpotify-1/.test(authInfo.state)) {
+            document.cookie = 'spat=' + btoa(authInfo.access_token);
+            defaultSettings.spotify.accessToken = authInfo.access_token;
 
-            return SettingsServiceResult.success(new SettingsService(defaultSettings));
-        } catch (ex) {
-            return SettingsServiceUnexpectedError.create('Unexpected settings fetch error', ex as Error);
+            window.location.replace(window.location.pathname);
         }
+
+        if ('code' in authInfo && /onGenius-1/.test(authInfo.state) && authInfo.code) {
+            document.cookie = 'gcode=' + btoa(authInfo.code);
+            defaultSettings.genius.code = authInfo.code;
+            window.location.replace(window.location.pathname);
+        }
+
+        return defaultSettings;
     }
 
     config: ISettings = { apiseeds: { key: '' }, genius: {}, spotify: {} };
@@ -110,6 +106,7 @@ class SettingsService extends BaseService {
     get<K extends keyof SettingsService['config']>(
         propName: K, val?: SettingsService['config'][K]
     ): SettingsServiceResult<SettingsService['config'][K], Error> {
+        this.refreshConfig(); //toDO: Make something more specific. Like get already refreshed value individualy.
 
         return SettingsServiceResult.success(this.config[propName]);
     }
@@ -128,6 +125,14 @@ class SettingsService extends BaseService {
         }
 
         return SettingsServiceResult.success(this.config[propName]);
+    }
+
+    refreshConfig() {
+        const config = SettingsService.makeDefaultSettings();
+        this.config = {
+            ...this.config,
+            ...config,
+        };
     }
 }
 

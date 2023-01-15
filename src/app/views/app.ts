@@ -13,7 +13,8 @@ export interface IAppViewProps {
 
 }
 
-const core = new Core();
+const core = current(Core);
+core.run();
 
 class AppView extends React.Component<IAppViewProps> {
     didRefresh: AppView['refresh'] = this.refresh.bind(this);

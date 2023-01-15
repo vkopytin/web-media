@@ -1,4 +1,4 @@
-import * as $ from 'jquery';
+import { Result } from '../utils/result';
 import { ErrorWithStatus } from './errors/errorWithStatus';
 
 export interface IImageInfo {
@@ -174,11 +174,89 @@ export interface IReorderTracksResult {
     snapshot_id: string;
 }
 
+export interface ICategory {
+    id: string;
+    name: string;
+    href: string;
+    icons: IImageInfo[];
+};
+
+export interface IBrowseResult {
+    tracks?: IResponseResult<ITrack>;
+    artists?: IResponseResult<IArtist>;
+    albums?: IResponseResult<IAlbum>;
+    playlists?: IResponseResult<IUserPlaylist>;
+    categories?: IResponseResult<ICategory>;
+}
+
+export interface IPLayerQueueResult {
+    currently_playing: {};
+    queue: ITrack[];
+}
+
+export interface ISpotifyAlbum {
+    added_at: string;
+    album: IAlbum;
+}
+
 export type ISearchType = 'track' | 'album' | 'artist' | 'playlist';
 
 const delayWithin = (ms = 800) => new Promise((resolve) => {
     setTimeout(() => resolve(true), ms);
 });
+
+const resultOrError = async <T>(response: Response): Promise<T> => {
+    if ([200, 204].indexOf(response.status) != -1) {
+        const text = await response.text();
+        const result = JSON.parse(text);
+
+        return result;
+    } else {
+        const result = await response.text();
+        const res = JSON.parse(result);
+
+        if ('error' in res) {
+            const error = res.error;
+            if ('message' in error) {
+                throw new ErrorWithStatus(error.message, response.status, response.statusText, res);
+            }
+            throw new ErrorWithStatus(res.error, response.status, response.statusText);
+        }
+
+        throw new ErrorWithStatus(result, response.status, response.statusText);
+    }
+}
+
+const toString = (obj: { toString?: () => string }) => {
+    try {
+        if (typeof obj === 'undefined') {
+            return '';
+        }
+        if (obj === null) {
+            return '';
+        }
+        if (typeof obj === 'number') {
+            return '' + obj;
+        }
+        if (typeof obj === 'string') {
+            return obj;
+        }
+
+        if ('toString' in obj) {
+            return obj.toString?.();
+        }
+
+        return '' + obj;
+    } catch (ex) {
+        console.log(ex);
+    }
+};
+const toUrlQueryParams = (obj: {}) => Object.entries<{}>(obj)
+    .map(([key, value]) => [key, toString(value)])
+    .map(([key, value]) => `${key}=${encodeURIComponent(value || '')}`)
+    .join('&');
+
+const baseUrl = 'https://api.spotify.com';
 
 class SpotifyAdapter {
 
@@ -186,733 +264,566 @@ class SpotifyAdapter {
 
     }
 
-    async me() {
-        return new Promise<IUserInfo>((resolve, reject) => {
-            $.ajax({
-                url: 'https://api.spotify.com/v1/me',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async me(): Promise<IUserInfo> {
+        const response = await fetch(`${baseUrl}/v1/me`, {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            }
         });
+        const result = await resultOrError<IUserInfo>(response);
+
+        return result;
     }
 
-    recentlyPlayed() {
-        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
-            $.ajax({
-                url: 'https://api.spotify.com/v1/me/player/recently-played',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async recentlyPlayed(before = new Date() as Date | number, limit = 20): Promise<IResponseResult<ISpotifySong>> {
+        before = +before;
+        const response = await fetch(`${baseUrl}/v1/me/player/recently-played?` + toUrlQueryParams({
+            before, limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            }
         });
+
+        return await resultOrError<IResponseResult<ISpotifySong>>(response);
     }
 
-    devices() {
-        const ready = delayWithin();
-        return new Promise<IDevicesResponse>((resolve, reject) => {
-            $.ajax({
-                url: 'https://api.spotify.com/v1/me/player/devices',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                success(response: IDevicesResponse) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async devices(): Promise<IDevicesResponse> {
+        await delayWithin();
+
+        const response = await fetch(`${baseUrl}/v1/me/player/devices`, {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError<IDevicesResponse>(response);
     }
 
-    recommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50, limit = 0) {
-        return new Promise<IRecommendationsResult>((resolve, reject) => {
-            $.ajax({
-                url: 'https://api.spotify.com/v1/recommendations',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                data: {
-                    market,
-                    seed_artists: ([] as string[]).concat(seedArtists).join(','),
-                    seed_tracks: ([] as string[]).concat(seedTracks).join(','),
-                    min_energy: minEnergy,
-                    min_popularity: minPopularity,
-                    limit
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async recommendations(
+        market: string,
+        seedArtists: string | string[], seedTracks: string | string[],
+        minEnergy = 0.4, minPopularity = 50, limit = 0
+    ): Promise<IRecommendationsResult> {
+        const response = await fetch(`${baseUrl}/v1/recommendations?` + toUrlQueryParams({
+            market,
+            seed_artists: ([] as string[]).concat(seedArtists).join(','),
+            seed_tracks: ([] as string[]).concat(seedTracks).join(','),
+            min_energy: minEnergy,
+            min_popularity: minPopularity,
+            limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            }
         });
+
+        return await resultOrError<IRecommendationsResult>(response);
     }
 
-    userPlaylists(userId: string) {
-        return new Promise<IUserPlaylistsResult>((resolve, reject) => {
-            $.ajax({
-                url: `https://api.spotify.com/v1/users/${userId}/playlists`,
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async userPlaylists(userId: string): Promise<IUserPlaylistsResult> {
+        const response = await fetch(`${baseUrl}/v1/users/${userId}/playlists`, {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError<IUserPlaylistsResult>(response);
     }
 
-    createNewPlaylist(userId: string, name: string, description = '', isPublic = false) {
+    async createNewPlaylist(userId: string, name: string, description = '', isPublic = false): Promise<unknown> {
         const data = {
             name,
             description,
             public: isPublic
         };
-        return new Promise<any>((resolve, reject) => {
-            $.ajax({
-                method: 'POST',
-                url: `https://api.spotify.com/v1/users/${userId}/playlists`,
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+        const response = await fetch(`${baseUrl}/v1/users/${userId}/playlists`, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + this.token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
         });
+
+        return await resultOrError(response);
     }
 
-    myPlaylists(offset = 0, limit = 20) {
-        return new Promise<IUserPlaylistsResult>((resolve, reject) => {
-            $.ajax({
-                url: 'https://api.spotify.com/v1/me/playlists',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                data: {
-                    offset: offset,
-                    limit: limit
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async myPlaylists(offset = 0, limit = 20): Promise<IUserPlaylistsResult> {
+        const response = await fetch(`${baseUrl}/v1/me/playlists?` + toUrlQueryParams({
+            offset,
+            limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError<IUserPlaylistsResult>(response);
     }
 
-    addTrackToPlaylist(trackUris: string | string[], playlistId: string) {
-        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
-            $.ajax({
-                method: 'POST',
-                url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    uris: ([] as string[]).concat(trackUris)
-                }),
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async addTrackToPlaylist(trackUris: string | string[], playlistId: string): Promise<ISpotifySong> {
+        const response = await fetch(`${baseUrl}/v1/playlists/${playlistId}/tracks`, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + this.token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                uris: ([] as string[]).concat(trackUris)
+            })
         });
+
+        return await resultOrError<ISpotifySong>(response);
     }
 
-    removeTrackFromPlaylist(trackUris: string | string[], playlistId: string) {
-        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
-            $.ajax({
-                method: 'DELETE',
-                url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    uris: ([] as string[]).concat(trackUris)
-                }),
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async removeTrackFromPlaylist(trackUris: string | string[], playlistId: string): Promise<IResponseResult<ISpotifySong>> {
+        const response = await fetch(`${baseUrl}/v1/playlists/${playlistId}/tracks`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + this.token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                uris: ([] as string[]).concat(trackUris)
+            })
         });
+
+        return await resultOrError<IResponseResult<ISpotifySong>>(response);
     }
 
-    listPlaylistTracks(playlistId: string, offset = 0, limit = 20) {
-        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
-            $.ajax({
-                url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                data: {
-                    offset: offset,
-                    limit: limit
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async getPlaylistDetails(playlistId: string): Promise<IUserPlaylist> {
+        const response = await fetch(`${baseUrl}/v1/playlists/${playlistId}`, {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError<IUserPlaylist>(response);
     }
 
-    myTopTracks() {
-        return new Promise<IResponseResult<ITrack>>((resolve, reject) => {
-            $.ajax({
-                url: `https://api.spotify.com/v1/me/top/tracks`,
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async listPlaylistTracks(playlistId: string, offset = 0, limit = 20): Promise<IResponseResult<ISpotifySong>> {
+        const response = await fetch(`${baseUrl}/v1/playlists/${playlistId}/tracks?` + toUrlQueryParams({
+            offset, limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError<IResponseResult<ISpotifySong>>(response);
     }
 
-    artistTopTracks(artistId: string, country = 'US') {
-        return new Promise<ITopTracksResult>((resolve, reject) => {
-            $.ajax({
-                url: `https://api.spotify.com/v1/artists/${artistId}/top-tracks`,
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                data: {
-                    country: country
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async myTopArtists(offset = 0, limit = 20): Promise<IResponseResult<IArtist>> {
+        const response = await fetch(`${baseUrl}/v1/me/top/artists?` + toUrlQueryParams({
+            offset, limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError(response);
     }
 
-    listAlbumTracks(albumId: string) {
-        return new Promise<IResponseResult<ITrack>>((resolve, reject) => {
-            $.ajax({
-                url: `https://api.spotify.com/v1/albums/${albumId}/tracks`,
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async myTopTracks(offset = 0, limit = 20): Promise<IResponseResult<ITrack>> {
+        const response = await fetch(`${baseUrl}/v1/me/top/tracks?` + toUrlQueryParams({
+            offset, limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError(response);
     }
 
-    play(deviceId?: string, tracksUriList?: string | string[], indexOrUri: number | string = '') {
-        const ready = delayWithin();
-        const urlParts = ['https://api.spotify.com/v1/me/player/play'];
-        deviceId && urlParts.push($.param({
-            device_id: deviceId
-        }));
+    async artistTopTracks(artistId: string, country = 'US'): Promise<ITopTracksResult> {
+        const response = await fetch(`${baseUrl}/v1/artists/${artistId}/top-tracks`, {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
+            body: JSON.stringify({
+                country: country
+            }),
+        });
+
+        return await resultOrError(response);
+    }
+
+    async listAlbumTracks(albumId: string, offset = 0, limit = 20): Promise<IResponseResult<ITrack>> {
+        const response = await fetch(`${baseUrl}/v1/albums/${albumId}/tracks?` + toUrlQueryParams({
+            offset, limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
+        });
+
+        return await resultOrError(response);
+    }
+
+    async listArtistTopTracks(artistId: string, country = 'US', offset = 0, limit = 20): Promise<{ tracks: ITrack[] }> {
+        const response = await fetch(`${baseUrl}/v1/artists/${artistId}/top-tracks?` + toUrlQueryParams({
+            country, offset, limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
+        });
+
+        return await resultOrError(response);
+    }
+
+    async getAlbumDetails(albumId: string): Promise<IAlbum> {
+        const response = await fetch(`${baseUrl}/v1/albums/${albumId}`, {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
+        });
+
+        return await resultOrError(response);
+    }
+
+    async play(tracksUriList?: string | string[], indexOrUri: number | string = '', deviceId?: string) {
+        const urlParts = [`${baseUrl}/v1/me/player/play`];
         const numberRx = /^\d+$/i;
-        const position = numberRx.test('' + indexOrUri) ? +indexOrUri : -1;
+        const position = numberRx.test('' + indexOrUri) ? +indexOrUri! : -1;
         const uri = (!numberRx.test('' + indexOrUri)) ? indexOrUri : '';
         const uris = ([] as string[]).concat(tracksUriList || []);
         const contextUri = uris.length === 1 ? uris[0] : '';
-        return new Promise<any>((resolve, reject) => {
-            $.ajax({
+        deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
+
+        try {
+            const response = await fetch(urlParts.join('?'), {
                 method: 'PUT',
-                url: urlParts.join('?'),
                 headers: {
-                    'Authorization': 'Bearer ' + this.token
+                    'Authorization': 'Bearer ' + this.token,
+                    'Content-Type': 'application/json'
                 },
-                contentType: 'application/json',
-                data: JSON.stringify((tracksUriList && tracksUriList.length) ? {
+                body: JSON.stringify((tracksUriList && tracksUriList.length) ? {
                     ...contextUri ? { context_uri: contextUri } : { uris },
-                    offset: {
-                        ...uri ? { uri } : { position }
-                    }
+
+                    ...uri ? { offset: { uri } }
+                        : position !== -1 ? { offset: { position } }
+                            : {}
                 } : {}),
-                success(response) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
             });
-        });
+
+            return await resultOrError(response);
+        } catch (ex) {
+            return Result.error(ex);
+        }
     }
 
-    next(deviceId: string = '') {
-        const ready = delayWithin();
-        const urlParts = ['https://api.spotify.com/v1/me/player/next'];
-        deviceId && urlParts.push($.param({
-            device_id: deviceId
-        }));
-        return new Promise<any>((resolve, reject) => {
-            $.ajax({
-                method: 'POST',
-                url: urlParts.join('?'),
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                success(response) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async next(deviceId: string = ''): Promise<unknown> {
+        await delayWithin();
+        const urlParts = [`${baseUrl}/v1/me/player/next`];
+        deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
+
+        const response = await fetch(urlParts.join('?'), {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError(response);
     }
 
-    previous(deviceId: string = '') {
-        const ready = delayWithin();
-        const urlParts = ['https://api.spotify.com/v1/me/player/previous'];
-        deviceId && urlParts.push($.param({
-            device_id: deviceId
-        }));
-        return new Promise<any>((resolve, reject) => {
-            $.ajax({
-                method: 'POST',
-                url: urlParts.join('?'),
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                success(response) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async previous(deviceId: string = ''): Promise<unknown> {
+        await delayWithin();
+        const urlParts = [`${baseUrl}/v1/me/player/previous`];
+        deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
+
+        const response = await fetch(urlParts.join('?'), {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError(response);
     }
 
-    pause(deviceId: string = '') {
-        const ready = delayWithin();
-        const urlParts = ['https://api.spotify.com/v1/me/player/pause'];
-        deviceId && urlParts.push($.param({
-            device_id: deviceId
-        }));
-        return new Promise<any>((resolve, reject) => {
-            $.ajax({
-                method: 'PUT',
-                url: urlParts.join('?'),
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                success(response) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async pause(deviceId: string = ''): Promise<unknown> {
+        await delayWithin();
+        const urlParts = [`${baseUrl}/v1/me/player/pause`];
+        deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
+
+        const response = await fetch(urlParts.join('?'), {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError(response);
     }
 
-    newReleases() {
-        return new Promise<IResponseResult<IAlbum>>((resolve, reject) => {
-            $.ajax({
-                url: 'https://api.spotify.com/v1/browse/new-releases',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                success(response) {
-                    resolve(response.albums);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async newReleases(offset = 0, limit = 20): Promise<ISearchResult> {
+        const response = await fetch(`${baseUrl}/v1/browse/new-releases?` + toUrlQueryParams({
+            offset, limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError(response);
     }
 
-    featuredPlaylists(offset = 0, limit = 20, country?: string, locale?: string, timestamp?: string) {
-        return new Promise<ISearchResult>((resolve, reject) => {
-            $.ajax({
-                url: 'https://api.spotify.com/v1/browse/featured-playlists',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                data: {
-                    ...country ? { country } : {},
-                    ...locale ? { locale } : {},
-                    ...timestamp ? { timestamp } : {},
-                    ...offset ? { offset } : {},
-                    limit
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            })
+    async featuredPlaylists(offset = 0, limit = 20, country?: string, locale?: string, timestamp?: string): Promise<Result<Error, ISearchResult>> {
+        const response = await fetch(`${baseUrl}/v1/browse/featured-playlists?` + toUrlQueryParams({
+            ...country ? { country } : {},
+            ...locale ? { locale } : {},
+            ...timestamp ? { timestamp } : {},
+            ...offset ? { offset } : {},
+            limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError(response);
     }
 
-    search(type: ISearchType, term: string, offset = 0, limit = 20) {
-        return new Promise<ISearchResult>((resolve, reject) => {
-            $.ajax({
-                url: 'https://api.spotify.com/v1/search',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                data: {
-                    q: term,
-                    type: type,
-                    ...offset ? { offset: offset } : {},
-                    limit: limit
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async categories(offset = 0, limit = 20, country?: string, locale?: string, timestamp?: string): Promise<IBrowseResult> {
+        const response = await fetch(`${baseUrl}/v1/browse/categories?` + toUrlQueryParams({
+            ...country ? { country } : {},
+            ...locale ? { locale } : {},
+            ...timestamp ? { timestamp } : {},
+            ...offset ? { offset } : {},
+            limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError(response);
     }
 
-    player(deviceId = '', play = null as boolean | null) {
-        const ready = delayWithin();
-        return new Promise<IPlayerResult>((resolve, reject) => {
-            $.ajax({
-                method: play === null ? 'GET' : 'PUT',
-                url: 'https://api.spotify.com/v1/me/player',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                ...play === null ? {} : {
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        device_ids: ([] as string[]).concat(deviceId),
-                        play: play
-                    })
-                },
-                success(response) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async search(searchType: ISearchType, term: string, offset = 0, limit = 20): Promise<ISearchResult> {
+        const response = await fetch(`${baseUrl}/v1/search?` + toUrlQueryParams({
+            q: term,
+            type: searchType,
+            ...offset ? { offset: offset } : {},
+            limit: limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError(response);
     }
 
-    seek(positionMs: number, deviceId = '') {
-        const ready = delayWithin();
-        return new Promise<IPlayerResult>((resolve, reject) => {
-            $.ajax({
-                method: 'PUT',
-                url: 'https://api.spotify.com/v1/me/player/seek?' + $.param({
-                    position_ms: positionMs,
-                    ...deviceId ? { device_id: deviceId } : {}
-                }),
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                contentType: 'application/json',
-                data: JSON.stringify({}),
-                success(response) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async player(deviceId = '', play = null as boolean | null): Promise<IPlayerResult> {
+        const response = await fetch(`${baseUrl}/v1/me/player`, {
+            method: play === null ? 'GET' : 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + this.token,
+                'Content-Type': 'application/json',
+            },
+            ...play === null ? {} : {
+                body: JSON.stringify({
+                    device_ids: ([] as string[]).concat(deviceId),
+                    play: play
+                })
+            }
         });
+
+        return await resultOrError(response);
     }
 
-    currentlyPlaying() {
-        const ready = delayWithin();
-        return new Promise<ICurrentlyPlayingResult>((resolve, reject) => {
-            $.ajax({
-                url: 'https://api.spotify.com/v1/me/player/currently-playing',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                success(response) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async queue(): Promise<IPLayerQueueResult> {
+        const response = await fetch(`${baseUrl}/v1/me/player/queue`, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + this.token,
+                'Content-Type': 'application/json',
+            },
         });
+
+        return await resultOrError(response);
     }
 
-    tracks(offset = 0, limit = 20) {
-        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
-            $.ajax({
-                url: 'https://api.spotify.com/v1/me/tracks',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                data: {
-                    offset: offset,
-                    limit: limit
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async seek(positionMs: number, deviceId = ''): Promise<void> {
+        const response = await fetch(`${baseUrl}/v1/me/player/seek?` + toUrlQueryParams({
+            position_ms: positionMs,
+            ...deviceId ? { device_id: deviceId } : {}
+        }), {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + this.token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
         });
+
+        return await resultOrError(response);
     }
 
-    albums(offset = 0, limit = 20) {
-        return new Promise<IResponseResult<IAlbum>>((resolve, reject) => {
-            $.ajax({
-                url: 'https://api.spotify.com/v1/me/albums',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                data: {
-                    offset: offset,
-                    limit: limit
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async currentlyPlaying(): Promise<ICurrentlyPlayingResult> {
+        const response = await fetch(`${baseUrl}/v1/me/player/currently-playing`, {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError(response);
     }
 
-    addTracks(trackIds: string | string[]) {
-        const ready = delayWithin();
-        const urlParts = ['https://api.spotify.com/v1/me/tracks'];
-        urlParts.push($.param({
-            ids: ([] as string[]).concat(trackIds).join(',')
-        }));
-        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
-            $.ajax({
-                method: 'PUT',
-                url: urlParts.join('?'),
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                contentType: 'application/json',
-                data: JSON.stringify({}),
-                success(response) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async tracks(offset = 0, limit = 20): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
+        const response = await fetch(`${baseUrl}/v1/me/tracks?` + toUrlQueryParams({
+            offset: offset,
+            limit: limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            }
         });
+
+        return await resultOrError(response);
     }
 
-    removeTracks(trackIds: string | string[]) {
-        const ready = delayWithin();
-        const urlParts = ['https://api.spotify.com/v1/me/tracks'];
-        urlParts.push($.param({
-            ids: ([] as string[]).concat(trackIds).join(',')
-        }));
-        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
-            $.ajax({
-                method: 'DELETE',
-                url: urlParts.join('?'),
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                contentType: 'application/json',
-                data: JSON.stringify({}),
-                success(response) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async albums(offset = 0, limit = 20): Promise<IResponseResult<ISpotifyAlbum>> {
+        const response = await fetch(`${baseUrl}/v1/me/albums?` + toUrlQueryParams({
+            offset, limit
+        }), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            }
         });
+
+        return await resultOrError(response);
     }
 
-    hasTracks(trackIds: string | string[]) {
-        const ready = delayWithin();
-        const urlParts = ['https://api.spotify.com/v1/me/tracks/contains'];
-        urlParts.push($.param({
-            ids: ([] as string[]).concat(trackIds).join(',')
-        }));
-        return new Promise<boolean[]>((resolve, reject) => {
-            $.ajax({
-                url: urlParts.join('?'),
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                success(response: boolean[]) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async addTracks(trackIds: string | string[]): Promise<IResponseResult<ISpotifySong>> {
+        const urlParts = [`${baseUrl}/v1/me/tracks`];
+        urlParts.push(`ids=${encodeURIComponent(([] as string[]).concat(trackIds).join(','))}`);
+
+        const response = await fetch(urlParts.join('?'), {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + this.token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
         });
+
+        return await resultOrError(response);
     }
 
-    volume(precent: number, deviceId?: string) {
-        const ready = delayWithin();
-        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
-            $.ajax({
-                method: 'PUT',
-                url: 'https://api.spotify.com/v1/me/player/volume?' + $.param({
-                    volume_percent: precent,
-                    ...deviceId ? { device_id: deviceId } : {}
-                }),
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                contentType: 'application/json',
-                data: JSON.stringify({}),
-                success(response) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async removeTracks(trackIds: string | string[]): Promise<IResponseResult<ISpotifySong>> {
+        const urlParts = [`${baseUrl}/v1/me/tracks`];
+        urlParts.push(`ids=${encodeURIComponent(([] as string[]).concat(trackIds).join(','))}`);
+
+        const response = await fetch(urlParts.join('?'), {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + this.token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
         });
+
+        return await resultOrError(response);
     }
 
-    addAlbums(albumIds: string | string[]) {
-        const ready = delayWithin();
-        const urlParts = ['https://api.spotify.com/v1/me/albums'];
-        urlParts.push($.param({
-            ids: ([] as string[]).concat(albumIds).join(',')
-        }));
-        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
-            $.ajax({
-                method: 'PUT',
-                url: urlParts.join('?'),
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                contentType: 'application/json',
-                data: JSON.stringify({}),
-                success(response) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async hasTracks(trackIds: string | string[]): Promise<boolean[]> {
+        const urlParts = [`${baseUrl}/v1/me/tracks/contains`];
+        urlParts.push(`ids=${encodeURIComponent(([] as string[]).concat(trackIds).join(','))}`);
+
+        const response = await fetch(urlParts.join('?'), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
         });
+
+        return await resultOrError(response);
     }
 
-    removeAlbums(albumIds: string | string[]) {
-        const ready = delayWithin();
-        const urlParts = ['https://api.spotify.com/v1/me/albums'];
-        urlParts.push($.param({
-            ids: ([] as string[]).concat(albumIds).join(',')
-        }));
-        return new Promise<IResponseResult<ISpotifySong>>((resolve, reject) => {
-            $.ajax({
-                method: 'DELETE',
-                url: urlParts.join('?'),
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                contentType: 'application/json',
-                data: JSON.stringify({}),
-                success(response) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async volume(precent: number, deviceId?: string): Promise<IResponseResult<ISpotifySong>> {
+
+        const response = await fetch(`${baseUrl}/v1/me/player/volume?` + toUrlQueryParams({
+            volume_percent: precent,
+            ...deviceId ? { device_id: deviceId } : {}
+        }), {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + this.token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
         });
+
+        return await resultOrError(response);
     }
 
-    hasAlbums(albumIds: string | string[]) {
-        const ready = delayWithin();
-        const urlParts = ['https://api.spotify.com/v1/me/albums/contains'];
-        urlParts.push($.param({
-            ids: ([] as string[]).concat(albumIds).join(',')
-        }));
-        return new Promise<boolean[]>((resolve, reject) => {
-            $.ajax({
-                url: urlParts.join('?'),
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                success(response: boolean[]) {
-                    ready.then(() => resolve(response));
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async addAlbums(albumIds: string | string[]): Promise<IResponseResult<ISpotifySong>> {
+        const urlParts = [`${baseUrl}/v1/me/albums`];
+        urlParts.push(`ids=${encodeURIComponent(([] as string[]).concat(albumIds).join(','))}`);
+
+        const response = await fetch(urlParts.join('?'), {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + this.token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
         });
+
+        return await resultOrError(response);
     }
 
-    reorderTracks(playlistId: string, rangeStart: number, insertBefore: number, rangeLength = 1) {
-        return new Promise<IReorderTracksResult>((resolve, reject) => {
-            $.ajax({
-                method: 'PUT',
-                url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                },
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    range_start: rangeStart,
-                    insert_before: insertBefore,
-                    range_length: rangeLength
-                }),
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR, textStatus: string, errorThrown: string) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+    async removeAlbums(albumIds: string | string[]): Promise<IResponseResult<ISpotifySong>> {
+        const urlParts = [`${baseUrl}/v1/me/albums`];
+        urlParts.push(`ids=${encodeURIComponent(([] as string[]).concat(albumIds).join(','))}`);
+
+        const response = await fetch(urlParts.join('?'), {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + this.token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
         });
+
+        return await resultOrError(response);
+    }
+
+    async hasAlbums(albumIds: string | string[]): Promise<boolean[]> {
+        await delayWithin();
+        const urlParts = [`${baseUrl}/v1/me/albums/contains`];
+        urlParts.push(`ids=${encodeURIComponent(([] as string[]).concat(albumIds).join(','))}`);
+
+        const response = await fetch(urlParts.join('?'), {
+            headers: {
+                'Authorization': 'Bearer ' + this.token
+            },
+        });
+
+        return await resultOrError(response);
+    }
+
+    async reorderTracks(playlistId: string, rangeStart: number, insertBefore: number, rangeLength = 1): Promise<IReorderTracksResult> {
+        const response = await fetch(`${baseUrl}/v1/playlists/${playlistId}/tracks`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + this.token,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                range_start: rangeStart,
+                insert_before: insertBefore,
+                range_length: rangeLength
+            }),
+        });
+
+        return await resultOrError(response);
     }
 }
 

@@ -116,6 +116,7 @@ export const template = (view: AppView) => <main>
             >
                 <PlaylistsView
                     showErrors={errors => view.showErrors(errors)}
+                    loadMore={view.state.scrolledToBottom}
                     currentTrackId={view.currentTrackId}
                 />
             </section>

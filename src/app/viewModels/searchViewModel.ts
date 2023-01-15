@@ -93,8 +93,8 @@ class SearchViewModel {
         resolve(true);
     }, 100));
 
-    constructor(private appViewModel: AppViewModel, private ss: Service) {
-        this.ss.spotifyPlayer();
+    constructor(private spotifyService: SpotifyService, private ss: Service) {
+
     }
 
     async fetchData() {
@@ -151,7 +151,7 @@ class SearchViewModel {
             this.settings.total = search.tracks.total;
             this.settings.offset = search.tracks.offset + Math.min(this.settings.limit, search.tracks.items.length);
         } else if (search?.artists) {
-            this.artistsAddRange(_.map(search.artists.items, (artist, index) => new ArtistViewModelItem(artist, search.artists!.offset + index, this.appViewModel, this.ss)));
+            this.artistsAddRange(_.map(search.artists.items, (artist, index) => new ArtistViewModelItem(artist, search.artists!.offset + index)));
 
             this.settings.total = search.artists.total;
             this.settings.offset = search.artists.offset + Math.min(this.settings.limit, search.artists.items.length);
@@ -170,25 +170,24 @@ class SearchViewModel {
     }
 
     async fetchTracks() {
-        const spotifyResult = await this.ss.service(SpotifyService);
         this.currentTracks = [];
 
         if (this.searchType === 'album' && this.currentAlbum) {
-            const albumTrackssResult = await spotifyResult.cata(s => s.listAlbumTracks(this.currentAlbum!.id()));
+            const albumTrackssResult = await this.spotifyService.listAlbumTracks(this.currentAlbum!.id());
 
             return albumTrackssResult.assert(e => this.errors = [e])
                 .cata(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem({ track: item } as any, index)));
         }
 
         if (this.searchType === 'playlist' && this.currentPlaylist) {
-            const playlistTracksResult = await spotifyResult.cata(s => s.fetchPlaylistTracks(this.currentPlaylist!.id()));
+            const playlistTracksResult = await this.spotifyService.fetchPlaylistTracks(this.currentPlaylist!.id());
 
             return playlistTracksResult.assert(e => this.errors = [e])
                 .cata(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem(item, index)));
         }
 
         if (this.searchType === 'artist' && this.currentArtist) {
-            const artistTracksResult = await spotifyResult.cata(s => s.fetchArtistTopTracks(this.currentArtist!.id(), 'US'));
+            const artistTracksResult = await this.spotifyService.fetchArtistTopTracks(this.currentArtist!.id(), 'US');
 
             return artistTracksResult.assert(e => this.errors = [e])
                 .cata(tr => this.currentTracks = _.map(tr.tracks, (item, index) => new TrackViewModelItem({ track: item } as any, index)));

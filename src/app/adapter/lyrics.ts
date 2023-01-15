@@ -19,6 +19,7 @@ class LyricsAdapter {
 
     constructor(public token: string) {
     }
+
     async search(term: string) {
         return new Promise<ILyricsSearchResult>((resolve, reject) => {
             $.ajax({

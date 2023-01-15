@@ -3,6 +3,7 @@ import { mocked } from 'ts-jest/utils';
 import { DataStorage } from '../../data/dataStorage';
 import { Service } from '../../service';
 import { AppViewModel } from '../appViewModel';
+import { SpotifyService } from '../../service/spotify';
 
 
 jest.mock('../../adapter/spotify', () => {
@@ -56,11 +57,14 @@ describe('App View Model', () => {
     let vm: AppViewModel;
     let srv: Service;
     let mockedInit: jest.SpyInstance<ReturnType<AppViewModel['init']>>;
+    let spotifyService: SpotifyService;
+
 
     beforeEach(async () => {
-        srv = new Service();
+        spotifyService = new SpotifyService(new SpotifyAdapter('test'));
+        srv = new Service({} as any, {} as any, {} as any, {} as any, spotifyService, {} as any, {} as any);
         mockedInit = jest.spyOn(AppViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
-        vm = new AppViewModel(srv);
+        vm = new AppViewModel({} as any, {} as any, {} as any, srv);
         const res = await vm.isInit;
         expect(res).toBeTruthy();
     });
@@ -96,7 +100,7 @@ describe('App View Model', () => {
     });
 
     it('Should catch error when fetch devices', async () => {
-        jest.spyOn(srv.spotifyService!.val!.adapter, 'devices').mockImplementation(() => {
+        jest.spyOn(spotifyService.adapter, 'devices').mockImplementation(() => {
             throw new Error('fake error');
         });
 

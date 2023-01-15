@@ -4,6 +4,7 @@ import { IRecommendationsResult, IResponseResult, ISpotifySong, ITrack } from '.
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
+import { SpotifyPlayerService } from '../service/spotifyPlayer';
 import { assertNoErrors, isLoading, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
@@ -66,17 +67,16 @@ class HomeViewModel {
         resolve(true);
     }, 100));
 
-    constructor(private ss: Service) {
-        this.ss.spotifyPlayer();
+    constructor(
+        private spotifyService: SpotifyService,
+        private spotifyPlayerService: SpotifyPlayerService,
+        private ss: Service
+    ) {
+
     }
 
     async connect() {
-        const spotifyResult = await this.ss.service(SpotifyService);
-        if (assertNoErrors(spotifyResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-            return;
-        }
-        const spotify = spotifyResult.val;
-        spotify?.on('change:state', (...args) => this.loadData(...args));
+        this.spotifyService.on('change:state', (...args) => this.loadData(...args));
     }
 
     @isLoading
@@ -145,9 +145,7 @@ class HomeViewModel {
     }
 
     async resume() {
-        const playerResult = await this.ss.spotifyPlayer();
-        playerResult.assert(e => this.errors = [e])
-            .cata(player => player.resume());
+        await this.spotifyPlayerService.resume();
     }
 
     async likeTrack(track: TrackViewModelItem) {

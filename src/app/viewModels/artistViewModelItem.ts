@@ -26,7 +26,7 @@ class ArtistViewModelItem {
 
     constructor(public artist: IArtist, private index: number,
         private appViewModel = current(AppViewModel),
-        private ss = current(Service)
+        private spotifyService = current(SpotifyService),
     ) {
 
     }
@@ -49,8 +49,7 @@ class ArtistViewModelItem {
     }
 
     async connect() {
-        const spotifyResult = await this.ss.service(SpotifyService);
-        spotifyResult.assert(e => this.errors = [e]);
+
     }
 
     async loadData(...args: unknown[]) {
@@ -62,13 +61,13 @@ class ArtistViewModelItem {
     async play() {
         const device = this.appViewModel.currentDevice;
 
-        const res = await this.ss.play(device?.id(), this.uri());
+        const res = await this.spotifyService.play(device?.id(), this.uri());
         res.assert(e => this.errors = [e]);
     }
 
     async playTracks() {
         const device = this.appViewModel.currentDevice;
-        const playResult = await this.ss.play(device?.id(), this.uri());
+        const playResult = await this.spotifyService.play(device?.id(), this.uri());
         playResult.assert(e => this.errors = [e]);
     }
 }

@@ -3,6 +3,9 @@ import { mocked } from 'ts-jest/utils';
 import { DataStorage } from '../../data/dataStorage';
 import { Service } from '../../service';
 import { MediaPlayerViewModel } from '../mediaPlayerViewModel';
+import { SpotifyService } from '../../service/spotify';
+import { SpotifyPlayerService } from '../../service/spotifyPlayer';
+import { SettingsService } from '../../service/settings';
 
 let mockSrv: any;
 
@@ -48,10 +51,14 @@ describe('Media Player View Model', () => {
     const MockedSpotifyAdapter = mocked(SpotifyAdapter, true);
     let vm: MediaPlayerViewModel;
     let srv: Service;
+    let spotifyService: SpotifyService;
+    let spotifyPlayerService: SpotifyPlayerService;
 
     beforeAll(async () => {
-        srv = new Service();
-        vm = new MediaPlayerViewModel({} as any, srv);
+        spotifyService = new SpotifyService(new SpotifyAdapter('test'));
+        spotifyPlayerService = new SpotifyPlayerService(new SettingsService());
+        srv = new Service({} as any, {} as any, {} as any, {} as any, spotifyService, {} as any, spotifyPlayerService);
+        vm = new MediaPlayerViewModel({} as any, {} as any, {} as any, {} as any, srv);
         const res = await vm.isInit;
         expect(res).toBeTruthy();
     });
@@ -68,13 +75,13 @@ describe('Media Player View Model', () => {
         await vm.fetchDataInternal();
 
         expect(vm.isPlaying).toBeTruthy();
-        expect(srv.spotifyService!.val!.adapter.player).toBeCalled();
+        expect(spotifyService.adapter.player).toBeCalled();
     });
 
     it('Should spotify set volume', (done) => {
-        jest.spyOn(srv.spotifyService!.val!.adapter, 'volume').mockImplementation(() => {
+        jest.spyOn(spotifyService.adapter, 'volume').mockImplementation(() => {
             setTimeout(() => {
-                expect(srv.spotifyService!.val!.adapter.volume).toBeCalledWith(50);
+                expect(spotifyService.adapter.volume).toBeCalledWith(50);
                 done();
             });
             return Promise.resolve({} as any);
@@ -83,9 +90,9 @@ describe('Media Player View Model', () => {
     });
 
     it('Should spotify start play', (done) => {
-        jest.spyOn(srv.spotifyService!.val!.adapter, 'play').mockImplementation(() => {
+        jest.spyOn(spotifyService.adapter, 'play').mockImplementation(() => {
             setTimeout(() => {
-                expect(srv.spotifyService!.val!.adapter.play).toHaveBeenCalled();
+                expect(spotifyService.adapter.play).toHaveBeenCalled();
                 done();
             });
             return Promise.resolve({} as any);
@@ -94,9 +101,9 @@ describe('Media Player View Model', () => {
     });
 
     it('Should spotify pause', (done) => {
-        jest.spyOn(srv.spotifyService!.val!.adapter, 'pause').mockImplementation(() => {
+        jest.spyOn(spotifyService.adapter, 'pause').mockImplementation(() => {
             setTimeout(() => {
-                expect(srv.spotifyService!.val!.adapter.pause).toHaveBeenCalled();
+                expect(spotifyService.adapter.pause).toHaveBeenCalled();
                 done();
             });
             return Promise.resolve({} as any);
@@ -105,9 +112,9 @@ describe('Media Player View Model', () => {
     });
 
     it('Should spotify previous', (done) => {
-        jest.spyOn(srv.spotifyService!.val!.adapter, 'previous').mockImplementation(() => {
+        jest.spyOn(spotifyService.adapter, 'previous').mockImplementation(() => {
             setTimeout(() => {
-                expect(srv.spotifyService!.val!.adapter.previous).toHaveBeenCalled();
+                expect(spotifyService.adapter.previous).toHaveBeenCalled();
                 done();
             });
             return Promise.resolve({} as any);
@@ -116,9 +123,9 @@ describe('Media Player View Model', () => {
     });
 
     it('Should spotify next', (done) => {
-        jest.spyOn(srv.spotifyService!.val!.adapter, 'next').mockImplementation(() => {
+        jest.spyOn(spotifyService.adapter, 'next').mockImplementation(() => {
             setTimeout(() => {
-                expect(srv.spotifyService!.val!.adapter.next).toHaveBeenCalled();
+                expect(spotifyService.adapter.next).toHaveBeenCalled();
                 done();
             });
             return Promise.resolve({} as any);
@@ -127,9 +134,9 @@ describe('Media Player View Model', () => {
     });
 
     it('Should spotify volumeUp', (done) => {
-        jest.spyOn(srv.spotifyService!.val!.adapter, 'volume').mockImplementation(() => {
+        jest.spyOn(spotifyService!.adapter, 'volume').mockImplementation(() => {
             setTimeout(() => {
-                expect(srv.spotifyService!.val!.adapter.volume).toHaveBeenCalled();
+                expect(spotifyService.adapter.volume).toHaveBeenCalled();
                 done();
             });
             return Promise.resolve({} as any);
@@ -138,9 +145,9 @@ describe('Media Player View Model', () => {
     });
 
     it('Should spotify volumeDown', (done) => {
-        jest.spyOn(srv.spotifyService!.val!.adapter, 'volume').mockImplementation(() => {
+        jest.spyOn(spotifyService.adapter, 'volume').mockImplementation(() => {
             setTimeout(() => {
-                expect(srv.spotifyService!.val!.adapter.volume).toHaveBeenCalled();
+                expect(spotifyService.adapter.volume).toHaveBeenCalled();
                 done();
             });
             return Promise.resolve({} as any);
@@ -149,9 +156,9 @@ describe('Media Player View Model', () => {
     });
 
     it('Should spotify likeTrack', (done) => {
-        jest.spyOn(srv.spotifyService!.val!.adapter, 'addTracks').mockImplementation(() => {
+        jest.spyOn(spotifyService.adapter, 'addTracks').mockImplementation(() => {
             setTimeout(() => {
-                expect(srv.spotifyService!.val!.adapter.addTracks).toHaveBeenCalled();
+                expect(spotifyService.adapter.addTracks).toHaveBeenCalled();
                 done();
             });
             return Promise.resolve({} as any);
@@ -161,9 +168,9 @@ describe('Media Player View Model', () => {
     });
 
     it('Should spotify unlikeTrack', (done) => {
-        jest.spyOn(srv.spotifyService!.val!.adapter, 'removeTracks').mockImplementation(() => {
+        jest.spyOn(spotifyService.adapter, 'removeTracks').mockImplementation(() => {
             setTimeout(() => {
-                expect(srv.spotifyService!.val!.adapter.removeTracks).toHaveBeenCalled();
+                expect(spotifyService.adapter.removeTracks).toHaveBeenCalled();
                 done();
             });
             return Promise.resolve({} as any);
@@ -173,9 +180,9 @@ describe('Media Player View Model', () => {
     });
 
     it('Should spotify resume', (done) => {
-        jest.spyOn(srv.spotifyPlayerService!.val!, 'resume').mockImplementation(() => {
+        jest.spyOn(spotifyPlayerService, 'resume').mockImplementation(() => {
             setTimeout(() => {
-                expect(srv.spotifyPlayerService!.val!.resume).toHaveBeenCalled();
+                expect(spotifyPlayerService.resume).toHaveBeenCalled();
                 done();
             });
             return Promise.resolve({} as any);

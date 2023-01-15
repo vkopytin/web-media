@@ -44,15 +44,15 @@ class MyTracksViewModel {
         resolve(true);
     }));
 
-    constructor(private ss: Service) {
+    constructor(
+        private spotifyService: SpotifyService,
+        private ss: Service,
+    ) {
 
     }
 
     async connect() {
-        const spotifyResult = await this.ss.service(SpotifyService);
-        spotifyResult.assert(e => this.errors = [e]).cata(spotify => {
-            spotify.on('change:state', (...args) => this.loadData(...args));
-        });
+        this.spotifyService.on('change:state', (...args) => this.loadData(...args));
     }
 
     async fetchData() {

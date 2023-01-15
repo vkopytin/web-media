@@ -41,13 +41,6 @@ class UserProfileViewModel {
     currentTrackId$ = this.appViewModel.currentTrackId$;
     @Binding() currentTrackId = '';
 
-    settings = {
-        currentTrackId: '',
-        spotifyAuthUrl: '',
-        geniusAuthUrl: '',
-        apiseedsKey: ''
-    };
-
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         await this.fetchData();
         this.apiseedsKey$.subscribe(_.debounce((val: string) => {
@@ -56,15 +49,17 @@ class UserProfileViewModel {
         resolve(true);
     }));
 
-    constructor(private appViewModel: AppViewModel, private ss: Service) {
+    constructor(
+        private appViewModel: AppViewModel,
+        private settingsService: SettingsService,
+        private ss: Service
+    ) {
 
     }
 
     async fetchData() {
-        const settingsResult = await this.ss.service(SettingsService);
-        settingsResult.assert(e => this.errors = [e]).cata(() => {
-            this.apiseedsKey = settingsResult.cata(val => val.apiseedsKey());
-        });
+        this.apiseedsKey = this.settingsService.apiseedsKey();
+
         const spotifyTokenUrlResult = await this.ss.getSpotifyAuthUrl();
         spotifyTokenUrlResult.assert(e => this.errors = [e]).cata(spotifyAuthUrl => {
             this.spotifyAuthUrl = spotifyAuthUrl;
@@ -91,11 +86,8 @@ class UserProfileViewModel {
         });
     }
 
-    async saveApiseedsKey(val: string) {
-        const settingsResult = await this.ss.service(SettingsService);
-        settingsResult.assert(e => this.errors = [e]).cata(settings => {
-            settingsResult.map(v => v.apiseedsKey(val));
-        });
+    saveApiseedsKey(val: string) {
+        this.settingsService.apiseedsKey(val);
     }
 
     async logout() {

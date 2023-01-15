@@ -35,19 +35,6 @@ function returnErrorResult<T>(message: string, ex: Error): ServiceResult<T, Erro
 }
 
 class SpotifyService extends withEvents(BaseService) {
-    static async create(connection: Service) {
-        try {
-            const settingsResult = await connection.settings('spotify');
-
-            return settingsResult
-                .cata(s => SpotifyServiceResult.success(new SpotifyService(
-                    new SpotifyAdapter(s?.accessToken || '')
-                )));
-        } catch (ex) {
-            return returnErrorResult<SpotifyService>('Unexpected error on requesting spotify service', ex as Error);
-        }
-    }
-
     currentProfile: IUserInfo | null = null;
     onStateChanged = debounce(this.onStateChangedInternal, 500);
 
@@ -77,7 +64,7 @@ class SpotifyService extends withEvents(BaseService) {
 
     async play(deviceId?: string, tracksUriList?: string | string[], indexOrUri: number | string = '') {
         try {
-            const res = await this.adapter.play(deviceId, tracksUriList, indexOrUri);
+            const res = await this.adapter.play(tracksUriList, indexOrUri, deviceId);
 
             this.onStateChanged(res);
             return SpotifyServiceResult.success(res);

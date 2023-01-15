@@ -1,6 +1,6 @@
 import { BaseService } from '../base/baseService';
 import { Service } from './index';
-import { ISettings } from './settings';
+import { ISettings, SettingsService } from './settings';
 import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult';
 import { SpotifyPlayerServiceError } from './errors/spotifyPlayerServiceError';
 import { SpotifyPlayerServiceUnexpectedError } from './errors/spotifyPlayerServiceUnexpectedError';
@@ -104,60 +104,7 @@ declare global {
 }
 
 class SpotifyPlayerService extends withEvents(BaseService) {
-    static async create(connection: Service) {
-        const getOAuthToken = async (cb: (t: string) => void) => {
-            const settingsResult = await connection.settings('spotify');
-            const spotifySettings = settingsResult.val as ISettings['spotify'];
-            console.log('*** Requesting OAuth Token ***');
-            cb(spotifySettings?.accessToken || '');
-        };
-        const settingsResult = await connection.settings('spotify');
-        const name = process.env.PLAYER_NAME || 'Dev Player for Spotify';
-        if (settingsResult.isError) {
-
-            return settingsResult;
-        }
-        if (!settingsResult.val) {
-            return SpotifyPlayerServiceError.create('Error getting access token from settings');
-        }
-
-        try {
-            if (window.Spotify) {
-                const Spotify = window.Spotify;
-                const player = new Spotify.Player({
-                    name,
-                    getOAuthToken: getOAuthToken
-                });
-
-                return SpotifyPlayerServiceResult.success(new SpotifyPlayerService(player));
-            }
-
-            return new Promise<SpotifyPlayerServiceResult<SpotifyPlayerService, Error>>((resolve, reject) => {
-
-                window.onSpotifyWebPlaybackSDKReady = () => {
-                    const Spotify = window.Spotify;
-                    const player = new Spotify.Player({
-                        name,
-                        getOAuthToken: getOAuthToken
-                    });
-
-                    resolve(SpotifyPlayerServiceResult.success(new SpotifyPlayerService(player)));
-                };
-
-                if (!window.Spotify) {
-                    const scriptTag = document.createElement('script');
-                    scriptTag.src = 'https://sdk.scdn.co/spotify-player.js';
-
-                    document.head!.appendChild(scriptTag);
-                }
-
-                setTimeout(() => reject(SpotifyPlayerServiceUnexpectedError.create('Player was not created withiin expected time range', new Error('Player was not created withiin expected time range'))), 5000);
-            });
-        } catch (ex) {
-
-            return SpotifyPlayerServiceUnexpectedError.create('Unexpected error while creating spotify player', ex as Error);
-        }
-    }
+    public player?: IPlayer;
 
     deviceId: string = '';
     onInitializationError = (error: IWebPlaybackError) => {
@@ -189,15 +136,60 @@ class SpotifyPlayerService extends withEvents(BaseService) {
         this.trigger('notReady', player);
     }
 
-    constructor(public player: IPlayer) {
+    constructor(private settingsService: SettingsService) {
         super();
+    }
 
-        setTimeout(() => {
-            this.connect();
+    async init() {
+        const getOAuthToken = async (cb: (t: string) => void) => {
+            this.settingsService.get('spotify').map(spotifySettings => {
+                console.log('[Spotify SDK] *** Requesting OAuth Token ***');
+                const token = spotifySettings?.accessToken || '';
+                cb(token);
+            });
+        };
+        const name = process.env.PLAYER_NAME || 'Dev Player for Spotify';
+        this.player = await new Promise((resolve, reject) => {
+            try {
+                if (window.Spotify) {
+                    const Spotify = window.Spotify;
+                    const player = new Spotify.Player({
+                        name,
+                        getOAuthToken: getOAuthToken
+                    });
+
+                    return resolve(player);
+                }
+                window.onSpotifyWebPlaybackSDKReady = () => {
+                    const Spotify = window.Spotify;
+                    const player = new Spotify.Player({
+                        name,
+                        getOAuthToken: getOAuthToken
+                    });
+
+                    resolve(player);
+                };
+
+                if (!window.Spotify) {
+                    const scriptTag = document.createElement('script');
+                    scriptTag.src = 'https://sdk.scdn.co/spotify-player.js';
+
+                    document.head.appendChild(scriptTag);
+                }
+
+                setTimeout(() => reject(new Error('[Spotify SDK] Player was not created withiin expected time range')), 5000);
+            } catch (ex) {
+                reject(ex as Error);
+            }
         });
+
+        this.connect();
     }
 
     async connect() {
+        if (!this.player) {
+            throw new Error('[Spotify SDK] Player is not initialized');
+        }
         // Error handling
         this.player.addListener('initialization_error', this.onInitializationError);
         this.player.addListener('authentication_error', this.onAuthenticationError);
@@ -221,41 +213,68 @@ class SpotifyPlayerService extends withEvents(BaseService) {
     }
 
     async refreshToken(newToken: string) {
+        if (!this.player) {
+            throw new Error('[Spotify SDK] Player is not initialized');
+        }
         await this.player.connect();
         return SpotifyPlayerServiceResult.success(true);
     }
 
     resume() {
+        if (!this.player) {
+            throw new Error('[Spotify SDK] Player is not initialized');
+        }
         return this.player.resume();
     }
 
     togglePlay() {
+        if (!this.player) {
+            throw new Error('[Spotify SDK] Player is not initialized');
+        }
         return this.player.togglePlay();
     }
 
     pause() {
+        if (!this.player) {
+            throw new Error('[Spotify SDK] Player is not initialized');
+        }
         return this.player.pause();
     }
 
     nextTrack() {
+        if (!this.player) {
+            throw new Error('[Spotify SDK] Player is not initialized');
+        }
         return this.player.nextTrack();
     }
 
     previouseTrack() {
+        if (!this.player) {
+            throw new Error('[Spotify SDK] Player is not initialized');
+        }
         return this.player.previousTrack();
     }
 
     async getCurrentState() {
+        if (!this.player) {
+            throw new Error('[Spotify SDK] Player is not initialized');
+        }
         const state = await this.player.getCurrentState();
         return state;
     }
 
     async getVolume() {
+        if (!this.player) {
+            throw new Error('[Spotify SDK] Player is not initialized');
+        }
         const volume = await this.player.getVolume();
         return volume * 100;
     }
 
     setVolume(percent: number) {
+        if (!this.player) {
+            throw new Error('[Spotify SDK] Player is not initialized');
+        }
         return this.player.setVolume(percent * 0.01);
     }
 }

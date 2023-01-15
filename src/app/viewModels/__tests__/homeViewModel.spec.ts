@@ -3,6 +3,9 @@ import { mocked } from 'ts-jest/utils';
 import { DataStorage } from '../../data/dataStorage';
 import { Service } from '../../service';
 import { HomeViewModel } from '../homeViewModel';
+import { SpotifyService } from '../../service/spotify';
+import { SpotifyPlayerService } from '../../service/spotifyPlayer';
+import { SettingsService } from '../../service/settings';
 
 let mockSrv: any;
 
@@ -42,10 +45,14 @@ describe('Home View Model', () => {
     const MockedSpotifyAdapter = mocked(SpotifyAdapter, true);
     let vm: HomeViewModel;
     let srv: Service;
+    let spotifyService: SpotifyService;
+    let spotifyPlayerService: SpotifyPlayerService;
 
     beforeAll(async () => {
-        srv = new Service();
-        vm = new HomeViewModel(srv);
+        spotifyService = new SpotifyService(new SpotifyAdapter('test'));
+        spotifyPlayerService = new SpotifyPlayerService(new SettingsService());
+        srv = new Service({} as any, {} as any, {} as any, {} as any, spotifyService, {} as any, spotifyPlayerService);
+        vm = new HomeViewModel({} as any, {} as any, srv);
         const res = await vm.isInit;
         expect(res).toBeTruthy();
     });
@@ -74,28 +81,28 @@ describe('Home View Model', () => {
     it('Should play track', async () => {
         await vm.playInTracks(vm.tracks[0]);
 
-        expect(srv.spotifyService!.val!.adapter.play).toBeCalledWith(null, ['recommendation:uri-01'], 'recommendation:uri-01');
+        expect(spotifyService.adapter.play).toBeCalledWith(null, ['recommendation:uri-01'], 'recommendation:uri-01');
     });
 
     it('Should resume playback', async () => {
-        jest.spyOn(srv.spotifyPlayerService!.val!.player, 'resume').mockImplementation(() => Promise.resolve());
+        jest.spyOn(spotifyPlayerService.player!, 'resume').mockImplementation(() => Promise.resolve());
 
         await vm.resume();
 
-        expect(srv.spotifyPlayerService!.val!.player.resume).toBeCalledWith();
+        expect(spotifyPlayerService.player!.resume).toBeCalledWith();
     });
 
     it('Should like track', async () => {
-        jest.spyOn(srv.spotifyService!.val!.adapter, 'addTracks').mockImplementation(() => Promise.resolve({} as any));
+        jest.spyOn(spotifyService.adapter, 'addTracks').mockImplementation(() => Promise.resolve({} as any));
         await vm.likeTrack(vm.tracks[0]);
 
-        expect(srv.spotifyService!.val!.adapter.addTracks).toBeCalledWith(['recommendation-01']);
+        expect(spotifyService.adapter.addTracks).toBeCalledWith(['recommendation-01']);
     });
 
     it('Should unlike track', async () => {
-        jest.spyOn(srv.spotifyService!.val!.adapter, 'removeTracks').mockImplementation(() => Promise.resolve({} as any));
+        jest.spyOn(spotifyService.adapter, 'removeTracks').mockImplementation(() => Promise.resolve({} as any));
         await vm.unlikeTrack(vm.tracks[0]);
 
-        expect(srv.spotifyService!.val!.adapter.removeTracks).toBeCalledWith(['recommendation-01']);
+        expect(spotifyService.adapter.removeTracks).toBeCalledWith(['recommendation-01']);
     });
 });

@@ -52,6 +52,7 @@ class TrackViewModelItem {
     constructor(
         public song: ISpotifySong,
         private index: number,
+        private dataService = current(DataService),
         private ss = current(Service)
     ) {
 
@@ -120,16 +121,13 @@ class TrackViewModelItem {
     }
 
     async connect() {
-        const spotifyResult = await this.ss.service(SpotifyService);
-        this.trackPlaylists = await spotifyResult.assert(e => this.errors = [e])
-            .cata(() => this.listPlaylists());
+        this.listPlaylists();
         const res = await this.ss.isBannedTrack(this.song.track.id);
         res.assert(e => this.errors = [e]).cata(r => this.isBanned = r);
     }
 
     async listPlaylists() {
-        const dataResult = await this.ss.service(DataService);
-        const res = await dataResult.cata(data => data.listPlaylistsByTrack(this.song.track));
+        const res = await this.dataService.listPlaylistsByTrack(this.song.track);
 
         return res.assert(e => this.errors = [e])
             .cata(playlists => playlists.map(playlist => new PlaylistsViewModelItem(playlist)));

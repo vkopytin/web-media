@@ -62,19 +62,15 @@ class NewReleasesViewModel {
         resume(true);
     }));
 
-    constructor(private ss: Service) {
+    constructor(
+        private spotifyService: SpotifyService,
+        private ss: Service,
+    ) {
 
     }
 
     async connect() {
-        const spotifyResult = await this.ss.service(SpotifyService);
-        if (spotifyResult.isError) {
-            this.errors = [spotifyResult];
-        }
-        if (assertNoErrors(spotifyResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-            return;
-        }
-        spotifyResult.map(val => val.on('change:state', state => this.checkAlbums()));
+        this.spotifyService.on('change:state', state => this.checkAlbums());
         this.currentAlbum$.subscribe(() => _.delay(() => this.loadTracks()));
         this.currentPlaylist$.subscribe(() => _.delay(() => this.loadTracks()));
     }
@@ -132,9 +128,12 @@ class NewReleasesViewModel {
     async checkAlbums() {
         const albums = this.newReleases;
         const ids = _.map(albums, (album: AlbumViewModelItem) => album.id());
+        if (ids.length === 0) {
+            return;
+        }
+
         const likedResult = await this.ss.hasAlbums(ids);
         if (assertNoErrors(likedResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-
             return;
         }
 

@@ -95,8 +95,7 @@ class PlaylistsViewModel {
     }
 
     async connect() {
-        const spotifyResult = await this.ss.service(SpotifyService);
-        spotifyResult.assert(e => this.errors = [e]);
+
     }
 
     async fetchData() {

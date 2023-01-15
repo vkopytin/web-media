@@ -5,7 +5,7 @@ import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SettingsService } from '../service/settings';
 import { SpotifyService } from '../service/spotify';
-import { IWebPlaybackState } from '../service/spotifyPlayer';
+import { IWebPlaybackState, SpotifyPlayerService } from '../service/spotifyPlayer';
 import { assertNoErrors, asyncQueue, Binding, current, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
@@ -93,32 +93,26 @@ class MediaPlayerViewModel {
         resolve(true);
     }));
 
-    constructor(private appViewModel: AppViewModel, private ss: Service) {
+    constructor(
+        private appViewModel: AppViewModel,
+        private spotifyService: SpotifyService,
+        private settingsSerivce: SettingsService,
+        private spotifyPlayerService: SpotifyPlayerService,
+        private ss: Service
+    ) {
 
     }
 
     async connect() {
-        const playerResult = await this.ss.spotifyPlayer();
-        const spotifyResult = await playerResult.cata((player) => {
-            player.on('playerStateChanged', (en, state) => this.updateFromPlayerState(state));
-            return this.ss.service(SpotifyService);
-        });
+        await this.spotifyPlayerService.on('playerStateChanged', (en, state) => this.updateFromPlayerState(state));
 
-        spotifyResult.assert(e => this.errors = [e])
-            .cata(spotify => {
-                spotify.on('change:state', state => this.updateState(state));
-                this.updateState();
-            });
+        this.spotifyService.on('change:state', state => this.fetchData());
+        this.fetchData();
     }
 
     async currentPlayerState() {
-        const stateResult = await this.ss.spotifyPlayerState();
-
-        return stateResult.assert(e => this.errors = [e]).cata(r => r);
-    }
-
-    updateState(res?: unknown) {
-        this.fetchData();
+        const state = await this.spotifyPlayerService.getCurrentState();
+        return state;
     }
 
     async updateFromPlayerState(state: IWebPlaybackState) {
@@ -135,25 +129,22 @@ class MediaPlayerViewModel {
         this.duration = state.duration;
         this.timePlayed = state.position;
         this.isPlaying = !state.paused;
-        this.artistName = artist.name;
+        this.artistName = artist?.name || '';
         this.autoSeek();
         this.checkTrackExists();
 
-        const playerResult = await this.ss.spotifyPlayer();
-        await playerResult.assert(e => this.errors = [e]).cata(async player => {
-            const settingsResult = await this.ss.settings('spotify');
-            await settingsResult.assert(async () => {
-                const volume = await player.getVolume();
-                return this.volume = volume;
-            }).map(settings => settings?.volume || this.volume).cata(volume => {
-                player.setVolume(volume);
-                this.volume = volume;
-            });
+        const settingsResult = await this.settingsSerivce.get('spotify');
+        await settingsResult.assert(async () => {
+            const volume = await this.spotifyPlayerService.getVolume();
+            return this.volume = volume;
+        }).map(settings => settings?.volume || this.volume).cata(volume => {
+            this.spotifyPlayerService.setVolume(volume);
+            this.volume = volume;
         });
     }
 
     async fetchDataInternal() {
-        const res = await this.ss.player();
+        const res = await this.spotifyService.player();
         res.map(currentlyPlaying => {
             this.lastTime = +new Date();
             if (currentlyPlaying && currentlyPlaying.item) {
@@ -222,151 +213,117 @@ class MediaPlayerViewModel {
 
     async setVolume(percent: number) {
         lockSection.push(async next => {
-            const stateResult = await this.ss.spotifyPlayerState();
-            const res = await stateResult.assert(e => this.errors = [e]).cata(async state => {
+            try {
+                const state = await this.spotifyPlayerService.getCurrentState();
                 if (_.isEmpty(state)) {
                     this.volume = percent;
                     await this.ss.volume(percent);
                 } else {
-                    const playerResult = await this.ss.spotifyPlayer();
-                    await playerResult.assert(e => this.errors = [e]).cata(async player => {
-                        this.volume = percent;
-                        await player.setVolume(percent);
-                    });
+                    this.volume = percent;
+                    await this.spotifyPlayerService.setVolume(percent);
                 }
 
-                return await this.ss.service(SettingsService);
-            });
-            res.assert(e => this.errors = [e]).cata(settings => {
-                settings.volume(this.volume = percent);
-            });
-
-            next();
+                this.settingsSerivce.volume(this.volume = percent);
+            } finally {
+                next();
+            }
         });
     }
 
     async play() {
         lockSection.push(async next => {
-            const stateResult = await this.ss.spotifyPlayerState();
-            const res = await stateResult.cata(async state => {
-                if (_.isEmpty(state)) {
-                    return await this.ss.play();
-                } else {
-                    const playerResult = await this.ss.spotifyPlayer();
-                    await playerResult.map(val => val.resume());
-                    return playerResult;
-                }
-            });
-            res.assert(e => this.errors = [e]).cata(() => {
-                this.isPlaying = true;
-            });
+            try {
+                const state = await this.spotifyPlayerService.getCurrentState();
 
-            next();
+                if (_.isEmpty(state)) {
+                    await this.ss.play();
+                } else {
+                    await this.spotifyPlayerService.resume();
+                }
+                this.isPlaying = true;
+            } finally {
+                next();
+            }
         });
     }
 
     async pause() {
         lockSection.push(async next => {
-            const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-                return next();
-            }
-            if (_.isEmpty(stateResult.val)) {
-                await this.ss.pause();
-            } else {
-                const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-                    return next();
+            try {
+                const state = await this.spotifyPlayerService.getCurrentState();
+                if (_.isEmpty(state)) {
+                    await this.ss.pause();
+                } else {
+                    await this.spotifyPlayerService.pause();
                 }
-                await playerResult.map(val => val.pause());
+                this.isPlaying = false;
+            } finally {
+                next();
             }
-            this.isPlaying = false;
-
-            next();
         });
     }
 
     async previous() {
         lockSection.push(async next => {
-            const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-                return next();
-            }
-            if (_.isEmpty(stateResult.val)) {
-                await this.ss.previous();
-            } else {
-                const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-                    return next();
+            try {
+                const state = await this.spotifyPlayerService.getCurrentState();
+                if (_.isEmpty(state)) {
+                    await this.ss.previous();
+                } else {
+                    await this.spotifyPlayerService.previouseTrack();
                 }
-                await playerResult.map(val => val.previouseTrack());
+            } finally {
+                next();
             }
-
-            next();
         });
     }
 
     async next() {
         lockSection.push(async next => {
-            const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-                return next();
-            }
-            if (_.isEmpty(stateResult.val)) {
-                await this.ss.next();
-            } else {
-                const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-                    return next();
+            try {
+                const state = await this.spotifyPlayerService.getCurrentState();
+                if (_.isEmpty(state)) {
+                    await this.ss.next();
+                } else {
+                    await this.spotifyPlayerService.nextTrack();
                 }
-                await playerResult.map(val => val.nextTrack());
+            } finally {
+                next();
             }
-
-            next();
         });
     }
 
     async volumeUp() {
         lockSection.push(async (next) => {
-            const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-                return next();
-            }
-            if (_.isEmpty(stateResult.val)) {
-                const volume = this.volume;
-                await this.ss.volume(volume * 1.1);
-            } else {
-                const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-                    return next();
+            try {
+                const state = await this.spotifyPlayerService.getCurrentState();
+                if (_.isEmpty(state)) {
+                    const volume = this.volume;
+                    await this.ss.volume(volume * 1.1);
+                } else {
+                    const volume = await this.spotifyPlayerService.getVolume();
+                    this.volume = volume * 1.1;
                 }
-                const volume = await playerResult.cata(val => val.getVolume());
-                this.volume = volume * 1.1;
+            } finally {
+                next();
             }
-
-            next();
         });
     }
 
     async volumeDown() {
         lockSection.push(async next => {
-            const stateResult = await this.ss.spotifyPlayerState();
-            if (assertNoErrors(stateResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-                return next();
-            }
-            if (_.isEmpty(stateResult.val)) {
-                const volume = this.volume;
-                await this.ss.volume(volume * 0.9);
-            } else {
-                const playerResult = await this.ss.spotifyPlayer();
-                if (assertNoErrors(playerResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-                    return next();
+            try {
+                const state = await this.spotifyPlayerService.getCurrentState();
+                if (_.isEmpty(state)) {
+                    const volume = this.volume;
+                    await this.ss.volume(volume * 0.9);
+                } else {
+                    const volume = await this.spotifyPlayerService.getVolume();
+                    this.volume = volume * 0.9;
                 }
-                const volume = await playerResult.cata(val => val.getVolume());
-                this.volume = volume * 0.9;
+            } finally {
+                next();
             }
-
-            next();
         });
     }
 
@@ -399,8 +356,7 @@ class MediaPlayerViewModel {
     }
 
     async resume() {
-        const playerResult = await this.ss.spotifyPlayer();
-        playerResult.assert(e => this.errors = [e]).cata(player => player.resume());
+        await this.spotifyPlayerService.resume();
     }
 }
 

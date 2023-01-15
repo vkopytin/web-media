@@ -3,14 +3,11 @@ import $ from 'jquery';
 import { BaseService } from '../base/baseService';
 import { Service } from '.';
 import { LoginServiceResult } from './results/loginServiceResult';
+import { SettingsService } from './settings';
 
 
 class LoginService extends withEvents(BaseService) {
-    static async create(connection: Service) {
-        return LoginServiceResult.success(new LoginService(connection));
-    }
-
-    constructor(public ss: Service) {
+    constructor(public settings: SettingsService) {
         super();
     }
 
@@ -57,7 +54,7 @@ class LoginService extends withEvents(BaseService) {
     }
 
     async isLoggedIn() {
-        const settingsResult = await this.ss.settings('spotify');
+        const settingsResult = await this.settings.get('spotify');
         if (!settingsResult.val) {
             return LoginServiceResult.success(false);
         }
@@ -70,13 +67,13 @@ class LoginService extends withEvents(BaseService) {
     async getGeniusAuthUrl() {
         const clientId = 'xJvzKWkHgMgOVTEoh4H3Jp3hhkUtTP3q9lQIGEwEZbPjp1r6-3kk9JQ6HiBHPEUq';
         const redirectUri = `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
-        authUrl = 'https://api.genius.com/oauth/authorize?' + $.param({
-            client_id: clientId,
-            redirect_uri: redirectUri,
-            scope: ['me'].join(' '),
-            response_type: 'code',
-            state: 'onGenius-1'
-        });
+            authUrl = 'https://api.genius.com/oauth/authorize?' + $.param({
+                client_id: clientId,
+                redirect_uri: redirectUri,
+                scope: ['me'].join(' '),
+                response_type: 'code',
+                state: 'onGenius-1'
+            });
 
         return LoginServiceResult.success(authUrl);
     }

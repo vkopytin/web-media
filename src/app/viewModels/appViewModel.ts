@@ -4,8 +4,10 @@ import * as _ from 'underscore';
 import { IUserInfo } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
+import { SpotifyService } from '../service/spotify';
+import { SpotifyPlayerService } from '../service/spotifyPlayer';
 import { SpotifySyncService } from '../service/spotifySyncService';
-import { current, State } from '../utils';
+import { State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { DeviceViewModelItem } from './deviceViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
@@ -62,7 +64,12 @@ class AppViewModel {
         resolve(true);
     }));
 
-    constructor(private ss: Service) {
+    constructor(
+        private spotifySyncService: SpotifySyncService,
+        private spotifyService: SpotifyService,
+        private spotifyPlayerService: SpotifyPlayerService,
+        private ss: Service,
+    ) {
 
     }
 
@@ -84,9 +91,7 @@ class AppViewModel {
 
     async startSync() {
         this.isSyncing = 1;
-        const syncServiceResult = await this.ss.service(SpotifySyncService);
-        const res = await syncServiceResult.cata(syncService => syncService.syncData());
-        res.assert(e => this.errors = [e]);
+        await this.spotifySyncService.syncData();
 
         this.isSyncing = 0;
     }
@@ -104,18 +109,13 @@ class AppViewModel {
         this.openLogin = isLoggedInResult.assert(e => this.errors = [e])
             .cata(r => !r);
 
-        const playerResult = await this.ss.spotifyPlayer();
-        playerResult.assert(e => this.errors = [e])
-            .cata((player) => {
-                const updateDevicesHandler = async (eventName: string, device: { device_id: string; }) => {
-                    await this.updateDevices();
-                    if (!this.currentDevice) {
-                        await this.ss.player(device.device_id, false);
-                    }
-                    player.off('ready', updateDevicesHandler);
-                };
-                player.on('ready', updateDevicesHandler);
-            });
+        const updateDevicesHandler = async (eventName: string, device: { device_id: string; }) => {
+            await this.updateDevices();
+            if (!this.currentDevice) {
+                await this.spotifyService.player(device.device_id, false);
+            }
+        };
+        this.spotifyPlayerService.on('ready', updateDevicesHandler);
     }
 
     async fetchData() {
@@ -140,7 +140,7 @@ class AppViewModel {
     }
 
     async switchDevice(device: DeviceViewModelItem) {
-        const res = await this.ss.player(device.id(), true);
+        const res = await this.spotifyService.player(device.id(), true);
 
         res.assert(e => this.errors = [e])
             .cata(() => _.delay(() => {

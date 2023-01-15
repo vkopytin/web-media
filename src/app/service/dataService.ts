@@ -19,12 +19,7 @@ import { IPlaylistRow } from '../data/entities/interfaces/iPlaylistRow';
 
 
 class DataService extends withEvents(BaseService) {
-    static async create(connection: Service) {
-        await initializeStructure();
-        return DataServiceResult.success(new DataService(connection));
-    }
-
-    constructor(public ss: Service) {
+    constructor() {
         super();
     }
 

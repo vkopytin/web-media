@@ -11,27 +11,16 @@ import { ServiceResult } from '../base/serviceResult';
 
 
 class SpotifySyncService extends withEvents(BaseService) {
-    static async create(connection: Service) {
-        const dataServiceResult = await connection.service(DataService);
-        if (dataServiceResult.isError) {
-            return dataServiceResult;
-        }
-        const spotifyResult = await connection.service(SpotifyService);
-        if (spotifyResult.isError) {
-            return spotifyResult;
-        }
-        const spotify = spotifyResult.val;
-        return SpotifySyncServiceResult.success(new SpotifySyncService(connection, spotify!, dataServiceResult.val!));
-    }
-
     limit = 49;
 
-    constructor(public ss: Service, public spotify: SpotifyService, private data: DataService) {
+    constructor(public spotify: SpotifyService, private data: DataService) {
         super();
     }
 
     async syncData() {
         try {
+            return;
+            // toDO: Enable sync data
             await this.syncMyTracks();
             const playlistsResult = await this.syncMyPlaylists();
             return playlistsResult.cata(async playlists => {

@@ -1,10 +1,7 @@
-import { ServiceResult } from '../base/serviceResult';
 import { SpotifyService } from './spotify';
 import { SettingsService } from './settings';
 import { SpotifyPlayerService } from './spotifyPlayer';
-import { asyncQueue } from '../utils';
 import * as _ from 'underscore';
-import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult';
 import { SpotifySyncService } from './spotifySyncService';
 import { DataService } from './dataService';
 import { ITrack, ISearchType, IUserPlaylist } from '../adapter/spotify';
@@ -14,163 +11,31 @@ import { LoginService } from './loginService';
 import { LyricsService } from './lyricsService';
 
 
-const lockSpotifyService = asyncQueue();
-const lockSettingsService = asyncQueue();
-const lockSpotifyPlayerService = asyncQueue();
-const lockSpotifySyncService = asyncQueue();
-const lockDataService = asyncQueue();
-const lockLoginService = asyncQueue();
-const lockLyricsServiceResult = asyncQueue();
-
 class Service {
-    settingsService: ServiceResult<SettingsService, Error> | null = null;
-    spotifyService: ServiceResult<SpotifyService, Error> | null = null;
-    spotifyPlayerService: ServiceResult<SpotifyPlayerService, Error> | null = null;
-    spotifySyncService: ServiceResult<SpotifySyncService, Error> | null = null;
-    dataService: ServiceResult<DataService, Error> | null = null;
+    constructor(
+        private settingsService: SettingsService,
+        private loginService: LoginService,
+        private lyricsService: LyricsService,
+        private dataService: DataService,
+        private spotifyService: SpotifyService,
+        private spotifySyncService: SpotifySyncService,
+        private spotifyPlayerService: SpotifyPlayerService,
+    ) {
 
-    service<T extends {}, O extends {}>(
-        ctor: { prototype: T },
-        options = {} as O
-    ): Promise<ServiceResult<T, Error>> {
-        switch (ctor) {
-            case SpotifyService as any:
-                return new Promise((resolve, reject) => {
-                    lockSpotifyService.push(async (next) => {
-                        if (this.spotifyService) {
-                            resolve(this.spotifyService as any);
-                            next();
-                            return;
-                        }
-
-                        const spotifyService = await SpotifyService.create(this);
-                        if (spotifyService.isError) {
-                            return resolve(spotifyService as any);
-                        }
-
-                        resolve(this.spotifyService = spotifyService as any)
-                        next();
-                    });
-                });
-            case SettingsService as any:
-                return new Promise((resolve, reject) => {
-                    lockSettingsService.push(next => {
-                        if (this.settingsService) {
-                            resolve(this.settingsService as any);
-                            next();
-                            return;
-                        }
-
-                        const settingsService = SettingsService.create(this);
-                        if (settingsService.isError) {
-                            resolve(settingsService as any);
-                            return next();
-                        }
-
-                        resolve(this.settingsService = settingsService as any);
-                        next();
-                    });
-                });
-            case SpotifyPlayerService as any:
-                return new Promise((resolve, reject) => {
-                    lockSpotifyPlayerService.push(async (next) => {
-                        if (this.spotifyPlayerService) {
-                            resolve(this.spotifyPlayerService as any);
-                            next();
-                            return;
-                        }
-
-                        const spotifyPlayerService = await SpotifyPlayerService.create(this);
-                        if (spotifyPlayerService.isError) {
-                            return resolve(spotifyPlayerService as any);
-                        }
-
-                        resolve(this.spotifyPlayerService = spotifyPlayerService as any);
-                        next();
-                    });
-                });
-            case SpotifySyncService as any:
-                return new Promise((resolve, reject) => {
-                    lockSpotifySyncService.push(async (next) => {
-                        if (this.spotifySyncService) {
-                            resolve(this.spotifySyncService as any);
-                            next();
-                            return;
-                        }
-
-                        const spotifySyncService = await SpotifySyncService.create(this);
-                        if (spotifySyncService.isError) {
-                            return resolve(spotifySyncService as any);
-                        }
-
-                        resolve(this.spotifySyncService = spotifySyncService as any);
-                        next();
-                    });
-                });
-            case DataService as any:
-                return new Promise((resolve, reject) => {
-                    lockDataService.push(async (next) => {
-                        if (this.dataService) {
-                            resolve(this.dataService as any);
-                            next();
-                            return;
-                        }
-
-                        const dataService = await DataService.create(this);
-                        if (dataService.isError) {
-                            return resolve(dataService as any);
-                        }
-
-                        resolve(this.dataService = dataService as any);
-                        next();
-                    });
-                });
-            case LoginService as any:
-                return new Promise((resolve, reject) => {
-                    lockLoginService.push(async (next) => {
-                        const loginService = await LoginService.create(this);
-                        if (loginService.isError) {
-                            return resolve(loginService as any);
-                        }
-
-                        resolve(loginService as any);
-                        next();
-                    });
-                });
-            case LyricsService as any:
-                return new Promise((resolve, reject) => {
-                    lockLyricsServiceResult.push(async (next) => {
-                        const lyricsServiceResult = await LyricsService.create(this);
-                        if (lyricsServiceResult.isError) {
-                            return resolve(lyricsServiceResult as any);
-                        }
-
-                        resolve(lyricsServiceResult as any);
-                        next();
-                    });
-                });
-            default:
-                throw new Error('Unexpected service request');
-        }
     }
 
     async isLoggedIn() {
-        const loginResult = await this.service(LoginService);
-        const isLoggedInResult = await loginResult.cata(s => s.isLoggedIn());
+        const isLoggedInResult = await this.loginService.isLoggedIn();
         if (!isLoggedInResult.val) {
 
             return isLoggedInResult;
         }
 
-        const spotifyResult = await this.service(SpotifyService);
-
-        return spotifyResult.cata(s => s.isLoggedIn());
+        return this.spotifyService.isLoggedIn();
     }
 
     async logout() {
-        const spotifyResult = await this.service(SpotifyService);
-
-        return spotifyResult.cata(s => s.logout());
+        return this.spotifyService.logout();
     }
 
     async settings<K extends keyof SettingsService['config']>(
@@ -180,22 +45,18 @@ class Service {
     async settings<K extends keyof SettingsService['config']>(...args: unknown[]) {
         const propName = args[0] as K;
         const val = args[1] as SettingsService['config'][K];
-        const settingsResult = await this.service(SettingsService);
-        const res = settingsResult.cata(s => {
-            if (args.length > 1) {
-                settingsResult.cata(s => s.set(propName, val));
-            }
-            return settingsResult;
-        });
+        if (args.length > 1) {
+            this.settingsService.set(propName, val);
+        }
 
-        return res.cata(s => s.get(propName));
+        return this.settingsService.get(propName);
     }
 
     async refreshToken(newToken: string) {
         const newSettingsResult = await this.settings('spotify', { accessToken: newToken });
-        const spotifyResult = await newSettingsResult.cata(() => this.service(SpotifyService));
+        const spotifyResult = await newSettingsResult.map(() => this.spotifyService);
         const refreshPlayerTokenResult = await spotifyResult.cata(spotify => spotify.refreshToken(newToken));
-        const playerResult = await refreshPlayerTokenResult.cata(() => this.service(SpotifyPlayerService));
+        const playerResult = await refreshPlayerTokenResult.map(() => this.spotifyPlayerService);
 
         return await playerResult.cata(player => {
             player.refreshToken(newToken);
@@ -204,277 +65,226 @@ class Service {
         });
     }
 
-    async spotifyPlayer() {
-        const playerResult = await this.service(SpotifyPlayerService);
-
-        return playerResult;
-    }
-
-    async spotifyPlayerState() {
-        const playerResult = await this.service(SpotifyPlayerService);
-        const stateResult = await playerResult.cata(p => p.getCurrentState());
-
-        return SpotifyPlayerServiceResult.success(stateResult);
-    }
-
     async playerResume() {
-        const player = await this.service(SpotifyPlayerService);
-        return await player.cata(p => p.resume());
+        return await this.spotifyPlayerService.resume();
     }
 
     async playerPause() {
-        const player = await this.service(SpotifyPlayerService);
-        return await player.cata(p => p.pause());
+        return await this.spotifyPlayerService.pause();
     }
     async playerNextTrack() {
-        const player = await this.service(SpotifyPlayerService);
-        return await player.cata(p => p.nextTrack());
+        return await this.spotifyPlayerService.nextTrack();
     }
     async playerPreviouseTrack() {
-        const player = await this.service(SpotifyPlayerService);
-        return await player.cata(p => p.previouseTrack());
+        return await this.spotifyPlayerService.previouseTrack();
     }
 
     async recentlyPlayed() {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.recentlyPlayed());
+        const result = await this.spotifyService.recentlyPlayed();
 
         return result;
     }
 
     async getSpotifyAuthUrl() {
-        const spotify = await this.service(LoginService);
-        const result = await spotify.cata(s => s.getSpotifyAuthUrl());
+        const result = await this.loginService.getSpotifyAuthUrl();
 
         return result;
     }
 
     async getGeniusAuthUrl() {
-        const spotify = await this.service(LoginService);
-        const result = await spotify.cata(s => s.getGeniusAuthUrl());
+        const result = await this.loginService.getGeniusAuthUrl();
 
         return result;
     }
 
     async listDevices() {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(spotify => spotify.listDevices());
+        const result = await this.spotifyService.listDevices();
 
         return result;
     }
 
     async listTopTracks() {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.listTopTracks());
+        const result = await this.spotifyService.listTopTracks();
 
         return result;
     }
 
     async fetchArtistTopTracks(artistId: string, country = 'US') {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.fetchArtistTopTracks(artistId, country));
+        const result = await this.spotifyService.fetchArtistTopTracks(artistId, country);
 
         return result;
     }
 
     async addTracks(tracks: ITrack | ITrack[]) {
         const arrTracks = ([] as ITrack[]).concat(tracks);
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.addTracks(_.map(arrTracks, t => t.id)));
+        const result = await this.spotifyService.addTracks(_.map(arrTracks, t => t.id));
 
         return result;
     }
 
     async removeTracks(tracks: ITrack | ITrack[]) {
         const arrTracks = ([] as ITrack[]).concat(tracks);
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.removeTracks(_.map(arrTracks, t => t.id)));
+        const result = await this.spotifyService.removeTracks(_.map(arrTracks, t => t.id));
 
         return result;
     }
 
     async hasTracks(trackIds: string | string[]) {
-        const service = await this.service(SpotifyService);
-        const result = await service.cata(s => s.hasTracks(trackIds));
+        const result = await this.spotifyService.hasTracks(trackIds);
 
         return result;
     }
 
     async volume(percent: number) {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.volume(percent));
+        const result = await this.spotifyService.volume(percent);
 
         return result;
     }
 
     async profile() {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.profile());
+        const result = await this.spotifyService.profile();
 
         return result;
     }
 
     async fetchRecommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50) {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.fetchRecommendations(
+        const result = await this.spotifyService.fetchRecommendations(
             market,
             seedArtists,
             seedTracks,
             minEnergy,
             minPopularity
-        ));
+        );
 
         return result;
     }
 
     async fetchMyPlaylists(offset = 0, limit = 20) {
-        const service = await this.service(SpotifyService);
-        const result = await service.cata(s => s.fetchMyPlaylists(offset, limit));
+        const result = await this.spotifyService.fetchMyPlaylists(offset, limit);
 
         return result;
     }
 
     async fetchPlaylistTracks(playlistId: string, offset = 0, limit = 20) {
-        const service = await this.service(SpotifyService);
-        const result = await service.cata(s => s.fetchPlaylistTracks(playlistId, offset, limit));
+        const result = await this.spotifyService.fetchPlaylistTracks(playlistId, offset, limit);
 
         return result;
     }
 
     async listAlbumTracks(albumId: string) {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.listAlbumTracks(albumId));
+        const result = await this.spotifyService.listAlbumTracks(albumId);
 
         return result;
     }
 
     async seek(positionMs: number, deviceId = '') {
-        const spotify = await this.service(SpotifyService);
-        const result = spotify.cata(s => s.seek(positionMs, deviceId));
+        const result = this.spotifyService.seek(positionMs, deviceId);
 
         return result;
     }
 
     async play(deviceId?: string, tracksUriList?: string | string[], indexOrUri: number | string = '') {
-        const spotify = await this.service(SpotifyService);
-        const result = spotify.cata(s => s.play(deviceId, tracksUriList, indexOrUri));
+        const result = this.spotifyService.play(deviceId, tracksUriList, indexOrUri);
 
         return result;
     }
 
     async pause(deviceId = '') {
-        const spotify = await this.service(SpotifyService);
-        const result = spotify.cata(s => s.pause(deviceId));
+        const result = this.spotifyService.pause(deviceId);
 
         return result;
     }
 
     async next(deviceId = '') {
-        const spotify = await this.service(SpotifyService);
-        const result = spotify.cata(s => s.next(deviceId));
+        const result = this.spotifyService.next(deviceId);
 
         return result;
     }
 
     async previous(deviceId = '') {
-        const spotify = await this.service(SpotifyService);
-        const result = spotify.cata(s => s.previous(deviceId));
+        const result = this.spotifyService.previous(deviceId);
 
         return result;
     }
 
     async newReleases() {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.newReleases());
+        const result = await this.spotifyService.newReleases();
 
         return result;
     }
 
     async featuredPlaylists(offset = 0, limit = 20, country?: string, locale?: string, timestamp?: string) {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.featuredPlaylists(offset, limit, country, locale, timestamp));
+        const result = await this.spotifyService.featuredPlaylists(offset, limit, country, locale, timestamp);
 
         return result;
     }
 
     async search(type: ISearchType, term: string, offset = 0, limit = 20) {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.search(type, term, offset, limit));
+        const result = await this.spotifyService.search(type, term, offset, limit);
 
         return result;
     }
 
     async player(deviceId = '', play: boolean | null = null) {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(spotify => spotify.player(deviceId, play));
+        const result = await this.spotifyService.player(deviceId, play);
 
         return result;
     }
 
     async currentlyPlaying() {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(spotify => spotify.currentlyPlaying());
+        const result = await this.spotifyService.currentlyPlaying();
 
         return result;
     }
 
     async fetchTracks(offset = 0, limit = 20) {
-        const service = await this.service(SpotifyService);
-        const result = await service.cata(s => s.fetchTracks(offset, limit));
+        const result = await this.spotifyService.fetchTracks(offset, limit);
 
         return result;
     }
 
     async albums(offset = 0, limit = 20) {
-        const spotify = await this.service(SpotifyService);
-        const result = spotify.cata(s => s.albums(offset, limit));
+        const result = this.spotifyService.albums(offset, limit);
 
         return result;
     }
 
     async addAlbums(albumIds: string | string[]) {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.addAlbums(albumIds));
+        const result = await this.spotifyService.addAlbums(albumIds);
 
         return result;
     }
 
     async removeAlbums(albumIds: string | string[]) {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.removeAlbums(albumIds));
+        const result = await this.spotifyService.removeAlbums(albumIds);
 
         return result;
     }
 
     async hasAlbums(albumIds: string | string[]) {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.hasAlbums(albumIds));
+        const result = await this.spotifyService.hasAlbums(albumIds);
 
         return result;
     }
 
     async createNewPlaylist(userId: string, name: string, description = '', isPublic = false) {
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.createNewPlaylist(userId, name, description, isPublic));
+        const result = await this.spotifyService.createNewPlaylist(userId, name, description, isPublic);
 
-        const syncServiceResult = await result.cata(() => this.service(SpotifySyncService));
-        const syncPlaylistsResult = await syncServiceResult.cata(s => s.syncMyPlaylists());
+        const syncPlaylistsResult = await this.spotifySyncService.syncMyPlaylists();
 
         return syncPlaylistsResult;
     }
 
     async addTrackToPlaylist(tracks: ITrack | ITrack[], playlist: IUserPlaylist) {
         tracks = ([] as ITrack[]).concat(tracks);
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.addTrackToPlaylist(_.map(([] as ITrack[]).concat(tracks), t => t.uri), playlist.id));
+        const result = await this.spotifyService.addTrackToPlaylist(_.map(([] as ITrack[]).concat(tracks), t => t.uri), playlist.id);
 
-        const dataResult = await result.cata(() => this.service(DataService));
         for (const track of tracks) {
-            await dataResult.cata(data => data.createTrack(track));
-            await dataResult.cata(data => data.addTrackToPlaylist(playlist, {
+            await this.dataService.createTrack(track);
+            await this.dataService.addTrackToPlaylist(playlist, {
                 added_at: new Date().toISOString(),
                 track
-            }));
+            });
         };
 
         return result;
@@ -482,54 +292,46 @@ class Service {
 
     async removeTrackFromPlaylist(tracks: ITrack | ITrack[], playlistId: string) {
         const arrTracks = ([] as ITrack[]).concat(tracks);
-        const spotify = await this.service(SpotifyService);
-        const result = await spotify.cata(s => s.removeTrackFromPlaylist(_.map(arrTracks, t => t.uri), playlistId));
+        const result = await this.spotifyService.removeTrackFromPlaylist(_.map(arrTracks, t => t.uri), playlistId);
 
-        const dataResult = await result.cata(() => this.service(DataService));
         for (const track of arrTracks) {
-            await dataResult.cata(d => d.removeTrackFromPlaylist(playlistId, {
+            await this.dataService.removeTrackFromPlaylist(playlistId, {
                 added_at: new Date().toISOString(),
                 track
-            }));
+            });
         }
 
         return result;
     }
 
     async findTrackLyrics(songInfo: { name: string; artist: string; }) {
-        const lyricsService = await this.service(LyricsService);
-        const lyricsResult = await lyricsService.cata(s => s.search(songInfo));
+        const lyricsResult = await this.lyricsService.search(songInfo);
 
         return lyricsResult;
     }
 
     async reorderTrack(playlistId: string, oldPosition: number, newPosition: number) {
-        const spotifyResult = await this.service(SpotifyService);
-        const reorderSResult = await spotifyResult.cata(s => s.reorderTracks(playlistId, oldPosition, newPosition, 1));
+        const reorderSResult = await this.spotifyService.reorderTracks(playlistId, oldPosition, newPosition, 1);
 
         return reorderSResult;
     }
 
     async bannTrack(trackId: string) {
-        const dataResult = await this.service(DataService);
-        const res = await dataResult.cata(d => d.bannTrack(trackId));
+        const res = await this.dataService.bannTrack(trackId);
 
         return res;
     }
 
     async removeBannFromTrak(trackId: string) {
-        const dataResult = await this.service(DataService);
-        return await dataResult.cata(d => d.removeBannFromTrack(trackId));
+        return await this.dataService.removeBannFromTrack(trackId);
     }
 
     async isBannedTrack(trackId: string) {
-        const dataResult = await this.service(DataService);
-        return await dataResult.cata(data => data.isBannedTrack(trackId));
+        return await this.dataService.isBannedTrack(trackId);
     }
 
     async listBannedTracks(byTrackIds: string[]) {
-        const dataResult = await this.service(DataService);
-        return await dataResult.cata(d => d.listBannedTracks(byTrackIds));
+        return await this.dataService.listBannedTracks(byTrackIds);
     }
 }
 

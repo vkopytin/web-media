@@ -20,16 +20,6 @@ function returnErrorResult<T>(message: string, ex: Error) {
 }
 
 class LyricsService extends withEvents(BaseService) {
-    static async create(connection: Service) {
-        const settingsResult = await connection.settings('apiseeds');
-
-        return settingsResult.cata(({ key: accessToken }) => {
-            const adapter = new LyricsAdapter(accessToken);
-
-            return LyricsServiceResult.success(new LyricsService(adapter));
-        });
-    }
-
     constructor(public adapter: LyricsAdapter) {
         super();
     }
@@ -44,7 +34,7 @@ class LyricsService extends withEvents(BaseService) {
                 lyrics.result.copyright.text
             ].join('\n'));
         } catch (ex) {
-            return returnErrorResult<string>('Unexpected error on requesting sptify recently played', ex as Error);
+            return returnErrorResult<string>('Unexpected error on requesting lyrics', ex as Error);
         }
     }
 }
