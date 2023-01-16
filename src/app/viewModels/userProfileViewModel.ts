@@ -38,14 +38,17 @@ class UserProfileViewModel {
     logoutCommand$!: BehaviorSubject<UserProfileViewModel['logoutCommand']>;
     @State logoutCommand = Scheduler.Command(() => this.logout());
 
+    updatApiseedsKeyCommand$!: BehaviorSubject<UserProfileViewModel['updatApiseedsKeyCommand']>;
+    @State updatApiseedsKeyCommand = Scheduler.Command((val: string) => {
+        this.apiseedsKey = val;
+        this.saveApiseedsKey(val);
+    });
+
     currentTrackId$ = this.appViewModel.currentTrackId$;
     @Binding() currentTrackId = '';
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         await this.fetchData();
-        this.apiseedsKey$.subscribe(_.debounce((val: string) => {
-            this.saveApiseedsKey(val);
-        }, 300));
         resolve(true);
     }));
 

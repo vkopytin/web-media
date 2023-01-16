@@ -17,16 +17,16 @@ export const template = (view: SearchView) => <>
     </section>
     <div className="segmented-control">
         <a className={cn("control-item ?active", view.searchType === 'track')} href="#create-public"
-            onClick={evnt => { evnt.preventDefault(); view.searchType = 'track' }}
+            onClick={evnt => { evnt.preventDefault(); view.changeSearchTypeCommand.exec('track') }}
         >Tracks</a>
         <a className={cn("control-item ?active", view.searchType === 'artist')} href="#crate-private"
-            onClick={evnt => { evnt.preventDefault(); view.searchType = 'artist' }}
+            onClick={evnt => { evnt.preventDefault(); view.changeSearchTypeCommand.exec('artist') }}
         >Artist</a>
         <a className={cn("control-item ?active", view.searchType === 'album')} href="#crate-private"
-            onClick={evnt => { evnt.preventDefault(); view.searchType = 'album' }}
+            onClick={evnt => { evnt.preventDefault(); view.changeSearchTypeCommand.exec('album') }}
         >Albums</a>
         <a className={cn("control-item ?active", view.searchType === 'playlist')} href="#crate-private"
-            onClick={evnt => { evnt.preventDefault(); view.searchType = 'playlist' }}
+            onClick={evnt => { evnt.preventDefault(); view.changeSearchTypeCommand.exec('playlist') }}
         >Playlists</a>
     </div>
     <ul className="table-view">
@@ -70,7 +70,7 @@ export const template = (view: SearchView) => <>
         {_.map(view.artists, (item: SearchView['artists'][0], index) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media"
-                    onClick={evnt => view.currentArtist = view.currentArtist?.id() === item.id() ? null : item}
+                    onClick={() => view.selectArtistCommand.exec(view.currentArtist?.id() === item.id() ? null : item)}
                 >
                     <span className="media-object pull-left player-left--32"
                     >
@@ -98,7 +98,7 @@ export const template = (view: SearchView) => <>
         {_.map(view.albums, (item: SearchView['albums'][0], index) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media"
-                    onClick={evnt => view.currentAlbum = view.currentAlbum?.id() === item.id() ? null : item}
+                    onClick={evnt => view.selectAlbumCommand.exec(view.currentAlbum?.id() === item.id() ? null : item)}
                 >
                     <span className="media-object pull-left player-left--32">
                         <div className="region">
@@ -127,7 +127,7 @@ export const template = (view: SearchView) => <>
         {_.map(view.playlists, (item: SearchView['playlists'][0], index) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media"
-                    onClick={evnt => view.currentPlaylist = view.currentPlaylist?.id() === item.id() ? null : item}
+                    onClick={() => view.selectPlaylistCommand.exec(view.currentPlaylist?.id() === item.id() ? null : item)}
                 >
                     <span className="media-object pull-left player-left--32">
                         <div className="region">

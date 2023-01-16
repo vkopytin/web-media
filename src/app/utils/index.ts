@@ -354,14 +354,17 @@ export function Binding<T>({ didSet }: { didSet?: (this: T, view: T, val: T[keyo
 
         const opts = {
             get(this: T): T[keyof T] {
+                if (descriptor?.get) {
+                    return descriptor?.get?.();
+                }
                 const val = (this[`${propName}$` as keyof T] as BehaviorSubject<unknown>).getValue() as any;
-                descriptor?.get?.();
+
                 return val;
             },
             set(this: T, val: T[keyof T]) {
+                descriptor?.set?.(val);
                 if (this[propName as keyof T] !== val) {
                     (this[`${propName}$` as keyof T] as BehaviorSubject<unknown>).next(val);
-                    descriptor?.set?.(val);
                 }
             },
             enumerable: true,

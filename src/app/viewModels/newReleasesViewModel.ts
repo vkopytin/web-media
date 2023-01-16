@@ -71,8 +71,6 @@ class NewReleasesViewModel {
 
     async connect() {
         this.spotifyService.on('change:state', state => this.checkAlbums());
-        this.currentAlbum$.subscribe(() => _.delay(() => this.loadTracks()));
-        this.currentPlaylist$.subscribe(() => _.delay(() => this.loadTracks()));
     }
 
     async fetchData() {
@@ -82,8 +80,8 @@ class NewReleasesViewModel {
             return;
         }
 
-        const releases = res.val as IResponseResult<IAlbum>;
-        this.newReleases = _.map(releases.items, album => new AlbumViewModelItem(album));
+        const releases = res.val!;
+        this.newReleases = _.map(releases.albums?.items || [], album => new AlbumViewModelItem(album));
         this.checkAlbums();
 
         const featuredPlaylistsResult = await this.ss.featuredPlaylists();

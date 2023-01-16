@@ -26,6 +26,10 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
     @Binding()
     selectedPlaylist!: PickPlaylistsView['homeVm']['selectedPlaylist'];
 
+    selectPlaylistCommand$ = this.homeVm.selectPlaylistCommand$;
+    @Binding()
+    selectPlaylistCommand!: PickPlaylistsView['homeVm']['selectPlaylistCommand'];
+
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);
     }

@@ -7,31 +7,24 @@ import { SpotifyServiceError } from './errors/spotifyServiceError';
 import { SpotifyServiceUnexpectedError } from './errors/spotifyServiceUnexpectedError';
 import * as _ from 'underscore';
 import { SpotifyAdapter, IUserInfo, ISearchType, IResponseResult, ISpotifySong, IUserPlaylistsResult, ITrack, ITopTracksResult, ISearchResult, IAlbum, IDevice, IPlayerResult, ICurrentlyPlayingResult, IRecommendationsResult } from '../adapter/spotify';
-import { ISettings } from './settings';
 import { withEvents } from 'databindjs';
 import { debounce } from '../utils';
 import { NoActiveDeviceError } from './errors/noActiveDeviceError';
 import { ServiceResult } from '../base/serviceResult';
 
 
-function returnErrorResult<T>(message: string, ex: Error): ServiceResult<T, Error> {
-    switch (true) {
-        case ex instanceof ErrorWithStatus:
-            const err = ex as ErrorWithStatus;
-            switch (err.status) {
-                case 401:
-                    if (/expired/i.test(err.message)) {
-                        return TokenExpiredError.create<T>(err.message, err);
-                    }
-                case 404:
-                    if (/active device/i.test(err.message)) {
-                        return NoActiveDeviceError.create<T>(err.message, err);
-                    }
-            }
-            return SpotifyServiceError.create<T>(err.message, err);
-        default:
-            return SpotifyServiceUnexpectedError.create<T>(message, ex);
+function returnErrorResult<T>(message: string, err: Error): ServiceResult<T, Error> {
+    if (err instanceof ErrorWithStatus) {
+        if (err.status === 401 && /expired/i.test(err.message)) {
+            return TokenExpiredError.create<T>(err.message, err);
+        } else if (err.status === 404 && /active device/i.test(err.message)) {
+            return NoActiveDeviceError.create<T>(err.message, err);
+        }
+
+        return SpotifyServiceError.create<T>(err.message, err);
     }
+
+    return SpotifyServiceUnexpectedError.create<T>(message, err);
 }
 
 class SpotifyService extends withEvents(BaseService) {
@@ -283,7 +276,7 @@ class SpotifyService extends withEvents(BaseService) {
 
             return SpotifyServiceResult.success(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<IAlbum>>('Unexpected error on requesting spotify fetch new releases', ex as Error);
+            return returnErrorResult<ISearchResult>('Unexpected error on requesting spotify fetch new releases', ex as Error);
         }
     }
 

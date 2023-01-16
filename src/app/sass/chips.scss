@@ -3,11 +3,11 @@
 // --------------------------------------------------
 
 .chips-list {
+  text-align: center;
 }
 
 .chips {
   display: inline-block;
-  text-align: center;
   padding: 2px 12px 2px 12px;
   margin: 2px;
   font-size: 12px;
@@ -20,6 +20,12 @@
   &.chips-inverted {
     padding: 0 5px 0 0;
     background-color: transparent;
+  }
+
+  &.small {
+    font-size: 10px;
+    padding: 0px 8px;
+    margin: 1px;
   }
 }
 

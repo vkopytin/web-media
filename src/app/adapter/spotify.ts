@@ -206,11 +206,16 @@ const delayWithin = (ms = 800) => new Promise((resolve) => {
 });
 
 const resultOrError = async <T>(response: Response): Promise<T> => {
-    if ([200, 204].indexOf(response.status) != -1) {
+    if ([200].indexOf(response.status) !== -1) {
         const text = await response.text();
+        if (text === '') {
+            return undefined as T;
+        }
         const result = JSON.parse(text);
 
         return result;
+    } else if (204 === response.status) {
+        return undefined as T;
     } else {
         const result = await response.text();
         const res = JSON.parse(result);
@@ -439,13 +444,12 @@ class SpotifyAdapter {
     }
 
     async artistTopTracks(artistId: string, country = 'US'): Promise<ITopTracksResult> {
-        const response = await fetch(`${baseUrl}/v1/artists/${artistId}/top-tracks`, {
+        const response = await fetch(`${baseUrl}/v1/artists/${artistId}/top-tracks?` + toUrlQueryParams({
+            country: country
+        }), {
             headers: {
                 'Authorization': 'Bearer ' + this.token
             },
-            body: JSON.stringify({
-                country: country
-            }),
         });
 
         return await resultOrError(response);
@@ -494,26 +498,22 @@ class SpotifyAdapter {
         const contextUri = uris.length === 1 ? uris[0] : '';
         deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
 
-        try {
-            const response = await fetch(urlParts.join('?'), {
-                method: 'PUT',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify((tracksUriList && tracksUriList.length) ? {
-                    ...contextUri ? { context_uri: contextUri } : { uris },
+        const response = await fetch(urlParts.join('?'), {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + this.token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify((tracksUriList && tracksUriList.length) ? {
+                ...contextUri ? { context_uri: contextUri } : { uris },
 
-                    ...uri ? { offset: { uri } }
-                        : position !== -1 ? { offset: { position } }
-                            : {}
-                } : {}),
-            });
+                ...uri ? { offset: { uri } }
+                    : position !== -1 ? { offset: { position } }
+                        : {}
+            } : {}),
+        });
 
-            return await resultOrError(response);
-        } catch (ex) {
-            return Result.error(ex);
-        }
+        return await resultOrError(response);
     }
 
     async next(deviceId: string = ''): Promise<unknown> {
@@ -621,6 +621,7 @@ class SpotifyAdapter {
     }
 
     async player(deviceId = '', play = null as boolean | null): Promise<IPlayerResult> {
+        await delayWithin();
         const response = await fetch(`${baseUrl}/v1/me/player`, {
             method: play === null ? 'GET' : 'PUT',
             headers: {

@@ -41,11 +41,11 @@ class TrackViewModelItem {
     playTracksCommand$!: BehaviorSubject<TrackViewModelItem['playTracksCommand']>;
     @State playTracksCommand = Scheduler.Command((tracks: TrackViewModelItem[]) => this.playTracks(tracks));
 
+    updateIsCachedCommand$!: BehaviorSubject<TrackViewModelItem['updateIsCachedCommand']>;
+    @State updateIsCachedCommand = Scheduler.Command((playlists: PlaylistsViewModelItem[]) => this.updateIsCached(playlists));
+
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         await this.connect();
-        this.trackPlaylists$.subscribe((val) => {
-            this.updateIsCached(val);
-        });
         resolve(true);
     }));
 
@@ -169,6 +169,7 @@ class TrackViewModelItem {
     }
 
     updateIsCached(playlists: PlaylistsViewModelItem[]) {
+        this.trackPlaylists = playlists;
     }
 
     async bannTrack() {

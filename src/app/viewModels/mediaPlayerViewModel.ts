@@ -203,11 +203,15 @@ class MediaPlayerViewModel {
             timePlayed = max * percent / 100;
 
         lockSection.push(async (next) => {
-            this.timePlayed = timePlayed;
-            const res = await this.ss.seek(timePlayed);
-            res.assert(e => this.errors = [e]);
-
-            next();
+            try {
+                this.timePlayed = timePlayed;
+                const res = await this.ss.seek(timePlayed);
+                res.assert(e => this.errors = [e]);
+                next();
+            } catch (ex) {
+                next();
+                this.errors = [new ServiceResult(null, ex as Error)];
+            }
         });
     }
 
@@ -217,15 +221,18 @@ class MediaPlayerViewModel {
                 const state = await this.spotifyPlayerService.getCurrentState();
                 if (_.isEmpty(state)) {
                     this.volume = percent;
-                    await this.ss.volume(percent);
+                    const res = await this.ss.volume(percent);
+                    res.assert(e => this.errors = [e]);
                 } else {
                     this.volume = percent;
                     await this.spotifyPlayerService.setVolume(percent);
                 }
 
                 this.settingsSerivce.volume(this.volume = percent);
-            } finally {
                 next();
+            } catch (ex) {
+                next();
+                this.errors = [new ServiceResult(null, ex as Error)];
             }
         });
     }
@@ -236,13 +243,17 @@ class MediaPlayerViewModel {
                 const state = await this.spotifyPlayerService.getCurrentState();
 
                 if (_.isEmpty(state)) {
-                    await this.ss.play();
+                    const res = await this.ss.play();
+                    res.map(() => this.isPlaying = true)
+                        .assert(e => this.errors = [e]);
                 } else {
                     await this.spotifyPlayerService.resume();
+                    this.isPlaying = true;
                 }
-                this.isPlaying = true;
-            } finally {
                 next();
+            } catch (ex) {
+                next();
+                this.errors = [new ServiceResult(null, ex as Error)];
             }
         });
     }
@@ -252,13 +263,17 @@ class MediaPlayerViewModel {
             try {
                 const state = await this.spotifyPlayerService.getCurrentState();
                 if (_.isEmpty(state)) {
-                    await this.ss.pause();
+                    const res = await this.ss.pause();
+                    res.map(() => this.isPlaying = false)
+                        .assert(e => this.errors = [e]);
                 } else {
                     await this.spotifyPlayerService.pause();
+                    this.isPlaying = false;
                 }
-                this.isPlaying = false;
-            } finally {
                 next();
+            } catch (ex) {
+                next();
+                this.errors = [new ServiceResult(null, ex as Error)];
             }
         });
     }
@@ -268,12 +283,15 @@ class MediaPlayerViewModel {
             try {
                 const state = await this.spotifyPlayerService.getCurrentState();
                 if (_.isEmpty(state)) {
-                    await this.ss.previous();
+                    const res = await this.ss.previous();
+                    res.assert(e => this.errors = [e]);
                 } else {
                     await this.spotifyPlayerService.previouseTrack();
                 }
-            } finally {
                 next();
+            } catch (ex) {
+                next();
+                this.errors = [new ServiceResult(null, ex as Error)];
             }
         });
     }
@@ -283,12 +301,15 @@ class MediaPlayerViewModel {
             try {
                 const state = await this.spotifyPlayerService.getCurrentState();
                 if (_.isEmpty(state)) {
-                    await this.ss.next();
+                    const res = await this.ss.next();
+                    res.assert(e => this.errors = [e]);
                 } else {
                     await this.spotifyPlayerService.nextTrack();
                 }
-            } finally {
                 next();
+            } catch (ex) {
+                next();
+                this.errors = [new ServiceResult(null, ex as Error)];
             }
         });
     }
@@ -299,13 +320,16 @@ class MediaPlayerViewModel {
                 const state = await this.spotifyPlayerService.getCurrentState();
                 if (_.isEmpty(state)) {
                     const volume = this.volume;
-                    await this.ss.volume(volume * 1.1);
+                    const res = await this.ss.volume(volume * 1.1);
+                    res.assert(e => this.errors = [e]);
                 } else {
                     const volume = await this.spotifyPlayerService.getVolume();
                     this.volume = volume * 1.1;
                 }
-            } finally {
                 next();
+            } catch (ex) {
+                next();
+                this.errors = [new ServiceResult(null, ex as Error)];
             }
         });
     }
@@ -316,26 +340,33 @@ class MediaPlayerViewModel {
                 const state = await this.spotifyPlayerService.getCurrentState();
                 if (_.isEmpty(state)) {
                     const volume = this.volume;
-                    await this.ss.volume(volume * 0.9);
+                    const res = await this.ss.volume(volume * 0.9);
+                    res.assert(e => this.errors = [e]);
                 } else {
                     const volume = await this.spotifyPlayerService.getVolume();
                     this.volume = volume * 0.9;
                 }
-            } finally {
                 next();
+            } catch (ex) {
+                next();
+                this.errors = [new ServiceResult(null, ex as Error)];
             }
         });
     }
 
     async likeTrack() {
         lockSection.push(async (next) => {
-            if (!this.currentTrack) {
-                return;
+            try {
+                if (!this.currentTrack) {
+                    return;
+                }
+                const stateResult = await this.ss.addTracks(this.currentTrack);
+                stateResult.assert(e => this.errors = [e]);
+                next();
+            } catch (ex) {
+                next();
+                this.errors = [new ServiceResult(null, ex as Error)];
             }
-            const stateResult = await this.ss.addTracks(this.currentTrack);
-            stateResult.assert(e => this.errors = [e]);
-
-            next();
         });
     }
 
@@ -344,10 +375,14 @@ class MediaPlayerViewModel {
             if (!this.currentTrack) {
                 return;
             }
-            const stateResult = await this.ss.removeTracks(this.currentTrack);
-            stateResult.assert(e => this.errors = [e]);
-
-            next();
+            try {
+                const stateResult = await this.ss.removeTracks(this.currentTrack);
+                stateResult.assert(e => this.errors = [e]);
+                next();
+            } catch (ex) {
+                next();
+                this.errors = [new ServiceResult(null, ex as Error)];
+            }
         });
     }
 

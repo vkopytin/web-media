@@ -54,7 +54,7 @@ export const template = (view: UserProfileView) => <div className={cn(`${view.pr
             <div className="input-row">
                 <label>ApiSeeds Key</label>
                 <input type="text" placeholder="API key"
-                    onChange={evnt => view.apiseedsKey = evnt.target.value}
+                    onChange={evnt => view.updatApiseedsKeyCommand.exec(evnt.target.value)}
                     defaultValue={view.apiseedsKey}
                 />
             </div>
@@ -77,7 +77,7 @@ export const template = (view: UserProfileView) => <div className={cn(`${view.pr
                         <div>
                             <span className="song-title">{item.name()}</span>
                             &nbsp;-&nbsp;
-                                    <span className="author-title">{item.artist()}</span>
+                            <span className="author-title">{item.artist()}</span>
                         </div>
                         <div className="album-title">{item.album()}</div>
                     </div>

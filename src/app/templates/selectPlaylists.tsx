@@ -15,13 +15,13 @@ export const template = (view: SelectPlaylistsView) => <div className={cn(`${vie
             return view.props.active
                 ? <span className="chips chips-positive" key={item.id()}>{item.name()}</span>
                 : <span className="chips chips-positive" key={item.id()}
-                    onClick={evnt => view.removeFromPlaylistCommand.exec(view.props.track, item)}
+                    onClick={() => view.removeFromPlaylistCommand.exec(view.props.track, item)}
                 >
                     {item.name()}
                 </span>
         }
         return view.props.active ? null : <span className="chips" key={item.id()}
-            onClick={evnt => view.addToPlaylistCommand.exec(view.props.track, item)}
+            onClick={() => view.addToPlaylistCommand.exec(view.props.track, item)}
         >
             {item.name()}
         </span>

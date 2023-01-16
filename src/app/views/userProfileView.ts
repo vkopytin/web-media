@@ -60,6 +60,10 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
     @Binding()
     logoutCommand!: UserProfileView['vm']['logoutCommand'];
 
+    updatApiseedsKeyCommand$ = this.vm.updatApiseedsKeyCommand$;
+    @Binding()
+    updatApiseedsKeyCommand!: UserProfileView['vm']['updatApiseedsKeyCommand'];
+
     doLogout = false;
 
     componentDidMount() {

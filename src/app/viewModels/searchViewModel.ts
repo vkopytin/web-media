@@ -7,7 +7,6 @@ import { SpotifyService } from '../service/spotify';
 import { asyncQueue, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AlbumViewModelItem } from './albumViewModelItem';
-import { AppViewModel } from './appViewModel';
 import { ArtistViewModelItem } from './artistViewModelItem';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
@@ -52,6 +51,21 @@ class SearchViewModel {
         currentMediaUri: null as string | null,
     };
 
+    searchCommand$!: BehaviorSubject<SearchViewModel['searchCommand']>;
+    @State searchCommand = Scheduler.Command((term: string) => (this.term = term, this.onChangeTerm()));
+
+    chageSearchTypeCommand$!: BehaviorSubject<SearchViewModel['chageSearchTypeCommand']>;
+    @State chageSearchTypeCommand = Scheduler.Command((searchType: ISearchType) => this.changeSearchType(searchType));
+
+    selectAlbumCommand$!: BehaviorSubject<SearchViewModel['selectAlbumCommand']>;
+    @State selectAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.selectAlbum(album));
+
+    selectPlaylistCommand$!: BehaviorSubject<SearchViewModel['selectPlaylistCommand']>;
+    @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => this.selectPlaylist(playlist));
+
+    selectArtistCommand$!: BehaviorSubject<SearchViewModel['selectArtistCommand']>;
+    @State selectArtistCommand = Scheduler.Command((artist: ArtistViewModelItem) => this.selectArtist(artist));
+
     loadMoreCommand$!: BehaviorSubject<SearchViewModel['loadMoreCommand']>;
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
 
@@ -77,24 +91,31 @@ class SearchViewModel {
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         this.fetchData();
-        this.term$.subscribe(this.onChangeTerm);
-        this.searchType$.subscribe(_.debounce(() => {
-            this.fetchData();
-        }, 300));
-        this.currentAlbum$.subscribe(_.debounce(() => {
-            this.fetchTracks();
-        }, 300));
-        this.currentPlaylist$.subscribe(_.debounce(() => {
-            this.fetchTracks();
-        }, 300));
-        this.currentArtist$.subscribe(_.debounce(() => {
-            this.fetchTracks();
-        }, 300));
         resolve(true);
     }, 100));
 
     constructor(private spotifyService: SpotifyService, private ss: Service) {
 
+    }
+
+    changeSearchType(searchType: ISearchType) {
+        this.searchType = searchType;
+        this.fetchData();
+    };
+
+    selectAlbum(album: AlbumViewModelItem | null) {
+        this.currentAlbum = album;
+        this.fetchTracks();
+    }
+
+    selectPlaylist(playlist: PlaylistsViewModelItem | null) {
+        this.currentPlaylist = playlist;
+        this.fetchTracks();
+    }
+
+    selectArtist(artist: ArtistViewModelItem | null) {
+        this.currentArtist = artist;
+        this.fetchTracks();
     }
 
     async fetchData() {

@@ -57,12 +57,12 @@ class HomeViewModel {
     removeBannFromTrackCommand$!: BehaviorSubject<HomeViewModel['removeBannFromTrackCommand']>;
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
 
+    selectPlaylistCommand$!: BehaviorSubject<HomeViewModel['selectPlaylistCommand']>;
+    @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => this.selectPlaylist(playlist));
+
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
         await this.connect();
         await this.fetchData();
-        this.selectedPlaylist$.subscribe(() => {
-            this.fetchData();
-        });
 
         resolve(true);
     }, 100));
@@ -146,6 +146,11 @@ class HomeViewModel {
 
     async resume() {
         await this.spotifyPlayerService.resume();
+    }
+
+    async selectPlaylist(playlist: PlaylistsViewModelItem) {
+        this.selectedPlaylist = playlist;
+        await this.fetchData();
     }
 
     async likeTrack(track: TrackViewModelItem) {

@@ -61,8 +61,22 @@ class SearchView extends React.Component<ISearchViewProps> {
     currentTracks!: SearchView['vm']['currentTracks'];
 
     selectedItem$ = this.vm.selectedItem$;
-    @Binding()
-    selectedItem!: SearchView['vm']['selectedItem'];
+    @Binding() selectedItem!: SearchView['vm']['selectedItem'];
+
+    searchCommand$ = this.vm.searchCommand$;
+    @Binding() searchCommand!: SearchView['vm']['searchCommand'];
+
+    changeSearchTypeCommand$ = this.vm.chageSearchTypeCommand$;
+    @Binding() changeSearchTypeCommand!: SearchView['vm']['chageSearchTypeCommand'];
+
+    selectAlbumCommand$ = this.vm.selectAlbumCommand$;
+    @Binding() selectAlbumCommand!: SearchView['vm']['selectArtistCommand'];
+
+    selectPlaylistCommand$ = this.vm.selectPlaylistCommand$;
+    @Binding() selectPlaylistCommand!: SearchView['vm']['selectPlaylistCommand'];
+
+    selectArtistCommand$ = this.vm.selectArtistCommand$;
+    @Binding() selectArtistCommand!: SearchView['vm']['selectArtistCommand'];
 
     loadMoreCommand$ = this.vm.loadMoreCommand$;
     @Binding()
@@ -77,7 +91,7 @@ class SearchView extends React.Component<ISearchViewProps> {
     unlikeTrackCommand!: SearchView['vm']['unlikeTrackCommand'];
 
     searchTracks = _.debounce((term: string) => {
-        this.term = term;
+        this.searchCommand.exec(term);
     }, 300);
 
     componentDidMount() {

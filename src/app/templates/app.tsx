@@ -13,6 +13,10 @@ export const template = (view: AppView) => <main>
             openLogin$={view.openLogin$}
             className={cn("modal ?active", view.openLogin)}
         />
+        {view.state.showSelectDevices === 'show' ? <div className='backdrop' onClick={() => view.openDevices(false)}></div>
+            : view.errors.length ? <div className='backdrop' onClick={evnt => view.clearErrors(evnt)}></div>
+                : <div></div>
+        }
         <div className={cn("popover ?visible", view.state.showSelectDevices === 'show')} style={{
             display: view.state.showSelectDevices !== 'hide' ? 'block' : 'none'
         }}>
