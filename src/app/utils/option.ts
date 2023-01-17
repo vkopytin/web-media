@@ -25,6 +25,14 @@ export class Option<T> extends Monad<T> {
         return new Some(value)
     }
 
+    static some<T>(value: T) {
+        return new Some(value);
+    }
+
+    static none<T>() {
+        return none as Option<T>;
+    }
+
     pure: any = Option.pure;
 
     // flatMap :: # Option a -> (a -> Option b) -> Option b
@@ -47,6 +55,14 @@ export class Option<T> extends Monad<T> {
         );
 
         return this;
+    }
+
+    orElse<R>(f: () => R): Option<R> {
+        return this.match(
+            () => Option.none()
+            ,
+            () => Option.some(f())
+        )
     }
 }
 

@@ -24,30 +24,43 @@ export function current<T extends {}>(
         return inst;
     }
 
-    throw new Error('[IoC] Conflict. Probably compnenent was not initialized before. And it is not ready to be used from here.');
+    throw new Error('[IoC] Conflict. Probably componenent was not initialized before. And it is not ready to be used from here.');
 }
 
 export function asyncQueue(concurrency = 1) {
     let running = 0;
     const taskQueue = [] as Array<(a: () => void) => void>;
 
-    const runTask = (task: (a: () => void) => void) => {
-        const done = () => {
+    const runTask = (task: (a: () => void) => void) => new Promise((resolve, reject) => {
+        const done = (): void => {
             running--;
+            resolve(true);
             if (taskQueue.length > 0) {
                 runTask(taskQueue.shift() as (a: () => void) => void);
             }
         };
         running++;
         try {
-            task(done);
+            return task(done);
         } catch (ex) {
+            reject(ex);
             _.delay(() => { throw ex; });
-            done();
+            return done();
         }
-    };
+    });
 
-    const enqueueTask = (task: (a: () => void) => void) => taskQueue.push(task);
+    const enqueueTask = (task: (a: () => void) => void) => new Promise((resolve, reject) => {
+        taskQueue.push(async done => {
+            try {
+                task(() => {
+                    resolve(true);
+                    done();
+                });
+            } catch (ex) {
+                reject(ex);
+            }
+        });
+    });
 
     return {
         push: (task: (a: () => void) => void) => running < concurrency ? runTask(task) : enqueueTask(task)
@@ -170,6 +183,27 @@ export function debounce<T extends Function>(func: T, wait = 0, cancelObj = 'can
             timerId = latestResolve = null;
         }
     }
+}
+
+export const asyncDebounce = <F extends Function>(fn: F, timout: number): F => {
+    let subscribers: Array<[(arg: unknown) => void, (arg: unknown) => void]> = [];
+    const dfn = debounce(async (...args: []) => {
+        try {
+            const res = await fn(...args);
+            const oldSubscribers = [...subscribers];
+            subscribers = [];
+            oldSubscribers.forEach(([resolve]) => resolve(res));
+        } catch (ex) {
+            const oldSubscribers = [...subscribers];
+            subscribers = [];
+            oldSubscribers.forEach(([, reject]) => reject(ex));
+        }
+    }, timout);
+
+    return ((...args: []) => new Promise((resolve, reject) => {
+        subscribers.push([resolve as (arg: unknown) => void, reject]);
+        dfn(...args);
+    })) as any;
 }
 
 export function isLoading<T extends { isLoading: boolean; }>(target: T, key: string, descriptor?: PropertyDescriptor) {

@@ -4,8 +4,7 @@ import { ServiceResult } from '../base/serviceResult';
 import { NoActiveDeviceError } from '../service/errors/noActiveDeviceError';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
 import { template } from '../templates/app';
-import { Binding, current, Notifications } from '../utils';
-import { Scheduler } from '../utils/scheduler';
+import { asyncDebounce, Binding, current, Notifications } from '../utils';
 import { AppViewModel, TrackViewModelItem } from '../viewModels';
 import { Core } from '../viewModels/core';
 
@@ -74,7 +73,7 @@ class AppView extends React.Component<IAppViewProps> {
         scrolledToBottom: false
     };
     elScroller = null as HTMLElement | null;
-    onPageScroll = _.debounce(() => this.onPageScrollInternal(), 500);
+    onPageScroll = asyncDebounce(() => this.onPageScrollInternal(), 500);
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);
@@ -168,7 +167,6 @@ class AppView extends React.Component<IAppViewProps> {
         if (!_.isEmpty(tokenExpired)) {
             this.errors = _.filter(errors, err => !err.is(TokenExpiredError));
             this.openLogin = true;
-            console.log('running tasks:', Scheduler.getCurrent().inProgress);
             setTimeout(() => this.refreshTokenCommand.exec());
             return;
         }

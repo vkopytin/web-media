@@ -24,7 +24,7 @@ export class Scheduler {
         return {
             isRunning: false,
             exec: (...args: unknown[]) => current.exec({
-                isRunning: true,
+                isRunning: false,
                 fails: 0,
                 exec: () => fn(...args)
             })
@@ -40,6 +40,7 @@ export class Scheduler {
             this.tasks.push({
                 ...task,
                 exec: async (...args) => {
+                    console.log('running tasks:', Scheduler.getCurrent().inProgress);
                     const res = await task.exec(...args);
                     resolve(res);
 
@@ -51,6 +52,7 @@ export class Scheduler {
 
     async run(task: ITask) {
         const done = async () => {
+            this.inProgress = this.inProgress.filter(a => a !== task);
             this.running--;
             if (this.tasks.length > 0) {
                 await this.run(this.tasks.shift() as ITask);
@@ -67,13 +69,11 @@ export class Scheduler {
                     task.fails++;
                     this.exec(task);
                 }
-                console.log(this.inProgress);
+                console.log('Failed task: ', task);
                 throw ex;
             });
         } finally {
             task.isRunning = false;
-            task.fails = 0;
-            this.inProgress = this.inProgress.filter(a => a !== task);
             done();
         }
     }

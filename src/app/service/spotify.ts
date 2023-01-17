@@ -1,5 +1,4 @@
 import { BaseService } from '../base/baseService';
-import { Service } from './index';
 import { SpotifyServiceResult } from './results/spotifyServiceResult';
 import { ErrorWithStatus } from '../adapter/errors/errorWithStatus';
 import { TokenExpiredError } from './errors/tokenExpiredError';
@@ -8,7 +7,7 @@ import { SpotifyServiceUnexpectedError } from './errors/spotifyServiceUnexpected
 import * as _ from 'underscore';
 import { SpotifyAdapter, IUserInfo, ISearchType, IResponseResult, ISpotifySong, IUserPlaylistsResult, ITrack, ITopTracksResult, ISearchResult, IAlbum, IDevice, IPlayerResult, ICurrentlyPlayingResult, IRecommendationsResult } from '../adapter/spotify';
 import { withEvents } from 'databindjs';
-import { debounce } from '../utils';
+import { asyncDebounce } from '../utils';
 import { NoActiveDeviceError } from './errors/noActiveDeviceError';
 import { ServiceResult } from '../base/serviceResult';
 
@@ -29,7 +28,7 @@ function returnErrorResult<T>(message: string, err: Error): ServiceResult<T, Err
 
 class SpotifyService extends withEvents(BaseService) {
     currentProfile: IUserInfo | null = null;
-    onStateChanged = debounce(this.onStateChangedInternal, 500);
+    onStateChanged = asyncDebounce(this.onStateChangedInternal, 500);
 
     constructor(public adapter: SpotifyAdapter) {
         super();

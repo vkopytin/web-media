@@ -263,14 +263,22 @@ const toUrlQueryParams = (obj: {}) => Object.entries<{}>(obj)
 
 const baseUrl = 'https://api.spotify.com';
 
+let index = 0;
+
 class SpotifyAdapter {
+    fetch: typeof fetch = async (input, init) => {
+        //if (/me\/player/.test('' + input) && index++ % 3 === 0) {
+        //    input = ('' + input).replace('?', '/fail?') + 'fail';
+        //}
+        return await fetch(input, init);
+    }
 
     constructor(public token: string) {
 
     }
 
     async me(): Promise<IUserInfo> {
-        const response = await fetch(`${baseUrl}/v1/me`, {
+        const response = await this.fetch(`${baseUrl}/v1/me`, {
             headers: {
                 'Authorization': 'Bearer ' + this.token
             }
@@ -282,7 +290,7 @@ class SpotifyAdapter {
 
     async recentlyPlayed(before = new Date() as Date | number, limit = 20): Promise<IResponseResult<ISpotifySong>> {
         before = +before;
-        const response = await fetch(`${baseUrl}/v1/me/player/recently-played?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/me/player/recently-played?` + toUrlQueryParams({
             before, limit
         }), {
             headers: {
@@ -296,7 +304,7 @@ class SpotifyAdapter {
     async devices(): Promise<IDevicesResponse> {
         await delayWithin();
 
-        const response = await fetch(`${baseUrl}/v1/me/player/devices`, {
+        const response = await this.fetch(`${baseUrl}/v1/me/player/devices`, {
             headers: {
                 'Authorization': 'Bearer ' + this.token
             },
@@ -310,7 +318,7 @@ class SpotifyAdapter {
         seedArtists: string | string[], seedTracks: string | string[],
         minEnergy = 0.4, minPopularity = 50, limit = 0
     ): Promise<IRecommendationsResult> {
-        const response = await fetch(`${baseUrl}/v1/recommendations?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/recommendations?` + toUrlQueryParams({
             market,
             seed_artists: ([] as string[]).concat(seedArtists).join(','),
             seed_tracks: ([] as string[]).concat(seedTracks).join(','),
@@ -327,7 +335,7 @@ class SpotifyAdapter {
     }
 
     async userPlaylists(userId: string): Promise<IUserPlaylistsResult> {
-        const response = await fetch(`${baseUrl}/v1/users/${userId}/playlists`, {
+        const response = await this.fetch(`${baseUrl}/v1/users/${userId}/playlists`, {
             headers: {
                 'Authorization': 'Bearer ' + this.token
             },
@@ -342,7 +350,7 @@ class SpotifyAdapter {
             description,
             public: isPublic
         };
-        const response = await fetch(`${baseUrl}/v1/users/${userId}/playlists`, {
+        const response = await this.fetch(`${baseUrl}/v1/users/${userId}/playlists`, {
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + this.token,
@@ -355,7 +363,7 @@ class SpotifyAdapter {
     }
 
     async myPlaylists(offset = 0, limit = 20): Promise<IUserPlaylistsResult> {
-        const response = await fetch(`${baseUrl}/v1/me/playlists?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/me/playlists?` + toUrlQueryParams({
             offset,
             limit
         }), {
@@ -368,7 +376,7 @@ class SpotifyAdapter {
     }
 
     async addTrackToPlaylist(trackUris: string | string[], playlistId: string): Promise<ISpotifySong> {
-        const response = await fetch(`${baseUrl}/v1/playlists/${playlistId}/tracks`, {
+        const response = await this.fetch(`${baseUrl}/v1/playlists/${playlistId}/tracks`, {
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + this.token,
@@ -383,7 +391,7 @@ class SpotifyAdapter {
     }
 
     async removeTrackFromPlaylist(trackUris: string | string[], playlistId: string): Promise<IResponseResult<ISpotifySong>> {
-        const response = await fetch(`${baseUrl}/v1/playlists/${playlistId}/tracks`, {
+        const response = await this.fetch(`${baseUrl}/v1/playlists/${playlistId}/tracks`, {
             method: 'DELETE',
             headers: {
                 'Authorization': 'Bearer ' + this.token,
@@ -398,7 +406,7 @@ class SpotifyAdapter {
     }
 
     async getPlaylistDetails(playlistId: string): Promise<IUserPlaylist> {
-        const response = await fetch(`${baseUrl}/v1/playlists/${playlistId}`, {
+        const response = await this.fetch(`${baseUrl}/v1/playlists/${playlistId}`, {
             headers: {
                 'Authorization': 'Bearer ' + this.token
             },
@@ -408,7 +416,7 @@ class SpotifyAdapter {
     }
 
     async listPlaylistTracks(playlistId: string, offset = 0, limit = 20): Promise<IResponseResult<ISpotifySong>> {
-        const response = await fetch(`${baseUrl}/v1/playlists/${playlistId}/tracks?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/playlists/${playlistId}/tracks?` + toUrlQueryParams({
             offset, limit
         }), {
             headers: {
@@ -420,7 +428,7 @@ class SpotifyAdapter {
     }
 
     async myTopArtists(offset = 0, limit = 20): Promise<IResponseResult<IArtist>> {
-        const response = await fetch(`${baseUrl}/v1/me/top/artists?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/me/top/artists?` + toUrlQueryParams({
             offset, limit
         }), {
             headers: {
@@ -432,7 +440,7 @@ class SpotifyAdapter {
     }
 
     async myTopTracks(offset = 0, limit = 20): Promise<IResponseResult<ITrack>> {
-        const response = await fetch(`${baseUrl}/v1/me/top/tracks?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/me/top/tracks?` + toUrlQueryParams({
             offset, limit
         }), {
             headers: {
@@ -444,7 +452,7 @@ class SpotifyAdapter {
     }
 
     async artistTopTracks(artistId: string, country = 'US'): Promise<ITopTracksResult> {
-        const response = await fetch(`${baseUrl}/v1/artists/${artistId}/top-tracks?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/artists/${artistId}/top-tracks?` + toUrlQueryParams({
             country: country
         }), {
             headers: {
@@ -456,7 +464,7 @@ class SpotifyAdapter {
     }
 
     async listAlbumTracks(albumId: string, offset = 0, limit = 20): Promise<IResponseResult<ITrack>> {
-        const response = await fetch(`${baseUrl}/v1/albums/${albumId}/tracks?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/albums/${albumId}/tracks?` + toUrlQueryParams({
             offset, limit
         }), {
             headers: {
@@ -468,7 +476,7 @@ class SpotifyAdapter {
     }
 
     async listArtistTopTracks(artistId: string, country = 'US', offset = 0, limit = 20): Promise<{ tracks: ITrack[] }> {
-        const response = await fetch(`${baseUrl}/v1/artists/${artistId}/top-tracks?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/artists/${artistId}/top-tracks?` + toUrlQueryParams({
             country, offset, limit
         }), {
             headers: {
@@ -480,7 +488,7 @@ class SpotifyAdapter {
     }
 
     async getAlbumDetails(albumId: string): Promise<IAlbum> {
-        const response = await fetch(`${baseUrl}/v1/albums/${albumId}`, {
+        const response = await this.fetch(`${baseUrl}/v1/albums/${albumId}`, {
             headers: {
                 'Authorization': 'Bearer ' + this.token
             },
@@ -498,7 +506,7 @@ class SpotifyAdapter {
         const contextUri = uris.length === 1 ? uris[0] : '';
         deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
 
-        const response = await fetch(urlParts.join('?'), {
+        const response = await this.fetch(urlParts.join('?'), {
             method: 'PUT',
             headers: {
                 'Authorization': 'Bearer ' + this.token,
@@ -521,7 +529,7 @@ class SpotifyAdapter {
         const urlParts = [`${baseUrl}/v1/me/player/next`];
         deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
 
-        const response = await fetch(urlParts.join('?'), {
+        const response = await this.fetch(urlParts.join('?'), {
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + this.token
@@ -536,7 +544,7 @@ class SpotifyAdapter {
         const urlParts = [`${baseUrl}/v1/me/player/previous`];
         deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
 
-        const response = await fetch(urlParts.join('?'), {
+        const response = await this.fetch(urlParts.join('?'), {
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + this.token
@@ -551,7 +559,7 @@ class SpotifyAdapter {
         const urlParts = [`${baseUrl}/v1/me/player/pause`];
         deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
 
-        const response = await fetch(urlParts.join('?'), {
+        const response = await this.fetch(urlParts.join('?'), {
             method: 'PUT',
             headers: {
                 'Authorization': 'Bearer ' + this.token
@@ -562,7 +570,7 @@ class SpotifyAdapter {
     }
 
     async newReleases(offset = 0, limit = 20): Promise<ISearchResult> {
-        const response = await fetch(`${baseUrl}/v1/browse/new-releases?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/browse/new-releases?` + toUrlQueryParams({
             offset, limit
         }), {
             headers: {
@@ -574,7 +582,7 @@ class SpotifyAdapter {
     }
 
     async featuredPlaylists(offset = 0, limit = 20, country?: string, locale?: string, timestamp?: string): Promise<Result<Error, ISearchResult>> {
-        const response = await fetch(`${baseUrl}/v1/browse/featured-playlists?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/browse/featured-playlists?` + toUrlQueryParams({
             ...country ? { country } : {},
             ...locale ? { locale } : {},
             ...timestamp ? { timestamp } : {},
@@ -590,7 +598,7 @@ class SpotifyAdapter {
     }
 
     async categories(offset = 0, limit = 20, country?: string, locale?: string, timestamp?: string): Promise<IBrowseResult> {
-        const response = await fetch(`${baseUrl}/v1/browse/categories?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/browse/categories?` + toUrlQueryParams({
             ...country ? { country } : {},
             ...locale ? { locale } : {},
             ...timestamp ? { timestamp } : {},
@@ -606,7 +614,7 @@ class SpotifyAdapter {
     }
 
     async search(searchType: ISearchType, term: string, offset = 0, limit = 20): Promise<ISearchResult> {
-        const response = await fetch(`${baseUrl}/v1/search?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/search?` + toUrlQueryParams({
             q: term,
             type: searchType,
             ...offset ? { offset: offset } : {},
@@ -622,7 +630,7 @@ class SpotifyAdapter {
 
     async player(deviceId = '', play = null as boolean | null): Promise<IPlayerResult> {
         await delayWithin();
-        const response = await fetch(`${baseUrl}/v1/me/player`, {
+        const response = await this.fetch(`${baseUrl}/v1/me/player`, {
             method: play === null ? 'GET' : 'PUT',
             headers: {
                 'Authorization': 'Bearer ' + this.token,
@@ -640,7 +648,7 @@ class SpotifyAdapter {
     }
 
     async queue(): Promise<IPLayerQueueResult> {
-        const response = await fetch(`${baseUrl}/v1/me/player/queue`, {
+        const response = await this.fetch(`${baseUrl}/v1/me/player/queue`, {
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + this.token,
@@ -652,7 +660,7 @@ class SpotifyAdapter {
     }
 
     async seek(positionMs: number, deviceId = ''): Promise<void> {
-        const response = await fetch(`${baseUrl}/v1/me/player/seek?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/me/player/seek?` + toUrlQueryParams({
             position_ms: positionMs,
             ...deviceId ? { device_id: deviceId } : {}
         }), {
@@ -668,7 +676,7 @@ class SpotifyAdapter {
     }
 
     async currentlyPlaying(): Promise<ICurrentlyPlayingResult> {
-        const response = await fetch(`${baseUrl}/v1/me/player/currently-playing`, {
+        const response = await this.fetch(`${baseUrl}/v1/me/player/currently-playing`, {
             headers: {
                 'Authorization': 'Bearer ' + this.token
             },
@@ -678,7 +686,7 @@ class SpotifyAdapter {
     }
 
     async tracks(offset = 0, limit = 20): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
-        const response = await fetch(`${baseUrl}/v1/me/tracks?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/me/tracks?` + toUrlQueryParams({
             offset: offset,
             limit: limit
         }), {
@@ -691,7 +699,7 @@ class SpotifyAdapter {
     }
 
     async albums(offset = 0, limit = 20): Promise<IResponseResult<ISpotifyAlbum>> {
-        const response = await fetch(`${baseUrl}/v1/me/albums?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/me/albums?` + toUrlQueryParams({
             offset, limit
         }), {
             headers: {
@@ -706,7 +714,7 @@ class SpotifyAdapter {
         const urlParts = [`${baseUrl}/v1/me/tracks`];
         urlParts.push(`ids=${encodeURIComponent(([] as string[]).concat(trackIds).join(','))}`);
 
-        const response = await fetch(urlParts.join('?'), {
+        const response = await this.fetch(urlParts.join('?'), {
             method: 'PUT',
             headers: {
                 'Authorization': 'Bearer ' + this.token,
@@ -722,7 +730,7 @@ class SpotifyAdapter {
         const urlParts = [`${baseUrl}/v1/me/tracks`];
         urlParts.push(`ids=${encodeURIComponent(([] as string[]).concat(trackIds).join(','))}`);
 
-        const response = await fetch(urlParts.join('?'), {
+        const response = await this.fetch(urlParts.join('?'), {
             method: 'DELETE',
             headers: {
                 'Authorization': 'Bearer ' + this.token,
@@ -738,7 +746,7 @@ class SpotifyAdapter {
         const urlParts = [`${baseUrl}/v1/me/tracks/contains`];
         urlParts.push(`ids=${encodeURIComponent(([] as string[]).concat(trackIds).join(','))}`);
 
-        const response = await fetch(urlParts.join('?'), {
+        const response = await this.fetch(urlParts.join('?'), {
             headers: {
                 'Authorization': 'Bearer ' + this.token
             },
@@ -749,7 +757,7 @@ class SpotifyAdapter {
 
     async volume(precent: number, deviceId?: string): Promise<IResponseResult<ISpotifySong>> {
 
-        const response = await fetch(`${baseUrl}/v1/me/player/volume?` + toUrlQueryParams({
+        const response = await this.fetch(`${baseUrl}/v1/me/player/volume?` + toUrlQueryParams({
             volume_percent: precent,
             ...deviceId ? { device_id: deviceId } : {}
         }), {
@@ -768,7 +776,7 @@ class SpotifyAdapter {
         const urlParts = [`${baseUrl}/v1/me/albums`];
         urlParts.push(`ids=${encodeURIComponent(([] as string[]).concat(albumIds).join(','))}`);
 
-        const response = await fetch(urlParts.join('?'), {
+        const response = await this.fetch(urlParts.join('?'), {
             method: 'PUT',
             headers: {
                 'Authorization': 'Bearer ' + this.token,
@@ -784,7 +792,7 @@ class SpotifyAdapter {
         const urlParts = [`${baseUrl}/v1/me/albums`];
         urlParts.push(`ids=${encodeURIComponent(([] as string[]).concat(albumIds).join(','))}`);
 
-        const response = await fetch(urlParts.join('?'), {
+        const response = await this.fetch(urlParts.join('?'), {
             method: 'DELETE',
             headers: {
                 'Authorization': 'Bearer ' + this.token,
@@ -801,7 +809,7 @@ class SpotifyAdapter {
         const urlParts = [`${baseUrl}/v1/me/albums/contains`];
         urlParts.push(`ids=${encodeURIComponent(([] as string[]).concat(albumIds).join(','))}`);
 
-        const response = await fetch(urlParts.join('?'), {
+        const response = await this.fetch(urlParts.join('?'), {
             headers: {
                 'Authorization': 'Bearer ' + this.token
             },
@@ -811,7 +819,7 @@ class SpotifyAdapter {
     }
 
     async reorderTracks(playlistId: string, rangeStart: number, insertBefore: number, rangeLength = 1): Promise<IReorderTracksResult> {
-        const response = await fetch(`${baseUrl}/v1/playlists/${playlistId}/tracks`, {
+        const response = await this.fetch(`${baseUrl}/v1/playlists/${playlistId}/tracks`, {
             method: 'PUT',
             headers: {
                 'Authorization': 'Bearer ' + this.token,

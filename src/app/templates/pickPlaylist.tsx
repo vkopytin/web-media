@@ -6,7 +6,7 @@ import { PickPlaylistsView } from '../views';
 export const template = (view: PickPlaylistsView) => <div className="chips-list">
     {_.map(view.playlists, (item: PickPlaylistsView['playlists'][0]) => {
         if (item && view.selectedPlaylist === item) {
-            return <span className="chips chips-positive" key={item.id()}
+            return <span className="chips chips-positive small" key={item.id()}
                 onClick={() => view.selectPlaylistCommand.exec(null)}
             >
                 {item.name()}

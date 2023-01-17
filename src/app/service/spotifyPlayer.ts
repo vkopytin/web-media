@@ -5,6 +5,8 @@ import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult
 import { SpotifyPlayerServiceError } from './errors/spotifyPlayerServiceError';
 import { SpotifyPlayerServiceUnexpectedError } from './errors/spotifyPlayerServiceUnexpectedError';
 import { withEvents } from 'databindjs';
+import { none, Option } from '../utils/option';
+import { Result } from '../utils/result';
 
 
 export interface IWebPlaybackPlayer {
@@ -186,9 +188,9 @@ class SpotifyPlayerService extends withEvents(BaseService) {
         this.connect();
     }
 
-    async connect() {
+    async connect(): Promise<Option<Error>> {
         if (!this.player) {
-            throw new Error('[Spotify SDK] Player is not initialized');
+            return Option.some(new Error('[Spotify SDK] Player is not initialized'));
         }
         // Error handling
         this.player.addListener('initialization_error', this.onInitializationError);
@@ -210,72 +212,87 @@ class SpotifyPlayerService extends withEvents(BaseService) {
         if (success) {
             console.log('The Web Playback SDK successfully connected to Spotify!');
         }
+        return Option.none();
     }
 
-    async refreshToken(newToken: string) {
+    async refreshToken(newToken: string): Promise<Result<Error, boolean>> {
         if (!this.player) {
-            throw new Error('[Spotify SDK] Player is not initialized');
+            return Result.error(new Error('[Spotify SDK] Player is not initialized'));
         }
+        await this.player.disconnect();
         await this.player.connect();
-        return SpotifyPlayerServiceResult.success(true);
+
+        return Result.of(true);
     }
 
-    resume() {
+    async resume(): Promise<Option<Error>> {
         if (!this.player) {
-            throw new Error('[Spotify SDK] Player is not initialized');
+            return Option.some(new Error('[Spotify SDK] Player is not initialized'));
         }
-        return this.player.resume();
+        await this.player.resume();
+
+        return Option.none();
     }
 
-    togglePlay() {
+    async togglePlay(): Promise<Option<Error>> {
         if (!this.player) {
-            throw new Error('[Spotify SDK] Player is not initialized');
+            return Option.some(new Error('[Spotify SDK] Player is not initialized'));
         }
-        return this.player.togglePlay();
+        await this.player.togglePlay();
+
+        return Option.none();
     }
 
-    pause() {
+    async pause(): Promise<Option<Error>> {
         if (!this.player) {
-            throw new Error('[Spotify SDK] Player is not initialized');
+            return Option.some(new Error('[Spotify SDK] Player is not initialized'));
         }
-        return this.player.pause();
+        await this.player.pause();
+
+        return Option.none();
     }
 
-    nextTrack() {
+    async nextTrack(): Promise<Option<Error>> {
         if (!this.player) {
-            throw new Error('[Spotify SDK] Player is not initialized');
+            return Option.some(new Error('[Spotify SDK] Player is not initialized'));
         }
-        return this.player.nextTrack();
+        await this.player.nextTrack();
+
+        return Option.none();
     }
 
-    previouseTrack() {
+    async previouseTrack(): Promise<Option<Error>> {
         if (!this.player) {
-            throw new Error('[Spotify SDK] Player is not initialized');
+            return Option.some(new Error('[Spotify SDK] Player is not initialized'));
         }
-        return this.player.previousTrack();
+        await this.player.previousTrack();
+
+        return Option.none();
     }
 
-    async getCurrentState() {
+    async getCurrentState(): Promise<Result<Error, IWebPlaybackState>> {
         if (!this.player) {
-            throw new Error('[Spotify SDK] Player is not initialized');
+            return Result.error(new Error('[Spotify SDK] Player is not initialized'));
         }
         const state = await this.player.getCurrentState();
-        return state;
+        return Result.of(state);
     }
 
-    async getVolume() {
+    async getVolume(): Promise<Result<Error, number>> {
         if (!this.player) {
-            throw new Error('[Spotify SDK] Player is not initialized');
+            return Result.error(new Error('[Spotify SDK] Player is not initialized'));
         }
         const volume = await this.player.getVolume();
-        return volume * 100;
+        return Result.of(volume * 100);
     }
 
-    setVolume(percent: number) {
+    async setVolume(percent: number): Promise<Option<Error>> {
         if (!this.player) {
-            throw new Error('[Spotify SDK] Player is not initialized');
+            return Option.some(new Error('[Spotify SDK] Player is not initialized'));
         }
-        return this.player.setVolume(percent * 0.01);
+        await this.player.setVolume(percent * 0.01);
+
+        return Option.none();
     }
 }
 

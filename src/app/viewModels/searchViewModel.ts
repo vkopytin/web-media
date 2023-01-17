@@ -4,7 +4,7 @@ import { ISearchResult, ISearchType, ISpotifySong } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { asyncQueue, State } from '../utils';
+import { asyncDebounce, asyncQueue, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AlbumViewModelItem } from './albumViewModelItem';
 import { ArtistViewModelItem } from './artistViewModelItem';
@@ -75,7 +75,7 @@ class SearchViewModel {
     unlikeTrackCommand$!: BehaviorSubject<SearchViewModel['unlikeTrackCommand']>;
     @State unlikeTrackCommand = Scheduler.Command(() => { });
 
-    onChangeTerm = _.debounce(() => {
+    onChangeTerm = asyncDebounce(() => {
         searchQueue.push(async (next) => {
             try {
                 if (this.term) {

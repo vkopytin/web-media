@@ -1,4 +1,5 @@
 import * as _ from 'underscore';
+import { asyncDebounce } from '../utils';
 import { IStorage, IStorageConfig } from './iStorage';
 
 
@@ -127,7 +128,7 @@ class InMemoryStorage implements IStorage {
         }
     }
 
-    complete = _.debounce(this.completeInternal, 500);
+    complete = asyncDebounce(this.completeInternal, 500);
     completeInternal() {
         console.log(db);
     }

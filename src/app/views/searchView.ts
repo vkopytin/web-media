@@ -2,7 +2,7 @@ import React from 'react';
 import * as _ from 'underscore';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/search';
-import { Binding, current, Notifications } from '../utils';
+import { asyncDebounce, Binding, current, Notifications } from '../utils';
 import { SearchViewModel, TrackViewModelItem } from '../viewModels';
 
 
@@ -90,7 +90,7 @@ class SearchView extends React.Component<ISearchViewProps> {
     @Binding()
     unlikeTrackCommand!: SearchView['vm']['unlikeTrackCommand'];
 
-    searchTracks = _.debounce((term: string) => {
+    searchTracks = asyncDebounce((term: string) => {
         this.searchCommand.exec(term);
     }, 300);
 

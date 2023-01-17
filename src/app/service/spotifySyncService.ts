@@ -19,8 +19,6 @@ class SpotifySyncService extends withEvents(BaseService) {
 
     async syncData() {
         try {
-            return;
-            // toDO: Enable sync data
             await this.syncMyTracks();
             const playlistsResult = await this.syncMyPlaylists();
             return playlistsResult.cata(async playlists => {
