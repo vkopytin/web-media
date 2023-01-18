@@ -56,11 +56,7 @@ class AppViewModel {
     @State isSyncing = 0;
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
-        await this.init();
-        await this.startSync();
-        await this.connect();
-        await this.fetchData();
-
+        this.init();
         resolve(true);
     }));
 
@@ -74,6 +70,13 @@ class AppViewModel {
     }
 
     async init() {
+        this.attachToWindowMessageEvent();
+        await this.startSync();
+        await this.connect();
+        await this.fetchData();
+    }
+
+    attachToWindowMessageEvent() {
         if (window.parent === window) {
             $(window).on('message', async evnt => {
                 const [eventName, value] = (evnt.originalEvent as any).data;
@@ -100,8 +103,8 @@ class AppViewModel {
         const tokenUrlResult = await this.ss.getSpotifyAuthUrl();
 
         console.log('updating token');
-        tokenUrlResult.error(e => this.errors = [tokenUrlResult])
-            .map(spotifyAuthUrl => this.autoRefreshUrl = spotifyAuthUrl + '23');
+        tokenUrlResult.map(spotifyAuthUrl => this.autoRefreshUrl = spotifyAuthUrl + '23')
+            .error(e => this.errors = [Result.error(e)]);
     }
 
     async connect() {
@@ -114,7 +117,8 @@ class AppViewModel {
         const updateDevicesHandler = async (eventName: string, device: { device_id: string; }) => {
             await this.updateDevices();
             if (!this.currentDevice) {
-                await this.spotifyService.player(device.device_id, false);
+                const res = await this.spotifyService.player(device.device_id, false);
+                res.error(e => this.errors = [Result.of(e)]);
             }
         };
         this.spotifyPlayerService.on('ready', updateDevicesHandler);
@@ -136,8 +140,9 @@ class AppViewModel {
 
     async updateDevices() {
         const devicesResult = await this.ss.listDevices();
-        devicesResult.error(e => this.errors = [devicesResult])
-            .map(devices => this.devices = _.map(devices, item => new DeviceViewModelItem(item)));
+        devicesResult
+            .map(devices => this.devices = _.map(devices, item => new DeviceViewModelItem(item)))
+            .error(e => this.errors = [devicesResult]);
 
         const currentDevice = _.find(this.devices, d => d.isActive()) || null;
         this.currentDevice = currentDevice;
@@ -146,10 +151,9 @@ class AppViewModel {
     async switchDevice(device: DeviceViewModelItem) {
         const res = await this.spotifyService.player(device.id(), true);
 
-        res.error(e => this.errors = [res])
-            .cata(() => _.delay(() => {
-                this.updateDevices();
-            }, 1000));
+        res.map(() => _.delay(() => {
+            this.updateDevices();
+        }, 1000)).error(e => this.errors = [res]);
     }
 }
 

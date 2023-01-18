@@ -94,9 +94,14 @@ class MediaPlayerViewModel {
     fetchData = asyncDebounce(() => this.fetchDataInternal(), 500);
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
-        await this.connect();
-        await this.fetchData();
-        resolve(true);
+        try {
+            await this.connect();
+            await this.fetchData();
+        } catch (ex) {
+            this.errors = [Result.error(ex as Error)];
+        } finally {
+            resolve(true);
+        }
     }));
 
     constructor(
@@ -193,19 +198,25 @@ class MediaPlayerViewModel {
     }
 
     lastTime = +new Date();
-    autoSeekInternal() {
-        if (this.isPlaying) {
+    async autoSeekInternal() {
+        try {
+            if (!this.isPlaying) {
+                await this.monitorPlyback();
+                return;
+            }
+
             const newTime = +new Date();
             const lastPlayed = this.timePlayed + newTime - this.lastTime;
-            if (this.duration > lastPlayed) {
-                this.timePlayed = lastPlayed;
-                this.lastTime = newTime;
-                this.autoSeek();
-            } else {
-                this.fetchData();
+            if (this.duration < lastPlayed) {
+                this.refreshPlaybackCommand.exec();
+                return;
             }
-        } else {
-            this.monitorPlyback();
+
+            this.timePlayed = lastPlayed;
+            this.lastTime = newTime;
+            this.autoSeek();
+        } catch (ex) {
+            this.errors = [Result.error(ex as Error)];
         }
     }
 
@@ -230,11 +241,11 @@ class MediaPlayerViewModel {
         lockSection.push(async next => {
             try {
                 const state = await this.spotifyPlayerService.getCurrentState();
-                state.map(async state => {
+                await state.map(async state => {
                     if (_.isEmpty(state)) {
                         this.volume = percent;
                         const res = await this.ss.volume(percent);
-                        res.error(e => this.errors = [res]);
+                        res.error(e => this.errors = [Result.error(e)]);
                     } else {
                         this.volume = percent;
                         const res = await this.spotifyPlayerService.setVolume(percent);
@@ -242,8 +253,8 @@ class MediaPlayerViewModel {
                     }
 
                     this.settingsSerivce.volume(this.volume = percent);
-                    next();
-                });
+                }).await();
+                next();
             } catch (ex) {
                 next();
                 this.errors = [Result.error(ex as Error)];

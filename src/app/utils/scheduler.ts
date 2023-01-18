@@ -68,6 +68,7 @@ export class Scheduler {
                 if (task.fails < 3) {
                     task.fails++;
                     this.exec(task);
+                    return;
                 }
                 console.log('Failed task: ', task);
                 throw ex;

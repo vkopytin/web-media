@@ -220,15 +220,16 @@ const resultOrError = async <T>(response: Response): Promise<T> => {
         const result = await response.text();
         const res = JSON.parse(result);
 
-        if ('error' in res) {
-            const error = res.error;
-            if ('message' in error) {
-                throw new ErrorWithStatus(error.message, response.status, response.statusText, res);
-            }
+        if (!('error' in res)) {
+            throw new ErrorWithStatus(result, response.status, response.statusText);
+        }
+
+        const error = res.error;
+        if (!('message' in error)) {
             throw new ErrorWithStatus(res.error, response.status, response.statusText);
         }
 
-        throw new ErrorWithStatus(result, response.status, response.statusText);
+        throw new ErrorWithStatus(error.message, response.status, response.statusText, res);
     }
 }
 
@@ -267,9 +268,9 @@ let index = 0;
 
 class SpotifyAdapter {
     fetch: typeof fetch = async (input, init) => {
-        //if (/me\/player/.test('' + input) && index++ % 3 === 0) {
-        //    input = ('' + input).replace('?', '/fail?') + 'fail';
-        //}
+        if (index++ % 3 === 0) {
+            input = ('' + input).replace('?', '/fail?') + 'fail';
+        }
         return await fetch(input, init);
     }
 

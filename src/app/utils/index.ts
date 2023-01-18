@@ -185,9 +185,12 @@ export function debounce<T extends Function>(func: T, wait = 0, cancelObj = 'can
     }
 }
 
-export const asyncDebounce = <F extends Function>(fn: F, timout: number): F => {
-    let subscribers: Array<[(arg: unknown) => void, (arg: unknown) => void]> = [];
-    const dfn = debounce(async (...args: []) => {
+type ArgumentTypes<T> = T extends (...args: infer U) => infer R ? U : never;
+type ReplaceReturnType<T, TNewReturn> = (...a: ArgumentTypes<T>) => TNewReturn;
+
+export const asyncDebounce = <F extends (...args: any) => any>(fn: F, timeout: number): ReplaceReturnType<F, Promise<ReturnType<F>>> => {
+    let subscribers: Array<[(arg: ReturnType<F>) => void, (arg: unknown) => void]> = [];
+    const dfn = debounce(async (...args: unknown[]) => {
         try {
             const res = await fn(...args);
             const oldSubscribers = [...subscribers];
@@ -198,12 +201,12 @@ export const asyncDebounce = <F extends Function>(fn: F, timout: number): F => {
             subscribers = [];
             oldSubscribers.forEach(([, reject]) => reject(ex));
         }
-    }, timout);
+    }, timeout);
 
     return ((...args: []) => new Promise((resolve, reject) => {
-        subscribers.push([resolve as (arg: unknown) => void, reject]);
-        dfn(...args);
-    })) as any;
+        subscribers.push([resolve, reject]);
+        setTimeout(() => dfn(...args));
+    }));
 }
 
 export function isLoading<T extends { isLoading: boolean; }>(target: T, key: string, descriptor?: PropertyDescriptor) {

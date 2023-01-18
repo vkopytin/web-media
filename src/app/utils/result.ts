@@ -57,10 +57,10 @@ class Result<E = Error, R = unknown> {
 
     map<T>(f: (v: R) => T): Result<E, T> {
         return this.left.match(
-            e => Result.error(e as unknown)
+            e => Result.error(e)
             ,
             () => Result.of(f(this.right))
-        ) as any;
+        );
     }
 
     error<T>(f: (v: E) => T): Result<T, R> {
@@ -71,12 +71,12 @@ class Result<E = Error, R = unknown> {
         );
     }
 
-    orElse<T>(f: (v: E) => T): T {
-        return this.match(
-            v => Result.of(v)
+    orElse<T>(f: (v: E) => Result<E, T>): Result<E, T> {
+        return this.left.match(
+            v => f(v)
             ,
-            e => f(e) as any
-        )
+            () => Result.of(null as T)
+        );
     }
 
     match<T>(success: (v: R) => T, error: (e: E) => T): T {

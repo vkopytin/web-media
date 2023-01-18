@@ -87,7 +87,7 @@ interface IPlayer {
     seek(number: number): Promise<void>;
     previousTrack(): Promise<void>;
     nextTrack(): Promise<void>;
-    connect(): Promise<((success: boolean) => void) | null>;
+    connect(): Promise<boolean>;
     getCurrentState(): Promise<IWebPlaybackState>;
     disconnect(): void;
     _options: {
@@ -219,10 +219,14 @@ class SpotifyPlayerService extends withEvents(BaseService) {
         if (!this.player) {
             return Result.error(new Error('[Spotify SDK] Player is not initialized'));
         }
-        await this.player.disconnect();
-        await this.player.connect();
+        const res = await this.player.connect();
+        if (res) {
+            console.log('The Web Playback SDK successfully connected to Spotify!');
+        } else {
+            console.log('The Web Playback SDK failed to connect to Spotify!');
+        }
 
-        return Result.of(true);
+        return Result.of(res);
     }
 
     async resume(): Promise<Option<Error>> {

@@ -29,7 +29,7 @@ class MyTracksViewModel {
     @State trackLyrics: { trackId: string; lyrics: string } | null = null;
 
     settings = {
-        total: 0,
+        total: 1,
         limit: 20,
         offset: 0
     };
@@ -84,7 +84,7 @@ class MyTracksViewModel {
             const tracksItems = _.map(tracks.items.slice(0, this.settings.limit), (song, index) => new TrackViewModelItem(song, index));
             this.tracks = [...this.tracks, ...tracksItems];
             this.checkTracks(tracksItems);
-        }).error(e => [Result.error(e)]);
+        }).error(e => this.errors = [Result.error(e)]);
 
         this.isLoading = false;
     }
