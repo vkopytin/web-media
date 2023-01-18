@@ -124,7 +124,6 @@ class HomeViewModel {
 
     async checkTracks(tracks: TrackViewModelItem[]) {
         if (!tracks.length) {
-
             return;
         }
         const tracksToCheck = tracks;
@@ -181,17 +180,16 @@ class HomeViewModel {
             name: track.name(),
             artist: track.artist()
         });
-        lyricsResult.error(e => {
-            this.trackLyrics = {
-                trackId: track.id(),
-                lyrics: e.message || 'empy-error-message'
-            };
-
-            return this.errors = [lyricsResult];
-        }).map(val => {
-            this.trackLyrics = {
+        this.trackLyrics = lyricsResult.match(val => {
+            return {
                 trackId: track.id(),
                 lyrics: '' + val
+            };
+        }, e => {
+            this.errors = [lyricsResult];
+            return {
+                trackId: track.id(),
+                lyrics: e.message || 'empy-error-message'
             };
         });
     }
@@ -200,14 +198,14 @@ class HomeViewModel {
         await track.bannTrack();
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
 
-        res.error(e => this.errors = [res]).map(r => this.bannedTrackIds = r);
+        res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
     }
 
     async removeBannFromTrack(track: TrackViewModelItem) {
         await track.removeBannFromTrack();
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
 
-        res.error(e => this.errors = [res]).map(r => this.bannedTrackIds = r);
+        res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
     }
 }
 

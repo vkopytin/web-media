@@ -77,32 +77,34 @@ class AppViewModel {
     }
 
     attachToWindowMessageEvent() {
-        if (window.parent === window) {
-            $(window).on('message', async evnt => {
-                const [eventName, value] = (evnt.originalEvent as any).data;
-                switch (eventName) {
-                    case 'accessToken':
-                        this.autoRefreshUrl = '';
-                        await this.ss.refreshToken(value);
-                        this.openLogin = false;
-                    default:
-                        break;
-                }
-            });
+        if (window.parent !== window) {
+            return;
         }
+
+        window.addEventListener('message', async evnt => {
+            const [eventName, value] = evnt.data;
+            switch (eventName) {
+                case 'accessToken':
+                    this.autoRefreshUrl = '';
+                    await this.ss.refreshToken(value);
+                    this.openLogin = false;
+                default:
+                    break;
+            }
+        });
     }
 
     async startSync() {
         this.isSyncing = 1;
-        await this.spotifySyncService.syncData();
-
+        const res = await this.spotifySyncService.syncData();
+        res.error(e => this.errors = [Result.error(e as Error)]);
         this.isSyncing = 0;
     }
 
     async refreshToken() {
         const tokenUrlResult = await this.ss.getSpotifyAuthUrl();
+        console.log('updating token...');
 
-        console.log('updating token');
         tokenUrlResult.map(spotifyAuthUrl => this.autoRefreshUrl = spotifyAuthUrl + '23')
             .error(e => this.errors = [Result.error(e)]);
     }

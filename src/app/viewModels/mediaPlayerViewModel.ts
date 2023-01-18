@@ -118,10 +118,10 @@ class MediaPlayerViewModel {
     }
 
     async connect() {
-        await this.spotifyPlayerService.on('playerStateChanged', (en, state) => this.updateFromPlayerState(state));
-
+        this.spotifyPlayerService.on('playerStateChanged', (en, state) => this.updateFromPlayerState(state));
         this.spotifyService.on('change:state', state => this.fetchData());
-        this.fetchData();
+
+        await this.fetchData();
     }
 
     async currentPlayerState() {
@@ -148,15 +148,19 @@ class MediaPlayerViewModel {
         this.checkTrackExists();
 
         const settingsResult = await this.settingsSerivce.get('spotify');
-        await settingsResult.error(async () => {
-            const volume = await this.spotifyPlayerService.getVolume();
-            volume.map(v => this.volume = v)
-                .error(e => (this.errors = [Result.error(e)], 0));
-            return this.volume;
-        }).map(settings => settings?.volume || this.volume).map(volume => {
-            this.spotifyPlayerService.setVolume(volume);
-            this.volume = volume;
-        });
+        await settingsResult.map(settings => settings?.volume || this.volume)
+            .match(async volume => {
+                const res = await this.spotifyPlayerService.setVolume(volume);
+                res.map(e => this.errors = [Result.error(e)]);
+
+                return this.volume = volume;
+            }, async () => {
+                const volume = await this.spotifyPlayerService.getVolume();
+                volume.map(v => this.volume = v)
+                    .error(e => (this.errors = [Result.error(e)], 0));
+
+                return this.volume;
+            });
     }
 
     async fetchDataInternal() {
@@ -168,12 +172,12 @@ class MediaPlayerViewModel {
                 this.currentTrack = currentlyPlaying.item;
                 this.currentTrackUri = currentlyPlaying.item.uri;
                 this.currentTrackId = currentlyPlaying.item.id;
-                this.volume = currentlyPlaying.device.volume_percent;
                 this.duration = currentlyPlaying.item.duration_ms || 0;
-                this.timePlayed = currentlyPlaying.progress_ms;
-                this.isPlaying = currentlyPlaying.is_playing;
                 this.trackName = currentlyPlaying.item.name;
                 this.albumName = currentlyPlaying.item.album.name;
+                this.volume = currentlyPlaying.device.volume_percent;
+                this.timePlayed = currentlyPlaying.progress_ms;
+                this.isPlaying = currentlyPlaying.is_playing;
                 this.artistName = artist.name;
                 this.thumbnailUrl = _.first(currentlyPlaying.item.album.images)?.url || '';
                 this.autoSeek();
@@ -196,7 +200,7 @@ class MediaPlayerViewModel {
     async monitorPlybackInternal() {
         if (!this.isPlaying) {
             await this.fetchData();
-            this.monitorPlyback();
+            await this.monitorPlyback();
         }
     }
 
@@ -224,19 +228,18 @@ class MediaPlayerViewModel {
     }
 
     manualSeek(percent: number) {
-        const max = this.duration,
-            timePlayed = max * percent / 100;
+        const max = this.duration;
+        const timePlayed = max * percent / 100;
 
         lockSection.push(async (next) => {
             try {
                 this.timePlayed = timePlayed;
                 const res = await this.ss.seek(timePlayed);
                 res.error(() => this.errors = [res]);
-                next();
             } catch (ex) {
-                next();
                 this.errors = [Result.error(ex as Error)];
             }
+            next();
         });
     }
 
@@ -257,11 +260,10 @@ class MediaPlayerViewModel {
 
                     this.settingsSerivce.volume(this.volume = percent);
                 }).await();
-                next();
             } catch (ex) {
-                next();
                 this.errors = [Result.error(ex as Error)];
             }
+            next();
         });
     }
 
@@ -269,7 +271,7 @@ class MediaPlayerViewModel {
         lockSection.push(async next => {
             try {
                 const state = await this.spotifyPlayerService.getCurrentState();
-                state.map(async state => {
+                await state.map(async state => {
                     if (_.isEmpty(state)) {
                         const res = await this.ss.play();
                         res.map(() => this.isPlaying = true)
@@ -279,12 +281,11 @@ class MediaPlayerViewModel {
                         res.map(e => this.errors = [Result.error(e)]);
                         this.isPlaying = true;
                     }
-                    next();
-                });
+                }).await();
             } catch (ex) {
-                next();
                 this.errors = [Result.error(ex as Error)];
             }
+            next();
         });
     }
 
@@ -292,7 +293,7 @@ class MediaPlayerViewModel {
         lockSection.push(async next => {
             try {
                 const state = await this.spotifyPlayerService.getCurrentState();
-                state.map(async state => {
+                await state.map(async state => {
                     if (_.isEmpty(state)) {
                         const res = await this.ss.pause();
                         res.map(() => this.isPlaying = false)
@@ -302,12 +303,11 @@ class MediaPlayerViewModel {
                         res.map(e => this.errors = [Result.error(e)]);
                         this.isPlaying = false;
                     }
-                    next();
-                });
+                }).await();
             } catch (ex) {
-                next();
                 this.errors = [Result.error(ex as Error)];
             }
+            next();
         });
     }
 
@@ -315,7 +315,7 @@ class MediaPlayerViewModel {
         lockSection.push(async next => {
             try {
                 const state = await this.spotifyPlayerService.getCurrentState();
-                state.map(async state => {
+                await state.map(async state => {
                     if (_.isEmpty(state)) {
                         const res = await this.ss.previous();
                         res.error(() => this.errors = [res]);
@@ -323,12 +323,11 @@ class MediaPlayerViewModel {
                         const res = await this.spotifyPlayerService.previouseTrack();
                         res.map(e => this.errors = [Result.error(e)])
                     }
-                    next();
-                });
+                }).await();
             } catch (ex) {
-                next();
                 this.errors = [Result.error(ex as Error)];
             }
+            next();
         });
     }
 
@@ -336,19 +335,19 @@ class MediaPlayerViewModel {
         lockSection.push(async next => {
             try {
                 const state = await this.spotifyPlayerService.getCurrentState();
-                state.map(async state => {
+                await state.map(async state => {
                     if (_.isEmpty(state)) {
                         const res = await this.ss.next();
                         res.error(() => this.errors = [res]);
                     } else {
-                        await this.spotifyPlayerService.nextTrack();
+                        const res = await this.spotifyPlayerService.nextTrack();
+                        res.map(e => this.errors = [Result.error(e)]);
                     }
-                    next();
-                });
+                }).await();
             } catch (ex) {
-                next();
                 this.errors = [Result.error(ex as Error)];
             }
+            next();
         });
     }
 
@@ -356,21 +355,21 @@ class MediaPlayerViewModel {
         lockSection.push(async (next) => {
             try {
                 const state = await this.spotifyPlayerService.getCurrentState();
-                state.map(async state => {
+                await state.map(async state => {
                     if (_.isEmpty(state)) {
                         const volume = this.volume;
                         const res = await this.ss.volume(volume * 1.1);
                         res.error(() => this.errors = [res]);
                     } else {
                         const volume = await this.spotifyPlayerService.getVolume();
-                        volume.map(v => this.volume = v * 1.1);
+                        volume.map(v => this.volume = v * 1.1)
+                            .error(e => this.errors = [Result.error(e)]);
                     }
-                    next();
-                });
+                }).await();
             } catch (ex) {
-                next();
                 this.errors = [Result.error(ex as Error)];
             }
+            next();
         });
     }
 
@@ -378,7 +377,7 @@ class MediaPlayerViewModel {
         lockSection.push(async next => {
             try {
                 const state = await this.spotifyPlayerService.getCurrentState();
-                state.map(async state => {
+                await state.map(async state => {
                     if (_.isEmpty(state)) {
                         const volume = this.volume;
                         const res = await this.ss.volume(volume * 0.9);
@@ -388,12 +387,11 @@ class MediaPlayerViewModel {
                         volume.map(v => this.volume = v * 0.9)
                             .error(e => this.errors = [Result.error(e)]);
                     }
-                    next();
-                });
+                }).await();
             } catch (ex) {
-                next();
                 this.errors = [Result.error(ex as Error)];
             }
+            next();
         });
     }
 
@@ -401,31 +399,31 @@ class MediaPlayerViewModel {
         lockSection.push(async (next) => {
             try {
                 if (!this.currentTrack) {
+                    next();
                     return;
                 }
                 const stateResult = await this.ss.addTracks(this.currentTrack);
                 stateResult.error(() => this.errors = [stateResult]);
-                next();
             } catch (ex) {
-                next();
                 this.errors = [Result.error(ex as Error)];
             }
+            next();
         });
     }
 
     async unlikeTrack() {
         lockSection.push(async (next) => {
             if (!this.currentTrack) {
+                next();
                 return;
             }
             try {
                 const stateResult = await this.ss.removeTracks(this.currentTrack);
                 stateResult.error(e => this.errors = [stateResult]);
-                next();
             } catch (ex) {
-                next();
                 this.errors = [Result.error(ex as Error)];
             }
+            next();
         });
     }
 

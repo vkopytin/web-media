@@ -61,13 +61,13 @@ class ArtistViewModelItem {
         const device = this.appViewModel.currentDevice;
 
         const res = await this.spotifyService.play(device?.id(), this.uri());
-        res.error(e => this.errors = [res]);
+        res.error(e => this.errors = [Result.error(e)]);
     }
 
     async playTracks() {
         const device = this.appViewModel.currentDevice;
         const playResult = await this.spotifyService.play(device?.id(), this.uri());
-        playResult.error(e => this.errors = [playResult]);
+        playResult.error(e => this.errors = [Result.error(e)]);
     }
 }
 
