@@ -1,7 +1,8 @@
 import url = require('url');
+import { Request } from 'express';
 
 
-export function getCurrentUrl(req) {
+export function getCurrentUrl(req: Request): url.UrlWithStringQuery {
     const xhostname = req.header('X-Forwarded-Host');
     const xprotocol = req.header('X-Forwarded-Proto');
     const originalUrl = `${xprotocol || req.protocol}://${xhostname}${req.originalUrl}`;
@@ -17,7 +18,7 @@ export function getCurrentUrl(req) {
     return url.parse(originalUrl);
 }
 
-export function getSessionIdCookie(req) {
+export function getSessionIdCookie(req: Request): string {
     if (process.env.SESSIONID) {
 
         return `sessionid=${process.env.SESSIONID}; _gat=1`;
@@ -30,16 +31,16 @@ export function getSessionIdCookie(req) {
  * Will match one and only one of the string `false|0|off|null|undefined` regardless
  * of capitalization and regardless off surrounding white-space.
  */
-export function tryValueFromString(strVal) {
+export function tryValueFromString(strVal: string): boolean {
     const regex = /^\s*(false|0|off|null|undefined)\s*$/i;
 
     return !(!strVal || regex.test(strVal));
 }
 
-export function atob(str) {
+export function atob(str: string): string {
     return Buffer.from(str, 'base64').toString('binary');
 }
 
-export function btoa(str) {
+export function btoa(str: string): string {
     return Buffer.from('' + str, 'binary').toString('base64');
 }

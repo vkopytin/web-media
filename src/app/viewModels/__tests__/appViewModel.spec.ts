@@ -1,9 +1,14 @@
 import { SpotifyAdapter } from '../../adapter/spotify';
 import { mocked } from 'ts-jest/utils';
 import { DataStorage } from '../../data/dataStorage';
-import { Service } from '../../service';
 import { AppViewModel } from '../appViewModel';
+import { SpotifySyncService } from '../../service/spotifySyncService';
 import { SpotifyService } from '../../service/spotify';
+import { SpotifyPlayerService } from '../../service/spotifyPlayer';
+import { Service } from '../../service';
+import { SettingsService } from '../../service/settings';
+import { DataService } from '../../service/dataService';
+import { DeviceViewModelItem } from '../deviceViewModelItem';
 
 
 jest.mock('../../adapter/spotify', () => {
@@ -32,6 +37,36 @@ jest.mock('../../adapter/spotify', () => {
     };
 });
 
+jest.mock('../../service/dataService', () => {
+    return {
+        DataService: jest.fn().mockImplementation(() => {
+            return {
+
+            };
+        })
+    };
+});
+
+jest.mock('../../service/spotifySyncService', () => {
+    return {
+        SpotifySyncService: jest.fn().mockImplementation(() => {
+            return {
+                syncData: jest.fn().mockImplementation(() => Promise.resolve()),
+            };
+        })
+    };
+});
+
+jest.mock('../deviceViewModelItem', () => {
+    return {
+        DeviceViewModelItem: jest.fn().mockImplementation(() => {
+            return {
+
+            };
+        })
+    };
+})
+
 DataStorage.dbType = 'inMemory';
 
 window.Spotify = {
@@ -53,24 +88,29 @@ window.Spotify = {
 } as any;
 
 describe('App View Model', () => {
-    const MockedSpotifyAdapter = mocked(SpotifyAdapter, true);
+    let adapter: SpotifyAdapter;
     let vm: AppViewModel;
-    let srv: Service;
+    let service: Service;
     let mockedInit: jest.SpyInstance<ReturnType<AppViewModel['init']>>;
-    let spotifyService: SpotifyService;
-
+    let spotifySync: SpotifySyncService;
+    let spotify: SpotifyService;
+    let spotifyPlayer: SpotifyPlayerService;
+    let dataService: DataService;
 
     beforeEach(async () => {
-        spotifyService = new SpotifyService(new SpotifyAdapter('test'));
-        srv = new Service({} as any, {} as any, {} as any, {} as any, spotifyService, {} as any, {} as any);
+        adapter = new SpotifyAdapter('key');
+        const settings = new SettingsService({ apiseeds: { key: '' }, genius: {}, lastSearch: { val: '' }, spotify: {} });
+        spotify = new SpotifyService(adapter);
+        spotifyPlayer = new SpotifyPlayerService(settings);
+        dataService = new DataService();
+        spotifySync = new SpotifySyncService(spotify, dataService);
         mockedInit = jest.spyOn(AppViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
-        vm = new AppViewModel({} as any, {} as any, {} as any, srv);
+        vm = new AppViewModel(spotifySync, spotify, spotifyPlayer, service);
         const res = await vm.isInit;
         expect(res).toBeTruthy();
     });
 
     afterEach(() => {
-        MockedSpotifyAdapter.mockClear();
         mockedInit.mockClear();
     });
 
@@ -100,7 +140,7 @@ describe('App View Model', () => {
     });
 
     it('Should catch error when fetch devices', async () => {
-        jest.spyOn(spotifyService.adapter, 'devices').mockImplementation(() => {
+        jest.spyOn(adapter, 'devices').mockImplementation(() => {
             throw new Error('fake error');
         });
 
@@ -114,7 +154,8 @@ describe('App View Model', () => {
     });
 
     it('Should switch device', async () => {
-        await vm.switchDevice(vm.currentDevice!);
+        const device = new DeviceViewModelItem({ id: 'test', is_active: false, is_private_session: true, is_restricted: true, name: 'test', type: 'test', volume_percent: 0 });
+        await vm.switchDevice(device);
 
         expect(vm.devices[0].id()).toBe('device-01');
         expect(vm.currentDevice!.id()).toBe('device-01');

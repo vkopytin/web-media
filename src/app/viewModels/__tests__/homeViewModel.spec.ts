@@ -6,6 +6,8 @@ import { HomeViewModel } from '../homeViewModel';
 import { SpotifyService } from '../../service/spotify';
 import { SpotifyPlayerService } from '../../service/spotifyPlayer';
 import { SettingsService } from '../../service/settings';
+import { SpotifySyncService } from '../../service/spotifySyncService';
+import { DataService } from '../../service/dataService';
 
 let mockSrv: any;
 
@@ -42,23 +44,30 @@ window.Spotify = {
 } as any;
 
 describe('Home View Model', () => {
-    const MockedSpotifyAdapter = mocked(SpotifyAdapter, true);
+    let adapter: SpotifyAdapter;
     let vm: HomeViewModel;
-    let srv: Service;
-    let spotifyService: SpotifyService;
-    let spotifyPlayerService: SpotifyPlayerService;
+    let service: Service;
+    let mockedInit: jest.SpyInstance<ReturnType<HomeViewModel['init']>>;
+    let spotifySync: SpotifySyncService;
+    let spotify: SpotifyService;
+    let spotifyPlayer: SpotifyPlayerService;
+    let dataService: DataService;
 
     beforeAll(async () => {
-        spotifyService = new SpotifyService(new SpotifyAdapter('test'));
-        spotifyPlayerService = new SpotifyPlayerService(new SettingsService());
-        srv = new Service({} as any, {} as any, {} as any, {} as any, spotifyService, {} as any, spotifyPlayerService);
-        vm = new HomeViewModel({} as any, {} as any, srv);
+        adapter = new SpotifyAdapter('key');
+        const settings = new SettingsService({ apiseeds: { key: '' }, genius: {}, lastSearch: { val: '' }, spotify: {} });
+        spotify = new SpotifyService(adapter);
+        spotifyPlayer = new SpotifyPlayerService(settings);
+        dataService = new DataService();
+        spotifySync = new SpotifySyncService(spotify, dataService);
+        mockedInit = jest.spyOn(HomeViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
+        vm = new HomeViewModel(spotify, spotifyPlayer, service);
         const res = await vm.isInit;
         expect(res).toBeTruthy();
     });
 
     afterAll(() => {
-        MockedSpotifyAdapter.mockClear();
+
     });
 
     it('Should be created', () => {
@@ -81,28 +90,28 @@ describe('Home View Model', () => {
     it('Should play track', async () => {
         await vm.playInTracks(vm.tracks[0]);
 
-        expect(spotifyService.adapter.play).toBeCalledWith(null, ['recommendation:uri-01'], 'recommendation:uri-01');
+        expect(adapter.play).toBeCalledWith(null, ['recommendation:uri-01'], 'recommendation:uri-01');
     });
 
     it('Should resume playback', async () => {
-        jest.spyOn(spotifyPlayerService.player!, 'resume').mockImplementation(() => Promise.resolve());
+        jest.spyOn(spotifyPlayer.player!, 'resume').mockImplementation(() => Promise.resolve());
 
         await vm.resume();
 
-        expect(spotifyPlayerService.player!.resume).toBeCalledWith();
+        expect(spotifyPlayer.player!.resume).toBeCalledWith();
     });
 
     it('Should like track', async () => {
-        jest.spyOn(spotifyService.adapter, 'addTracks').mockImplementation(() => Promise.resolve({} as any));
+        jest.spyOn(adapter, 'addTracks').mockImplementation(() => Promise.resolve({} as any));
         await vm.likeTrack(vm.tracks[0]);
 
-        expect(spotifyService.adapter.addTracks).toBeCalledWith(['recommendation-01']);
+        expect(adapter.addTracks).toBeCalledWith(['recommendation-01']);
     });
 
     it('Should unlike track', async () => {
-        jest.spyOn(spotifyService.adapter, 'removeTracks').mockImplementation(() => Promise.resolve({} as any));
+        jest.spyOn(adapter, 'removeTracks').mockImplementation(() => Promise.resolve({} as any));
         await vm.unlikeTrack(vm.tracks[0]);
 
-        expect(spotifyService.adapter.removeTracks).toBeCalledWith(['recommendation-01']);
+        expect(adapter.removeTracks).toBeCalledWith(['recommendation-01']);
     });
 });
