@@ -94,14 +94,8 @@ class MediaPlayerViewModel {
     fetchData = asyncDebounce(() => this.fetchDataInternal(), 500);
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
-        try {
-            await this.connect();
-            await this.fetchData();
-        } catch (ex) {
-            this.errors = [Result.error(ex as Error)];
-        } finally {
-            resolve(true);
-        }
+        await this.init();
+        resolve(true);
     }));
 
     constructor(
@@ -112,6 +106,15 @@ class MediaPlayerViewModel {
         private ss: Service
     ) {
 
+    }
+
+    async init() {
+        try {
+            await this.connect();
+            await this.fetchData();
+        } catch (ex) {
+            this.errors = [Result.error(ex as Error)];
+        }
     }
 
     async connect() {

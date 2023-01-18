@@ -62,9 +62,7 @@ class HomeViewModel {
     @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => this.selectPlaylist(playlist));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
-        await this.connect();
-        await this.fetchData();
-
+        await this.init();
         resolve(true);
     }, 100));
 
@@ -74,6 +72,11 @@ class HomeViewModel {
         private ss: Service
     ) {
 
+    }
+
+    async init() {
+        await this.connect();
+        await this.fetchData();
     }
 
     async connect() {

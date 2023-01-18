@@ -56,7 +56,7 @@ class AppViewModel {
     @State isSyncing = 0;
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
-        this.init();
+        await this.init();
         resolve(true);
     }));
 
