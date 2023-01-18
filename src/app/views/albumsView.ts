@@ -2,10 +2,11 @@ import React from 'react';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/albums';
 import { Binding, current, Notifications } from '../utils';
+import { Result } from '../utils/result';
 import { AlbumsViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IAlbumsViewProps {
-    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
+    showErrors<T>(errors: Result<Error, T>[]): void;
     uri: string;
     currentTrackId: string;
     tracks: TrackViewModelItem[];
@@ -39,7 +40,7 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
         this.tracks = this.props.tracks;
     }
 
-    refresh(args: { inst: AlbumsView['errors$']; value: ServiceResult<unknown, Error>[] }) {
+    refresh(args: { inst: AlbumsView['errors$']; value: Result<Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -56,7 +57,7 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
         return this.props.currentTrackId === track.id();
     }
 
-    showErrors(errors: ServiceResult<unknown, Error>[]) {
+    showErrors(errors: Result<Error>[]) {
         this.props.showErrors(errors);
     }
 

@@ -150,9 +150,9 @@ async function* asAsyncOf(context: unknown, fn: Function, ...args: unknown[]) {
 
 export function debounce<T extends Function>(func: T, wait = 0, cancelObj = 'canceled') {
     let timerId: number | null, latestResolve: {} | null, shouldCancel: boolean;
-    let allArgs = [] as unknown[];
+    let allArgs = [] as unknown[][];
     return function (this: unknown, ...args: unknown[]) {
-        allArgs = [...allArgs, ...args];
+        allArgs = [...allArgs, args];
         if (!latestResolve) {
             return new Promise((resolve, reject) => {
                 latestResolve = resolve;
@@ -167,13 +167,13 @@ export function debounce<T extends Function>(func: T, wait = 0, cancelObj = 'can
         });
     }
 
-    async function invoke(this: unknown, args: unknown[], resolve: (a: unknown) => void, reject: (a: unknown) => void) {
+    async function invoke(this: unknown, args: unknown[][], resolve: (a: unknown) => void, reject: (a: unknown) => void) {
         if (shouldCancel && resolve !== latestResolve) {
             resolve(cancelObj)
         } else {
-            allArgs = [];
+            allArgs = [] as unknown[][];
             try {
-                const res = await func.apply(this, args);
+                const res = await func.apply(this, [...(args[args.length - 1] || []), ...args.slice(0, -1)]);
                 resolve(res);
             } catch (ex) {
                 reject(ex);

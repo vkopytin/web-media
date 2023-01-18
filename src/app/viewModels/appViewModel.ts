@@ -2,12 +2,12 @@ import $ from 'jquery';
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IUserInfo } from '../adapter/spotify';
-import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
 import { SpotifyPlayerService } from '../service/spotifyPlayer';
 import { SpotifySyncService } from '../service/spotifySyncService';
 import { State } from '../utils';
+import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { DeviceViewModelItem } from './deviceViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
@@ -50,7 +50,7 @@ class AppViewModel {
     @State autoRefreshUrl = '';
 
     errors$!: BehaviorSubject<AppViewModel['errors']>;
-    @State errors = [] as ServiceResult<any, Error>[];
+    @State errors = [] as Result<Error, unknown>[];
 
     isSyncing$!: BehaviorSubject<AppViewModel['isSyncing']>;
     @State isSyncing = 0;
@@ -100,14 +100,16 @@ class AppViewModel {
         const tokenUrlResult = await this.ss.getSpotifyAuthUrl();
 
         console.log('updating token');
-        tokenUrlResult.assert(e => this.errors = [e])
-            .cata(spotifyAuthUrl => this.autoRefreshUrl = spotifyAuthUrl + '23');
+        tokenUrlResult.error(e => this.errors = [tokenUrlResult])
+            .map(spotifyAuthUrl => this.autoRefreshUrl = spotifyAuthUrl + '23');
     }
 
     async connect() {
         const isLoggedInResult = await this.ss.isLoggedIn();
-        this.openLogin = isLoggedInResult.assert(e => this.errors = [e])
-            .cata(r => !r);
+        this.openLogin = isLoggedInResult.match(
+            r => !r,
+            e => (this.errors = [isLoggedInResult], false)
+        );
 
         const updateDevicesHandler = async (eventName: string, device: { device_id: string; }) => {
             await this.updateDevices();
@@ -120,20 +122,22 @@ class AppViewModel {
 
     async fetchData() {
         const userInfoResult = await this.ss.profile();
-        userInfoResult.assert(e => this.errors = [e])
-            .cata(r => this.profile = r);
+        userInfoResult.error(e => this.errors = [userInfoResult])
+            .map(r => this.profile = r);
 
         await this.updateDevices();
 
         const topTracksResult = await this.ss.listTopTracks();
-        this.topTracks = topTracksResult.assert(e => this.errors = [e])
-            .cata(topTracks => _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index)));
+        this.topTracks = topTracksResult.match(
+            topTracks => _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index)),
+            e => (this.errors = [topTracksResult], [])
+        );
     }
 
     async updateDevices() {
         const devicesResult = await this.ss.listDevices();
-        devicesResult.assert(e => this.errors = [e])
-            .cata(devices => this.devices = _.map(devices, item => new DeviceViewModelItem(item)));
+        devicesResult.error(e => this.errors = [devicesResult])
+            .map(devices => this.devices = _.map(devices, item => new DeviceViewModelItem(item)));
 
         const currentDevice = _.find(this.devices, d => d.isActive()) || null;
         this.currentDevice = currentDevice;
@@ -142,7 +146,7 @@ class AppViewModel {
     async switchDevice(device: DeviceViewModelItem) {
         const res = await this.spotifyService.player(device.id(), true);
 
-        res.assert(e => this.errors = [e])
+        res.error(e => this.errors = [res])
             .cata(() => _.delay(() => {
                 this.updateDevices();
             }, 1000));

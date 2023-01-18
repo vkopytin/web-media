@@ -1,11 +1,12 @@
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
-import { ISpotifySong } from '../adapter/spotify';
+import { IResponseResult, ISpotifySong } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { DataService } from '../service/dataService';
 import { SpotifyService } from '../service/spotify';
 import { current, formatTime, isLoading, State } from '../utils';
+import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { MediaPlayerViewModel } from './mediaPlayerViewModel';
 import { PlaylistsViewModel } from './playlistsViewModel';
@@ -15,7 +16,7 @@ class TrackViewModelItem {
     mediaPlayerViewModel = current(MediaPlayerViewModel);
 
     errors$!: BehaviorSubject<TrackViewModelItem['errors']>;
-    @State errors = [] as ServiceResult<any, Error>[];
+    @State errors = [] as Result<Error, unknown>[];
 
     isLiked$!: BehaviorSubject<TrackViewModelItem['isLiked']>;
     @State isLiked = false;
@@ -123,49 +124,56 @@ class TrackViewModelItem {
     async connect() {
         this.listPlaylists();
         const res = await this.ss.isBannedTrack(this.song.track.id);
-        res.assert(e => this.errors = [e]).cata(r => this.isBanned = r);
+        res.map(r => this.isBanned = r).error(e => this.errors = [Result.error(e)]);
     }
 
     async listPlaylists() {
         const res = await this.dataService.listPlaylistsByTrack(this.song.track);
 
-        return res.assert(e => this.errors = [e])
-            .cata(playlists => playlists.map(playlist => new PlaylistsViewModelItem(playlist)));
+        return res
+            .map(playlists => playlists.map(playlist => new PlaylistsViewModelItem(playlist)))
+            .error(e => this.errors = [Result.error(e)]);
     }
 
     async play(playlistUri: string) {
         const playResult = await this.ss.play('', playlistUri, this.uri());
-        playResult.assert(e => this.errors = [e]).map(() => this.mediaPlayerViewModel.fetchDataInternal());
+        playResult.map(() => this.mediaPlayerViewModel.fetchDataInternal())
+            .error(e => this.errors = [Result.error(e)]);
     }
 
     async playTracks(tracks: TrackViewModelItem[]) {
         const allowedTracks = _.filter(tracks, track => !track.isBanned);
         const playResult = await this.ss.play('', _.map(allowedTracks, item => item.uri()), this.uri());
-        playResult.assert(e => this.errors = [e]).map(() => this.mediaPlayerViewModel.fetchDataInternal());
+        playResult.map(() => this.mediaPlayerViewModel.fetchDataInternal())
+            .error(e => this.errors = [Result.error(e)]);
     }
 
     @isLoading
     async addToPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
         const result = await this.ss.addTrackToPlaylist(track.song.track, playlist.playlist);
-        result.assert(e => this.errors = [e]).cata(() => setTimeout(() => {
+        result.map(() => setTimeout(() => {
             this.connect();
-        }, 2000));
+        }, 2000)).error(e => this.errors = [Result.error(e)]);
     }
 
     @isLoading
     async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
         const result = await this.ss.removeTrackFromPlaylist(track.song.track, playlist.id());
-        await result.assert(e => this.errors = [e]).cata(() => this.connect());
+        await result.map(() => this.connect()).error(e => this.errors = [Result.error(e)]);
     }
 
-    async likeTrack() {
+    async likeTrack(): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
         const result = await this.ss.addTracks(this.song.track);
-        return result.assert(e => this.errors = [e]);
+        result.error(e => this.errors = [Result.error(e)]);
+
+        return result;
     }
 
     async unlikeTrack() {
         const result = await this.ss.removeTracks(this.song.track);
-        return result.assert(e => this.errors = [e]);
+        result.error(e => this.errors = [Result.error(e)]);
+
+        return result;
     }
 
     updateIsCached(playlists: PlaylistsViewModelItem[]) {
@@ -174,12 +182,12 @@ class TrackViewModelItem {
 
     async bannTrack() {
         const res = await this.ss.bannTrack(this.id());
-        res.assert(e => this.errors = [e]).cata(r => this.isBanned = r);
+        res.map(r => this.isBanned = r).error(e => this.errors = [Result.error(e)]);
     }
 
     async removeBannFromTrack() {
         const res = await this.ss.removeBannFromTrak(this.id());
-        res.assert(e => this.errors = [e]).cata(r => this.isBanned = !r);
+        res.map(r => this.isBanned = !r).error(e => this.errors = [Result.error(e)]);
     }
 
 }

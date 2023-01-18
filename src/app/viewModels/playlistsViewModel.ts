@@ -1,17 +1,16 @@
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
-import { ServiceResult } from '../base/serviceResult';
 import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
-import { SpotifyService } from '../service/spotify';
 import { assertNoErrors, current, isLoading, State } from '../utils';
+import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 class PlaylistsViewModel {
     errors$!: BehaviorSubject<PlaylistsViewModel['errors']>;
-    @State errors = [] as ServiceResult<unknown, Error>[];
+    @State errors = [] as Result<Error, unknown>[];
 
     playlists$!: BehaviorSubject<PlaylistsViewModel['playlists']>;
     @State playlists = [] as PlaylistsViewModelItem[];
@@ -100,21 +99,21 @@ class PlaylistsViewModel {
 
     async fetchData() {
         const result = await this.ss.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
-        result.assert(e => this.errors = [e]).cata(({ items: playlists }) => {
+        result.map(({ items: playlists }) => {
             this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
             this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
             this.playlists = _.map(_.first(playlists, this.settings.playlist.limit), item => new PlaylistsViewModelItem(item));
-        });
+        }).error(e => this.errors = [Result.error(e)]);
     }
 
     @isLoading
     async loadMore() {
         const result = await this.ss.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
-        result.assert(e => this.errors = [e]).cata(({ items: playlists }) => {
+        result.map(({ items: playlists }) => {
             this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
             this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
             this.playlists = [...this.playlists, ..._.map(_.first(playlists, this.settings.playlist.limit), item => new PlaylistsViewModelItem(item))];
-        });
+        }).error(e => this.errors = [Result.error(e)]);
     }
 
     async fetchTracks() {
@@ -125,12 +124,12 @@ class PlaylistsViewModel {
         if (currentPlaylistId) {
             this.loadTracks('playlistTracks');
             const result = await this.ss.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
-            result.assert(e => this.errors = [e]).cata(({ items: tracks }) => {
+            result.map(({ items: tracks }) => {
                 this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
                 this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);
                 this.tracks = _.map(_.first(tracks, this.settings.track.limit), (item, index) => new TrackViewModelItem(item, index));
                 this.checkTracks(this.tracks);
-            });
+            }).error(e => this.errors = [Result.error(e)]);
         }
     }
 
@@ -138,7 +137,7 @@ class PlaylistsViewModel {
         const currentPlaylistId = this.currentPlaylistId;
         if (currentPlaylistId) {
             const result = await this.ss.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
-            result.assert(e => this.errors = [e]).cata(({ items: tracks }) => {
+            result.map(({ items: tracks }) => {
                 this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
                 this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);
                 const moreTracks = _.map(_.first(tracks, this.settings.track.limit), (item, index) => new TrackViewModelItem(item, index));
@@ -147,7 +146,7 @@ class PlaylistsViewModel {
                     ...moreTracks
                 ];
                 this.checkTracks(moreTracks);
-            });
+            }).error(e => this.errors = [Result.error(e)]);
         }
     }
 
@@ -164,14 +163,14 @@ class PlaylistsViewModel {
             return;
         }
         const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
-        likedResult.assert(e => this.errors = [e]).cata(likedList => {
+        likedResult.map(likedList => {
             _.each(likedList, (liked, index) => {
                 tracksToCheck[index].isLiked = liked;
             });
             this.likedTracks = _.filter(this.tracks, track => track.isLiked);
-        });
+        }).error(e => this.errors = [Result.error(e)]);
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
-        res.assert(e => this.errors = [e]).cata(r => this.bannedTrackIds = r);
+        res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
     }
 
     playlistsAddRange(value: PlaylistsViewModelItem[]) {
@@ -196,7 +195,7 @@ class PlaylistsViewModel {
             '',
             isPublic
         ));
-        await spotifyResult.assert(e => this.errors = [e]).cata(() => this.fetchData());
+        await spotifyResult.map(() => this.fetchData()).error(e => this.errors = [Result.error(e)]);
     }
 
     async likeTrack(track: TrackViewModelItem) {
@@ -218,18 +217,18 @@ class PlaylistsViewModel {
             name: track.name(),
             artist: track.artist()
         });
-        if (assertNoErrors(lyricsResult, () => { })) {
+        lyricsResult.error(e => {
             this.trackLyrics = {
                 trackId: track.id(),
-                lyrics: lyricsResult.error?.message || 'unknown-error'
+                lyrics: e.message || 'unknown-error'
             };
             return;
-        }
-
-        this.trackLyrics = {
-            trackId: track.id(),
-            lyrics: '' + lyricsResult.val
-        };
+        }).map(val => {
+            this.trackLyrics = {
+                trackId: track.id(),
+                lyrics: '' + val
+            };
+        });
     }
 
     async reorderTrack(track: TrackViewModelItem, beforeTrack: TrackViewModelItem) {
@@ -246,7 +245,7 @@ class PlaylistsViewModel {
         } else if (oldPosition > newPosition) {
             res = await this.ss.reorderTrack(this.currentPlaylistId, oldPosition, newPosition);
         }
-        res?.assert(e => this.errors = [e]);
+        res?.error(e => this.errors = [Result.error(e)]);
     }
 
     @isLoading
@@ -254,7 +253,7 @@ class PlaylistsViewModel {
         await track.bannTrack();
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
 
-        res.assert(e => this.errors = [e]).cata(r => this.bannedTrackIds = r);
+        res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
     }
 
     @isLoading
@@ -262,7 +261,7 @@ class PlaylistsViewModel {
         await track.removeBannFromTrack();
         const res = await this.ss.listBannedTracks(this.tracks.map(track => track.id()));
 
-        res.assert(e => this.errors = [e]).cata(r => this.bannedTrackIds = r);
+        res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
     }
 }
 

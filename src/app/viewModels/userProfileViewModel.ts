@@ -1,10 +1,10 @@
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IUserInfo } from '../adapter/spotify';
-import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SettingsService } from '../service/settings';
 import { Binding, State } from '../utils';
+import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
 import { TrackViewModelItem } from './trackViewModelItem';
@@ -12,7 +12,7 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 class UserProfileViewModel {
     errors$!: BehaviorSubject<UserProfileViewModel['errors']>;
-    @State errors = [] as ServiceResult<{}, Error>[];
+    @State errors = [] as Result<Error, unknown>[];
 
     isLoggedin$!: BehaviorSubject<boolean>;
     @State isLoggedin = false;
@@ -64,29 +64,29 @@ class UserProfileViewModel {
         this.apiseedsKey = this.settingsService.apiseedsKey();
 
         const spotifyTokenUrlResult = await this.ss.getSpotifyAuthUrl();
-        spotifyTokenUrlResult.assert(e => this.errors = [e]).cata(spotifyAuthUrl => {
+        spotifyTokenUrlResult.map(spotifyAuthUrl => {
             this.spotifyAuthUrl = spotifyAuthUrl;
-        });
+        }).error(e => this.errors = [Result.error(e)]);
 
         const isLoggedinResult = await this.ss.isLoggedIn();
-        isLoggedinResult.assert(e => this.errors = [e]).cata(isLoggedIn => {
+        isLoggedinResult.map(isLoggedIn => {
             this.isLoggedin = isLoggedIn;
-        });
+        }).error(e => this.errors = [Result.error(e)]);
 
         const geniusTokenUrlResult = await this.ss.getGeniusAuthUrl();
-        geniusTokenUrlResult.assert(e => this.errors = [e]).cata(geniusAuthUrl => {
+        geniusTokenUrlResult.map(geniusAuthUrl => {
             this.geniusAuthUrl = geniusAuthUrl;
-        });
+        }).error(e => this.errors = [Result.error(e)]);
 
         const userInfoResult = await this.ss.profile();
-        userInfoResult.assert(e => this.errors = [e]).cata(userInfo => {
+        userInfoResult.map(userInfo => {
             this.profile = userInfo;
-        });
+        }).error(e => this.errors = [Result.error(e)]);
 
         const topTracksResult = await this.ss.listTopTracks();
-        topTracksResult.assert(e => this.errors = [e]).cata(topTracks => {
+        topTracksResult.map(topTracks => {
             this.topTracks = _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index));
-        });
+        }).error(e => this.errors = [Result.error(e)]);
     }
 
     saveApiseedsKey(val: string) {
@@ -95,9 +95,9 @@ class UserProfileViewModel {
 
     async logout() {
         const res = await this.ss.logout();
-        res.assert(e => this.errors = []).cata(() => {
+        res.map(() => {
             this.isLoggedin = false;
-        });
+        }).error(e => this.errors = [Result.error(e)]);
     }
 }
 

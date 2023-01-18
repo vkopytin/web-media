@@ -1,6 +1,6 @@
 import { none, Option, Some } from './option';
 
-class Result<E, R> {
+class Result<E = Error, R = unknown> {
     static of<E, R>(success: R) {
         return new Result<E, R>(null, success);
     }
@@ -30,7 +30,7 @@ class Result<E, R> {
         return this;
     }
 
-    cata<T>(f: (v: R) => Result<E, T>): Result<E, T> {
+    cata<T>(f: (v: R) => Result<E, T> | Promise<Result<E, T>>): Result<E, T> | Promise<Result<E, T>> {
         return this.left.match(
             e => Result.error(e)
             ,
@@ -79,12 +79,16 @@ class Result<E, R> {
         )
     }
 
-    match<T>(success: (v: R) => T, error: (e: E) => T) {
+    match<T>(success: (v: R) => T, error: (e: E) => T): T {
         return this.left.match(
             err => error(err)
             ,
             () => success(this.right)
         );
+    }
+
+    is(a: new (...args: any[]) => E): boolean {
+        return this.left.match(e => e instanceof a, () => this.right instanceof a);
     }
 }
 

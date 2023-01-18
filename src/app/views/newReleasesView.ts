@@ -1,13 +1,13 @@
 import React from 'react';
 import * as _ from 'underscore';
-import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/newReleases';
 import { Binding, current, Notifications } from '../utils';
+import { Result } from '../utils/result';
 import { AlbumViewModelItem, NewReleasesViewModel } from '../viewModels';
 
 
 export interface INewReleasesViewProps {
-    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
+    showErrors<T>(errors: Result<Error, T>[]): void;
     currentTrackId: string;
 }
 
@@ -71,7 +71,7 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[]; }) {
+    refresh(args: { inst: unknown; value: Result<Error>[]; }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -84,7 +84,7 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
         return !!_.find(this.likedAlbums, (item: AlbumViewModelItem) => item.id() === album.id());
     }
 
-    showErrors(errors: ServiceResult<unknown, Error>[]) {
+    showErrors(errors: Result<Error>[]) {
         this.props.showErrors(errors);
     }
 

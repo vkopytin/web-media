@@ -8,6 +8,7 @@ import { SpotifySyncServiceResult } from './results/spotifySyncServiceResult';
 import { SpotifyService } from './spotify';
 import { DataService } from './dataService';
 import { ServiceResult } from '../base/serviceResult';
+import { Result } from '../utils/result';
 
 
 class SpotifySyncService extends withEvents(BaseService) {
@@ -17,24 +18,24 @@ class SpotifySyncService extends withEvents(BaseService) {
         super();
     }
 
-    async syncData() {
+    async syncData(): Promise<Result<Error, boolean>> {
         try {
             await this.syncMyTracks();
             const playlistsResult = await this.syncMyPlaylists();
-            return playlistsResult.cata(async playlists => {
+            return await playlistsResult.cata(async playlists => {
                 for (const playlist of playlists) {
                     await this.syncTracksByPlaylist(playlist);
                 }
                 this.cleanUpData();
 
-                return SpotifySyncServiceResult.success(true);
+                return Result.of(true);
             });
         } catch (ex) {
-            return SpotifySyncServiceResult.error<boolean>(ex as Error);
+            return Result.error(ex as Error);
         }
     }
 
-    async syncMyPlaylists() {
+    async syncMyPlaylists(): Promise<Result<Error, IUserPlaylist[]>> {
         try {
             let res = [] as IUserPlaylist[];
             for await (const playlists of this.listMyPlaylists()) {
@@ -43,13 +44,13 @@ class SpotifySyncService extends withEvents(BaseService) {
                 }
                 res = [...res, ...playlists];
             }
-            return SpotifySyncServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return SpotifySyncServiceResult.error<IUserPlaylist[]>(ex as Error);
+            return Result.error(ex as Error);
         }
     }
 
-    async syncTracksByPlaylist(playlist: IUserPlaylist) {
+    async syncTracksByPlaylist(playlist: IUserPlaylist): Promise<void> {
         let index = 0;
         for await (const songs of this.listPlaylistTracks(playlist.id)) {
             for (const song of songs) {
@@ -59,7 +60,7 @@ class SpotifySyncService extends withEvents(BaseService) {
         }
     }
 
-    async syncMyTracks() {
+    async syncMyTracks(): Promise<void> {
         let index = 0;
         const myPlaylist: IUserPlaylist = {
             id: 'myTracks',
@@ -88,10 +89,9 @@ class SpotifySyncService extends withEvents(BaseService) {
         while (offset < total) {
             const currentOffset = offset;
             const result = await this.spotify.fetchPlaylistTracks(playlistId, offset, this.limit + 1);
-            if (assertNoErrors(result, (e: ServiceResult<unknown, Error>[]) => _.delay(() => { throw e; }))) {
-                return;
-            }
-            const response = result.val as IResponseResult<ISpotifySong>;
+
+            const response = result.match(s => s, e => { throw e });
+
             total = offset + Math.min(this.limit + 1, response.items.length);
             offset = offset + Math.min(this.limit, response.items.length);
 
@@ -111,7 +111,7 @@ class SpotifySyncService extends withEvents(BaseService) {
             if (assertNoErrors(result, (e: ServiceResult<unknown, Error>[]) => _.delay(() => { throw e; }))) {
                 return;
             }
-            const response = result.val as IUserPlaylistsResult;
+            const response = result.match(s => s, e => { throw e });
             total = offset + Math.min(this.limit + 1, response.items.length);
             offset = offset + Math.min(this.limit, response.items.length);
 
@@ -131,7 +131,7 @@ class SpotifySyncService extends withEvents(BaseService) {
             if (assertNoErrors(result, (e: ServiceResult<unknown, Error>[]) => _.delay(() => { throw e; }))) {
                 return;
             }
-            const response = result.val as IResponseResult<ISpotifySong>;
+            const response = result.match(s => s, e => { throw e });
             total = offset + Math.min(this.limit + 1, response.items.length);
             offset = offset + Math.min(this.limit, response.items.length);
 

@@ -4,13 +4,14 @@ import { IResponseResult, ISpotifySong } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, current, State } from '../utils';
+import { assertNoErrors, State } from '../utils';
+import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 class MyTracksViewModel {
     errors$!: BehaviorSubject<MyTracksViewModel['errors']>;
-    @State errors = [] as ServiceResult<any, Error>[];
+    @State errors = [] as Result<Error, unknown>[];
 
     tracks$!: BehaviorSubject<MyTracksViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
@@ -60,15 +61,12 @@ class MyTracksViewModel {
         this.settings.offset = 0;
         this.loadData('myTracks');
         const res = await this.ss.fetchTracks(this.settings.offset, this.settings.limit + 1);
-        if (res.isError) {
-            this.isLoading = false;
-            return;
-        }
-        const tracks = res.val as IResponseResult<ISpotifySong>;
-        this.settings.total = this.settings.offset + Math.min(this.settings.limit + 1, tracks.items.length);
-        this.settings.offset = this.settings.offset + Math.min(this.settings.limit, tracks.items.length);
-        this.tracks = _.map(tracks.items.slice(0, this.settings.limit), (song, index) => new TrackViewModelItem(song, index));
-        this.checkTracks(this.tracks);
+        res.map(tracks => {
+            this.settings.total = this.settings.offset + Math.min(this.settings.limit + 1, tracks.items.length);
+            this.settings.offset = this.settings.offset + Math.min(this.settings.limit, tracks.items.length);
+            this.tracks = _.map(tracks.items.slice(0, this.settings.limit), (song, index) => new TrackViewModelItem(song, index));
+            this.checkTracks(this.tracks);
+        }).error(e => this.errors = [Result.error(e)]);
 
         this.isLoading = false;
     }
@@ -80,16 +78,14 @@ class MyTracksViewModel {
         this.isLoading = true;
         this.loadData('myTracks');
         const res = await this.ss.fetchTracks(this.settings.offset, this.settings.limit + 1);
-        if (assertNoErrors(res, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-            this.isLoading = false;
-            return;
-        }
-        const tracks = res.val as IResponseResult<ISpotifySong>;
-        this.settings.total = this.settings.offset + Math.min(this.settings.limit + 1, tracks.items.length);
-        this.settings.offset = this.settings.offset + Math.min(this.settings.limit, tracks.items.length);
-        const tracksItems = _.map(tracks.items.slice(0, this.settings.limit), (song, index) => new TrackViewModelItem(song, index));
-        this.tracks = [...this.tracks, ...tracksItems];
-        this.checkTracks(tracksItems);
+        res.map(tracks => {
+            this.settings.total = this.settings.offset + Math.min(this.settings.limit + 1, tracks.items.length);
+            this.settings.offset = this.settings.offset + Math.min(this.settings.limit, tracks.items.length);
+            const tracksItems = _.map(tracks.items.slice(0, this.settings.limit), (song, index) => new TrackViewModelItem(song, index));
+            this.tracks = [...this.tracks, ...tracksItems];
+            this.checkTracks(tracksItems);
+        }).error(e => [Result.error(e)]);
+
         this.isLoading = false;
     }
 
@@ -106,13 +102,12 @@ class MyTracksViewModel {
             return;
         }
         const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
-        if (assertNoErrors(likedResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-            return;
-        }
-        _.each(likedResult.val as boolean[], (liked, index) => {
-            tracksToCheck[index].isLiked = liked;
-        });
-        this.likedTracks = _.filter(this.tracks, track => track.isLiked);
+        likedResult.map(liked => {
+            _.each(liked, (liked, index) => {
+                tracksToCheck[index].isLiked = liked;
+            });
+            this.likedTracks = _.filter(this.tracks, track => track.isLiked);
+        }).error(e => this.errors = [Result.error(e)]);
     }
 
     tracksAddRange(value: TrackViewModelItem[]) {
@@ -133,18 +128,18 @@ class MyTracksViewModel {
             name: track.name(),
             artist: track.artist()
         });
-        if (assertNoErrors(lyricsResult, () => { })) {
+        lyricsResult.error(e => {
             this.trackLyrics = {
                 trackId: track.id(),
-                lyrics: lyricsResult.error?.message || 'unknown-error'
+                lyrics: e.message || 'unknown-error'
             };
             return;
-        }
-
-        this.trackLyrics = {
-            trackId: track.id(),
-            lyrics: '' + lyricsResult.val
-        };
+        }).map(val => {
+            this.trackLyrics = {
+                trackId: track.id(),
+                lyrics: val
+            };
+        });
     }
 }
 

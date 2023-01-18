@@ -1,17 +1,16 @@
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IArtist } from '../adapter/spotify';
-import { ServiceResult } from '../base/serviceResult';
-import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
 import { current, State } from '../utils';
+import { Result } from '../utils/result';
 import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 
 class ArtistViewModelItem {
     errors$!: BehaviorSubject<ArtistViewModelItem['errors']>;
-    @State errors = [] as ServiceResult<any, Error>[];
+    @State errors = [] as Result<Error, unknown>[];
 
     playlists$!: BehaviorSubject<ArtistViewModelItem['playlists']>;
     @State playlists = [] as PlaylistsViewModelItem[];
@@ -62,13 +61,13 @@ class ArtistViewModelItem {
         const device = this.appViewModel.currentDevice;
 
         const res = await this.spotifyService.play(device?.id(), this.uri());
-        res.assert(e => this.errors = [e]);
+        res.error(e => this.errors = [res]);
     }
 
     async playTracks() {
         const device = this.appViewModel.currentDevice;
         const playResult = await this.spotifyService.play(device?.id(), this.uri());
-        playResult.assert(e => this.errors = [e]);
+        playResult.error(e => this.errors = [playResult]);
     }
 }
 

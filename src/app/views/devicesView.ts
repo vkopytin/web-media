@@ -2,10 +2,11 @@ import React from 'react';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/devices';
 import { Binding, current, Notifications } from '../utils';
+import { Result } from '../utils/result';
 import { AppViewModel, DeviceViewModelItem } from '../viewModels';
 
 export interface IDevicesViewProps {
-    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
+    showErrors<T>(errors: Result<Error, T>[]): void;
     openShowDevices(showHide: boolean): void;
 }
 
@@ -41,7 +42,7 @@ class DevicesView extends React.Component<IDevicesViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: DevicesView['errors$']; value: ServiceResult<unknown, Error>[] }) {
+    refresh(args: { inst: DevicesView['errors$']; value: Result<Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -55,7 +56,7 @@ class DevicesView extends React.Component<IDevicesViewProps> {
         this.props.openShowDevices(false);
     }
 
-    showErrors(errors: ServiceResult<unknown, Error>[]) {
+    showErrors(errors: Result<Error>[]) {
         this.props.showErrors(errors);
     }
 

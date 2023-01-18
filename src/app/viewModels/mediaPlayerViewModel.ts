@@ -11,6 +11,7 @@ import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { Option } from '../utils/option'
+import { Result } from '../utils/result';
 
 const lockSection = asyncQueue();
 
@@ -21,7 +22,7 @@ const optionToErrorServiceResult = <E extends Error, T = unknown>(e: Option<E>) 
 
 class MediaPlayerViewModel {
     errors$!: BehaviorSubject<ServiceResult<any, Error>[]>;
-    @State errors = [] as ServiceResult<any, Error>[];
+    @State errors = [] as Result<Error, unknown>[];
 
     queue$!: BehaviorSubject<MediaPlayerViewModel['queue']>;
     @State queue = [] as TrackViewModelItem[];
@@ -139,12 +140,12 @@ class MediaPlayerViewModel {
         this.checkTrackExists();
 
         const settingsResult = await this.settingsSerivce.get('spotify');
-        await settingsResult.assert(async () => {
+        await settingsResult.error(async () => {
             const volume = await this.spotifyPlayerService.getVolume();
             volume.map(v => this.volume = v)
-                .error(e => (this.errors = [new ServiceResult(null, e)], 0));
+                .error(e => (this.errors = [Result.error(e)], 0));
             return this.volume;
-        }).map(settings => settings?.volume || this.volume).cata(volume => {
+        }).map(settings => settings?.volume || this.volume).map(volume => {
             this.spotifyPlayerService.setVolume(volume);
             this.volume = volume;
         });
@@ -172,16 +173,16 @@ class MediaPlayerViewModel {
             } else {
                 this.isPlaying = currentlyPlaying?.is_playing || false;
             }
-        }).assert(e => {
-            this.errors = [e];
-            throw e.error;
+        }).error(e => {
+            this.errors = [Result.error(e)];
+            throw e;
         });
     }
 
     async checkTrackExists() {
         const trackExistsResult = await this.ss.hasTracks(this.currentTrackId);
-        trackExistsResult.assert(e => this.errors = [e])
-            .cata(r => this.isLiked = _.first(r) || false);
+        trackExistsResult.map(r => this.isLiked = _.first(r) || false)
+            .error(e => this.errors = [Result.error(e)]);
     }
 
     async monitorPlybackInternal() {
@@ -216,11 +217,11 @@ class MediaPlayerViewModel {
             try {
                 this.timePlayed = timePlayed;
                 const res = await this.ss.seek(timePlayed);
-                res.assert(e => this.errors = [e]);
+                res.error(() => this.errors = [res]);
                 next();
             } catch (ex) {
                 next();
-                this.errors = [new ServiceResult(null, ex as Error)];
+                this.errors = [Result.error(ex as Error)];
             }
         });
     }
@@ -233,11 +234,11 @@ class MediaPlayerViewModel {
                     if (_.isEmpty(state)) {
                         this.volume = percent;
                         const res = await this.ss.volume(percent);
-                        res.assert(e => this.errors = [e]);
+                        res.error(e => this.errors = [res]);
                     } else {
                         this.volume = percent;
                         const res = await this.spotifyPlayerService.setVolume(percent);
-                        optionToErrorServiceResult(res).assert(e => this.errors = [e]);
+                        res.map(e => this.errors = [Result.error(e)]);
                     }
 
                     this.settingsSerivce.volume(this.volume = percent);
@@ -245,7 +246,7 @@ class MediaPlayerViewModel {
                 });
             } catch (ex) {
                 next();
-                this.errors = [new ServiceResult(null, ex as Error)];
+                this.errors = [Result.error(ex as Error)];
             }
         });
     }
@@ -258,17 +259,17 @@ class MediaPlayerViewModel {
                     if (_.isEmpty(state)) {
                         const res = await this.ss.play();
                         res.map(() => this.isPlaying = true)
-                            .assert(e => this.errors = [e]);
+                            .error(e => this.errors = [Result.error(e)]);
                     } else {
                         const res = await this.spotifyPlayerService.resume();
-                        res.map(e => this.errors = [new ServiceResult(null, e)]);
+                        res.map(e => this.errors = [Result.error(e)]);
                         this.isPlaying = true;
                     }
                     next();
                 });
             } catch (ex) {
                 next();
-                this.errors = [new ServiceResult(null, ex as Error)];
+                this.errors = [Result.error(ex as Error)];
             }
         });
     }
@@ -281,17 +282,17 @@ class MediaPlayerViewModel {
                     if (_.isEmpty(state)) {
                         const res = await this.ss.pause();
                         res.map(() => this.isPlaying = false)
-                            .assert(e => this.errors = [e]);
+                            .error(e => this.errors = [Result.error(e)]);
                     } else {
                         const res = await this.spotifyPlayerService.pause();
-                        res.map(e => this.errors = [new ServiceResult(null, e)]);
+                        res.map(e => this.errors = [Result.error(e)]);
                         this.isPlaying = false;
                     }
                     next();
                 });
             } catch (ex) {
                 next();
-                this.errors = [new ServiceResult(null, ex as Error)];
+                this.errors = [Result.error(ex as Error)];
             }
         });
     }
@@ -303,15 +304,16 @@ class MediaPlayerViewModel {
                 state.map(async state => {
                     if (_.isEmpty(state)) {
                         const res = await this.ss.previous();
-                        res.assert(e => this.errors = [e]);
+                        res.error(() => this.errors = [res]);
                     } else {
-                        await this.spotifyPlayerService.previouseTrack();
+                        const res = await this.spotifyPlayerService.previouseTrack();
+                        res.map(e => this.errors = [Result.error(e)])
                     }
                     next();
                 });
             } catch (ex) {
                 next();
-                this.errors = [new ServiceResult(null, ex as Error)];
+                this.errors = [Result.error(ex as Error)];
             }
         });
     }
@@ -323,7 +325,7 @@ class MediaPlayerViewModel {
                 state.map(async state => {
                     if (_.isEmpty(state)) {
                         const res = await this.ss.next();
-                        res.assert(e => this.errors = [e]);
+                        res.error(() => this.errors = [res]);
                     } else {
                         await this.spotifyPlayerService.nextTrack();
                     }
@@ -331,7 +333,7 @@ class MediaPlayerViewModel {
                 });
             } catch (ex) {
                 next();
-                this.errors = [new ServiceResult(null, ex as Error)];
+                this.errors = [Result.error(ex as Error)];
             }
         });
     }
@@ -344,7 +346,7 @@ class MediaPlayerViewModel {
                     if (_.isEmpty(state)) {
                         const volume = this.volume;
                         const res = await this.ss.volume(volume * 1.1);
-                        res.assert(e => this.errors = [e]);
+                        res.error(() => this.errors = [res]);
                     } else {
                         const volume = await this.spotifyPlayerService.getVolume();
                         volume.map(v => this.volume = v * 1.1);
@@ -353,7 +355,7 @@ class MediaPlayerViewModel {
                 });
             } catch (ex) {
                 next();
-                this.errors = [new ServiceResult(null, ex as Error)];
+                this.errors = [Result.error(ex as Error)];
             }
         });
     }
@@ -366,17 +368,17 @@ class MediaPlayerViewModel {
                     if (_.isEmpty(state)) {
                         const volume = this.volume;
                         const res = await this.ss.volume(volume * 0.9);
-                        res.assert(e => this.errors = [e]);
+                        res.error(e => this.errors = [res]);
                     } else {
                         const volume = await this.spotifyPlayerService.getVolume();
                         volume.map(v => this.volume = v * 0.9)
-                            .error(e => this.errors = [new ServiceResult(null, e)]);
+                            .error(e => this.errors = [Result.error(e)]);
                     }
                     next();
                 });
             } catch (ex) {
                 next();
-                this.errors = [new ServiceResult(null, ex as Error)];
+                this.errors = [Result.error(ex as Error)];
             }
         });
     }
@@ -388,11 +390,11 @@ class MediaPlayerViewModel {
                     return;
                 }
                 const stateResult = await this.ss.addTracks(this.currentTrack);
-                stateResult.assert(e => this.errors = [e]);
+                stateResult.error(() => this.errors = [stateResult]);
                 next();
             } catch (ex) {
                 next();
-                this.errors = [new ServiceResult(null, ex as Error)];
+                this.errors = [Result.error(ex as Error)];
             }
         });
     }
@@ -404,11 +406,11 @@ class MediaPlayerViewModel {
             }
             try {
                 const stateResult = await this.ss.removeTracks(this.currentTrack);
-                stateResult.assert(e => this.errors = [e]);
+                stateResult.error(e => this.errors = [stateResult]);
                 next();
             } catch (ex) {
                 next();
-                this.errors = [new ServiceResult(null, ex as Error)];
+                this.errors = [Result.error(ex as Error)];
             }
         });
     }
@@ -418,7 +420,8 @@ class MediaPlayerViewModel {
     }
 
     async resume() {
-        await this.spotifyPlayerService.resume();
+        const res = await this.spotifyPlayerService.resume();
+        res.map(e => this.errors = [Result.error(e)]);
     }
 }
 

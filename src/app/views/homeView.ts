@@ -2,11 +2,12 @@ import React from 'react';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/home';
 import { Binding, current, Notifications } from '../utils';
+import { Result } from '../utils/result';
 import { HomeViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IHomeViewProps {
     currentTrackId: string;
-    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
+    showErrors<T>(errors: Result<Error, T>[]): void;
 }
 
 class HomeView extends React.Component<IHomeViewProps> {
@@ -77,7 +78,7 @@ class HomeView extends React.Component<IHomeViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: HomeView['errors$']; value: ServiceResult<unknown, Error>[] }) {
+    refresh(args: { inst: HomeView['errors$']; value: Result<Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -96,7 +97,7 @@ class HomeView extends React.Component<IHomeViewProps> {
         return !!res;
     }
 
-    showErrors(errors: ServiceResult<unknown, Error>[]) {
+    showErrors(errors: Result<Error>[]) {
         this.props.showErrors(errors);
     }
 

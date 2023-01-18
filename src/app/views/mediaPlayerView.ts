@@ -3,10 +3,11 @@ import { BehaviorSubject } from 'rxjs';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/mediaPlayer';
 import { Binding, current, formatTime, Notifications } from '../utils';
+import { Result } from '../utils/result';
 import { MediaPlayerViewModel } from '../viewModels';
 
 export interface IMediaPlayerViewProps {
-    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
+    showErrors<T>(errors: Result<Error, T>[]): void;
     currentTrackId$: BehaviorSubject<string>;
 }
 
@@ -120,7 +121,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: MediaPlayerView['errors$']; value: ServiceResult<unknown, Error>[] }) {
+    refresh(args: { inst: MediaPlayerView['errors$']; value: Result<Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -159,7 +160,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
         return formatTime(this.duration - this.timePlayed);
     }
 
-    showErrors(errors: ServiceResult<unknown, Error>[]) {
+    showErrors(errors: Result<Error>[]) {
         this.props.showErrors(errors);
     }
 

@@ -1,10 +1,12 @@
 import { BaseService } from '../base/baseService';
-import { Service } from './index';
-import { SettingsServiceResult } from './results/settingsServiceResult';
 import { SettingsServiceUnexpectedError } from './errors/settingsServiceUnexpectedError';
+import { Result } from '../utils/result';
 
 
 export interface ISettings {
+    lastSearch: {
+        val: string
+    },
     genius: {
         accessToken?: string;
         code?: string;
@@ -26,7 +28,7 @@ const fromEntries = (str: string) => {
     return obj;
 };
 
-const getCookie = (key: string) => {
+const getCookie = (key: string, defVal = '') => {
     const cookieRx = new RegExp('(^' + key + '|[^\\w\\d\\s]*' + key + ')[\\s]*=[\\s]*([^;]+)');
     const [a, k, value] = cookieRx.exec(document.cookie) || [];
 
@@ -38,6 +40,7 @@ class SettingsService extends BaseService {
         let sToken = getCookie('spat');
         let gToken = getCookie('gsat');
         let gCode = getCookie('gcode');
+        const lastSearch = getCookie('lastSearch', '');
         const apiseesKey = getCookie('apsk');
         const volume = +(getCookie('lastVolume') || 50);
         const urlParams = window.location.search.replace(/^\?/, '') || '';
@@ -48,6 +51,9 @@ class SettingsService extends BaseService {
             code?: string;
         };
         const defaultSettings: ISettings = {
+            lastSearch: {
+                val: lastSearch && atob(lastSearch),
+            },
             spotify: {
                 accessToken: sToken && atob(sToken),
                 volume: volume,
@@ -77,9 +83,9 @@ class SettingsService extends BaseService {
         return defaultSettings;
     }
 
-    config: ISettings = { apiseeds: { key: '' }, genius: {}, spotify: {} };
+    config: ISettings = { lastSearch: { val: '' }, apiseeds: { key: '' }, genius: {}, spotify: {} };
 
-    constructor(settings: ISettings = { apiseeds: { key: '' }, genius: {}, spotify: {} }) {
+    constructor(settings: ISettings = { lastSearch: { val: '' }, apiseeds: { key: '' }, genius: {}, spotify: {} }) {
         super();
 
         this.config = settings;
@@ -105,15 +111,15 @@ class SettingsService extends BaseService {
 
     get<K extends keyof SettingsService['config']>(
         propName: K, val?: SettingsService['config'][K]
-    ): SettingsServiceResult<SettingsService['config'][K], Error> {
+    ): Result<Error, SettingsService['config'][K]> {
         this.refreshConfig(); //toDO: Make something more specific. Like get already refreshed value individualy.
 
-        return SettingsServiceResult.success(this.config[propName]);
+        return Result.of(this.config[propName]);
     }
 
     set<K extends keyof SettingsService['config']>(
         propName: K, val: SettingsService['config'][K]
-    ): SettingsServiceResult<SettingsService['config'][K], Error> {
+    ): Result<Error, SettingsService['config'][K]> {
         if (val !== this.config[propName]) {
             this.config[propName] = {
                 ...this.config[propName],
@@ -122,9 +128,12 @@ class SettingsService extends BaseService {
             if (propName === 'spotify' && 'accessToken' in val) {
                 document.cookie = 'spat=' + btoa((val as any).accessToken);
             }
+            if (propName === 'lastSearch') {
+                document.cookie = 'lastSearch=' + btoa(((val as { val: string }).val));
+            }
         }
 
-        return SettingsServiceResult.success(this.config[propName]);
+        return Result.of(this.config[propName]);
     }
 
     refreshConfig() {

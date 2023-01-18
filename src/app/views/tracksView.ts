@@ -1,15 +1,15 @@
 import $ = require('jquery');
 import React from 'react';
-import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/tracks';
 import { Binding, current, Notifications } from '../utils';
+import { Result } from '../utils/result';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 export interface ITracksViewProps {
     className?: string;
     playlist: PlaylistsViewModelItem;
     currentTrackId: string;
-    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
+    showErrors<T>(errors: Result<Error, T>[]): void;
 }
 
 function elementIndex(el: HTMLElement) {
@@ -96,7 +96,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {
+    refresh(args: { inst: unknown; value: Result[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -113,7 +113,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         return track.id() === this.props.currentTrackId;
     }
 
-    showErrors(errors: ServiceResult<unknown, Error>[]) {
+    showErrors(errors: Result[]) {
         this.props.showErrors(errors);
     }
 

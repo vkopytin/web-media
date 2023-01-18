@@ -1,9 +1,8 @@
 import { withEvents } from 'databindjs';
 import $ from 'jquery';
 import { BaseService } from '../base/baseService';
-import { Service } from '.';
-import { LoginServiceResult } from './results/loginServiceResult';
 import { SettingsService } from './settings';
+import { Result } from '../utils/result';
 
 
 class LoginService extends withEvents(BaseService) {
@@ -11,7 +10,7 @@ class LoginService extends withEvents(BaseService) {
         super();
     }
 
-    async getSpotifyAuthUrl() {
+    async getSpotifyAuthUrl(): Promise<Result<Error, string>> {
         const clientId = '963f916fa62c4186a4b8370e16eef658';
         const redirectUri = `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
             authUrl = 'https://accounts.spotify.com/authorize?' + $.param({
@@ -50,21 +49,23 @@ class LoginService extends withEvents(BaseService) {
                 state: 'onSpotify-1'
             });
 
-        return LoginServiceResult.success(authUrl);
+        return Result.of(authUrl);
     }
 
-    async isLoggedIn() {
+    async isLoggedIn(): Promise<Result<Error, boolean>> {
         const settingsResult = await this.settings.get('spotify');
-        if (!settingsResult.val) {
-            return LoginServiceResult.success(false);
-        }
-        if ('accessToken' in settingsResult.val) {
-            return LoginServiceResult.success(true);
-        }
-        return LoginServiceResult.success(false);
+        return settingsResult.map(settings => {
+            if (!settings) {
+                return false;
+            }
+            if ('accessToken' in settings) {
+                return true;
+            }
+            return false;
+        });
     }
 
-    async getGeniusAuthUrl() {
+    async getGeniusAuthUrl(): Promise<Result<Error, string>> {
         const clientId = 'xJvzKWkHgMgOVTEoh4H3Jp3hhkUtTP3q9lQIGEwEZbPjp1r6-3kk9JQ6HiBHPEUq';
         const redirectUri = `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
             authUrl = 'https://api.genius.com/oauth/authorize?' + $.param({
@@ -75,7 +76,7 @@ class LoginService extends withEvents(BaseService) {
                 state: 'onGenius-1'
             });
 
-        return LoginServiceResult.success(authUrl);
+        return Result.of(authUrl);
     }
 }
 

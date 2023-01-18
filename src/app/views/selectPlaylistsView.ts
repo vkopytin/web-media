@@ -1,13 +1,13 @@
 import React from 'react';
 import * as _ from 'underscore';
-import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/selectPlaylists';
 import { Binding, current, Notifications } from '../utils';
+import { Result } from '../utils/result';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 
 export interface ISelectPlaylistsViewProps {
-    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
+    showErrors<T>(errors: Result<Error, T>[]): void;
     className?: string;
     track: TrackViewModelItem;
     active?: boolean;
@@ -61,7 +61,7 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
         }
     }
 
-    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {
+    refresh(args: { inst: unknown; value: Result[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -75,7 +75,7 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
         return !!res;
     }
 
-    showErrors(errors: ServiceResult<unknown, Error>[]) {
+    showErrors(errors: Result[]) {
         this.props.showErrors(errors);
     }
 

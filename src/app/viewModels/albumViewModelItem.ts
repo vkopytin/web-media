@@ -1,12 +1,12 @@
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IAlbum } from '../adapter/spotify';
-import { ServiceResult } from '../base/serviceResult';
 import { State } from '../utils';
+import { Result } from '../utils/result';
 
 class AlbumViewModelItem {
     errors$!: BehaviorSubject<AlbumViewModelItem['errors']>;
-    @State errors = [] as ServiceResult<any, Error>[];
+    @State errors = [] as Result<Error, unknown>[];
 
     isLiked$!: BehaviorSubject<AlbumViewModelItem['isLiked']>;
     @State isLiked = false;

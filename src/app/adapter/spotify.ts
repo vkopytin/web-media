@@ -581,7 +581,7 @@ class SpotifyAdapter {
         return await resultOrError(response);
     }
 
-    async featuredPlaylists(offset = 0, limit = 20, country?: string, locale?: string, timestamp?: string): Promise<Result<Error, ISearchResult>> {
+    async featuredPlaylists(offset = 0, limit = 20, country?: string, locale?: string, timestamp?: string): Promise<ISearchResult> {
         const response = await this.fetch(`${baseUrl}/v1/browse/featured-playlists?` + toUrlQueryParams({
             ...country ? { country } : {},
             ...locale ? { locale } : {},
@@ -685,7 +685,7 @@ class SpotifyAdapter {
         return await resultOrError(response);
     }
 
-    async tracks(offset = 0, limit = 20): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
+    async tracks(offset = 0, limit = 20): Promise<IResponseResult<ISpotifySong>> {
         const response = await this.fetch(`${baseUrl}/v1/me/tracks?` + toUrlQueryParams({
             offset: offset,
             limit: limit

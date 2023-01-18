@@ -1,161 +1,160 @@
 import { BaseService } from '../base/baseService';
-import { SpotifyServiceResult } from './results/spotifyServiceResult';
 import { ErrorWithStatus } from '../adapter/errors/errorWithStatus';
 import { TokenExpiredError } from './errors/tokenExpiredError';
 import { SpotifyServiceError } from './errors/spotifyServiceError';
 import { SpotifyServiceUnexpectedError } from './errors/spotifyServiceUnexpectedError';
 import * as _ from 'underscore';
-import { SpotifyAdapter, IUserInfo, ISearchType, IResponseResult, ISpotifySong, IUserPlaylistsResult, ITrack, ITopTracksResult, ISearchResult, IAlbum, IDevice, IPlayerResult, ICurrentlyPlayingResult, IRecommendationsResult } from '../adapter/spotify';
+import { SpotifyAdapter, IUserInfo, ISearchType, IResponseResult, ISpotifySong, IUserPlaylistsResult, ITrack, ITopTracksResult, ISearchResult, IAlbum, IDevice, IPlayerResult, ICurrentlyPlayingResult, IRecommendationsResult, ISpotifyAlbum, IReorderTracksResult } from '../adapter/spotify';
 import { withEvents } from 'databindjs';
 import { asyncDebounce } from '../utils';
 import { NoActiveDeviceError } from './errors/noActiveDeviceError';
-import { ServiceResult } from '../base/serviceResult';
+import { Result } from '../utils/result';
 
 
-function returnErrorResult<T>(message: string, err: Error): ServiceResult<T, Error> {
+function returnErrorResult<T>(message: string, err: Error): Result<Error, T> {
     if (err instanceof ErrorWithStatus) {
         if (err.status === 401 && /expired/i.test(err.message)) {
-            return TokenExpiredError.create<T>(err.message, err);
+            return TokenExpiredError.of(err.message, err);
         } else if (err.status === 404 && /active device/i.test(err.message)) {
-            return NoActiveDeviceError.create<T>(err.message, err);
+            return NoActiveDeviceError.of(err.message, err);
         }
 
-        return SpotifyServiceError.create<T>(err.message, err);
+        return SpotifyServiceError.of<T>(err.message, err);
     }
 
-    return SpotifyServiceUnexpectedError.create<T>(message, err);
+    return SpotifyServiceUnexpectedError.of<T>(message, err);
 }
 
 class SpotifyService extends withEvents(BaseService) {
     currentProfile: IUserInfo | null = null;
-    onStateChanged = asyncDebounce(this.onStateChangedInternal, 500);
+    onStateChanged = asyncDebounce((...args: unknown[]) => this.onStateChangedInternal(...args), 500);
 
     constructor(public adapter: SpotifyAdapter) {
         super();
     }
 
-    refreshToken(newToken: string) {
+    refreshToken(newToken: string): Result<Error, boolean> {
         this.adapter.token = newToken;
-        return SpotifyServiceResult.success(true);
+        return Result.of(true);
     }
 
     onStateChangedInternal(...args: unknown[]) {
         this.trigger('change:state', ...args);
     }
 
-    async seek(positionMs: number, deviceId: string) {
+    async seek(positionMs: number, deviceId: string): Promise<Result<Error, void>> {
         try {
             const res = await this.adapter.seek(Math.round(positionMs), deviceId);
 
             this.onStateChanged(res);
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IPlayerResult>('Unexpected error on requesting spotify seek', ex as Error);
+            return returnErrorResult<void>('Unexpected error on requesting spotify seek', ex as Error);
         }
     }
 
-    async play(deviceId?: string, tracksUriList?: string | string[], indexOrUri: number | string = '') {
+    async play(deviceId?: string, tracksUriList?: string | string[], indexOrUri: number | string = ''): Promise<Result<Error, unknown>> {
         try {
             const res = await this.adapter.play(tracksUriList, indexOrUri, deviceId);
 
             this.onStateChanged(res);
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify play', ex as Error);
         }
     }
 
-    async pause(deviceId = '') {
+    async pause(deviceId = ''): Promise<Result<Error, unknown>> {
         try {
             const res = await this.adapter.pause(deviceId);
 
             this.onStateChanged(res);
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify pause', ex as Error);
         }
     }
 
-    async next(deviceId = '') {
+    async next(deviceId = ''): Promise<Result<Error, unknown>> {
         try {
             const res = await this.adapter.next(deviceId);
 
             this.onStateChanged(res);
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify next', ex as Error);
         }
     }
 
-    async previous(deviceId: string = '') {
+    async previous(deviceId: string = ''): Promise<Result<Error, unknown>> {
         try {
             const res = await this.adapter.previous(deviceId);
 
             this.onStateChanged(res);
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify previous', ex as Error);
         }
     }
 
-    async volume(percent: number) {
+    async volume(percent: number): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
         try {
             const res = await this.adapter.volume(Math.round(percent));
 
             this.onStateChanged(res);
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify volume', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify volume', ex as Error);
         }
     }
 
-    async profile() {
+    async profile(): Promise<Result<Error, IUserInfo>> {
         try {
             const res = this.currentProfile = this.currentProfile || await this.adapter.me();
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IUserInfo>('Unexpected error on requesting spotify profile', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify profile', ex as Error);
         }
     }
 
-    async isLoggedIn() {
+    async isLoggedIn(): Promise<Result<Error, boolean>> {
         try {
             const profile = this.currentProfile = this.currentProfile || await this.adapter.me();
 
-            return SpotifyServiceResult.success(!!profile);
+            return Result.of(!!profile);
         } catch (ex) {
-            return returnErrorResult<boolean>('Unexpected error on requesting spotify service', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify service', ex as Error);
         }
     }
 
-    async logout() {
+    async logout(): Promise<Result<Error, boolean>> {
         this.currentProfile = null;
 
-        return SpotifyServiceResult.success(true);
+        return Result.of(true);
     }
 
-    async recentlyPlayed() {
+    async recentlyPlayed(): Promise<Result<Error, ISpotifySong[]>> {
         try {
             const res = await this.adapter.recentlyPlayed();
 
-            return SpotifyServiceResult.success(res.items);
+            return Result.of(res.items);
         } catch (ex) {
-            return returnErrorResult<ISpotifySong[]>('Unexpected error on requesting spotify recently played', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify recently played', ex as Error);
         }
     }
 
-    async listDevices() {
+    async listDevices(): Promise<Result<Error, IDevice[]>> {
         try {
             const res = await this.adapter.devices();
 
-            return SpotifyServiceResult.success(res.devices);
+            return Result.of(res.devices);
         } catch (ex) {
-            return returnErrorResult<IDevice[]>('Unexpected error on requesting spotify list devices', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify list devices', ex as Error);
         }
     }
 
-    async fetchRecommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50, limit = 20) {
+    async fetchRecommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50, limit = 20): Promise<Result<Error, IRecommendationsResult>> {
         try {
             const res = await this.adapter.recommendations(
                 market,
@@ -166,249 +165,249 @@ class SpotifyService extends withEvents(BaseService) {
                 limit
             );
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IRecommendationsResult>('Unexpected error on requesting spotify fetch recommendations', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify fetch recommendations', ex as Error);
         }
     }
 
-    async userPlaylists(user: IUserInfo) {
+    async userPlaylists(user: IUserInfo): Promise<Result<Error, IUserPlaylistsResult>> {
         if (!user.id) {
             throw new Error('Can\'t fetch playlist. Empty id');
         }
         try {
             const res = await this.adapter.userPlaylists(user.id);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IUserPlaylistsResult>('Unexpected error on requesting spotify user playlists', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify user playlists', ex as Error);
         }
     }
 
-    async fetchMyPlaylists(offset = 0, limit = 20) {
+    async fetchMyPlaylists(offset = 0, limit = 20): Promise<Result<Error, IUserPlaylistsResult>> {
         try {
             const res = await this.adapter.myPlaylists(offset, limit);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IUserPlaylistsResult>('Unexpected error on requesting spotify fetch my playlists', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify fetch my playlists', ex as Error);
         }
     }
 
-    async fetchPlaylistTracks(playlistId: string, offset = 0, limit = 20) {
+    async fetchPlaylistTracks(playlistId: string, offset = 0, limit = 20): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
         try {
             const res = await this.adapter.listPlaylistTracks(playlistId, offset, limit);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify fetch playlist tracks', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify fetch playlist tracks', ex as Error);
         }
     }
 
-    async listTopTracks() {
+    async listTopTracks(): Promise<Result<Error, IResponseResult<ITrack>>> {
         try {
             const res = await this.adapter.myTopTracks();
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ITrack>>('Unexpected error on requesting spotify list top tracks', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify list top tracks', ex as Error);
         }
     }
 
-    async fetchArtistTopTracks(artistId: string, country = 'US') {
+    async fetchArtistTopTracks(artistId: string, country = 'US'): Promise<Result<Error, ITopTracksResult>> {
         try {
             const res = await this.adapter.artistTopTracks(artistId, country);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<ITopTracksResult>('Unexpected error on requesting spotify fetch artists top tracks', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify fetch artists top tracks', ex as Error);
         }
     }
 
-    async addTracks(trackIds: string | string[]) {
+    async addTracks(trackIds: string | string[]): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
         try {
             const res = await this.adapter.addTracks(trackIds);
 
             this.onStateChanged();
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify add tracks', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify add tracks', ex as Error);
         }
     }
 
-    async removeTracks(trackIds: string | string[]) {
+    async removeTracks(trackIds: string | string[]): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
         try {
             const res = await this.adapter.removeTracks(trackIds);
 
             this.onStateChanged();
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify remove tracks', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify remove tracks', ex as Error);
         }
     }
 
-    async hasTracks(trackIds: string | string[]) {
+    async hasTracks(trackIds: string | string[]): Promise<Result<Error, boolean[]>> {
         try {
             const res = await this.adapter.hasTracks(trackIds);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<boolean[]>('Unexpected error on requesting spotify has tracks', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify has tracks', ex as Error);
         }
     }
 
-    async listAlbumTracks(albumId: string) {
+    async listAlbumTracks(albumId: string): Promise<Result<Error, IResponseResult<ITrack>>> {
         try {
             const res = await this.adapter.listAlbumTracks(albumId);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ITrack>>('Unexpected error on requesting spotify list album tracks', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify list album tracks', ex as Error);
         }
     }
 
-    async newReleases() {
+    async newReleases(): Promise<Result<Error, ISearchResult>> {
         try {
             const res = await this.adapter.newReleases();
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<ISearchResult>('Unexpected error on requesting spotify fetch new releases', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify fetch new releases', ex as Error);
         }
     }
 
-    async featuredPlaylists(offset = 0, limit = 20, country?: string, locale?: string, timestamp?: string) {
+    async featuredPlaylists(offset = 0, limit = 20, country?: string, locale?: string, timestamp?: string): Promise<Result<Error, ISearchResult>> {
         try {
             const res = await this.adapter.featuredPlaylists(offset, limit, country, locale, timestamp);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<ISearchResult>('Unexpected error on requesting spotify featured playlists', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify featured playlists', ex as Error);
         }
     }
 
-    async search(type: ISearchType, term: string, offset = 0, limit = 20) {
+    async search(type: ISearchType, term: string, offset = 0, limit = 20): Promise<Result<Error, ISearchResult>> {
         try {
             const res = await this.adapter.search(type, term, offset, limit);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<ISearchResult>('Unexpected error on requesting spotify search', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify search', ex as Error);
         }
     }
 
-    async player(deviceId = '', play: boolean | null = null) {
+    async player(deviceId = '', play: boolean | null = null): Promise<Result<Error, IPlayerResult>> {
         try {
             const res = await this.adapter.player(deviceId, play);
 
             play !== null && this.onStateChanged(res);
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IPlayerResult>('Unexpected error on requesting spotify player', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify player', ex as Error);
         }
     }
 
-    async currentlyPlaying() {
+    async currentlyPlaying(): Promise<Result<Error, ICurrentlyPlayingResult>> {
         try {
             const res = await this.adapter.currentlyPlaying();
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<ICurrentlyPlayingResult>('Unexpected error on requesting spotify currently playing', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify currently playing', ex as Error);
         }
     }
 
-    async fetchTracks(offset = 0, limit = 20) {
+    async fetchTracks(offset = 0, limit = 20): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
         try {
             const res = await this.adapter.tracks(offset, limit);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify fetch tracks', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify fetch tracks', ex as Error);
         }
     }
 
-    async albums(offset = 0, limit = 20) {
+    async albums(offset = 0, limit = 20): Promise<Result<Error, IResponseResult<ISpotifyAlbum>>> {
         try {
             const res = await this.adapter.albums(offset, limit);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify fetch albums', ex as Error);
         }
     }
 
-    async addAlbums(albumIds: string | string[]) {
+    async addAlbums(albumIds: string | string[]): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
         try {
             const res = await this.adapter.addAlbums(albumIds);
 
             this.onStateChanged();
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify add albums', ex as Error);
         }
     }
 
-    async removeAlbums(albumIds: string | string[]) {
+    async removeAlbums(albumIds: string | string[]): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
         try {
             const res = await this.adapter.removeAlbums(albumIds);
 
             this.onStateChanged();
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify remove albums', ex as Error);
         }
     }
 
-    async hasAlbums(albumIds: string | string[]) {
+    async hasAlbums(albumIds: string | string[]): Promise<Result<Error, boolean[]>> {
         try {
             const res = await this.adapter.hasAlbums(albumIds);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify has albums', ex as Error);
         }
     }
 
-    async createNewPlaylist(userId: string, name: string, description = '', isPublic = false) {
+    async createNewPlaylist(userId: string, name: string, description = '', isPublic = false): Promise<Result<Error, unknown>> {
         try {
             const res = await this.adapter.createNewPlaylist(userId, name, description, isPublic);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify crate new playlist', ex as Error);
         }
     }
 
-    async addTrackToPlaylist(trackUris: string | string[], playlistId: string) {
+    async addTrackToPlaylist(trackUris: string | string[], playlistId: string): Promise<Result<Error, ISpotifySong>> {
         try {
             const res = await this.adapter.addTrackToPlaylist(trackUris, playlistId);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify add tracks to playlist', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify add tracks to playlist', ex as Error);
         }
     }
 
-    async removeTrackFromPlaylist(trackUris: string | string[], playlistId: string) {
+    async removeTrackFromPlaylist(trackUris: string | string[], playlistId: string): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
         try {
             const res = await this.adapter.removeTrackFromPlaylist(trackUris, playlistId);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
-            return returnErrorResult<IResponseResult<ISpotifySong>>('Unexpected error on requesting spotify remove tracks from playlist', ex as Error);
+            return returnErrorResult('Unexpected error on requesting spotify remove tracks from playlist', ex as Error);
         }
     }
 
-    async reorderTracks(playlistId: string, rangeStart: number, insertBefore: number, rangeLength = 1) {
+    async reorderTracks(playlistId: string, rangeStart: number, insertBefore: number, rangeLength = 1): Promise<Result<Error, IReorderTracksResult>> {
         try {
             const res = await this.adapter.reorderTracks(playlistId, rangeStart, insertBefore, rangeLength);
 
-            return SpotifyServiceResult.success(res);
+            return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify reorder tracks', ex as Error);
         }

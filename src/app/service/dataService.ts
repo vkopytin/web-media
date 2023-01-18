@@ -16,6 +16,7 @@ import { PlaylistRowsStore } from '../data/entities/playlistRowsStore';
 import { BannedTracksStore } from '../data/entities/bannedTracksStore';
 import { ServiceResult } from '../base/serviceResult';
 import { IPlaylistRow } from '../data/entities/interfaces/iPlaylistRow';
+import { Result } from '../utils/result';
 
 
 class DataService extends withEvents(BaseService) {
@@ -119,11 +120,11 @@ class DataService extends withEvents(BaseService) {
         });
     }
 
-    async listPlaylistsByTrack(track: ITrack) {
-        return new Promise<ServiceResult<IUserPlaylist[], Error>>((resolve, reject) => {
+    async listPlaylistsByTrack(track: ITrack): Promise<Result<Error, IUserPlaylist[]>> {
+        return new Promise<Result<Error, IUserPlaylist[]>>((resolve, reject) => {
             DataStorage.create(async (err, storage) => {
                 if (err) {
-                    return reject(DataServiceResult.error(err));
+                    return reject(Result.error(err));
                 }
 
                 try {
@@ -133,16 +134,16 @@ class DataService extends withEvents(BaseService) {
                         res.push((row as IPlaylistRow).playlist as IUserPlaylist);
                     }
 
-                    resolve(DataServiceResult.success(res));
+                    resolve(Result.of(res));
                 } catch (ex) {
-                    reject(DataServiceResult.error(ex as Error));
+                    reject(Result.error(ex as Error));
                 }
             });
         });
     }
 
-    async bannTrack(trackId: string) {
-        return new Promise<DataServiceResult<boolean, Error>>((resolve, reject) => {
+    async bannTrack(trackId: string): Promise<Result<Error, boolean>> {
+        return new Promise<Result<Error, boolean>>((resolve, reject) => {
             DataStorage.create(async (err, storage) => {
                 if (err) {
                     return reject(err);
@@ -152,58 +153,58 @@ class DataService extends withEvents(BaseService) {
                     const bannedTracksStore = new BannedTracksStore(storage!);
                     await bannedTracksStore.refresh({ id: trackId } as ITrack);
 
-                    resolve(DataServiceResult.success(true));
+                    resolve(Result.of(true));
                 } catch (ex) {
-                    reject(DataServiceResult.error(ex as Error));
+                    reject(Result.error(ex as Error));
                 }
             });
         });
     }
 
-    async removeBannFromTrack(trackId: string) {
-        return new Promise<DataServiceResult<boolean, Error>>((resolve, reject) => {
+    async removeBannFromTrack(trackId: string): Promise<Result<Error, boolean>> {
+        return new Promise<Result<Error, boolean>>((resolve, reject) => {
             DataStorage.create(async (err, storage) => {
                 if (err) {
-                    return reject(DataServiceResult.error(err));
+                    return reject(Result.error(err));
                 }
 
                 try {
                     const bannedTracksStore = new BannedTracksStore(storage!);
-                    await bannedTracksStore.delete(trackId);
+                    const res = await bannedTracksStore.delete(trackId);
 
-                    resolve(DataServiceResult.success(true));
+                    resolve(Result.of(res));
                 } catch (ex) {
-                    reject(DataServiceResult.error(ex as Error));
+                    reject(Result.error(ex as Error));
                 }
             });
         });
     }
 
-    async isBannedTrack(trackId: string) {
-        return new Promise<DataServiceResult<boolean, Error>>((resolve, reject) => {
+    async isBannedTrack(trackId: string): Promise<Result<Error, boolean>> {
+        return new Promise<Result<Error, boolean>>((resolve, reject) => {
             DataStorage.create(async (err, storage) => {
                 if (err) {
-                    return reject(DataServiceResult.error(err));
+                    return reject(Result.error(err));
                 }
 
                 try {
                     const bannedTracksStore = new BannedTracksStore(storage!);
                     const track = await bannedTracksStore.get(trackId);
 
-                    resolve(DataServiceResult.success(!!track));
+                    resolve(Result.of(!!track));
                 } catch (ex) {
-                    reject(DataServiceResult.error(ex as Error));
+                    reject(Result.error(ex as Error));
                 }
             });
         });
     }
 
-    async listBannedTracks(trackIds: string[]) {
+    async listBannedTracks(trackIds: string[]): Promise<Result<Error, string[]>> {
         trackIds = ([] as string[]).concat(trackIds).sort();
-        return new Promise<DataServiceResult<string[], Error>>((resolve, reject) => {
+        return new Promise<Result<Error, string[]>>((resolve, reject) => {
             DataStorage.create(async (err, storage) => {
                 if (err) {
-                    return reject(DataServiceResult.error(err));
+                    return reject(Result.error(err));
                 }
 
                 try {
@@ -215,9 +216,9 @@ class DataService extends withEvents(BaseService) {
                         }
                     }
 
-                    resolve(DataServiceResult.success(bannedIds));
+                    resolve(Result.of(bannedIds));
                 } catch (ex) {
-                    reject(DataServiceResult.error(ex as Error));
+                    reject(Result.error(ex as Error));
                 }
             });
         });

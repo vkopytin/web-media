@@ -9,6 +9,7 @@ import { SettingsServiceResult } from './results/settingsServiceResult';
 import { SpotifyServiceResult } from './results/spotifyServiceResult';
 import { LoginService } from './loginService';
 import { LyricsService } from './lyricsService';
+import { Result } from '../utils/result';
 
 
 class Service {
@@ -24,14 +25,16 @@ class Service {
 
     }
 
-    async isLoggedIn() {
+    async isLoggedIn(): Promise<Result<Error, boolean>> {
         const isLoggedInResult = await this.loginService.isLoggedIn();
-        if (!isLoggedInResult.val) {
+        return await isLoggedInResult.match(async isLoggedIn => {
+            if (!isLoggedIn) {
 
-            return isLoggedInResult;
-        }
+                return isLoggedInResult;
+            }
 
-        return this.spotifyService.isLoggedIn();
+            return await this.spotifyService.isLoggedIn();
+        }, e => Promise.resolve(Result.error(e)));
     }
 
     async logout() {
@@ -41,7 +44,7 @@ class Service {
     async settings<K extends keyof SettingsService['config']>(
         propName: K,
         val?: SettingsService['config'][K]
-    ): Promise<SettingsServiceResult<SettingsService['config'][K], Error>>;
+    ): Promise<Result<Error, SettingsService['config'][K]>>;
     async settings<K extends keyof SettingsService['config']>(...args: unknown[]) {
         const propName = args[0] as K;
         const val = args[1] as SettingsService['config'][K];
@@ -52,16 +55,16 @@ class Service {
         return this.settingsService.get(propName);
     }
 
-    async refreshToken(newToken: string) {
+    async refreshToken(newToken: string): Promise<Result<Error, boolean>> {
         const newSettingsResult = await this.settings('spotify', { accessToken: newToken });
         const spotifyResult = await newSettingsResult.map(() => this.spotifyService);
         const refreshPlayerTokenResult = await spotifyResult.cata(spotify => spotify.refreshToken(newToken));
         const playerResult = await refreshPlayerTokenResult.map(() => this.spotifyPlayerService);
 
-        return await playerResult.cata(player => {
-            player.refreshToken(newToken);
+        return await playerResult.cata(async player => {
+            await player.refreshToken(newToken);
 
-            return SpotifyServiceResult.success(true);
+            return Result.of(true);
         });
     }
 

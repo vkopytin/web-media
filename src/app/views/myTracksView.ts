@@ -2,10 +2,11 @@ import React from 'react';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/myTracks';
 import { Binding, current, Notifications } from '../utils';
+import { Result } from '../utils/result';
 import { MyTracksViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IMyTracksViewProps {
-    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
+    showErrors<T>(errors: Result<Error, T>[]): void;
     loadMore?: boolean;
     currentTrackId: string;
 }
@@ -60,7 +61,7 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
         }
     }
 
-    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {
+    refresh(args: { inst: unknown; value: Result<Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -73,7 +74,7 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
         return this.props.currentTrackId === track.id();
     }
 
-    showErrors(errors: ServiceResult<unknown, Error>[]) {
+    showErrors(errors: Result<Error>[]) {
         this.props.showErrors(errors);
     }
 

@@ -1,12 +1,12 @@
 import React from 'react';
-import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/pickPlaylist';
 import { Binding, current, Notifications } from '../utils';
+import { Result } from '../utils/result';
 import { HomeViewModel, PlaylistsViewModel } from '../viewModels';
 
 
 export interface IPickPlaylistsViewProps {
-    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
+    showErrors<T>(errors: Result<Error, T>[]): void;
 }
 
 class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
@@ -42,7 +42,7 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
     componentDidUpdate(prevProps: IPickPlaylistsViewProps) {
     }
 
-    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {
+    refresh(args: { inst: unknown; value: Result<Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -51,7 +51,7 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
         });
     }
 
-    showErrors(errors: ServiceResult<unknown, Error>[]) {
+    showErrors(errors: Result<Error>[]) {
         this.props.showErrors(errors);
     }
 

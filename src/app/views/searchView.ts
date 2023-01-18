@@ -1,13 +1,13 @@
 import React from 'react';
 import * as _ from 'underscore';
-import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/search';
 import { asyncDebounce, Binding, current, Notifications } from '../utils';
+import { Result } from '../utils/result';
 import { SearchViewModel, TrackViewModelItem } from '../viewModels';
 
 
 export interface ISearchViewProps {
-    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
+    showErrors<T>(errors: Result<Error, T>[]): void;
     loadMore?: boolean;
     currentTrackId: string;
 }
@@ -108,7 +108,7 @@ class SearchView extends React.Component<ISearchViewProps> {
         }
     }
 
-    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {
+    refresh(args: { inst: unknown; value: Result[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -121,7 +121,7 @@ class SearchView extends React.Component<ISearchViewProps> {
         return track.id() === this.props.currentTrackId;
     }
 
-    showErrors(errors: ServiceResult<unknown, Error>[]) {
+    showErrors(errors: Result[]) {
         this.props.showErrors(errors);
     }
 

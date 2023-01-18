@@ -1,14 +1,14 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/userProfile';
 import { Binding, current, Notifications } from '../utils';
-import { AppViewModel, TrackViewModelItem, UserProfileViewModel } from '../viewModels';
+import { Result } from '../utils/result';
+import { TrackViewModelItem, UserProfileViewModel } from '../viewModels';
 
 
 export interface IUserProfileViewProps {
     className?: string;
-    showErrors<T>(errors: ServiceResult<T, Error>[]): void;
+    showErrors<T>(errors: Result<Error, T>[]): void;
     openLogin$: BehaviorSubject<boolean>;
 }
 
@@ -74,7 +74,7 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: unknown; value: ServiceResult<unknown, Error>[] }) {
+    refresh(args: { inst: unknown; value: Result[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -87,7 +87,7 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
         return this.currentTrackId === track.id();
     }
 
-    showErrors<T>(errors: ServiceResult<T, Error>[]) {
+    showErrors<T>(errors: Result[]) {
         this.props.showErrors(errors);
     }
 

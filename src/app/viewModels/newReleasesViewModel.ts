@@ -1,10 +1,11 @@
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
-import { IAlbum, IResponseResult, ISearchResult, ISpotifySong, ITrack } from '../adapter/spotify';
+import { IResponseResult, ISearchResult, ISpotifySong, ITrack } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, current, State } from '../utils';
+import { assertNoErrors, State } from '../utils';
+import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { AlbumViewModelItem } from './albumViewModelItem';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
@@ -13,7 +14,7 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 class NewReleasesViewModel {
     errors$!: BehaviorSubject<ServiceResult<any, Error>[]>;
-    @State errors = [] as ServiceResult<any, Error>[];
+    @State errors = [] as Result<Error, unknown>[];
 
     newReleases$!: BehaviorSubject<NewReleasesViewModel['newReleases']>;
     @State newReleases = [] as AlbumViewModelItem[];
@@ -75,49 +76,35 @@ class NewReleasesViewModel {
 
     async fetchData() {
         const res = await this.ss.newReleases();
-        if (assertNoErrors(res, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-
-            return;
-        }
-
-        const releases = res.val!;
-        this.newReleases = _.map(releases.albums?.items || [], album => new AlbumViewModelItem(album));
-        this.checkAlbums();
-
-        const featuredPlaylistsResult = await this.ss.featuredPlaylists();
-        if (assertNoErrors(res, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-
-            return;
-        }
-        const featuredPlaylists = featuredPlaylistsResult.val as ISearchResult;
-        this.featuredPlaylists = _.map(featuredPlaylists.playlists?.items || [], playlist => new PlaylistsViewModelItem(playlist));
+        const res2 = await res.map(releases => {
+            this.newReleases = _.map(releases.albums?.items || [], album => new AlbumViewModelItem(album));
+            this.checkAlbums();
+        }).cata(() => this.ss.featuredPlaylists());
+        const res3 = res2.map(featuredPlaylists => {
+            this.featuredPlaylists = _.map(featuredPlaylists.playlists?.items || [], playlist => new PlaylistsViewModelItem(playlist));
+        });
+        res3.error(e => this.errors = [Result.error(e)]);
     }
 
     async loadTracks() {
         const currentAlbum = this.currentAlbum;
         if (currentAlbum) {
             const result = await this.ss.listAlbumTracks(currentAlbum.id());
-            if (assertNoErrors(result, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-                return;
-            }
-
-            const tracks = result.val as IResponseResult<ITrack>;
-
-            this.tracks = _.map(tracks.items, (item, index) => new TrackViewModelItem({
-                track: {
-                    ...item,
-                    album: item.album || currentAlbum.album
-                },
-                added_at: ''
-            }, index));
+            result.map(tracks => {
+                this.tracks = _.map(tracks.items, (item, index) => new TrackViewModelItem({
+                    track: {
+                        ...item,
+                        album: item.album || currentAlbum.album
+                    },
+                    added_at: ''
+                }, index));
+            }).error(e => this.errors = [Result.error(e)]);
         } else if (this.currentPlaylist) {
             const playlistTracksResult = await this.ss.fetchPlaylistTracks(this.currentPlaylist.id(), 0, 100);
-            if (assertNoErrors(playlistTracksResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-                return;
-            }
-            const tracksResult = playlistTracksResult.val as IResponseResult<ISpotifySong>;
-            const tracksModels = _.map(tracksResult.items, (item, index) => new TrackViewModelItem(item, index));
-            this.currentTracks = tracksModels;
+            playlistTracksResult.map(tracksResult => {
+                const tracksModels = _.map(tracksResult.items, (item, index) => new TrackViewModelItem(item, index));
+                this.currentTracks = tracksModels;
+            }).error(e => this.errors = [Result.error(e)]);
         } else {
             this.tracks = [];
         }
@@ -131,30 +118,24 @@ class NewReleasesViewModel {
         }
 
         const likedResult = await this.ss.hasAlbums(ids);
-        if (assertNoErrors(likedResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-            return;
-        }
-
-        const likedAlbums = [] as AlbumViewModelItem[];
-        _.each(likedResult.val as boolean[], (liked, index) => {
-            albums[index].isLiked = liked;
-            liked && likedAlbums.push(albums[index]);
-        });
-        this.likedAlbums = likedAlbums;
+        likedResult.map(liked => {
+            const likedAlbums = [] as AlbumViewModelItem[];
+            _.each(liked, (liked, index) => {
+                albums[index].isLiked = liked;
+                liked && likedAlbums.push(albums[index]);
+            });
+            this.likedAlbums = likedAlbums;
+        }).error(e => this.errors = [Result.error(e)]);
     }
 
     async likeAlbum(album: AlbumViewModelItem) {
         const likedResult = await this.ss.addAlbums(album.id());
-        if (assertNoErrors(likedResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-            return;
-        }
+        likedResult.error(() => this.errors = [likedResult]);
     }
 
     async unlikeAlbum(album: AlbumViewModelItem) {
         const likedResult = await this.ss.removeAlbums(album.id());
-        if (assertNoErrors(likedResult, (e: ServiceResult<unknown, Error>[]) => this.errors = e)) {
-            return;
-        }
+        likedResult.error(() => this.errors = [likedResult]);
     }
 }
 

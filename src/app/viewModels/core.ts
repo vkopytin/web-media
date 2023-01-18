@@ -21,9 +21,9 @@ import { UserProfileViewModel } from './userProfileViewModel';
 export class Core {
     dataService = current(DataService);
     settings = current(SettingsService, SettingsService.makeDefaultSettings());
-    lyricsAdapter = current(LyricsAdapter, this.settings.get('apiseeds').map(({ key }) => key).val);
+    lyricsAdapter = current(LyricsAdapter, this.settings.get('apiseeds').map(({ key }) => key).match(r => r, e => ''));
     lyricsService = current(LyricsService, this.lyricsAdapter);
-    sptifyAdapter = current(SpotifyAdapter, this.settings.get('spotify').map(({ accessToken: key }) => key).val);
+    sptifyAdapter = current(SpotifyAdapter, this.settings.get('spotify').map(({ accessToken: key }) => key).match(r => r, e => ''));
     spotify = current(SpotifyService, this.sptifyAdapter);
     login = current(LoginService, this.settings);
     spotifySync = current(SpotifySyncService, this.spotify, this.dataService);
@@ -35,7 +35,7 @@ export class Core {
     myTracksViewModel = current(MyTracksViewModel, this.spotify, this.service);
     newReleasesViewModel = current(NewReleasesViewModel, this.spotify, this.service);
     playlistsViewModel = current(PlaylistsViewModel, this.service);
-    searchViewModel = current(SearchViewModel, this.spotify, this.service);
+    searchViewModel = current(SearchViewModel, this.spotify, this.settings, this.service);
     userProfileViewModel = current(UserProfileViewModel, this.appViewModel, this.settings, this.service);
 
     async run(): Promise<void> {

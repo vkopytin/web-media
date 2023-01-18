@@ -5,6 +5,7 @@ import { NoActiveDeviceError } from '../service/errors/noActiveDeviceError';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
 import { template } from '../templates/app';
 import { asyncDebounce, Binding, current, Notifications } from '../utils';
+import { Result } from '../utils/result';
 import { AppViewModel, TrackViewModelItem } from '../viewModels';
 import { Core } from '../viewModels/core';
 
@@ -83,7 +84,7 @@ class AppView extends React.Component<IAppViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: AppView['errors$']; value: ServiceResult<unknown, Error>[] }) {
+    refresh(args: { inst: AppView['errors$']; value: Result<Error>[] }) {
         if (args?.inst === this.errors$) {
             this.showErrors(args.value);
         }
@@ -157,7 +158,7 @@ class AppView extends React.Component<IAppViewProps> {
         return bottom - scrollY;
     }
 
-    showErrors(errors: ServiceResult<any, Error>[]) {
+    showErrors(errors: Result<Error, unknown>[]) {
         if (_.isEmpty(errors)) {
             return;
         }
