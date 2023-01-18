@@ -268,9 +268,9 @@ let index = 0;
 
 class SpotifyAdapter {
     fetch: typeof fetch = async (input, init) => {
-        if (index++ % 3 === 0) {
-            input = ('' + input).replace('?', '/fail?') + 'fail';
-        }
+        //if (index++ % 3 === 0) {
+        //    input = ('' + input).replace('?', '/fail?') + 'fail';
+        //}
         return await fetch(input, init);
     }
 

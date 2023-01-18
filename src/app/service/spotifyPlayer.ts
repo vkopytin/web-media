@@ -210,7 +210,7 @@ class SpotifyPlayerService extends withEvents(BaseService) {
         // Connect to the player!
         const success = await this.player.connect();
         if (success) {
-            console.log('The Web Playback SDK successfully connected to Spotify!');
+            console.log('[Spotify SDK] Successfully connected to Spotify!');
         }
         return Option.none();
     }
@@ -221,9 +221,9 @@ class SpotifyPlayerService extends withEvents(BaseService) {
         }
         const res = await this.player.connect();
         if (res) {
-            console.log('The Web Playback SDK successfully connected to Spotify!');
+            console.log('[Spotify SDK] Successfully connected to Spotify!');
         } else {
-            console.log('The Web Playback SDK failed to connect to Spotify!');
+            console.log('[Spotify SDK] Failed to connect to Spotify!');
         }
 
         return Result.of(res);
