@@ -39,6 +39,16 @@ export class Core {
     userProfileViewModel = current(UserProfileViewModel, this.appViewModel, this.settings, this.service);
 
     async run(): Promise<void> {
-        await this.spotifyPlayer.init();
+        await Promise.all([
+            this.spotifyPlayer.init(),
+            this.appViewModel.init(),
+            this.homeViewModel.init(),
+            this.mediaPlayerViewModel.init(),
+            this.myTracksViewModel.init(),
+            this.newReleasesViewModel.init(),
+            this.playlistsViewModel.init(),
+            this.searchViewModel.init(),
+            this.userProfileViewModel.init(),
+        ]);
     }
 }

@@ -4,9 +4,9 @@ import { ISettings, SettingsService } from './settings';
 import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult';
 import { SpotifyPlayerServiceError } from './errors/spotifyPlayerServiceError';
 import { SpotifyPlayerServiceUnexpectedError } from './errors/spotifyPlayerServiceUnexpectedError';
-import { withEvents } from 'databindjs';
 import { none, Option } from '../utils/option';
 import { Result } from '../utils/result';
+import { Events } from '../events';
 
 
 export interface IWebPlaybackPlayer {
@@ -105,7 +105,7 @@ declare global {
     }
 }
 
-class SpotifyPlayerService extends withEvents(BaseService) {
+class SpotifyPlayerService extends Events {
     public player?: IPlayer;
 
     deviceId: string = '';

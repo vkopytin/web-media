@@ -1,11 +1,9 @@
-import { utils } from 'databindjs';
 import * as React from 'react';
 import * as _ from 'underscore';
+import { className as cn } from '../utils';
 import { Result } from '../utils/result';
 import { AppView, DevicesView, HomeView, MediaPlayerView, MyTracksView, NewReleasesView, PlaylistsView, SearchView, SwitchView, UserProfileView } from '../views';
 const imgSrc = require('../../images/Spotify_Logo_RGB_Green.png');
-
-const cn = utils.className;
 
 export const template = (view: AppView) => <main>
     <section className="device-content">
@@ -60,7 +58,7 @@ export const template = (view: AppView) => <main>
                 onClick={evnt => view.openLogin = true}
             ></a>
             <h1 className="title">
-                <img className="spotify-logo" src={imgSrc.default} height="32"
+                <img className="spotify-logo" src={imgSrc.default.src} height="32"
                     onClick={evnt => view.refreshTokenCommand.exec()}
                 />
             </h1>

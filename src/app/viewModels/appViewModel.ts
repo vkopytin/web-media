@@ -55,11 +55,6 @@ class AppViewModel {
     isSyncing$!: BehaviorSubject<AppViewModel['isSyncing']>;
     @State isSyncing = 0;
 
-    isInit = new Promise<boolean>(resolve => _.delay(async () => {
-        await this.init();
-        resolve(true);
-    }));
-
     constructor(
         private spotifySyncService: SpotifySyncService,
         private spotifyService: SpotifyService,
@@ -82,6 +77,9 @@ class AppViewModel {
         }
 
         window.addEventListener('message', async evnt => {
+            if (!(evnt.data instanceof Array)) {
+                return;
+            }
             const [eventName, value] = evnt.data;
             switch (eventName) {
                 case 'accessToken':

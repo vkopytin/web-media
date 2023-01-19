@@ -1,4 +1,4 @@
-import { Events } from 'databindjs';
+import { Events } from '../events';
 import { ServiceResult } from './serviceResult';
 
 

@@ -47,17 +47,16 @@ class UserProfileViewModel {
     currentTrackId$ = this.appViewModel.currentTrackId$;
     @Binding() currentTrackId = '';
 
-    isInit = new Promise<boolean>(resolve => _.delay(async () => {
-        await this.fetchData();
-        resolve(true);
-    }));
-
     constructor(
         private appViewModel: AppViewModel,
         private settingsService: SettingsService,
         private ss: Service
     ) {
 
+    }
+
+    async init() {
+        await this.fetchData();
     }
 
     async fetchData() {

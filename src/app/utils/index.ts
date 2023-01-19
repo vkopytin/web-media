@@ -9,6 +9,24 @@ export function formatTime(ms: number) {
     return ''.concat(minutes, ':').concat(seconds < 10 ? '0' : '').concat('' + seconds);
 }
 
+export function className(str: string, ...args: Array<{}>) {
+    str = str || '';
+    const classArray = str.split(/\s+/gi);
+    const res = classArray.reduce((res, val) => {
+        if (val.indexOf('?') !== 0) {
+            return [...res, val];
+        }
+        if (args.shift()) {
+
+            return [...res, val.replace(/^\?/, '')];
+        }
+
+        return res;
+    }, [] as string[]);
+
+    return res.join(' ');
+}
+
 const instances = new WeakMap();
 
 export function current<T extends {}>(
@@ -18,13 +36,12 @@ export function current<T extends {}>(
     if (instances.has(ctor)) {
         return instances.get(ctor);
     }
-    if (ctor.length === options.length) {
+    if (ctor.length === options.length || ctor.length === 0) {
         const inst = new ctor(...options);
         instances.set(ctor, inst);
         return inst;
     }
-
-    throw new Error('[IoC] Conflict. Probably componenent was not initialized before. And it is not ready to be used from here.');
+    throw new Error(`[IoC] Conflict. Probably componenent was not initialized before. And it is not ready to be used from here.`);
 }
 
 export function asyncQueue(concurrency = 1) {
@@ -156,14 +173,14 @@ export function debounce<T extends Function>(func: T, wait = 0, cancelObj = 'can
         if (!latestResolve) {
             return new Promise((resolve, reject) => {
                 latestResolve = resolve;
-                timerId = setTimeout(invoke.bind(this, allArgs, resolve, reject), wait);
+                timerId = window.setTimeout(invoke.bind(this, allArgs, resolve, reject), wait);
             });
         }
 
         shouldCancel = true;
         return new Promise((resolve, reject) => {
             latestResolve = resolve;
-            timerId = setTimeout(invoke.bind(this, allArgs, resolve, reject), wait);
+            timerId = window.setTimeout(invoke.bind(this, allArgs, resolve, reject), wait);
         });
     }
 

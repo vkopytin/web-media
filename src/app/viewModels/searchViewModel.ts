@@ -92,16 +92,15 @@ class SearchViewModel {
         });
     }, 300);
 
-    isInit = new Promise<boolean>(resolve => _.delay(async () => {
+    constructor(private spotifyService: SpotifyService, private settingsService: SettingsService, private ss: Service) {
+
+    }
+
+    async init() {
         this.settingsService.get('lastSearch').map(({ val }) => {
             this.term = val;
         });
-        this.fetchData();
-        resolve(true);
-    }, 100));
-
-    constructor(private spotifyService: SpotifyService, private settingsService: SettingsService, private ss: Service) {
-
+        await this.fetchData();
     }
 
     changeSearchType(searchType: ISearchType) {

@@ -83,18 +83,12 @@ class PlaylistsViewModel {
     removeBannFromTrackCommand$!: BehaviorSubject<PlaylistsViewModel['removeBannFromTrackCommand']>;
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
 
-    isInit = new Promise<boolean>(resolve => _.delay(async () => {
-        await this.connect();
-        await this.fetchData();
-        resolve(true);
-    }));
-
     constructor(private ss: Service) {
 
     }
 
-    async connect() {
-
+    async init() {
+        await this.fetchData();
     }
 
     async fetchData() {

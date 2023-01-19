@@ -1,15 +1,13 @@
-import { utils } from 'databindjs';
+import { className as cn } from '../utils';
 import * as React from 'react';
 import * as _ from 'underscore';
 import { MediaPlayerView } from '../views';
 
 
-const cn = utils.className;
-
 export const template = (view: MediaPlayerView) => <div className="player-playback">
     <div className="player-left">
         <div className="region">
-            <div className="album-media" style={{backgroundImage: `url(${view.thumbnailUrl})`}}>
+            <div className="album-media" style={{ backgroundImage: `url(${view.thumbnailUrl})` }}>
                 {view.isPlaying || <button className="button-play icon icon-play"
                     onClick={evnt => view.resumeCommand.exec()}
                 ></button>}
@@ -38,7 +36,7 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
                         <div className="progress-max"
                             onClick={evnt => view.seekTrack(evnt)}
                         >
-                            <div className="progress" style={{width: `${view.timePlayed / view.duration * 100}%`}}></div>
+                            <div className="progress" style={{ width: `${view.timePlayed / view.duration * 100}%` }}></div>
                         </div>
                         <div className="time-played">{view.titlePlayed()}</div>
                     </div>
@@ -51,7 +49,7 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
                     ></button>
                     <div className="playback-volume">
                         <div className="progress-max" onClick={evnt => view.updateVolume(evnt)}>
-                            <div className="progress" style={{width: `${view.getVolume()}%`}}></div>
+                            <div className="progress" style={{ width: `${view.getVolume()}%` }}></div>
                         </div>
                         <div className="volume-marker">
                             <span className="icon icon-sound3"></span>

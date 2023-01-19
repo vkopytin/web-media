@@ -93,11 +93,6 @@ class MediaPlayerViewModel {
     autoSeek = asyncDebounce(() => this.autoSeekInternal(), 500);
     fetchData = asyncDebounce(() => this.fetchDataInternal(), 500);
 
-    isInit = new Promise<boolean>(resolve => _.delay(async () => {
-        await this.init();
-        resolve(true);
-    }));
-
     constructor(
         private appViewModel: AppViewModel,
         private spotifyService: SpotifyService,
@@ -118,8 +113,8 @@ class MediaPlayerViewModel {
     }
 
     async connect() {
-        this.spotifyPlayerService.on('playerStateChanged', (en, state) => this.updateFromPlayerState(state));
-        this.spotifyService.on('change:state', state => this.fetchData());
+        this.spotifyPlayerService.on('playerStateChanged', (en: unknown, state: IWebPlaybackState) => this.updateFromPlayerState(state));
+        this.spotifyService.on('change:state', (state: IWebPlaybackState) => this.fetchData());
 
         await this.fetchData();
     }

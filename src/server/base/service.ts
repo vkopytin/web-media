@@ -1,5 +1,0 @@
-class BaseService {
-
-}
-
-export { BaseService };

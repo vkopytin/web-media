@@ -7,6 +7,7 @@ type PanelType = 'home' | 'playlists' | 'profile' | 'releases' | 'search' | 'tra
 export interface ISwitchViewProps {
     currentView: PanelType;
     onClick?(evnt: {}): void;
+    children: Array<{}>;
 }
 
 const panels = ['home', 'playlists', 'tracks', 'search', 'releases'];

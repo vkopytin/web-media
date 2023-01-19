@@ -1,4 +1,3 @@
-import { withEvents } from 'databindjs';
 import * as _ from 'underscore';
 import { BaseService } from '../base/baseService';
 import { Service } from '.';
@@ -8,6 +7,7 @@ import { ErrorWithStatus } from '../adapter/errors/errorWithStatus';
 import { LyricsServiceError } from './errors/lyricsServiceError';
 import { LyricsServiceUnexpectedError } from './errors/lyricsServiceUnexpectedError';
 import { Result } from '../utils/result';
+import { Events } from '../events';
 
 
 function returnErrorResult<T>(message: string, ex: Error): Result<Error, T> {
@@ -20,7 +20,7 @@ function returnErrorResult<T>(message: string, ex: Error): Result<Error, T> {
     }
 }
 
-class LyricsService extends withEvents(BaseService) {
+class LyricsService extends Events {
     constructor(public adapter: LyricsAdapter) {
         super();
     }

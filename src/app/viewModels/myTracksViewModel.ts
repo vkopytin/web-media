@@ -39,12 +39,6 @@ class MyTracksViewModel {
     findTrackLyricsCommand$!: BehaviorSubject<MyTracksViewModel['findTrackLyricsCommand']>;
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
 
-    isInit = new Promise<boolean>(resolve => _.delay(async () => {
-        await this.connect();
-        await this.fetchData();
-        resolve(true);
-    }));
-
     constructor(
         private spotifyService: SpotifyService,
         private ss: Service,
@@ -52,8 +46,13 @@ class MyTracksViewModel {
 
     }
 
+    async init() {
+        await this.connect();
+        await this.fetchData();
+    }
+
     async connect() {
-        this.spotifyService.on('change:state', (...args) => this.loadData(...args));
+        this.spotifyService.on('change:state', (...args: unknown[]) => this.loadData(...args));
     }
 
     async fetchData() {

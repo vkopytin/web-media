@@ -1,10 +1,8 @@
-import { utils } from 'databindjs';
+import { className as cn } from '../utils';
 import * as React from 'react';
 import * as _ from 'underscore';
 import { UserProfileView } from '../views';
 const imgSrc = require('../../images/Spotify_Logo_RGB_Green.png');
-
-const cn = utils.className;
 
 export const template = (view: UserProfileView) => <div className={cn(`${view.props.className}`)}>
     <header className="bar bar-nav">
@@ -12,7 +10,7 @@ export const template = (view: UserProfileView) => <div className={cn(`${view.pr
             onClick={evnt => view.openLogin = false}
         ></a>
         <h1 className="title">
-            <img className="spotify-logo" src={imgSrc.default} height="32" />
+            <img className="spotify-logo" src={imgSrc.default.src} height="32" />
         </h1>
     </header>
 

@@ -1,1 +1,0 @@
-export { RMService } from './connections';

@@ -1,4 +1,3 @@
-import { withEvents } from 'databindjs';
 import { BaseService } from '../base/baseService';
 import { Service } from '.';
 import { assertNoErrors } from '../utils';
@@ -9,9 +8,10 @@ import { SpotifyService } from './spotify';
 import { DataService } from './dataService';
 import { ServiceResult } from '../base/serviceResult';
 import { Result } from '../utils/result';
+import { Events } from '../events';
 
 
-class SpotifySyncService extends withEvents(BaseService) {
+class SpotifySyncService extends Events {
     limit = 49;
 
     constructor(public spotify: SpotifyService, private data: DataService) {

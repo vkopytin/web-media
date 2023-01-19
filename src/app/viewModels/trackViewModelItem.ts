@@ -46,7 +46,7 @@ class TrackViewModelItem {
     @State updateIsCachedCommand = Scheduler.Command((playlists: PlaylistsViewModelItem[]) => this.updateIsCached(playlists));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {
-        await this.connect();
+        await this.fetchData();
         resolve(true);
     }));
 
@@ -121,7 +121,7 @@ class TrackViewModelItem {
         return image?.url;
     }
 
-    async connect() {
+    async fetchData() {
         this.listPlaylists();
         const res = await this.ss.isBannedTrack(this.song.track.id);
         res.map(r => this.isBanned = r).error(e => this.errors = [Result.error(e)]);
@@ -152,14 +152,14 @@ class TrackViewModelItem {
     async addToPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
         const result = await this.ss.addTrackToPlaylist(track.song.track, playlist.playlist);
         result.map(() => setTimeout(() => {
-            this.connect();
+            this.fetchData();
         }, 2000)).error(e => this.errors = [Result.error(e)]);
     }
 
     @isLoading
     async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
         const result = await this.ss.removeTrackFromPlaylist(track.song.track, playlist.id());
-        await result.map(() => this.connect()).error(e => this.errors = [Result.error(e)]);
+        await result.map(() => this.fetchData()).error(e => this.errors = [Result.error(e)]);
     }
 
     async likeTrack(): Promise<Result<Error, IResponseResult<ISpotifySong>>> {

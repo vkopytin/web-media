@@ -1,26 +1,42 @@
 {
-    "compilerOptions": {
-        "esModuleInterop": true,
-        "experimentalDecorators": true,
-        "moduleResolution": "node",
-        "module": "commonjs",
-        "target": "es5",
-        "noImplicitAny": true,
-        "sourceMap": true,
-        "jsx": "react",
-        "allowJs": true,
-        "allowUnreachableCode": true,
-        "baseUrl": "static/js",
-        "importHelpers": true,
-        "strict": true
-    },
-    //    "include": [ "**/*.ts" ],
-    "exclude": [
-        "**/node_modules/*",
-        "**/server/*",
-        "**/bundle/*"
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "target": "es5",
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "jsx": "preserve",
+    "allowJs": true,
+    "allowUnreachableCode": true,
+    "baseUrl": "static/js",
+    "importHelpers": true,
+    "strict": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
     ],
-    "filesGlob": [
-        "./src/*.d.ts"
-    ]
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
+  },
+  //    "include": [ "**/*.ts" ],
+  "exclude": [
+    "**/node_modules/*",
+    "**/server/*",
+    "**/bundle/*"
+  ],
+  "filesGlob": [
+    "./src/*.d.ts"
+  ],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ]
 }

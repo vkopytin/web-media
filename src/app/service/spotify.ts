@@ -5,10 +5,10 @@ import { SpotifyServiceError } from './errors/spotifyServiceError';
 import { SpotifyServiceUnexpectedError } from './errors/spotifyServiceUnexpectedError';
 import * as _ from 'underscore';
 import { SpotifyAdapter, IUserInfo, ISearchType, IResponseResult, ISpotifySong, IUserPlaylistsResult, ITrack, ITopTracksResult, ISearchResult, IAlbum, IDevice, IPlayerResult, ICurrentlyPlayingResult, IRecommendationsResult, ISpotifyAlbum, IReorderTracksResult } from '../adapter/spotify';
-import { withEvents } from 'databindjs';
 import { asyncDebounce } from '../utils';
 import { NoActiveDeviceError } from './errors/noActiveDeviceError';
 import { Result } from '../utils/result';
+import { Events } from '../events';
 
 
 function returnErrorResult<T>(message: string, err: Error): Result<Error, T> {
@@ -25,9 +25,9 @@ function returnErrorResult<T>(message: string, err: Error): Result<Error, T> {
     return SpotifyServiceUnexpectedError.of<T>(message, err);
 }
 
-class SpotifyService extends withEvents(BaseService) {
+class SpotifyService extends Events {
     currentProfile: IUserInfo | null = null;
-    onStateChanged = asyncDebounce((...args: unknown[]) => this.onStateChangedInternal(...args), 500);
+    onStateChanged = asyncDebounce((...args: Array<{}>) => this.onStateChangedInternal(...args), 500);
 
     constructor(public adapter: SpotifyAdapter) {
         super();
@@ -38,7 +38,7 @@ class SpotifyService extends withEvents(BaseService) {
         return Result.of(true);
     }
 
-    onStateChangedInternal(...args: unknown[]) {
+    onStateChangedInternal(...args: Array<{}>) {
         this.trigger('change:state', ...args);
     }
 
@@ -46,7 +46,7 @@ class SpotifyService extends withEvents(BaseService) {
         try {
             const res = await this.adapter.seek(Math.round(positionMs), deviceId);
 
-            this.onStateChanged(res);
+            this.onStateChanged({});
             return Result.of(res);
         } catch (ex) {
             return returnErrorResult<void>('Unexpected error on requesting spotify seek', ex as Error);
@@ -57,7 +57,7 @@ class SpotifyService extends withEvents(BaseService) {
         try {
             const res = await this.adapter.play(tracksUriList, indexOrUri, deviceId);
 
-            this.onStateChanged(res);
+            this.onStateChanged({});
             return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify play', ex as Error);
@@ -68,7 +68,7 @@ class SpotifyService extends withEvents(BaseService) {
         try {
             const res = await this.adapter.pause(deviceId);
 
-            this.onStateChanged(res);
+            this.onStateChanged({});
             return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify pause', ex as Error);
@@ -79,7 +79,7 @@ class SpotifyService extends withEvents(BaseService) {
         try {
             const res = await this.adapter.next(deviceId);
 
-            this.onStateChanged(res);
+            this.onStateChanged({});
             return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify next', ex as Error);
@@ -90,7 +90,7 @@ class SpotifyService extends withEvents(BaseService) {
         try {
             const res = await this.adapter.previous(deviceId);
 
-            this.onStateChanged(res);
+            this.onStateChanged({});
             return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify previous', ex as Error);

@@ -1,4 +1,3 @@
-import { withEvents } from 'databindjs';
 import { BaseService } from '../base/baseService';
 import { Service } from '.';
 import * as _ from 'underscore';
@@ -17,9 +16,10 @@ import { BannedTracksStore } from '../data/entities/bannedTracksStore';
 import { ServiceResult } from '../base/serviceResult';
 import { IPlaylistRow } from '../data/entities/interfaces/iPlaylistRow';
 import { Result } from '../utils/result';
+import { Events } from '../events';
 
 
-class DataService extends withEvents(BaseService) {
+class DataService extends Events {
     constructor() {
         super();
     }

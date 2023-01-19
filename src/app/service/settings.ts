@@ -1,5 +1,4 @@
 import { BaseService } from '../base/baseService';
-import { SettingsServiceUnexpectedError } from './errors/settingsServiceUnexpectedError';
 import { Result } from '../utils/result';
 
 
@@ -19,24 +18,55 @@ export interface ISettings {
         key: string;
     }
 }
-const fromEntries = (str: string) => {
+
+export interface IAuthInfo {
+    access_token: string;
+    state: string;
+    code?: string;
+}
+
+const fromEntries = <T,>(str: string): T => {
     const obj = {} as { [key: string]: string };
     str.replace(/([^=&]+)=([^&]*)/g, (m: unknown, key: string, value: string) => {
         return obj[decodeURIComponent(key)] = decodeURIComponent(value);
     });
 
-    return obj;
+    return obj as T;
 };
 
 const getCookie = (key: string, defVal = '') => {
+    if (typeof document === 'undefined') {
+        return '';
+    }
     const cookieRx = new RegExp('(^' + key + '|[^\\w\\d\\s]*' + key + ')[\\s]*=[\\s]*([^;]+)');
+    if (!cookieRx.test(document.cookie)) {
+        return defVal;
+    }
     const [a, k, value] = cookieRx.exec(document.cookie) || [];
 
     return value;
 }
 
 class SettingsService extends BaseService {
-    static makeDefaultSettings() {
+    static makeDefaultSettings(): ISettings {
+        if (typeof document === 'undefined' || typeof window === 'undefined') {
+            return {
+                lastSearch: {
+                    val: ''
+                },
+                spotify: {
+                    accessToken: '',
+                    volume: 0
+                },
+                genius: {
+                    accessToken: '',
+                    code: ''
+                },
+                apiseeds: {
+                    key: ''
+                }
+            };
+        }
         let sToken = getCookie('spat');
         let gToken = getCookie('gsat');
         let gCode = getCookie('gcode');
@@ -45,11 +75,7 @@ class SettingsService extends BaseService {
         const volume = +(getCookie('lastVolume') || 50);
         const urlParams = window.location.search.replace(/^\?/, '') || '';
         const hashData = window.location.hash.replace(/^#/, '') || '';
-        const authInfo = fromEntries(hashData + '&' + urlParams) as {
-            access_token: string;
-            state: string;
-            code?: string;
-        };
+        const authInfo: IAuthInfo = fromEntries(hashData + '&' + urlParams);
         const defaultSettings: ISettings = {
             lastSearch: {
                 val: lastSearch && atob(lastSearch),
@@ -83,12 +109,8 @@ class SettingsService extends BaseService {
         return defaultSettings;
     }
 
-    config: ISettings = { lastSearch: { val: '' }, apiseeds: { key: '' }, genius: {}, spotify: {} };
-
-    constructor(settings: ISettings = { lastSearch: { val: '' }, apiseeds: { key: '' }, genius: {}, spotify: {} }) {
+    constructor(public config: ISettings = { lastSearch: { val: '' }, apiseeds: { key: '' }, genius: {}, spotify: {} }) {
         super();
-
-        this.config = settings;
     }
 
     volume(val?: number) {

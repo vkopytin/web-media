@@ -1,10 +1,8 @@
-import { utils } from 'databindjs';
+import { className as cn } from '../utils';
 import * as React from 'react';
 import * as _ from 'underscore';
 import { AlbumsView, SearchView, SelectPlaylistsView } from '../views';
 
-
-const cn = utils.className;
 
 export const template = (view: SearchView) => <>
     <section className="bar bar-standard">

@@ -1,27 +1,22 @@
 import React from 'react';
 import * as _ from 'underscore';
-import { ServiceResult } from '../base/serviceResult';
 import { NoActiveDeviceError } from '../service/errors/noActiveDeviceError';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
 import { template } from '../templates/app';
 import { asyncDebounce, Binding, current, Notifications } from '../utils';
 import { Result } from '../utils/result';
 import { AppViewModel, TrackViewModelItem } from '../viewModels';
-import { Core } from '../viewModels/core';
 
 export interface IAppViewProps {
 
 }
-
-const core = current(Core);
-core.run();
 
 class AppView extends React.Component<IAppViewProps> {
     didRefresh: AppView['refresh'] = this.refresh.bind(this);
     vm = current(AppViewModel);
 
     errors$ = this.vm.errors$;
-    @Binding<AppView>({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding<AppView>({ didSet: (view, errors) => view.showErrors(errors as Result<Error, unknown>[]) })
     errors!: AppView['vm']['errors'];
 
     openLogin$ = this.vm.openLogin$;

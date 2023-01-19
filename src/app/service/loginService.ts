@@ -1,11 +1,11 @@
-import { withEvents } from 'databindjs';
 import $ from 'jquery';
 import { BaseService } from '../base/baseService';
 import { SettingsService } from './settings';
 import { Result } from '../utils/result';
+import { Events } from '../events';
 
 
-class LoginService extends withEvents(BaseService) {
+class LoginService extends Events {
     constructor(public settings: SettingsService) {
         super();
     }

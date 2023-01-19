@@ -61,11 +61,6 @@ class HomeViewModel {
     selectPlaylistCommand$!: BehaviorSubject<HomeViewModel['selectPlaylistCommand']>;
     @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => this.selectPlaylist(playlist));
 
-    isInit = new Promise<boolean>(resolve => _.delay(async () => {
-        await this.init();
-        resolve(true);
-    }, 100));
-
     constructor(
         private spotifyService: SpotifyService,
         private spotifyPlayerService: SpotifyPlayerService,
@@ -80,7 +75,7 @@ class HomeViewModel {
     }
 
     async connect() {
-        this.spotifyService.on('change:state', (...args) => this.loadData(...args));
+        this.spotifyService.on('change:state', (...args: unknown[]) => this.loadData(...args));
     }
 
     @isLoading

@@ -57,12 +57,6 @@ class NewReleasesViewModel {
     unlikeAlbumCommand$!: BehaviorSubject<NewReleasesViewModel['unlikeAlbumCommand']>;
     @State unlikeAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.unlikeAlbum(album));
 
-    isInit = new Promise(resume => _.delay(async () => {
-        await this.connect();
-        await this.fetchData();
-        resume(true);
-    }));
-
     constructor(
         private spotifyService: SpotifyService,
         private ss: Service,
@@ -70,8 +64,13 @@ class NewReleasesViewModel {
 
     }
 
+    async init() {
+        await this.connect();
+        await this.fetchData();
+    }
+
     async connect() {
-        this.spotifyService.on('change:state', state => this.checkAlbums());
+        this.spotifyService.on('change:state', () => this.checkAlbums());
     }
 
     async fetchData() {

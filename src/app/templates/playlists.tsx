@@ -1,11 +1,8 @@
-import { utils } from 'databindjs';
 import * as React from 'react';
 import * as _ from 'underscore';
 import { PlaylistsView } from '../views/playlistsView';
 import { TracksView } from '../views/tracksView';
 
-
-const cn = utils.className;
 
 export const template = (view: PlaylistsView) => <>
     <form>

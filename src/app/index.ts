@@ -1,5 +1,4 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import './sass/ratchet.scss';
 
 
@@ -12,18 +11,7 @@ const fromEntries = (str: string) => {
     return obj;
 };
 
-if (
-    !/state=onSpotify-123/.test(window.location.hash)
-    && !/state=onGenius-123/.test(window.location.hash)
-) {
-    (async () => {
-        const { AppView } = await import('./views/app');
-        ReactDOM.render(
-            React.createElement(AppView),
-            document.getElementsByClassName('app-root')[0]
-        );
-    })();
-} else if (/state=onSpotify-123/.test(window.location.hash)) {
+if (/state=onSpotify-123/.test(window.location.hash)) {
     const authData = window.location.hash.replace(/^#/, '');
     const authInfo = fromEntries(authData) as {
         access_token: string;
