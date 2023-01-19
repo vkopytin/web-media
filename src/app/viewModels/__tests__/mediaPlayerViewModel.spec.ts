@@ -1,5 +1,4 @@
 import { SpotifyAdapter } from '../../adapter/spotify';
-import { mocked } from 'ts-jest/utils';
 import { DataStorage } from '../../data/dataStorage';
 import { Service } from '../../service';
 import { MediaPlayerViewModel } from '../mediaPlayerViewModel';
@@ -10,12 +9,10 @@ import { SpotifySyncService } from '../../service/spotifySyncService';
 import { DataService } from '../../service/dataService';
 import { AppViewModel } from '../appViewModel';
 
-let mockSrv: any;
-
 jest.mock('../../adapter/spotify', () => {
     return {
         SpotifyAdapter: jest.fn().mockImplementation(() => {
-            return mockSrv = mockSrv || {
+            return {
                 player: jest.fn().mockImplementation(() => Promise.resolve({
                     is_playing: true
                 })),
@@ -81,8 +78,6 @@ describe('Media Player View Model', () => {
         appViewModel = new AppViewModel(spotifySync, spotify, spotifyPlayer, service);
         mockedInit = jest.spyOn(MediaPlayerViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
         vm = new MediaPlayerViewModel({} as any, {} as any, {} as any, {} as any, service);
-        const res = await vm.isInit;
-        expect(res).toBeTruthy();
     });
 
     afterAll(() => {

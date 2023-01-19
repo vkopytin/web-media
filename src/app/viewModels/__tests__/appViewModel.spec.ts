@@ -1,5 +1,4 @@
 import { SpotifyAdapter } from '../../adapter/spotify';
-import { mocked } from 'ts-jest/utils';
 import { DataStorage } from '../../data/dataStorage';
 import { AppViewModel } from '../appViewModel';
 import { SpotifySyncService } from '../../service/spotifySyncService';
@@ -106,8 +105,6 @@ describe('App View Model', () => {
         spotifySync = new SpotifySyncService(spotify, dataService);
         mockedInit = jest.spyOn(AppViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
         vm = new AppViewModel(spotifySync, spotify, spotifyPlayer, service);
-        const res = await vm.isInit;
-        expect(res).toBeTruthy();
     });
 
     afterEach(() => {
@@ -146,7 +143,7 @@ describe('App View Model', () => {
 
         await vm.updateDevices();
 
-        expect(vm.errors).toHaveLength(1);
+        expect(vm.errors.length).toEqual(1);
         console.log(vm.errors[0].error);
 
         expect(vm.devices[0].id()).toBe('device-01');

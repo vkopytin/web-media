@@ -9,7 +9,7 @@
     "watch-dev": "cross-env NODE_OPTIONS=--max_old_space_size=16000 NODE_ENV=development webpack --watch --progress --color --config webpack/watch.webpack-back.config",
     "build-alpha": "cross-env NODE_OPTIONS=--max_old_space_size=4000 NODE_ENV=alpha webpack --progress --color --config webpack/alpha.webpack.config",
     "build-prod": "cross-env NODE_OPTIONS=--max_old_space_size=4000 NODE_ENV=production webpack --progress --color --config webpack/prod.webpack.config",
-    "test": "jest test",
+    "test": "jest",
     "make-ssl-sert": "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./selfsigned.key -out selfsigned.crt",
     "make-ssl-cert": "openssl req -x509 -nodes -sha256 -newkey rsa:2048 -out selfsigned.crt -keyout selfsigned.key -subj '/CN=localhost' -extensions EXT -config <( printf \"[dn]\nCN=localhost\n[req]\ndistinguished_name=dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth\")",
     "make-ssl-pem": "cat selfsigned.crt selfsigned.key > selfsigned.pem",
@@ -27,30 +27,6 @@
   ],
   "author": "Volodymyr Kopytin",
   "license": "ISC",
-  "jest": {
-    "testEnvironment": "jsdom",
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest",
-      "^.+\\.mustache$": "mustache-jest"
-    },
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "mustache",
-      "json"
-    ],
-    "modulePathIgnorePatterns": [
-      "<rootDir>/bundle"
-    ],
-    "globals": {
-      "ts-jest": {
-        "tsConfig": "<rootDir>/server/tsconfig.json"
-      }
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$"
-  },
   "dependencies": {
     "@types/jquery": "^3.5.16",
     "@types/lodash": "^4.14.184",
@@ -58,16 +34,22 @@
     "jquery": "^3.6.3",
     "lodash": "^4.17.21",
     "material-icons": "^1.13.1",
-    "next": "^12.1.6",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "rxjs": "^7.8.0",
-    "sass": "^1.53.0"
+    "rxjs": "^7.8.0"
   },
   "devDependencies": {
+    "@types/jasmine": "^4.3.1",
+    "@types/jest": "^29.2.6",
     "@types/node": "^17.0.42",
     "@types/react": "^18.0.12",
-    "typescript": "^4.7.3",
+    "jasmine": "^4.5.0",
+    "jest": "^29.3.1",
+    "next": "^12.1.6",
+    "sass": "^1.53.0",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4",
     "underscore": "^1.13.6"
   }
 }

@@ -365,7 +365,7 @@ export function State<T>(target: T, propName: string, descriptor?: PropertyDescr
     return Binding<T>()(target, propName, descriptor);
 }
 
-export function Binding<T>({ didSet }: { didSet?: (this: T, view: T, val: T[keyof T]) => void } = {}) {
+export function Binding<T>({ didSet }: { didSet?: (this: T, view: T, val: any) => void } = {}) {
     return function (target: T, propName: string, descriptor?: PropertyDescriptor): any {
         const desc$ = Object.getOwnPropertyDescriptor(target, `${String(propName)}$`);
         function initBinding(this: T, store$: BehaviorSubject<unknown>) {

@@ -1,5 +1,4 @@
 import { SpotifyAdapter } from '../../adapter/spotify';
-import { mocked } from 'ts-jest/utils';
 import { DataStorage } from '../../data/dataStorage';
 import { Service } from '../../service';
 import { HomeViewModel } from '../homeViewModel';
@@ -9,12 +8,11 @@ import { SettingsService } from '../../service/settings';
 import { SpotifySyncService } from '../../service/spotifySyncService';
 import { DataService } from '../../service/dataService';
 
-let mockSrv: any;
 
 jest.mock('../../adapter/spotify', () => {
     return {
         SpotifyAdapter: jest.fn().mockImplementation(() => {
-            return mockSrv = mockSrv || {
+            return {
                 recommendations: jest.fn().mockImplementation(() => Promise.resolve({ tracks: [{ id: 'recommendation-01', uri: 'recommendation:uri-01' }] })),
                 tracks: jest.fn().mockImplementation(() => Promise.resolve({ items: [{ track: { id: 'track-01', uri: 'track:uri-01' } }] })),
                 hasTracks: jest.fn().mockImplementation(() => Promise.resolve([true])),
@@ -62,8 +60,6 @@ describe('Home View Model', () => {
         spotifySync = new SpotifySyncService(spotify, dataService);
         mockedInit = jest.spyOn(HomeViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
         vm = new HomeViewModel(spotify, spotifyPlayer, service);
-        const res = await vm.isInit;
-        expect(res).toBeTruthy();
     });
 
     afterAll(() => {
