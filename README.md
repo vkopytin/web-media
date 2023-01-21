@@ -32,11 +32,11 @@ Between independent modules. Helps keep all composition loosely coupled. The [co
 
 This version of the implementation consists of several layers.
 
-- [Adapters layer](src/app/adapter/spotify.ts) is to fetch data from a remote API;
+- [Adapters layer](src/app/adapter/spotify.ts#:~:text=SpotifyAdapter) is to fetch data from a remote API;
 - Data layer to cache API data for late use;
-- [Services layer](src/app/service/spotify.ts) to contain business logic with implementations of various state transitions;
+- [Services layer](src/app/service/spotify.ts#:~:text=SpotifyService) to contain business logic with implementations of various state transitions;
 - View layer to render the state on UI.
-- Databinding - [POC](src/app/utils/databinding.ts)
+- Databinding - [POC](src/app/utils/databinding.ts#:~:text=Binding<T)
 - Command dispatcher [Scheduler](src/app/utils/scheduler.ts)
 - Functional [Result](src/app/utils/result.ts) and [Option](src/app/utils/option.ts) techniques
 
