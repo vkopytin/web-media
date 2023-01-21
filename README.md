@@ -98,6 +98,7 @@ business requirements.
 From this project there is the ability to update personal knowledge about how more advanced tools with similar concepts
 would work together. For the fully scalable production solution.
 
-This is how it look in the browser:
+This is how it looks in the browser:
+
 <img width="370" alt="image" src="https://user-images.githubusercontent.com/4933561/213888715-e965c81f-339b-48f7-95fb-f5af5bd3877d.png">
 
