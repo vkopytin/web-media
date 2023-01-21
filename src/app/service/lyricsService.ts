@@ -1,13 +1,9 @@
-import * as _ from 'underscore';
-import { BaseService } from '../base/baseService';
-import { Service } from '.';
-import { LyricsServiceResult } from './results/lyricsServiceResult';
-import { ILyricsSearchResult, LyricsAdapter } from '../adapter/lyrics';
 import { ErrorWithStatus } from '../adapter/errors/errorWithStatus';
+import { LyricsAdapter } from '../adapter/lyrics';
+import { Events } from '../events';
+import { Result } from '../utils/result';
 import { LyricsServiceError } from './errors/lyricsServiceError';
 import { LyricsServiceUnexpectedError } from './errors/lyricsServiceUnexpectedError';
-import { Result } from '../utils/result';
-import { Events } from '../events';
 
 
 function returnErrorResult<T>(message: string, ex: Error): Result<Error, T> {

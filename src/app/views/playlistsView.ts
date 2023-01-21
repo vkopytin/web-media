@@ -1,6 +1,7 @@
 import React from 'react';
 import { template } from '../templates/playlists';
-import { Binding, current, Notifications } from '../utils';
+import { Binding, Notifications } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { PlaylistsViewModel } from '../viewModels';
 
@@ -13,7 +14,7 @@ export interface IPlaylistsViewProps {
 
 class PlaylistsView extends React.Component<IPlaylistsViewProps> {
     didRefresh: PlaylistsView['refresh'] = this.refresh.bind(this);
-    vm = current(PlaylistsViewModel);
+    vm = inject(PlaylistsViewModel);
 
     @Binding((a: PlaylistsView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])

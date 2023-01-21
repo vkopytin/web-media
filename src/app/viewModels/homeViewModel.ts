@@ -1,11 +1,9 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
-import { IRecommendationsResult, IResponseResult, ISpotifySong, ITrack } from '../adapter/spotify';
-import { ServiceResult } from '../base/serviceResult';
+import { ISpotifySong } from '../adapter/spotify';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
 import { SpotifyPlayerService } from '../service/spotifyPlayer';
-import { assertNoErrors, isLoading, State } from '../utils';
+import { isLoading, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';

@@ -1,7 +1,7 @@
 import React from 'react';
-import * as _ from 'underscore';
 import { template } from '../templates/search';
-import { asyncDebounce, Binding, current, Notifications } from '../utils';
+import { asyncDebounce, Binding, Notifications } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { SearchViewModel, TrackViewModelItem } from '../viewModels';
 
@@ -14,7 +14,7 @@ export interface ISearchViewProps {
 
 class SearchView extends React.Component<ISearchViewProps> {
     didRefresh: SearchView['refresh'] = this.refresh.bind(this);
-    vm = current(SearchViewModel);
+    vm = inject(SearchViewModel);
 
     @Binding((a: SearchView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])

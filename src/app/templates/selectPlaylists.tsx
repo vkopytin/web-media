@@ -1,8 +1,6 @@
-import { className as cn } from '../utils';
-import * as React from 'react';
 import * as _ from 'underscore';
+import { className as cn } from '../utils';
 import { SelectPlaylistsView } from '../views';
-
 
 export const template = (view: SelectPlaylistsView) => <div className={cn(`${view.props.className}`)}>
     {(view.isLoading && !view.props.active) ? <span className="chips chips-positive loading material-icons">refresh</span>

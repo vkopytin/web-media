@@ -1,4 +1,3 @@
-import { BehaviorSubject } from 'rxjs';
 import { State } from '../utils';
 import { Result } from '../utils/result';
 import { TrackViewModelItem } from './trackViewModelItem';

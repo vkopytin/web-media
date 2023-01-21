@@ -1,16 +1,14 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { ITrack } from '../adapter/spotify';
-import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SettingsService } from '../service/settings';
 import { SpotifyService } from '../service/spotify';
 import { IWebPlaybackState, SpotifyPlayerService } from '../service/spotifyPlayer';
-import { asyncDebounce, asyncQueue, Binding, current, State } from '../utils';
+import { asyncDebounce, asyncQueue, Binding, State } from '../utils';
+import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
 import { TrackViewModelItem } from './trackViewModelItem';
-import { Result } from '../utils/result';
 
 const lockSection = asyncQueue();
 

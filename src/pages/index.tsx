@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { current } from '../app/utils';
+import { inject } from '../app/utils/inject';
 import { Core } from '../app/viewModels/core';
 import { AppView } from '../app/views/app';
 
-const core = current(Core);
+const core = inject(Core);
 
 export default function HomePage() {
   const [isSsr, setIsSsr] = useState(true);

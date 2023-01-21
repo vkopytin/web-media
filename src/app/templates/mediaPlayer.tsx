@@ -1,8 +1,4 @@
-import { className as cn } from '../utils';
-import * as React from 'react';
-import * as _ from 'underscore';
 import { MediaPlayerView } from '../views';
-
 
 export const template = (view: MediaPlayerView) => <div className="player-playback">
     <div className="player-left">

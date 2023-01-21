@@ -1,6 +1,7 @@
 import React from 'react';
 import { template } from '../templates/home';
-import { Binding, current, Notifications } from '../utils';
+import { Binding, Notifications } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { HomeViewModel, TrackViewModelItem } from '../viewModels';
 
@@ -11,7 +12,7 @@ export interface IHomeViewProps {
 
 class HomeView extends React.Component<IHomeViewProps> {
     didRefresh: HomeView['refresh'] = this.refresh.bind(this);
-    vm = current(HomeViewModel);
+    vm = inject(HomeViewModel);
 
     @Binding((a: HomeView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])

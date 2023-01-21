@@ -1,6 +1,5 @@
-import { className as cn } from '../utils';
-import * as React from 'react';
 import * as _ from 'underscore';
+import { className as cn } from '../utils';
 import { UserProfileView } from '../views';
 const imgSrc = require('../../images/Spotify_Logo_RGB_Green.png');
 

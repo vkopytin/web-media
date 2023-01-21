@@ -1,6 +1,5 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
-import { ISearchResult, ISearchType, ISpotifySong } from '../adapter/spotify';
+import { ISearchType, ISpotifySong } from '../adapter/spotify';
 import { Service } from '../service';
 import { SettingsService } from '../service/settings';
 import { SpotifyService } from '../service/spotify';

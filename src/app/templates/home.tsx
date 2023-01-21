@@ -1,8 +1,6 @@
-import * as React from 'react';
 import * as _ from 'underscore';
 import { PickPlaylistsView, SelectPlaylistsView } from '../views';
 import { HomeView } from '../views/homeView';
-
 
 export const template = (view: HomeView) => <>
     <div className="center">

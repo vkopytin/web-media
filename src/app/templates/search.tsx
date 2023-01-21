@@ -1,8 +1,6 @@
-import { className as cn } from '../utils';
-import * as React from 'react';
 import * as _ from 'underscore';
+import { className as cn } from '../utils';
 import { AlbumsView, SearchView, SelectPlaylistsView } from '../views';
-
 
 export const template = (view: SearchView) => <>
     <section className="bar bar-standard">

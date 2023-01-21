@@ -1,9 +1,8 @@
-import * as React from 'react';
 import * as _ from 'underscore';
 import { DevicesView } from '../views/devicesView';
 
 const ListDevices = ({ view }: { view: DevicesView }) => <>
-{_.map(view.devices, (device) => {
+    {_.map(view.devices, (device) => {
         return <li key={device.id()} className="table-view-cell"
             onClick={evnt => view.switchDevice(device)}
         >
@@ -13,7 +12,7 @@ const ListDevices = ({ view }: { view: DevicesView }) => <>
     })}
 </>;
 
-const EmptyDevices = ({view }: { view: DevicesView }) => <>
+const EmptyDevices = ({ view }: { view: DevicesView }) => <>
     <li className="table-view-cell" style={{ padding: '11px 15px 11px 15px' }}>
         <label>Not Found</label>
         <label className="chips chips-positive pull-right">

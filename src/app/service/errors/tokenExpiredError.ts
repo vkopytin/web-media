@@ -1,12 +1,6 @@
 import { Result } from '../../utils/result';
-import { SpotifyServiceResult } from '../results/spotifyServiceResult';
-
 
 class TokenExpiredError extends Error {
-
-    static create<T>(message: string, details = {}) {
-        return SpotifyServiceResult.error<T, TokenExpiredError>(new TokenExpiredError(message, details));
-    }
 
     static of<T>(message: string, details = {}): Result<Error, T> {
         return Result.error<Error, T>(new TokenExpiredError(message, details));

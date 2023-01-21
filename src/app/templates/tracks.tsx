@@ -1,8 +1,6 @@
-import { className as cn } from '../utils';
-import * as React from 'react';
 import * as _ from 'underscore';
+import { className as cn } from '../utils';
 import { SelectPlaylistsView, TracksView } from '../views';
-
 
 export const template = (view: TracksView) => <>
     <ul className={cn(`${view.props.className} table-view`)}>

@@ -1,7 +1,8 @@
 import React from 'react';
 import * as _ from 'underscore';
 import { template } from '../templates/selectPlaylists';
-import { Binding, current, Notifications } from '../utils';
+import { Binding, Notifications } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
@@ -15,7 +16,7 @@ export interface ISelectPlaylistsViewProps {
 
 class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
     didRefresh: SelectPlaylistsView['refresh'] = this.refresh.bind(this);
-    playlistsViewModel = current(PlaylistsViewModel);
+    playlistsViewModel = inject(PlaylistsViewModel);
     vm = this.props.track;
 
     @Binding((a: SelectPlaylistsView) => a.vm, 'errors', {

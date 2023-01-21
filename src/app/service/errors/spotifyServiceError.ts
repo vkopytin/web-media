@@ -1,13 +1,6 @@
-import { ServiceResult } from '../../base/serviceResult';
 import { Result } from '../../utils/result';
-import { SpotifyServiceResult } from '../results/spotifyServiceResult';
-
 
 class SpotifyServiceError extends Error {
-
-    static create<T>(message: string, details = {}): ServiceResult<T, Error> {
-        return SpotifyServiceResult.error<T, SpotifyServiceError>(new SpotifyServiceError(message, details));
-    }
 
     static of<T>(message: string, details = {}): Result<Error, T> {
         return Result.error<Error, T>(new SpotifyServiceError(message, details));

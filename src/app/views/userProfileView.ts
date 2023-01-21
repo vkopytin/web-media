@@ -1,7 +1,7 @@
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
 import { template } from '../templates/userProfile';
-import { Binding, current, Notifications } from '../utils';
+import { Binding, Notifications } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { AppViewModel, TrackViewModelItem, UserProfileViewModel } from '../viewModels';
 
@@ -13,14 +13,14 @@ export interface IUserProfileViewProps {
 
 class UserProfileView extends React.Component<IUserProfileViewProps> {
     didRefresh: UserProfileView['refresh'] = this.refresh.bind(this);
-    vm = current(UserProfileViewModel);
+    vm = inject(UserProfileViewModel);
 
     @Binding((a: UserProfileView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
     })
     errors!: UserProfileView['vm']['errors'];
 
-    @Binding(() => current(AppViewModel), 'openLogin')
+    @Binding(() => inject(AppViewModel), 'openLogin')
     openLogin!: boolean;
 
     @Binding((a: UserProfileView) => a.vm, 'isLoggedin')

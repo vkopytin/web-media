@@ -1,6 +1,7 @@
 import React from 'react';
 import { template } from '../templates/pickPlaylist';
-import { Binding, current, Notifications } from '../utils';
+import { Binding, Notifications } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { HomeViewModel, PlaylistsViewModel } from '../viewModels';
 
@@ -11,8 +12,8 @@ export interface IPickPlaylistsViewProps {
 
 class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
     didRefresh: PickPlaylistsView['refresh'] = this.refresh.bind(this);
-    vm = current(PlaylistsViewModel);
-    homeVm = current(HomeViewModel);
+    vm = inject(PlaylistsViewModel);
+    homeVm = inject(HomeViewModel);
 
     @Binding((a: PickPlaylistsView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])

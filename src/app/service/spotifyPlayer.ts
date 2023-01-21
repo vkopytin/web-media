@@ -1,12 +1,7 @@
-import { BaseService } from '../base/baseService';
-import { Service } from './index';
-import { ISettings, SettingsService } from './settings';
-import { SpotifyPlayerServiceResult } from './results/spotifyPlayerServiceResult';
-import { SpotifyPlayerServiceError } from './errors/spotifyPlayerServiceError';
-import { SpotifyPlayerServiceUnexpectedError } from './errors/spotifyPlayerServiceUnexpectedError';
-import { none, Option } from '../utils/option';
-import { Result } from '../utils/result';
 import { Events } from '../events';
+import { Option } from '../utils/option';
+import { Result } from '../utils/result';
+import { SettingsService } from './settings';
 
 
 export interface IWebPlaybackPlayer {

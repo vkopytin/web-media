@@ -1,4 +1,3 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IAlbum } from '../adapter/spotify';
 import { State } from '../utils';

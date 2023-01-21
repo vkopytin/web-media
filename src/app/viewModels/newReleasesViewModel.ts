@@ -1,10 +1,7 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
-import { IResponseResult, ISearchResult, ISpotifySong, ITrack } from '../adapter/spotify';
-import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { SpotifyService } from '../service/spotify';
-import { assertNoErrors, State } from '../utils';
+import { State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { AlbumViewModelItem } from './albumViewModelItem';

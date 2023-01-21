@@ -1,4 +1,3 @@
-import * as React from 'react';
 import * as _ from 'underscore';
 import { className as cn } from '../utils';
 import { Result } from '../utils/result';

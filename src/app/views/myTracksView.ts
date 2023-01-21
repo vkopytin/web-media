@@ -1,7 +1,7 @@
 import React from 'react';
-import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/myTracks';
-import { Binding, current, Notifications } from '../utils';
+import { Binding, Notifications } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { MyTracksViewModel, TrackViewModelItem } from '../viewModels';
 
@@ -13,7 +13,7 @@ export interface IMyTracksViewProps {
 
 class MyTracksView extends React.Component<IMyTracksViewProps> {
     didRefresh: MyTracksView['refresh'] = this.refresh.bind(this);
-    vm = current(MyTracksViewModel);
+    vm = inject(MyTracksViewModel);
 
     @Binding((a: MyTracksView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])

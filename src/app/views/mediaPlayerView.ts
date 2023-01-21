@@ -1,8 +1,7 @@
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/mediaPlayer';
-import { Binding, current, formatTime, Notifications } from '../utils';
+import { Binding, formatTime, Notifications } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { AppViewModel, MediaPlayerViewModel } from '../viewModels';
 
@@ -12,14 +11,14 @@ export interface IMediaPlayerViewProps {
 
 class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     didRefresh: MediaPlayerView['refresh'] = this.refresh.bind(this);
-    vm = current(MediaPlayerViewModel);
+    vm = inject(MediaPlayerViewModel);
 
     @Binding((a: MediaPlayerView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
     })
     errors!: MediaPlayerView['vm']['errors'];
 
-    @Binding(() => current(AppViewModel), 'currentTrackId')
+    @Binding(() => inject(AppViewModel), 'currentTrackId')
     currentTrackId!: MediaPlayerView['vm']['currentTrackId'];
 
     @Binding((a: MediaPlayerView) => a.vm, 'queue')

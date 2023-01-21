@@ -1,9 +1,7 @@
-import { getDefaultSettings } from 'http2';
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
-import { assertNoErrors, current, isLoading, State } from '../utils';
+import { isLoading, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';

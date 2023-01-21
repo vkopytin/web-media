@@ -1,14 +1,11 @@
-import { BaseService } from '../base/baseService';
-import { Service } from '.';
-import { assertNoErrors } from '../utils';
 import * as _ from 'underscore';
-import { IResponseResult, ISpotifySong, IUserPlaylistsResult, IUserPlaylist } from '../adapter/spotify';
-import { SpotifySyncServiceResult } from './results/spotifySyncServiceResult';
-import { SpotifyService } from './spotify';
-import { DataService } from './dataService';
+import { IUserPlaylist } from '../adapter/spotify';
 import { ServiceResult } from '../base/serviceResult';
-import { Result } from '../utils/result';
 import { Events } from '../events';
+import { assertNoErrors } from '../utils';
+import { Result } from '../utils/result';
+import { DataService } from './dataService';
+import { SpotifyService } from './spotify';
 
 
 class SpotifySyncService extends Events {

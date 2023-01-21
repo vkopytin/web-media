@@ -1,7 +1,8 @@
 import $ = require('jquery');
 import React from 'react';
 import { template } from '../templates/tracks';
-import { Binding, current, Notifications } from '../utils';
+import { Binding, Notifications } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
@@ -25,7 +26,7 @@ interface ITracksViewState {
 
 class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
     didRefresh: TracksView['refresh'] = this.refresh.bind(this);
-    vm = current(PlaylistsViewModel);
+    vm = inject(PlaylistsViewModel);
 
     state = {
         draggedIndex: 0,

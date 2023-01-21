@@ -1,15 +1,13 @@
-import { SpotifyService } from './spotify';
-import { SettingsService } from './settings';
-import { SpotifyPlayerService } from './spotifyPlayer';
 import * as _ from 'underscore';
-import { SpotifySyncService } from './spotifySyncService';
+import { ISearchType, ITrack, IUserPlaylist } from '../adapter/spotify';
+import { Result } from '../utils/result';
 import { DataService } from './dataService';
-import { ITrack, ISearchType, IUserPlaylist } from '../adapter/spotify';
-import { SettingsServiceResult } from './results/settingsServiceResult';
-import { SpotifyServiceResult } from './results/spotifyServiceResult';
 import { LoginService } from './loginService';
 import { LyricsService } from './lyricsService';
-import { Result } from '../utils/result';
+import { SettingsService } from './settings';
+import { SpotifyService } from './spotify';
+import { SpotifyPlayerService } from './spotifyPlayer';
+import { SpotifySyncService } from './spotifySyncService';
 
 
 class Service {

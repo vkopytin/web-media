@@ -1,7 +1,7 @@
 import React from 'react';
-import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/devices';
-import { Binding, current, Notifications } from '../utils';
+import { Binding, Notifications } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { AppViewModel, DeviceViewModelItem } from '../viewModels';
 
@@ -12,7 +12,7 @@ export interface IDevicesViewProps {
 
 class DevicesView extends React.Component<IDevicesViewProps> {
     didRefresh: DevicesView['refresh'] = this.refresh.bind(this);
-    vm = current(AppViewModel);
+    vm = inject(AppViewModel);
 
     @Binding((a: DevicesView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])

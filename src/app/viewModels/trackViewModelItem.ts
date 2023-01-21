@@ -1,19 +1,16 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IResponseResult, ISpotifySong } from '../adapter/spotify';
-import { ServiceResult } from '../base/serviceResult';
 import { Service } from '../service';
 import { DataService } from '../service/dataService';
-import { SpotifyService } from '../service/spotify';
-import { current, formatTime, isLoading, State } from '../utils';
+import { formatTime, isLoading, State } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { MediaPlayerViewModel } from './mediaPlayerViewModel';
-import { PlaylistsViewModel } from './playlistsViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 class TrackViewModelItem {
-    mediaPlayerViewModel = current(MediaPlayerViewModel);
+    mediaPlayerViewModel = inject(MediaPlayerViewModel);
 
     @State errors = [] as Result<Error, unknown>[];
     @State isLiked = false;
@@ -34,8 +31,8 @@ class TrackViewModelItem {
     constructor(
         public song: ISpotifySong,
         private index: number,
-        private dataService = current(DataService),
-        private ss = current(Service)
+        private dataService = inject(DataService),
+        private ss = inject(Service)
     ) {
 
     }

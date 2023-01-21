@@ -1,7 +1,8 @@
 import React from 'react';
 import * as _ from 'underscore';
 import { template } from '../templates/newReleases';
-import { Binding, current, Notifications } from '../utils';
+import { Binding, Notifications } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { AlbumViewModelItem, NewReleasesViewModel } from '../viewModels';
 
@@ -13,7 +14,7 @@ export interface INewReleasesViewProps {
 
 class NewReleasesView extends React.Component<INewReleasesViewProps> {
     didRefresh: NewReleasesView['refresh'] = this.refresh.bind(this);
-    vm = current(NewReleasesViewModel);
+    vm = inject(NewReleasesViewModel);
 
     @Binding((a: NewReleasesView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])

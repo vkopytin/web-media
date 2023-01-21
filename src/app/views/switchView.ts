@@ -87,4 +87,3 @@ class SwitchView extends React.Component<ISwitchViewProps, {}> {
 }
 
 export { SwitchView };
-

@@ -1,8 +1,5 @@
-import { className as cn } from '../utils';
-import * as React from 'react';
 import * as _ from 'underscore';
-import { AlbumsView, NewReleasesView, TracksView } from '../views';
-
+import { AlbumsView, NewReleasesView } from '../views';
 
 export const template = (view: NewReleasesView) => <>
     <ul className="stack albums">

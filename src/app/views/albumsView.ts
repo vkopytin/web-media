@@ -1,7 +1,7 @@
 import React from 'react';
-import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/albums';
-import { Binding, current, Notifications, StateV2 } from '../utils';
+import { Binding, Notifications } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { AlbumsViewModel, TrackViewModelItem } from '../viewModels';
 
@@ -14,7 +14,7 @@ export interface IAlbumsViewProps {
 
 class AlbumsView extends React.Component<IAlbumsViewProps> {
     didRefresh: AlbumsView['refresh'] = this.refresh.bind(this);
-    vm = current(AlbumsViewModel);
+    vm = inject(AlbumsViewModel);
 
     @Binding((a: AlbumsView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])

@@ -1,12 +1,6 @@
 import { Result } from '../../utils/result';
-import { SpotifyServiceResult } from '../results/spotifyServiceResult';
-
 
 class NoActiveDeviceError extends Error {
-
-    static create<T>(message: string, details = {}) {
-        return SpotifyServiceResult.error<T, NoActiveDeviceError>(new NoActiveDeviceError(message, details));
-    }
 
     static of<T>(message: string, details = {}): Result<Error, T> {
         return Result.error<Error, T>(new NoActiveDeviceError(message, details));

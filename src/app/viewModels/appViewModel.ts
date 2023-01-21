@@ -1,5 +1,3 @@
-import $ from 'jquery';
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IUserInfo } from '../adapter/spotify';
 import { Service } from '../service';

@@ -1,22 +1,16 @@
-import { BaseService } from '../base/baseService';
-import { Service } from '.';
-import * as _ from 'underscore';
-import { DataServiceResult } from './results/dataServiceResult';
-import { initializeStructure } from '../data/useCases';
-import { ITrack } from '../data/entities/interfaces/iTrack';
-import { DataStorage } from '../data/dataStorage';
-import { TracksStore } from '../data/entities/tracksStore';
 import { ISpotifySong, IUserPlaylist } from '../adapter/spotify';
-import { PlaylistsStore } from '../data/entities/playlistsStore';
-import { ImagesStore } from '../data/entities/imagesStore';
+import { DataStorage } from '../data/dataStorage';
 import { AlbumsStore } from '../data/entities/albumsStore';
 import { ArtistsStore } from '../data/entities/artistsStore';
-import { PlaylistRowsStore } from '../data/entities/playlistRowsStore';
 import { BannedTracksStore } from '../data/entities/bannedTracksStore';
-import { ServiceResult } from '../base/serviceResult';
+import { ImagesStore } from '../data/entities/imagesStore';
 import { IPlaylistRow } from '../data/entities/interfaces/iPlaylistRow';
-import { Result } from '../utils/result';
+import { ITrack } from '../data/entities/interfaces/iTrack';
+import { PlaylistRowsStore } from '../data/entities/playlistRowsStore';
+import { PlaylistsStore } from '../data/entities/playlistsStore';
+import { TracksStore } from '../data/entities/tracksStore';
 import { Events } from '../events';
+import { Result } from '../utils/result';
 
 
 class DataService extends Events {

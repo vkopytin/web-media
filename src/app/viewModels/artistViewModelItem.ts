@@ -1,8 +1,8 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IArtist } from '../adapter/spotify';
 import { SpotifyService } from '../service/spotify';
-import { current, State } from '../utils';
+import { State } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { AppViewModel } from './appViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
@@ -19,8 +19,8 @@ class ArtistViewModelItem {
     });
 
     constructor(public artist: IArtist, private index: number,
-        private appViewModel = current(AppViewModel),
-        private spotifyService = current(SpotifyService),
+        private appViewModel = inject(AppViewModel),
+        private spotifyService = inject(SpotifyService),
     ) {
 
     }

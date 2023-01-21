@@ -1,14 +1,12 @@
-import { BaseService } from '../base/baseService';
 import { ErrorWithStatus } from '../adapter/errors/errorWithStatus';
-import { TokenExpiredError } from './errors/tokenExpiredError';
+import { ICurrentlyPlayingResult, IDevice, IPlayerResult, IRecommendationsResult, IReorderTracksResult, IResponseResult, ISearchResult, ISearchType, ISpotifyAlbum, ISpotifySong, ITopTracksResult, ITrack, IUserInfo, IUserPlaylistsResult, SpotifyAdapter } from '../adapter/spotify';
+import { Events } from '../events';
+import { asyncDebounce } from '../utils';
+import { Result } from '../utils/result';
+import { NoActiveDeviceError } from './errors/noActiveDeviceError';
 import { SpotifyServiceError } from './errors/spotifyServiceError';
 import { SpotifyServiceUnexpectedError } from './errors/spotifyServiceUnexpectedError';
-import * as _ from 'underscore';
-import { SpotifyAdapter, IUserInfo, ISearchType, IResponseResult, ISpotifySong, IUserPlaylistsResult, ITrack, ITopTracksResult, ISearchResult, IAlbum, IDevice, IPlayerResult, ICurrentlyPlayingResult, IRecommendationsResult, ISpotifyAlbum, IReorderTracksResult } from '../adapter/spotify';
-import { asyncDebounce } from '../utils';
-import { NoActiveDeviceError } from './errors/noActiveDeviceError';
-import { Result } from '../utils/result';
-import { Events } from '../events';
+import { TokenExpiredError } from './errors/tokenExpiredError';
 
 
 function returnErrorResult<T>(message: string, err: Error): Result<Error, T> {

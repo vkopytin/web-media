@@ -3,7 +3,8 @@ import * as _ from 'underscore';
 import { NoActiveDeviceError } from '../service/errors/noActiveDeviceError';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
 import { template } from '../templates/app';
-import { asyncDebounce, Binding, current, Notifications } from '../utils';
+import { asyncDebounce, Binding, Notifications } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { AppViewModel, TrackViewModelItem } from '../viewModels';
 
@@ -13,7 +14,7 @@ export interface IAppViewProps {
 
 class AppView extends React.Component<IAppViewProps> {
     didRefresh: AppView['refresh'] = this.refresh.bind(this);
-    vm = current(AppViewModel);
+    vm = inject(AppViewModel);
 
     @Binding((a: AppView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])

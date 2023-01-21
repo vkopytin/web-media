@@ -1,12 +1,6 @@
 import { Result } from '../../utils/result';
-import { LyricsServiceResult } from '../results/lyricsServiceResult';
-
 
 class LyricsServiceUnexpectedError extends Error {
-
-    static create<T>(message: string, details = {}) {
-        return LyricsServiceResult.error<T, LyricsServiceUnexpectedError>(new LyricsServiceUnexpectedError(message, details));
-    }
 
     static of<T>(message: string, details = {}) {
         return Result.error<Error, T>(new LyricsServiceUnexpectedError(message, details));

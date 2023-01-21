@@ -1,12 +1,6 @@
 import { Result } from '../../utils/result';
-import { SpotifyPlayerServiceResult } from '../results/spotifyPlayerServiceResult';
-
 
 class SpotifyPlayerServiceError extends Error {
-
-    static create(message: string, details = {}) {
-        return SpotifyPlayerServiceResult.error(new SpotifyPlayerServiceError(message, details));
-    }
 
     static of<T>(message: string, details = {}): Result<Error, T> {
         return Result.error<Error, T>(new SpotifyPlayerServiceError(message, details));

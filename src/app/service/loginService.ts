@@ -1,8 +1,7 @@
 import $ from 'jquery';
-import { BaseService } from '../base/baseService';
-import { SettingsService } from './settings';
-import { Result } from '../utils/result';
 import { Events } from '../events';
+import { Result } from '../utils/result';
+import { SettingsService } from './settings';
 
 
 class LoginService extends Events {

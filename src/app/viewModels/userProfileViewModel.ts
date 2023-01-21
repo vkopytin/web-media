@@ -1,9 +1,9 @@
-import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { IUserInfo } from '../adapter/spotify';
 import { Service } from '../service';
 import { SettingsService } from '../service/settings';
-import { Binding, current, State } from '../utils';
+import { Binding, State } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
@@ -25,7 +25,7 @@ class UserProfileViewModel {
         this.saveApiseedsKey(val);
     });
 
-    @Binding(() => current(AppViewModel), 'currentTrackId') currentTrackId = '';
+    @Binding(() => inject(AppViewModel), 'currentTrackId') currentTrackId = '';
 
     constructor(
         private appViewModel: AppViewModel,

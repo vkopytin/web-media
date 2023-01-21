@@ -1,7 +1,5 @@
-import * as React from 'react';
 import * as _ from 'underscore';
 import { PickPlaylistsView } from '../views';
-
 
 export const template = (view: PickPlaylistsView) => <div className="chips-list">
     {_.map(view.playlists, (item: PickPlaylistsView['playlists'][0]) => {
