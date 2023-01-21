@@ -9,11 +9,12 @@ export const template = (view: AppView) => <main>
     <section className="device-content">
         <UserProfileView
             showErrors={errors => view.showErrors(errors)}
-            openLogin$={view.openLogin$}
             className={cn("modal ?active", view.openLogin)}
         />
         {view.state.showSelectDevices === 'show' ? <div className='backdrop' onClick={() => view.openDevices(false)}></div>
-            : view.errors.length ? <div className='backdrop' onClick={evnt => view.clearErrors(evnt)}></div>
+            : (() => {
+                return view.errors.length;
+            })() ? <div className='backdrop' onClick={evnt => view.clearErrors(evnt)}></div>
                 : <div></div>
         }
         <div className={cn("popover ?visible", view.state.showSelectDevices === 'show')} style={{
@@ -67,7 +68,6 @@ export const template = (view: AppView) => <main>
             <div className="region">
                 <MediaPlayerView
                     showErrors={errors => view.showErrors(errors)}
-                    currentTrackId$={view.currentTrackId$}
                 />
             </div>
         </div>

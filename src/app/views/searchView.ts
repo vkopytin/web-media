@@ -16,78 +16,66 @@ class SearchView extends React.Component<ISearchViewProps> {
     didRefresh: SearchView['refresh'] = this.refresh.bind(this);
     vm = current(SearchViewModel);
 
-    errors$ = this.vm.errors$;
-    @Binding<SearchView>({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding((a: SearchView) => a.vm, 'errors', {
+        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
+    })
     errors!: SearchView['vm']['errors'];
 
-    term$ = this.vm.term$;
-    @Binding()
+    @Binding((a: SearchView) => a.vm, 'term')
     term!: SearchView['vm']['term'];
 
-    tracks$ = this.vm.tracks$;
-    @Binding()
+    @Binding((a: SearchView) => a.vm, 'tracks')
     tracks!: SearchView['vm']['tracks'];
 
-    artists$ = this.vm.artists$;
-    @Binding()
+    @Binding((a: SearchView) => a.vm, 'artists')
     artists!: SearchView['vm']['artists'];
 
-    albums$ = this.vm.albums$;
-    @Binding()
+    @Binding((a: SearchView) => a.vm, 'albums')
     albums!: SearchView['vm']['albums'];
 
-    playlists$ = this.vm.playlists$;
-    @Binding()
+    @Binding((a: SearchView) => a.vm, 'playlists')
     playlists!: SearchView['vm']['playlists'];
 
-    searchType$ = this.vm.searchType$;
-    @Binding()
+    @Binding((a: SearchView) => a.vm, 'searchType')
     searchType!: SearchView['vm']['searchType'];
 
-    currentAlbum$ = this.vm.currentAlbum$;
-    @Binding()
+    @Binding((a: SearchView) => a.vm, 'currentAlbum')
     currentAlbum!: SearchView['vm']['currentAlbum'];
 
-    currentPlaylist$ = this.vm.currentPlaylist$;
-    @Binding()
+    @Binding((a: SearchView) => a.vm, 'currentPlaylist')
     currentPlaylist!: SearchView['vm']['currentPlaylist'];
 
-    currentArtist$ = this.vm.currentArtist$;
-    @Binding()
+    @Binding((a: SearchView) => a.vm, 'currentArtist')
     currentArtist!: SearchView['vm']['currentArtist'];
 
-    currentTracks$ = this.vm.currentTracks$;
-    @Binding()
+    @Binding((a: SearchView) => a.vm, 'currentTracks')
     currentTracks!: SearchView['vm']['currentTracks'];
 
-    selectedItem$ = this.vm.selectedItem$;
-    @Binding() selectedItem!: SearchView['vm']['selectedItem'];
+    @Binding((a: SearchView) => a.vm, 'selectedItem')
+    selectedItem!: SearchView['vm']['selectedItem'];
 
-    searchCommand$ = this.vm.searchCommand$;
-    @Binding() searchCommand!: SearchView['vm']['searchCommand'];
+    @Binding((a: SearchView) => a.vm, 'searchCommand')
+    searchCommand!: SearchView['vm']['searchCommand'];
 
-    changeSearchTypeCommand$ = this.vm.chageSearchTypeCommand$;
-    @Binding() changeSearchTypeCommand!: SearchView['vm']['chageSearchTypeCommand'];
+    @Binding((a: SearchView) => a.vm, 'chageSearchTypeCommand')
+    changeSearchTypeCommand!: SearchView['vm']['chageSearchTypeCommand'];
 
-    selectAlbumCommand$ = this.vm.selectAlbumCommand$;
-    @Binding() selectAlbumCommand!: SearchView['vm']['selectArtistCommand'];
+    @Binding((a: SearchView) => a.vm, 'selectArtistCommand')
+    selectAlbumCommand!: SearchView['vm']['selectArtistCommand'];
 
-    selectPlaylistCommand$ = this.vm.selectPlaylistCommand$;
-    @Binding() selectPlaylistCommand!: SearchView['vm']['selectPlaylistCommand'];
+    @Binding((a: SearchView) => a.vm, 'selectPlaylistCommand')
+    selectPlaylistCommand!: SearchView['vm']['selectPlaylistCommand'];
 
-    selectArtistCommand$ = this.vm.selectArtistCommand$;
-    @Binding() selectArtistCommand!: SearchView['vm']['selectArtistCommand'];
+    @Binding((a: SearchView) => a.vm, 'selectArtistCommand')
+    selectArtistCommand!: SearchView['vm']['selectArtistCommand'];
 
-    loadMoreCommand$ = this.vm.loadMoreCommand$;
-    @Binding()
+    @Binding((a: SearchView) => a.vm, 'loadMoreCommand')
     loadMoreCommand!: SearchView['vm']['loadMoreCommand'];
 
-    likeTrackCommand$ = this.vm.likeTrackCommand$;
-    @Binding()
+    @Binding((a: SearchView) => a.vm, 'likeTrackCommand')
     likeTrackCommand!: SearchView['vm']['likeTrackCommand'];
 
-    unlikeTrackCommand$ = this.vm.unlikeTrackCommand$;
-    @Binding()
+    @Binding((a: SearchView) => a.vm, 'unlikeTrackCommand')
     unlikeTrackCommand!: SearchView['vm']['unlikeTrackCommand'];
 
     searchTracks = asyncDebounce((term: string) => {
@@ -108,10 +96,7 @@ class SearchView extends React.Component<ISearchViewProps> {
         }
     }
 
-    refresh(args: { inst: unknown; value: Result[] }) {
-        if (args?.inst === this.errors$) {
-            this.showErrors(args.value);
-        }
+    refresh() {
         this.setState({
             ...this.state,
         });

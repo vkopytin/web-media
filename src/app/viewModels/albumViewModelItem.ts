@@ -5,10 +5,7 @@ import { State } from '../utils';
 import { Result } from '../utils/result';
 
 class AlbumViewModelItem {
-    errors$!: BehaviorSubject<AlbumViewModelItem['errors']>;
     @State errors = [] as Result<Error, unknown>[];
-
-    isLiked$!: BehaviorSubject<AlbumViewModelItem['isLiked']>;
     @State isLiked = false;
 
     constructor(public album: IAlbum) {

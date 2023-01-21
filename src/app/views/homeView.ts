@@ -1,5 +1,4 @@
 import React from 'react';
-import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/home';
 import { Binding, current, Notifications } from '../utils';
 import { Result } from '../utils/result';
@@ -14,60 +13,48 @@ class HomeView extends React.Component<IHomeViewProps> {
     didRefresh: HomeView['refresh'] = this.refresh.bind(this);
     vm = current(HomeViewModel);
 
-    errors$ = this.vm.errors$;
-    @Binding<HomeView>({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding((a: HomeView) => a.vm, 'errors', {
+        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
+    })
     errors!: HomeView['vm']['errors'];
 
-    tracks$ = this.vm.tracks$;
-    @Binding()
+    @Binding((a: HomeView) => a.vm, 'tracks')
     tracks!: HomeView['vm']['tracks'];
 
-    likedTracks$ = this.vm.likedTracks$;
-    @Binding()
+    @Binding((a: HomeView) => a.vm, 'likedTracks')
     likedTracks!: HomeView['vm']['likedTracks'];
 
-    isLoading$ = this.vm.isLoading$;
-    @Binding()
+    @Binding((a: HomeView) => a.vm, 'isLoading')
     isLoading!: HomeView['vm']['isLoading'];
 
-    selectedTrack$ = this.vm.selectedTrack$;
-    @Binding()
+    @Binding((a: HomeView) => a.vm, 'selectedTrack')
     selectedTrack!: HomeView['vm']['selectedTrack'];
 
-    trackLyrics$ = this.vm.trackLyrics$;
-    @Binding()
+    @Binding((a: HomeView) => a.vm, 'trackLyrics')
     trackLyrics!: HomeView['vm']['trackLyrics'];
 
-    bannedTrackIds$ = this.vm.bannedTrackIds$;
-    @Binding()
+    @Binding((a: HomeView) => a.vm, 'bannedTrackIds')
     bannedTrackIds!: HomeView['vm']['bannedTrackIds'];
 
-    refreshCommand$ = this.vm.refreshCommand$;
-    @Binding()
+    @Binding((a: HomeView) => a.vm, 'refreshCommand')
     refreshCommand!: HomeView['vm']['refreshCommand'];
 
-    selectTrackCommand$ = this.vm.selectTrackCommand$;
-    @Binding()
+    @Binding((a: HomeView) => a.vm, 'selectTrackCommand')
     selectTrackCommand!: HomeView['vm']['selectTrackCommand'];
 
-    likeTrackCommand$ = this.vm.likeTrackCommand$;
-    @Binding()
+    @Binding((a: HomeView) => a.vm, 'likeTrackCommand')
     likeTrackCommand!: HomeView['vm']['likeTrackCommand'];
 
-    unlikeTrackCommand$ = this.vm.unlikeTrackCommand$;
-    @Binding()
+    @Binding((a: HomeView) => a.vm, 'unlikeTrackCommand')
     unlikeTrackCommand!: HomeView['vm']['unlikeTrackCommand'];
 
-    findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
-    @Binding()
+    @Binding((a: HomeView) => a.vm, 'findTrackLyricsCommand')
     findTrackLyricsCommand!: HomeView['vm']['findTrackLyricsCommand'];
 
-    bannTrackCommand$ = this.vm.bannTrackCommand$;
-    @Binding()
+    @Binding((a: HomeView) => a.vm, 'bannTrackCommand')
     bannTrackCommand!: HomeView['vm']['bannTrackCommand'];
 
-    removeBannFromTrackCommand$ = this.vm.removeBannFromTrackCommand$;
-    @Binding()
+    @Binding((a: HomeView) => a.vm, 'removeBannFromTrackCommand')
     removeBannFromTrackCommand!: HomeView['vm']['removeBannFromTrackCommand'];
 
     componentDidMount() {
@@ -78,10 +65,7 @@ class HomeView extends React.Component<IHomeViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: HomeView['errors$']; value: Result<Error>[] }) {
-        if (args?.inst === this.errors$) {
-            this.showErrors(args.value);
-        }
+    refresh() {
         this.setState({
             ...this.state,
         });

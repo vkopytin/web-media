@@ -32,52 +32,42 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         dragIndex: 0
     };
 
-    errors$ = this.vm.errors$;
-    @Binding<TracksView>({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding((a: TracksView) => a.vm, 'errors', {
+        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
+    })
     errors!: TracksView['vm']['errors'];
 
-    tracks$ = this.vm.tracks$;
-    @Binding()
+    @Binding((a: TracksView) => a.vm, 'tracks')
     tracks!: TracksView['vm']['tracks'];
 
-    likedTracks$ = this.vm.likedTracks$;
-    @Binding()
+    @Binding((a: TracksView) => a.vm, 'likedTracks')
     likedTracks!: TracksView['vm']['likedTracks'];
 
-    selectedItem$ = this.vm.selectedItem$;
-    @Binding()
+    @Binding((a: TracksView) => a.vm, 'selectedItem')
     selectedItem!: TracksView['vm']['selectedItem'];
 
-    trackLyrics$ = this.vm.trackLyrics$;
-    @Binding()
+    @Binding((a: TracksView) => a.vm, 'trackLyrics')
     trackLyrics!: TracksView['vm']['trackLyrics'];
 
-    bannedTrackIds$ = this.vm.bannedTrackIds$;
-    @Binding()
+    @Binding((a: TracksView) => a.vm, 'bannedTrackIds')
     bannedTrackIds!: TracksView['vm']['bannedTrackIds'];
 
-    likeTrackCommand$ = this.vm.likeTrackCommand$;
-    @Binding()
+    @Binding((a: TracksView) => a.vm, 'likeTrackCommand')
     likeTrackCommand!: TracksView['vm']['likeTrackCommand'];
 
-    unlikeTrackCommand$ = this.vm.unlikeTrackCommand$;
-    @Binding()
+    @Binding((a: TracksView) => a.vm, 'unlikeTrackCommand')
     unlikeTrackCommand!: TracksView['vm']['unlikeTrackCommand'];
 
-    findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
-    @Binding()
+    @Binding((a: TracksView) => a.vm, 'findTrackLyricsCommand')
     findTrackLyricsCommand!: TracksView['vm']['findTrackLyricsCommand'];
 
-    reorderTrackCommand$ = this.vm.reorderTrackCommand$;
-    @Binding()
+    @Binding((a: TracksView) => a.vm, 'reorderTrackCommand')
     reorderTrackCommand!: TracksView['vm']['reorderTrackCommand'];
 
-    bannTrackCommand$ = this.vm.bannTrackCommand$;
-    @Binding()
+    @Binding((a: TracksView) => a.vm, 'bannTrackCommand')
     bannTrackCommand!: TracksView['vm']['bannTrackCommand'];
 
-    removeBannFromTrackCommand$ = this.vm.removeBannFromTrackCommand$;
-    @Binding()
+    @Binding((a: TracksView) => a.vm, 'removeBannFromTrackCommand')
     removeBannFromTrackCommand!: TracksView['vm']['removeBannFromTrackCommand'];
 
     constructor(props: ITracksViewProps) {
@@ -96,10 +86,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: unknown; value: Result[] }) {
-        if (args?.inst === this.errors$) {
-            this.showErrors(args.value);
-        }
+    refresh() {
         this.setState({
             ...this.state,
         });

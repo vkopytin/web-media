@@ -14,24 +14,21 @@ class DevicesView extends React.Component<IDevicesViewProps> {
     didRefresh: DevicesView['refresh'] = this.refresh.bind(this);
     vm = current(AppViewModel);
 
-    errors$ = this.vm.errors$;
-    @Binding<DevicesView>({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding((a: DevicesView) => a.vm, 'errors', {
+        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
+    })
     errors!: DevicesView['vm']['errors'];
 
-    switchDeviceCommand$ = this.vm.switchDeviceCommand$;
-    @Binding()
+    @Binding((a: DevicesView) => a.vm, 'switchDeviceCommand')
     switchDeviceCommand!: DevicesView['vm']['switchDeviceCommand'];
 
-    devices$ = this.vm.devices$;
-    @Binding()
+    @Binding((a: DevicesView) => a.vm, 'devices')
     devices!: DevicesView['vm']['devices'];
 
-    currentDevice$ = this.vm.currentDevice$;
-    @Binding()
+    @Binding((a: DevicesView) => a.vm, 'currentDevice')
     currentDevice!: DevicesView['vm']['currentDevice'];
 
-    refreshDevicesCommand$ = this.vm.refreshDevicesCommand$;
-    @Binding()
+    @Binding((a: DevicesView) => a.vm, 'refreshDevicesCommand')
     refreshDevicesCommand!: DevicesView['vm']['refreshDevicesCommand'];
 
     componentDidMount() {
@@ -42,10 +39,7 @@ class DevicesView extends React.Component<IDevicesViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: DevicesView['errors$']; value: Result<Error>[] }) {
-        if (args?.inst === this.errors$) {
-            this.showErrors(args.value);
-        }
+    refresh() {
         this.setState({
             ...this.state,
         });

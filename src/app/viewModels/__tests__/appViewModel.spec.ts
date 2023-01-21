@@ -64,27 +64,10 @@ jest.mock('../deviceViewModelItem', () => {
             };
         })
     };
-})
+});
 
 DataStorage.dbType = 'inMemory';
 
-window.Spotify = {
-    Player: (function () {
-        function Player() {
-
-        }
-        Player.prototype = {
-            addListener() {
-                return Promise.resolve(true);
-            },
-            connect() {
-                return Promise.resolve(true);
-            }
-        };
-
-        return Player;
-    })()
-} as any;
 
 describe('App View Model', () => {
     let adapter: SpotifyAdapter;

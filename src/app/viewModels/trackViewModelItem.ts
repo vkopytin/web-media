@@ -15,34 +15,15 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 class TrackViewModelItem {
     mediaPlayerViewModel = current(MediaPlayerViewModel);
 
-    errors$!: BehaviorSubject<TrackViewModelItem['errors']>;
     @State errors = [] as Result<Error, unknown>[];
-
-    isLiked$!: BehaviorSubject<TrackViewModelItem['isLiked']>;
     @State isLiked = false;
-
-    isCached$!: BehaviorSubject<TrackViewModelItem['isCached']>;
     @State isCached = false;
-
-    trackPlaylists$!: BehaviorSubject<TrackViewModelItem['trackPlaylists']>;
     @State trackPlaylists = [] as PlaylistsViewModelItem[];
-
-    isBanned$!: BehaviorSubject<TrackViewModelItem['isBanned']>;
     @State isBanned = false;
-
-    isLoading$!: BehaviorSubject<PlaylistsViewModel['isLoading']>;
     @State isLoading = false;
-
-    addToPlaylistCommand$!: BehaviorSubject<TrackViewModelItem['addToPlaylistCommand']>;
     @State addToPlaylistCommand = Scheduler.Command((track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.addToPlaylist(track, playlist));
-
-    removeFromPlaylistCommand$!: BehaviorSubject<TrackViewModelItem['removeFromPlaylistCommand']>;
     @State removeFromPlaylistCommand = Scheduler.Command((track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist));
-
-    playTracksCommand$!: BehaviorSubject<TrackViewModelItem['playTracksCommand']>;
     @State playTracksCommand = Scheduler.Command((tracks: TrackViewModelItem[]) => this.playTracks(tracks));
-
-    updateIsCachedCommand$!: BehaviorSubject<TrackViewModelItem['updateIsCachedCommand']>;
     @State updateIsCachedCommand = Scheduler.Command((playlists: PlaylistsViewModelItem[]) => this.updateIsCached(playlists));
 
     isInit = new Promise<boolean>(resolve => _.delay(async () => {

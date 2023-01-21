@@ -15,52 +15,42 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
     didRefresh: NewReleasesView['refresh'] = this.refresh.bind(this);
     vm = current(NewReleasesViewModel);
 
-    errors$ = this.vm.errors$;
-    @Binding<NewReleasesView>({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding((a: NewReleasesView) => a.vm, 'errors', {
+        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
+    })
     errors!: NewReleasesView['vm']['errors'];
 
-    newReleases$ = this.vm.newReleases$;
-    @Binding()
+    @Binding((a: NewReleasesView) => a.vm, 'newReleases')
     newReleases!: NewReleasesView['vm']['newReleases'];
 
-    featuredPlaylists$ = this.vm.featuredPlaylists$;
-    @Binding()
+    @Binding((a: NewReleasesView) => a.vm, 'featuredPlaylists')
     featuredPlaylists!: NewReleasesView['vm']['featuredPlaylists'];
 
-    currentAlbum$ = this.vm.currentAlbum$;
-    @Binding()
+    @Binding((a: NewReleasesView) => a.vm, 'currentAlbum')
     currentAlbum!: NewReleasesView['vm']['currentAlbum'];
 
-    currentPlaylist$ = this.vm.currentPlaylist$;
-    @Binding()
+    @Binding((a: NewReleasesView) => a.vm, 'currentPlaylist')
     currentPlaylist!: NewReleasesView['vm']['currentPlaylist'];
 
-    tracks$ = this.vm.tracks$;
-    @Binding()
+    @Binding((a: NewReleasesView) => a.vm, 'tracks')
     tracks!: NewReleasesView['vm']['tracks'];
 
-    likedAlbums$ = this.vm.likedAlbums$;
-    @Binding()
+    @Binding((a: NewReleasesView) => a.vm, 'likedAlbums')
     likedAlbums!: NewReleasesView['vm']['likedAlbums'];
 
-    currentTracks$ = this.vm.currentTracks$;
-    @Binding()
+    @Binding((a: NewReleasesView) => a.vm, 'currentTracks')
     currentTracks!: NewReleasesView['vm']['currentTracks'];
 
-    selectAlbumCommand$ = this.vm.selectAlbumCommand$;
-    @Binding()
+    @Binding((a: NewReleasesView) => a.vm, 'selectAlbumCommand')
     selectAlbumCommand!: NewReleasesView['vm']['selectAlbumCommand'];
 
-    selectPlaylistCommand$ = this.vm.selectPlaylistCommand$;
-    @Binding()
+    @Binding((a: NewReleasesView) => a.vm, 'selectPlaylistCommand')
     selectPlaylistCommand!: NewReleasesView['vm']['selectPlaylistCommand'];
 
-    likeAlbumCommand$ = this.vm.likeAlbumCommand$;
-    @Binding()
+    @Binding((a: NewReleasesView) => a.vm, 'likeAlbumCommand')
     likeAlbumCommand!: NewReleasesView['vm']['likeAlbumCommand'];
 
-    unlikeAlbumCommand$ = this.vm.unlikeAlbumCommand$;
-    @Binding()
+    @Binding((a: NewReleasesView) => a.vm, 'unlikeAlbumCommand')
     unlikeAlbumCommand!: NewReleasesView['vm']['unlikeAlbumCommand'];
 
     componentDidMount() {
@@ -71,10 +61,7 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: unknown; value: Result<Error>[]; }) {
-        if (args?.inst === this.errors$) {
-            this.showErrors(args.value);
-        }
+    refresh() {
         this.setState({
             ...this.state,
         });

@@ -6,88 +6,43 @@ import { Service } from '../service';
 import { SettingsService } from '../service/settings';
 import { SpotifyService } from '../service/spotify';
 import { IWebPlaybackState, SpotifyPlayerService } from '../service/spotifyPlayer';
-import { assertNoErrors, asyncDebounce, asyncQueue, Binding, current, State } from '../utils';
+import { asyncDebounce, asyncQueue, Binding, current, State } from '../utils';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
 import { TrackViewModelItem } from './trackViewModelItem';
-import { Option } from '../utils/option'
 import { Result } from '../utils/result';
 
 const lockSection = asyncQueue();
 
-const optionToErrorServiceResult = <E extends Error, T = unknown>(e: Option<E>) => e.match(
-    e => new ServiceResult<T, E>(null, e),
-    () => new ServiceResult(null as T, new Error('Unexpected error'))
-);
-
 class MediaPlayerViewModel {
-    errors$!: BehaviorSubject<ServiceResult<any, Error>[]>;
     @State errors = [] as Result<Error, unknown>[];
-
-    queue$!: BehaviorSubject<MediaPlayerViewModel['queue']>;
     @State queue = [] as TrackViewModelItem[];
-
-    timePlayed$!: BehaviorSubject<MediaPlayerViewModel['timePlayed']>;
     @State timePlayed = 1;
-
-    duration$!: BehaviorSubject<MediaPlayerViewModel['duration']>;
     @State duration = 3.14 * 60 * 1000;
-
-    isPlaying$!: BehaviorSubject<MediaPlayerViewModel['isPlaying']>;
     @State isPlaying = false;
-
-    trackName$!: BehaviorSubject<MediaPlayerViewModel['trackName']>;
     @State trackName = '';
-
-    albumName$!: BehaviorSubject<MediaPlayerViewModel['albumName']>;
     @State albumName = '';
-
-    artistName$!: BehaviorSubject<MediaPlayerViewModel['artistName']>;
     @State artistName = '';
-
-    volume$!: BehaviorSubject<MediaPlayerViewModel['volume']>;
     @State volume = 50;
-
-    thumbnailUrl$!: BehaviorSubject<MediaPlayerViewModel['thumbnailUrl']>;
     @State thumbnailUrl = '';
-
-    isLiked$!: BehaviorSubject<MediaPlayerViewModel['isLiked']>;
     @State isLiked = false;
-
-    currentTrack$!: BehaviorSubject<MediaPlayerViewModel['currentTrack']>;
     @State currentTrack: ITrack | null = null;
-
-    currentTrackUri$!: BehaviorSubject<MediaPlayerViewModel['currentTrackUri']>;
     @State currentTrackUri = '';
-
-    tracks$!: BehaviorSubject<MediaPlayerViewModel['tracks']>;
     @State tracks: TrackViewModelItem[] | null = null;
 
-    resumeCommand$!: BehaviorSubject<MediaPlayerViewModel['resumeCommand']>;
     @State resumeCommand = Scheduler.Command(() => this.play());
-    pauseCommand$!: BehaviorSubject<MediaPlayerViewModel['pauseCommand']>;
     @State pauseCommand = Scheduler.Command(() => this.pause());
-    prevCommand$!: BehaviorSubject<MediaPlayerViewModel['prevCommand']>;
     @State prevCommand = Scheduler.Command(() => this.previous());
-    nextCommand$!: BehaviorSubject<MediaPlayerViewModel['nextCommand']>;
     @State nextCommand = Scheduler.Command(() => this.next());
-    volumeUpCommand$!: BehaviorSubject<MediaPlayerViewModel['volumeUpCommand']>;
     @State volumeUpCommand = Scheduler.Command(() => this.volumeUp());
-    volumeCommand$!: BehaviorSubject<MediaPlayerViewModel['volumeCommand']>;
     @State volumeCommand = Scheduler.Command((percent: number) => this.setVolume(percent));
-    volumeDownCommand$!: BehaviorSubject<MediaPlayerViewModel['volumeDownCommand']>;
     @State volumeDownCommand = Scheduler.Command(() => this.volumeDown());
-    refreshPlaybackCommand$!: BehaviorSubject<MediaPlayerViewModel['refreshPlaybackCommand']>;
     @State refreshPlaybackCommand = Scheduler.Command(() => this.fetchData());
-    likeSongCommand$!: BehaviorSubject<MediaPlayerViewModel['likeSongCommand']>;
     @State likeSongCommand = Scheduler.Command(() => this.likeTrack());
-    unlikeSongCommand$!: BehaviorSubject<MediaPlayerViewModel['unlikeSongCommand']>;
     @State unlikeSongCommand = Scheduler.Command(() => this.unlikeTrack());
-    seekPlaybackCommand$!: BehaviorSubject<MediaPlayerViewModel['seekPlaybackCommand']>;
     @State seekPlaybackCommand = Scheduler.Command((percent: number) => this.manualSeek(percent));
 
-    currentTrackId$ = this.appViewModel.currentTrackId$;
-    @Binding() currentTrackId = '';
+    @Binding((vm: MediaPlayerViewModel) => vm.appViewModel, 'currentTrackId') currentTrackId = '';
 
     monitorPlyback = asyncDebounce(() => this.monitorPlybackInternal(), 5 * 1000);
     autoSeek = asyncDebounce(() => this.autoSeekInternal(), 500);
@@ -187,6 +142,9 @@ class MediaPlayerViewModel {
     }
 
     async checkTrackExists() {
+        if (!this.currentTrackId) {
+            return;
+        }
         const trackExistsResult = await this.ss.hasTracks(this.currentTrackId);
         trackExistsResult.map(r => this.isLiked = _.first(r) || false)
             .error(e => this.errors = [Result.error(e)]);

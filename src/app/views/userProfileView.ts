@@ -3,65 +3,54 @@ import { BehaviorSubject } from 'rxjs';
 import { template } from '../templates/userProfile';
 import { Binding, current, Notifications } from '../utils';
 import { Result } from '../utils/result';
-import { TrackViewModelItem, UserProfileViewModel } from '../viewModels';
+import { AppViewModel, TrackViewModelItem, UserProfileViewModel } from '../viewModels';
 
 
 export interface IUserProfileViewProps {
     className?: string;
     showErrors<T>(errors: Result<Error, T>[]): void;
-    openLogin$: BehaviorSubject<boolean>;
 }
 
 class UserProfileView extends React.Component<IUserProfileViewProps> {
     didRefresh: UserProfileView['refresh'] = this.refresh.bind(this);
     vm = current(UserProfileViewModel);
 
-    errors$ = this.vm.errors$;
-    @Binding<UserProfileView>({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding((a: UserProfileView) => a.vm, 'errors', {
+        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
+    })
     errors!: UserProfileView['vm']['errors'];
 
-    openLogin$ = this.props.openLogin$;
-    @Binding()
+    @Binding(() => current(AppViewModel), 'openLogin')
     openLogin!: boolean;
 
-    isLoggedin$ = this.vm.isLoggedin$;
-    @Binding()
+    @Binding((a: UserProfileView) => a.vm, 'isLoggedin')
     isLoggedin!: UserProfileView['vm']['isLoggedin'];
 
-    profile$ = this.vm.profile$;
-    @Binding()
+    @Binding((a: UserProfileView) => a.vm, 'profile')
     profile!: UserProfileView['vm']['profile'];
 
-    currentTrackId$ = this.vm.currentTrackId$;
-    @Binding()
+    @Binding((a: UserProfileView) => a.vm, 'currentTrackId')
     currentTrackId!: UserProfileView['vm']['currentTrackId'];
 
-    topTracks$ = this.vm.topTracks$;
-    @Binding()
+    @Binding((a: UserProfileView) => a.vm, 'topTracks')
     topTracks!: UserProfileView['vm']['topTracks'];
 
-    tracks$ = this.vm.tracks$;
-    @Binding()
+    @Binding((a: UserProfileView) => a.vm, 'tracks')
     tracks!: UserProfileView['vm']['tracks'];
 
-    spotifyAuthUrl$ = this.vm.spotifyAuthUrl$;
-    @Binding()
+    @Binding((a: UserProfileView) => a.vm, 'spotifyAuthUrl')
     spotifyAuthUrl!: UserProfileView['vm']['spotifyAuthUrl'];
 
-    geniusAuthUrl$ = this.vm.geniusAuthUrl$;
-    @Binding()
+    @Binding((a: UserProfileView) => a.vm, 'geniusAuthUrl')
     geniusAuthUrl!: UserProfileView['vm']['geniusAuthUrl'];
 
-    apiseedsKey$ = this.vm.apiseedsKey$;
-    @Binding()
+    @Binding((a: UserProfileView) => a.vm, 'apiseedsKey')
     apiseedsKey!: UserProfileView['vm']['apiseedsKey'];
 
-    logoutCommand$ = this.vm.logoutCommand$;
-    @Binding()
+    @Binding((a: UserProfileView) => a.vm, 'logoutCommand')
     logoutCommand!: UserProfileView['vm']['logoutCommand'];
 
-    updatApiseedsKeyCommand$ = this.vm.updatApiseedsKeyCommand$;
-    @Binding()
+    @Binding((a: UserProfileView) => a.vm, 'updatApiseedsKeyCommand')
     updatApiseedsKeyCommand!: UserProfileView['vm']['updatApiseedsKeyCommand'];
 
     doLogout = false;
@@ -74,10 +63,7 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: unknown; value: Result[] }) {
-        if (args?.inst === this.errors$) {
-            this.showErrors(args.value);
-        }
+    refresh() {
         this.setState({
             ...this.state,
         });

@@ -26,21 +26,6 @@ jest.mock('../../adapter/spotify', () => {
 
 DataStorage.dbType = 'inMemory';
 
-window.Spotify = {
-    Player: (function () {
-        function Player() {
-
-        }
-        Player.prototype = {
-            addListener: jest.fn().mockImplementation(() => Promise.resolve(true)),
-            connect: jest.fn().mockImplementation(() => Promise.resolve(true)),
-            resume: jest.fn().mockImplementation(() => Promise.resolve(true))
-        };
-
-        return Player;
-    })()
-} as any;
-
 describe('Home View Model', () => {
     let adapter: SpotifyAdapter;
     let vm: HomeViewModel;
@@ -73,20 +58,20 @@ describe('Home View Model', () => {
     it('Should fetch data', async () => {
         await vm.fetchData();
 
-        expect(vm.tracks).toHaveLength(1);
+        expect(vm.tracks.length).toEqual(1);
         expect(vm.tracks[0].id()).toEqual('recommendation-01');
     });
 
     it('Should check tracks', async () => {
         await vm.checkTracks(vm.tracks);
 
-        expect(vm.likedTracks).toHaveLength(1);
+        expect(vm.likedTracks.length).toEqual(1);
     });
 
     it('Should play track', async () => {
         await vm.playInTracks(vm.tracks[0]);
 
-        expect(adapter.play).toBeCalledWith(null, ['recommendation:uri-01'], 'recommendation:uri-01');
+        expect(adapter.play).toHaveBeenCalledWith(['recommendation:uri-01'], 'recommendation:uri-01');
     });
 
     it('Should resume playback', async () => {
@@ -94,20 +79,20 @@ describe('Home View Model', () => {
 
         await vm.resume();
 
-        expect(spotifyPlayer.player!.resume).toBeCalledWith();
+        expect(spotifyPlayer.player!.resume).toHaveBeenCalledWith();
     });
 
     it('Should like track', async () => {
         jest.spyOn(adapter, 'addTracks').mockImplementation(() => Promise.resolve({} as any));
         await vm.likeTrack(vm.tracks[0]);
 
-        expect(adapter.addTracks).toBeCalledWith(['recommendation-01']);
+        expect(adapter.addTracks).toHaveBeenCalledWith(['recommendation-01']);
     });
 
     it('Should unlike track', async () => {
         jest.spyOn(adapter, 'removeTracks').mockImplementation(() => Promise.resolve({} as any));
         await vm.unlikeTrack(vm.tracks[0]);
 
-        expect(adapter.removeTracks).toBeCalledWith(['recommendation-01']);
+        expect(adapter.removeTracks).toHaveBeenCalledWith(['recommendation-01']);
     });
 });

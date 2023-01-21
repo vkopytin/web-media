@@ -16,43 +16,18 @@ import { TrackViewModelItem } from './trackViewModelItem';
 type PanelType = 'home' | 'playlists' | 'profile' | 'releases' | 'search' | 'tracks';
 
 class AppViewModel {
-    openLogin$!: BehaviorSubject<AppViewModel['openLogin']>;
-    @State openLogin = false;
-
-    currentPanel$!: BehaviorSubject<PanelType>;
-    @State currentPanel: PanelType = 'home';
-
-    devices$!: BehaviorSubject<DeviceViewModelItem[]>;
-    @State devices: DeviceViewModelItem[] = [];
-
-    profile$!: BehaviorSubject<IUserInfo>;
-    @State profile: IUserInfo = {};
-
-    refreshDevicesCommand$!: BehaviorSubject<{ exec: () => Promise<void> }>;
-    @State refreshDevicesCommand = Scheduler.Command(() => this.updateDevices());
-
-    switchDeviceCommand$!: BehaviorSubject<{ exec: (a: unknown) => Promise<void> }>;
-    @State switchDeviceCommand = Scheduler.Command((device: DeviceViewModelItem) => this.switchDevice(device));
-
-    refreshTokenCommand$!: BehaviorSubject<{ exec: () => Promise<void> }>;
-    @State refreshTokenCommand = Scheduler.Command(() => this.refreshToken());
-
-    currentTrackId$!: BehaviorSubject<string>;
-    @State currentTrackId = '';
-
-    topTracks$!: BehaviorSubject<TrackViewModelItem[]>;
-    @State topTracks = [] as TrackViewModelItem[];
-
-    currentDevice$!: BehaviorSubject<DeviceViewModelItem>;
-    @State currentDevice = null as (DeviceViewModelItem | null);
-
-    autoRefreshUrl$!: BehaviorSubject<string>;
-    @State autoRefreshUrl = '';
-
-    errors$!: BehaviorSubject<AppViewModel['errors']>;
     @State errors = [] as Result<Error, unknown>[];
-
-    isSyncing$!: BehaviorSubject<AppViewModel['isSyncing']>;
+    @State openLogin = false;
+    @State currentPanel: PanelType = 'home';
+    @State devices: DeviceViewModelItem[] = [];
+    @State profile: IUserInfo = {};
+    @State refreshDevicesCommand = Scheduler.Command(() => this.updateDevices());
+    @State switchDeviceCommand = Scheduler.Command((device: DeviceViewModelItem) => this.switchDevice(device));
+    @State refreshTokenCommand = Scheduler.Command(() => this.refreshToken());
+    @State currentTrackId = '';
+    @State topTracks = [] as TrackViewModelItem[];
+    @State currentDevice = null as (DeviceViewModelItem | null);
+    @State autoRefreshUrl = '';
     @State isSyncing = 0;
 
     constructor(
@@ -72,10 +47,6 @@ class AppViewModel {
     }
 
     attachToWindowMessageEvent() {
-        if (window.parent !== window) {
-            return;
-        }
-
         window.addEventListener('message', async evnt => {
             if (!(evnt.data instanceof Array)) {
                 return;

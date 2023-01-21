@@ -1,4 +1,3 @@
-import { Result } from '../utils/result';
 import { ErrorWithStatus } from './errors/errorWithStatus';
 
 export interface IImageInfo {
@@ -205,16 +204,18 @@ const delayWithin = (ms = 800) => new Promise((resolve) => {
     setTimeout(() => resolve(true), ms);
 });
 
-const resultOrError = async <T>(response: Response): Promise<T> => {
-    if ([200].indexOf(response.status) !== -1) {
+const resultOrError = async <T,>(response: Response): Promise<T> => {
+    if ([200, 202, 204].indexOf(response.status) !== -1) {
         const text = await response.text();
-        if (text === '') {
-            return undefined as T;
+        if (!text) {
+            return text as T;
         }
-        const result = JSON.parse(text);
-
-        return result;
-    } else if (204 === response.status) {
+        try {
+            return JSON.parse(text);
+        } catch (ex) {
+            return text as T;
+        }
+    } else if (response.status > 200 && response.status < 300) {
         return undefined as T;
     } else {
         const result = await response.text();

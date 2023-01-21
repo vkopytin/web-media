@@ -18,32 +18,26 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
     playlistsViewModel = current(PlaylistsViewModel);
     vm = this.props.track;
 
-    errors$ = this.vm.errors$;
-    @Binding<SelectPlaylistsView>({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding((a: SelectPlaylistsView) => a.vm, 'errors', {
+        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
+    })
     errors!: SelectPlaylistsView['vm']['errors'];
 
     // playlists
-    trackPlaylists$ = this.vm.trackPlaylists$;
-    @Binding()
+    @Binding((a: SelectPlaylistsView) => a.vm, 'trackPlaylists')
     trackPlaylists!: SelectPlaylistsView['vm']['trackPlaylists'];
 
     //items
-    playlists$ = this.playlistsViewModel.playlists$;
-    @Binding()
+    @Binding((a: SelectPlaylistsView) => a.playlistsViewModel, 'playlists')
     playlists!: SelectPlaylistsView['playlistsViewModel']['playlists'];
 
-    isLoading$ = this.playlistsViewModel.isLoading$;
-    @Binding()
+    @Binding((a: SelectPlaylistsView) => a.playlistsViewModel, 'isLoading')
     isLoading!: SelectPlaylistsView['playlistsViewModel']['isLoading'];
 
-    fetchData = () => this.playlistsViewModel.fetchData();
+    @Binding((a: SelectPlaylistsView) => a.vm, 'addToPlaylistCommand')
+    addToPlaylistCommand!: SelectPlaylistsView['vm']['addToPlaylistCommand'];
 
-    addToPlaylistCommand$ = this.vm.addToPlaylistCommand$;
-    @Binding()
-    addToPlaylistCommand!: SelectPlaylistsView['vm']['removeFromPlaylistCommand'];
-
-    removeFromPlaylistCommand$ = this.vm.removeFromPlaylistCommand$;
-    @Binding()
+    @Binding((a: SelectPlaylistsView) => a.vm, 'removeFromPlaylistCommand')
     removeFromPlaylistCommand!: SelectPlaylistsView['vm']['removeFromPlaylistCommand'];
 
     componentDidMount() {
@@ -61,10 +55,11 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
         }
     }
 
-    refresh(args: { inst: unknown; value: Result[] }) {
-        if (args?.inst === this.errors$) {
-            this.showErrors(args.value);
-        }
+    fetchData() {
+        return this.playlistsViewModel.fetchData();
+    }
+
+    refresh() {
         this.setState({
             ...this.state,
         });

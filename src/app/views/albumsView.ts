@@ -1,7 +1,7 @@
 import React from 'react';
 import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/albums';
-import { Binding, current, Notifications } from '../utils';
+import { Binding, current, Notifications, StateV2 } from '../utils';
 import { Result } from '../utils/result';
 import { AlbumsViewModel, TrackViewModelItem } from '../viewModels';
 
@@ -16,16 +16,15 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
     didRefresh: AlbumsView['refresh'] = this.refresh.bind(this);
     vm = current(AlbumsViewModel);
 
-    errors$ = this.vm.errors$;
-    @Binding<AlbumsView>({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding((a: AlbumsView) => a.vm, 'errors', {
+        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
+    })
     errors!: AlbumsView['vm']['errors'];
 
-    tracks$ = this.vm.tracks$;
-    @Binding()
+    @Binding((a: AlbumsView) => a.vm, 'tracks')
     tracks!: AlbumsView['vm']['tracks'];
 
-    selectedItem$ = this.vm.selectedItem$;
-    @Binding()
+    @Binding((a: AlbumsView) => a.vm, 'selectedItem')
     selectedItem!: AlbumsView['vm']['selectedItem'];
 
     componentDidMount() {
@@ -40,10 +39,7 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
         this.tracks = this.props.tracks;
     }
 
-    refresh(args: { inst: AlbumsView['errors$']; value: Result<Error>[] }) {
-        if (args?.inst === this.errors$) {
-            this.showErrors(args.value);
-        }
+    refresh() {
         this.setState({
             ...this.state,
         });

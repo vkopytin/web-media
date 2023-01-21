@@ -16,35 +16,6 @@ import { TrackViewModelItem } from './trackViewModelItem';
 const searchQueue = asyncQueue();
 
 class SearchViewModel {
-    errors$!: BehaviorSubject<SearchViewModel['errors']>;
-    @State errors = [] as Result<Error, unknown>[];
-
-    term$!: BehaviorSubject<SearchViewModel['term']>;
-    @State term = '';
-
-    @State isLoading = false;
-
-    tracks$!: BehaviorSubject<SearchViewModel['tracks']>;
-    @State tracks = [] as TrackViewModelItem[];
-    artists$!: BehaviorSubject<SearchViewModel['artists']>;
-    @State artists = [] as ArtistViewModelItem[];
-    albums$!: BehaviorSubject<SearchViewModel['albums']>;
-    @State albums = [] as AlbumViewModelItem[];
-    playlists$!: BehaviorSubject<SearchViewModel['playlists']>;
-    @State playlists = [] as PlaylistsViewModelItem[];
-    searchType$!: BehaviorSubject<SearchViewModel['searchType']>;
-    @State searchType: ISearchType = 'track';
-    currentArtist$!: BehaviorSubject<SearchViewModel['currentArtist']>;
-    @State currentArtist: ArtistViewModelItem | null = null;
-    currentAlbum$!: BehaviorSubject<SearchViewModel['currentAlbum']>;
-    @State currentAlbum: AlbumViewModelItem | null = null;
-    currentPlaylist$!: BehaviorSubject<SearchViewModel['currentPlaylist']>;
-    @State currentPlaylist: PlaylistsViewModelItem | null = null;
-    currentTracks$!: BehaviorSubject<SearchViewModel['currentTracks']>;
-    @State currentTracks = [] as TrackViewModelItem[];
-    selectedItem$!: BehaviorSubject<SearchViewModel['selectedItem']>;
-    @State selectedItem: TrackViewModelItem | null = null;
-
     settings = {
         offset: 0,
         total: 0,
@@ -52,28 +23,27 @@ class SearchViewModel {
         currentMediaUri: null as string | null,
     };
 
-    searchCommand$!: BehaviorSubject<SearchViewModel['searchCommand']>;
+    @State errors = [] as Result<Error, unknown>[];
+    @State term = '';
+    @State isLoading = false;
+    @State tracks = [] as TrackViewModelItem[];
+    @State artists = [] as ArtistViewModelItem[];
+    @State albums = [] as AlbumViewModelItem[];
+    @State playlists = [] as PlaylistsViewModelItem[];
+    @State searchType: ISearchType = 'track';
+    @State currentArtist: ArtistViewModelItem | null = null;
+    @State currentAlbum: AlbumViewModelItem | null = null;
+    @State currentPlaylist: PlaylistsViewModelItem | null = null;
+    @State currentTracks = [] as TrackViewModelItem[];
+    @State selectedItem: TrackViewModelItem | null = null;
+
     @State searchCommand = Scheduler.Command((term: string) => this.onChangeTerm(term));
-
-    chageSearchTypeCommand$!: BehaviorSubject<SearchViewModel['chageSearchTypeCommand']>;
     @State chageSearchTypeCommand = Scheduler.Command((searchType: ISearchType) => this.changeSearchType(searchType));
-
-    selectAlbumCommand$!: BehaviorSubject<SearchViewModel['selectAlbumCommand']>;
     @State selectAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.selectAlbum(album));
-
-    selectPlaylistCommand$!: BehaviorSubject<SearchViewModel['selectPlaylistCommand']>;
     @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => this.selectPlaylist(playlist));
-
-    selectArtistCommand$!: BehaviorSubject<SearchViewModel['selectArtistCommand']>;
     @State selectArtistCommand = Scheduler.Command((artist: ArtistViewModelItem) => this.selectArtist(artist));
-
-    loadMoreCommand$!: BehaviorSubject<SearchViewModel['loadMoreCommand']>;
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
-
-    likeTrackCommand$!: BehaviorSubject<SearchViewModel['likeTrackCommand']>;
     @State likeTrackCommand = Scheduler.Command(() => { });
-
-    unlikeTrackCommand$!: BehaviorSubject<SearchViewModel['unlikeTrackCommand']>;
     @State unlikeTrackCommand = Scheduler.Command(() => { });
 
     onChangeTerm = asyncDebounce((term: string) => {
@@ -97,6 +67,12 @@ class SearchViewModel {
     }
 
     async init() {
+        this.settings = {
+            offset: 0,
+            total: 0,
+            limit: 20,
+            currentMediaUri: null as string | null,
+        };
         this.settingsService.get('lastSearch').map(({ val }) => {
             this.term = val;
         });

@@ -89,7 +89,7 @@ interface IPlayer {
     nextTrack(): Promise<void>;
     connect(): Promise<boolean>;
     getCurrentState(): Promise<IWebPlaybackState>;
-    disconnect(): void;
+    disconnect(): Promise<void>;
     _options: {
         getOAuthToken(fn: (access_token: string) => void): void;
         id: string;
@@ -150,8 +150,12 @@ class SpotifyPlayerService extends Events {
                 cb(token);
             });
         };
-        const name = process.env.PLAYER_NAME || 'Dev Player for Spotify';
+        if (this.player) {
+            return;
+        }
+
         this.player = await new Promise((resolve, reject) => {
+            const name = process.env.PLAYER_NAME || 'Dev Player for Spotify';
             try {
                 if (window.Spotify) {
                     const Spotify = window.Spotify;
@@ -179,13 +183,13 @@ class SpotifyPlayerService extends Events {
                     document.head.appendChild(scriptTag);
                 }
 
-                setTimeout(() => reject(new Error('[Spotify SDK] Player was not created withiin expected time range')), 5000);
+                setTimeout(() => reject(new Error('[Spotify SDK] Player was not created within expected time range')), 5000);
             } catch (ex) {
                 reject(ex as Error);
             }
         });
 
-        this.connect();
+        await this.connect();
     }
 
     async connect(): Promise<Option<Error>> {
@@ -219,6 +223,8 @@ class SpotifyPlayerService extends Events {
         if (!this.player) {
             return Result.error(new Error('[Spotify SDK] Player is not initialized'));
         }
+        const isDisconnected = await this.player.disconnect();
+        console.log(isDisconnected);
         const res = await this.player.connect();
         if (res) {
             console.log('[Spotify SDK] Successfully connected to Spotify!');

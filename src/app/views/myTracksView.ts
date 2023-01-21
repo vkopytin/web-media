@@ -15,36 +15,30 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
     didRefresh: MyTracksView['refresh'] = this.refresh.bind(this);
     vm = current(MyTracksViewModel);
 
-    errors$ = this.vm.errors$;
-    @Binding<MyTracksView>({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding((a: MyTracksView) => a.vm, 'errors', {
+        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
+    })
     errors!: MyTracksView['vm']['errors'];
 
-    tracks$ = this.vm.tracks$;
-    @Binding()
+    @Binding((a: MyTracksView) => a.vm, 'tracks')
     tracks!: MyTracksView['vm']['tracks'];
 
-    likedTracks$ = this.vm.likedTracks$;
-    @Binding()
+    @Binding((a: MyTracksView) => a.vm, 'likedTracks')
     likedTracks!: MyTracksView['vm']['likedTracks'];
 
-    isLoading$ = this.vm.isLoading$;
-    @Binding()
+    @Binding((a: MyTracksView) => a.vm, 'isLoading')
     isLoading!: MyTracksView['vm']['isLoading'];
 
-    selectedItem$ = this.vm.selectedItem$;
-    @Binding()
+    @Binding((a: MyTracksView) => a.vm, 'selectedItem')
     selectedItem!: MyTracksView['vm']['selectedItem'];
 
-    trackLyrics$ = this.vm.trackLyrics$;
-    @Binding()
+    @Binding((a: MyTracksView) => a.vm, 'trackLyrics')
     trackLyrics!: MyTracksView['vm']['trackLyrics'];
 
-    loadMoreCommand$ = this.vm.loadMoreCommand$;
-    @Binding()
+    @Binding((a: MyTracksView) => a.vm, 'loadMoreCommand')
     loadMoreCommand!: MyTracksView['vm']['loadMoreCommand'];
 
-    findTrackLyricsCommand$ = this.vm.findTrackLyricsCommand$;
-    @Binding()
+    @Binding((a: MyTracksView) => a.vm, 'findTrackLyricsCommand')
     findTrackLyricsCommand!: MyTracksView['vm']['findTrackLyricsCommand'];
 
     componentDidMount() {
@@ -61,10 +55,7 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
         }
     }
 
-    refresh(args: { inst: unknown; value: Result<Error>[] }) {
-        if (args?.inst === this.errors$) {
-            this.showErrors(args.value);
-        }
+    refresh() {
         this.setState({
             ...this.state,
         });

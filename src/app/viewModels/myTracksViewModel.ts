@@ -10,33 +10,20 @@ import { Scheduler } from '../utils/scheduler';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 class MyTracksViewModel {
-    errors$!: BehaviorSubject<MyTracksViewModel['errors']>;
-    @State errors = [] as Result<Error, unknown>[];
-
-    tracks$!: BehaviorSubject<MyTracksViewModel['tracks']>;
-    @State tracks = [] as TrackViewModelItem[];
-
-    likedTracks$!: BehaviorSubject<MyTracksViewModel['likedTracks']>;
-    @State likedTracks = [] as TrackViewModelItem[];
-
-    isLoading$!: BehaviorSubject<MyTracksViewModel['isLoading']>;
-    @State isLoading = false;
-
-    selectedItem$!: BehaviorSubject<MyTracksViewModel['selectedItem']>;
-    @State selectedItem: TrackViewModelItem | null = null;
-
-    trackLyrics$!: BehaviorSubject<MyTracksViewModel['trackLyrics']>;
-    @State trackLyrics: { trackId: string; lyrics: string } | null = null;
-
     settings = {
         total: 1,
         limit: 20,
         offset: 0
     };
 
-    loadMoreCommand$!: BehaviorSubject<MyTracksViewModel['loadMoreCommand']>;
+    @State errors = [] as Result<Error, unknown>[];
+    @State tracks = [] as TrackViewModelItem[];
+    @State likedTracks = [] as TrackViewModelItem[];
+    @State isLoading = false;
+    @State selectedItem: TrackViewModelItem | null = null;
+    @State trackLyrics: { trackId: string; lyrics: string } | null = null;
+
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
-    findTrackLyricsCommand$!: BehaviorSubject<MyTracksViewModel['findTrackLyricsCommand']>;
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
 
     constructor(
@@ -47,6 +34,11 @@ class MyTracksViewModel {
     }
 
     async init() {
+        this.settings = {
+            total: 1,
+            limit: 20,
+            offset: 0
+        };
         await this.connect();
         await this.fetchData();
     }

@@ -20,6 +20,8 @@ class SpotifySyncService extends Events {
 
     async syncData(): Promise<Result<Error, boolean>> {
         try {
+            // toDO: enable sync
+            return Result.of(true);
             await this.syncMyTracks();
             const playlistsResult = await this.syncMyPlaylists();
             return await playlistsResult.cata(async playlists => {

@@ -1,3 +1,4 @@
+import { getDefaultSettings } from 'http2';
 import { BehaviorSubject } from 'rxjs';
 import * as _ from 'underscore';
 import { ViewModel } from '../base/viewModel';
@@ -9,78 +10,31 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 class PlaylistsViewModel {
-    errors$!: BehaviorSubject<PlaylistsViewModel['errors']>;
     @State errors = [] as Result<Error, unknown>[];
-
-    playlists$!: BehaviorSubject<PlaylistsViewModel['playlists']>;
     @State playlists = [] as PlaylistsViewModelItem[];
-
-    tracks$!: BehaviorSubject<PlaylistsViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
-
-    isLoading$!: BehaviorSubject<PlaylistsViewModel['isLoading']>;
     @State isLoading = false;
-
-    likedTracks$!: BehaviorSubject<PlaylistsViewModel['likedTracks']>;
     @State likedTracks = [] as TrackViewModelItem[];
-
-    currentPlaylistId$!: BehaviorSubject<PlaylistsViewModel['currentPlaylistId']>;
     @State currentPlaylistId = '';
-
-    newPlaylistName$!: BehaviorSubject<PlaylistsViewModel['newPlaylistName']>;
     @State newPlaylistName = '';
-
-    selectedItem$!: BehaviorSubject<PlaylistsViewModel['selectedItem']>;
     @State selectedItem: TrackViewModelItem | null = null;
-
-    trackLyrics$!: BehaviorSubject<PlaylistsViewModel['trackLyrics']>;
     @State trackLyrics: { trackId: string; lyrics: string } | null = null;
-
-    bannedTrackIds$!: BehaviorSubject<PlaylistsViewModel['bannedTrackIds']>;
     @State bannedTrackIds = [] as string[];
 
-    settings = {
-        ...(this as any as ViewModel).settings,
-        tracks: [] as TrackViewModelItem[],
+    settings = this.defaultSettings();
 
-        currentPlaylistId: '',
-        playlist: {
-            offset: 0,
-            limit: 20,
-            total: 0
-        },
-        track: {
-            offset: 0,
-            limit: 20,
-            total: 0
-        },
-        isLoading: false,
-        newPlaylistName: '',
-    };
-
-    selectPlaylistCommand$!: BehaviorSubject<PlaylistsViewModel['selectPlaylistCommand']>;
     @State selectPlaylistCommand = Scheduler.Command((playlistId: string) => {
         this.currentPlaylistId = playlistId;
         this.fetchTracks();
     });
-    loadMoreCommand$!: BehaviorSubject<PlaylistsViewModel['loadMoreCommand']>;
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
-    loadMoreTracksCommand$!: BehaviorSubject<PlaylistsViewModel['loadMoreTracksCommand']>;
     @State loadMoreTracksCommand = Scheduler.Command(() => this.loadMoreTracks());
-    createPlaylistCommand$!: BehaviorSubject<PlaylistsViewModel['createPlaylistCommand']>;
     @State createPlaylistCommand = Scheduler.Command((isPublic: boolean) => this.createNewPlaylist(isPublic));
-    likeTrackCommand$!: BehaviorSubject<PlaylistsViewModel['likeTrackCommand']>;
     @State likeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.likeTrack(track));
-    unlikeTrackCommand$!: BehaviorSubject<PlaylistsViewModel['unlikeTrackCommand']>;
     @State unlikeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.unlikeTrack(track));
-    findTrackLyricsCommand$!: BehaviorSubject<PlaylistsViewModel['findTrackLyricsCommand']>;
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
-    reorderTrackCommand$!: BehaviorSubject<PlaylistsViewModel['reorderTrackCommand']>;
     @State reorderTrackCommand = Scheduler.Command((track: TrackViewModelItem, beforeTrack: TrackViewModelItem) => this.reorderTrack(track, beforeTrack));
-
-    bannTrackCommand$!: BehaviorSubject<PlaylistsViewModel['bannTrackCommand']>;
     @State bannTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.bannTrack(track));
-    removeBannFromTrackCommand$!: BehaviorSubject<PlaylistsViewModel['removeBannFromTrackCommand']>;
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
 
     constructor(private ss: Service) {
@@ -88,7 +42,29 @@ class PlaylistsViewModel {
     }
 
     async init() {
+        this.settings = this.defaultSettings();
         await this.fetchData();
+    }
+
+    defaultSettings() {
+        return {
+            ...(this as any as ViewModel).settings,
+            tracks: [] as TrackViewModelItem[],
+
+            currentPlaylistId: '',
+            playlist: {
+                offset: 0,
+                limit: 20,
+                total: 0
+            },
+            track: {
+                offset: 0,
+                limit: 20,
+                total: 0
+            },
+            isLoading: false,
+            newPlaylistName: '',
+        };
     }
 
     async fetchData() {

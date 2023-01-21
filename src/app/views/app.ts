@@ -15,52 +15,42 @@ class AppView extends React.Component<IAppViewProps> {
     didRefresh: AppView['refresh'] = this.refresh.bind(this);
     vm = current(AppViewModel);
 
-    errors$ = this.vm.errors$;
-    @Binding<AppView>({ didSet: (view, errors) => view.showErrors(errors as Result<Error, unknown>[]) })
+    @Binding((a: AppView) => a.vm, 'errors', {
+        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
+    })
     errors!: AppView['vm']['errors'];
 
-    openLogin$ = this.vm.openLogin$;
-    @Binding()
+    @Binding((a: AppView) => a.vm, 'openLogin')
     openLogin!: AppView['vm']['openLogin'];
 
-    currentPanel$ = this.vm.currentPanel$;
-    @Binding()
+    @Binding((a: AppView) => a.vm, 'currentPanel')
     currentPanel!: AppView['vm']['currentPanel'];
 
-    devices$ = this.vm.devices$;
-    @Binding()
+    @Binding((a: AppView) => a.vm, 'devices')
     devices!: AppView['vm']['devices'];
 
-    profile$ = this.vm.profile$;
-    @Binding()
+    @Binding((a: AppView) => a.vm, 'profile')
     profile!: AppView['vm']['profile'];
 
-    currentTrackId$ = this.vm.currentTrackId$;
-    @Binding()
+    @Binding((a: AppView) => a.vm, 'currentTrackId')
     currentTrackId!: AppView['vm']['currentTrackId'];
 
-    topTracks$ = this.vm.topTracks$;
-    @Binding()
+    @Binding((a: AppView) => a.vm, 'topTracks')
     topTracks!: AppView['vm']['topTracks'];
 
-    currentDevice$ = this.vm.currentDevice$;
-    @Binding()
+    @Binding((a: AppView) => a.vm, 'currentDevice')
     currentDevice!: AppView['vm']['currentDevice'];
 
-    refreshDevicesCommand$ = this.vm.refreshDevicesCommand$;
-    @Binding()
+    @Binding((a: AppView) => a.vm, 'refreshDevicesCommand')
     refreshDevicesCommand!: AppView['vm']['refreshDevicesCommand'];
 
-    refreshTokenCommand$ = this.vm.refreshTokenCommand$;
-    @Binding()
+    @Binding((a: AppView) => a.vm, 'refreshTokenCommand')
     refreshTokenCommand!: AppView['vm']['refreshTokenCommand'];
 
-    autoRefreshUrl$ = this.vm.autoRefreshUrl$;
-    @Binding()
+    @Binding((a: AppView) => a.vm, 'autoRefreshUrl')
     autoRefreshUrl!: AppView['vm']['autoRefreshUrl'];
 
-    isSyncing$ = this.vm.isSyncing$;
-    @Binding()
+    @Binding((a: AppView) => a.vm, 'isSyncing')
     isSyncing!: AppView['vm']['isSyncing'];
 
     state = {
@@ -79,10 +69,7 @@ class AppView extends React.Component<IAppViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: AppView['errors$']; value: Result<Error>[] }) {
-        if (args?.inst === this.errors$) {
-            this.showErrors(args.value);
-        }
+    refresh() {
         this.setState({
             ...this.state,
         });

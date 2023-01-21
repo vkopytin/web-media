@@ -14,20 +14,18 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
     vm = current(PlaylistsViewModel);
     homeVm = current(HomeViewModel);
 
-    errors$ = this.vm.errors$;
-    @Binding<PickPlaylistsView>({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding((a: PickPlaylistsView) => a.vm, 'errors', {
+        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
+    })
     errors!: PickPlaylistsView['vm']['errors'];
 
-    playlists$ = this.vm.playlists$;
-    @Binding()
+    @Binding((a: PickPlaylistsView) => a.vm, 'playlists')
     playlists!: PickPlaylistsView['vm']['playlists'];
 
-    selectedPlaylist$ = this.homeVm.selectedPlaylist$;
-    @Binding()
+    @Binding((a: PickPlaylistsView) => a.homeVm, 'selectedPlaylist')
     selectedPlaylist!: PickPlaylistsView['homeVm']['selectedPlaylist'];
 
-    selectPlaylistCommand$ = this.homeVm.selectPlaylistCommand$;
-    @Binding()
+    @Binding((a: PickPlaylistsView) => a.homeVm, 'selectPlaylistCommand')
     selectPlaylistCommand!: PickPlaylistsView['homeVm']['selectPlaylistCommand'];
 
     componentDidMount() {
@@ -42,10 +40,7 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
     componentDidUpdate(prevProps: IPickPlaylistsViewProps) {
     }
 
-    refresh(args: { inst: unknown; value: Result<Error>[] }) {
-        if (args?.inst === this.errors$) {
-            this.showErrors(args.value);
-        }
+    refresh() {
         this.setState({
             ...this.state,
         });

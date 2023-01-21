@@ -4,114 +4,86 @@ import { ServiceResult } from '../base/serviceResult';
 import { template } from '../templates/mediaPlayer';
 import { Binding, current, formatTime, Notifications } from '../utils';
 import { Result } from '../utils/result';
-import { MediaPlayerViewModel } from '../viewModels';
+import { AppViewModel, MediaPlayerViewModel } from '../viewModels';
 
 export interface IMediaPlayerViewProps {
     showErrors<T>(errors: Result<Error, T>[]): void;
-    currentTrackId$: BehaviorSubject<string>;
 }
 
 class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     didRefresh: MediaPlayerView['refresh'] = this.refresh.bind(this);
     vm = current(MediaPlayerViewModel);
 
-    errors$ = this.vm.errors$;
-    @Binding<MediaPlayerView>({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding((a: MediaPlayerView) => a.vm, 'errors', {
+        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
+    })
     errors!: MediaPlayerView['vm']['errors'];
 
-    currentTrackId$ = this.vm.currentTrackId$;
-    @Binding()
+    @Binding(() => current(AppViewModel), 'currentTrackId')
     currentTrackId!: MediaPlayerView['vm']['currentTrackId'];
 
-    queue$ = this.vm.queue$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'queue')
     queue!: MediaPlayerView['vm']['queue'];
 
-    timePlayed$ = this.vm.timePlayed$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'timePlayed')
     timePlayed!: MediaPlayerView['vm']['timePlayed'];
 
-    duration$ = this.vm.duration$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'duration')
     duration!: MediaPlayerView['vm']['duration'];
 
-    isPlaying$ = this.vm.isPlaying$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'isPlaying')
     isPlaying!: MediaPlayerView['vm']['isPlaying'];
 
-    trackName$ = this.vm.trackName$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'trackName')
     trackName!: MediaPlayerView['vm']['trackName'];
 
-    albumName$ = this.vm.albumName$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'albumName')
     albumName!: MediaPlayerView['vm']['albumName'];
 
-    artistName$ = this.vm.artistName$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'artistName')
     artistName!: MediaPlayerView['vm']['artistName'];
 
-    volume$ = this.vm.volume$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'volume')
     volume!: MediaPlayerView['vm']['volume'];
 
-    thumbnailUrl$ = this.vm.thumbnailUrl$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'thumbnailUrl')
     thumbnailUrl!: MediaPlayerView['vm']['thumbnailUrl'];
 
-    isLiked$ = this.vm.isLiked$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'isLiked')
     isLiked!: MediaPlayerView['vm']['isLiked'];
 
-    resumeCommand$ = this.vm.resumeCommand$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'resumeCommand')
     resumeCommand!: MediaPlayerView['vm']['resumeCommand'];
 
-    pauseCommand$ = this.vm.pauseCommand$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'pauseCommand')
     pauseCommand!: MediaPlayerView['vm']['pauseCommand'];
 
-    prevCommand$ = this.vm.prevCommand$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'prevCommand')
     prevCommand!: MediaPlayerView['vm']['prevCommand'];
 
-    nextCommand$ = this.vm.nextCommand$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'nextCommand')
     nextCommand!: MediaPlayerView['vm']['nextCommand'];
 
-    volumeUpCommand$ = this.vm.volumeUpCommand$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'volumeCommand')
     volumeUpCommand!: MediaPlayerView['vm']['volumeUpCommand'];
 
-    volumeDownCommand$ = this.vm.volumeDownCommand$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'volumeDownCommand')
     volumeDownCommand!: MediaPlayerView['vm']['volumeDownCommand'];
 
-    refreshPlaybackCommand$ = this.vm.refreshPlaybackCommand$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'refreshPlaybackCommand')
     refreshPlaybackCommand!: MediaPlayerView['vm']['refreshPlaybackCommand'];
 
-    likeSongCommand$ = this.vm.likeSongCommand$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'likeSongCommand')
     likeSongCommand!: MediaPlayerView['vm']['likeSongCommand'];
 
-    unlikeSongCommand$ = this.vm.unlikeSongCommand$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'unlikeSongCommand')
     unlikeSongCommand!: MediaPlayerView['vm']['unlikeSongCommand'];
 
-    seekPlaybackCommand$ = this.vm.seekPlaybackCommand$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'seekPlaybackCommand')
     seekPlaybackCommand!: MediaPlayerView['vm']['seekPlaybackCommand'];
 
-    volumeCommand$ = this.vm.volumeCommand$;
-    @Binding()
+    @Binding((a: MediaPlayerView) => a.vm, 'volumeCommand')
     volumeCommand!: MediaPlayerView['vm']['volumeCommand'];
-
-    constructor(props: IMediaPlayerViewProps) {
-        super(props);
-        // toDO: Find better solution
-        this.currentTrackId$ = this.props.currentTrackId$;
-    }
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);
@@ -121,10 +93,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh(args: { inst: MediaPlayerView['errors$']; value: Result<Error>[] }) {
-        if (args?.inst === this.errors$) {
-            this.showErrors(args.value);
-        }
+    refresh() {
         this.setState({
             ...this.state,
         });

@@ -15,48 +15,39 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
     didRefresh: PlaylistsView['refresh'] = this.refresh.bind(this);
     vm = current(PlaylistsViewModel);
 
-    errors$ = this.vm.errors$;
-    @Binding<PlaylistsView>({ didSet: (view, errors) => view.showErrors(errors) })
+    @Binding((a: PlaylistsView) => a.vm, 'errors', {
+        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
+    })
     errors!: PlaylistsView['vm']['errors'];
 
-    playlists$ = this.vm.playlists$;
-    @Binding()
+    @Binding((a: PlaylistsView) => a.vm, 'playlists')
     playlists!: PlaylistsView['vm']['playlists'];
 
-    tracks$ = this.vm.tracks$;
-    @Binding()
+    @Binding((a: PlaylistsView) => a.vm, 'tracks')
     tracks!: PlaylistsView['vm']['tracks'];
 
-    isLoading$ = this.vm.isLoading$;
-    @Binding()
+    @Binding((a: PlaylistsView) => a.vm, 'isLoading')
     isLoading!: PlaylistsView['vm']['isLoading'];
 
-    likedTracks$ = this.vm.likedTracks$;
-    @Binding()
+    @Binding((a: PlaylistsView) => a.vm, 'likedTracks')
     likedTracks!: PlaylistsView['vm']['likedTracks'];
 
-    currentPlaylistId$ = this.vm.currentPlaylistId$;
-    @Binding()
+    @Binding((a: PlaylistsView) => a.vm, 'currentPlaylistId')
     currentPlaylistId!: PlaylistsView['vm']['currentPlaylistId'];
 
-    newPlaylistName$ = this.vm.newPlaylistName$;
-    @Binding()
+    @Binding((a: PlaylistsView) => a.vm, 'newPlaylistName')
     newPlaylistName!: PlaylistsView['vm']['newPlaylistName'];
 
-    selectPlaylistCommand$ = this.vm.selectPlaylistCommand$;
-    @Binding()
+    @Binding((a: PlaylistsView) => a.vm, 'selectPlaylistCommand')
     selectPlaylistCommand!: PlaylistsView['vm']['selectPlaylistCommand'];
 
-    loadMoreCommand$ = this.vm.loadMoreCommand$;
-    @Binding()
+    @Binding((a: PlaylistsView) => a.vm, 'loadMoreCommand')
     loadMoreCommand!: PlaylistsView['vm']['loadMoreCommand'];
 
-    loadMoreTracksCommand$ = this.vm.loadMoreTracksCommand$;
-    @Binding()
+    @Binding((a: PlaylistsView) => a.vm, 'loadMoreTracksCommand')
     loadMoreTracksCommand!: PlaylistsView['vm']['loadMoreTracksCommand'];
 
-    createPlaylistCommand$ = this.vm.createPlaylistCommand$;
-    @Binding()
+    @Binding((a: PlaylistsView) => a.vm, 'createPlaylistCommand')
     createPlaylistCommand!: PlaylistsView['vm']['createPlaylistCommand'];
 
     componentDidMount() {
@@ -73,10 +64,7 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
         }
     }
 
-    refresh(args: { inst: unknown; value: Result<Error>[] }) {
-        if (args?.inst === this.errors$) {
-            this.showErrors(args.value);
-        }
+    refresh() {
         this.setState({
             ...this.state,
         });

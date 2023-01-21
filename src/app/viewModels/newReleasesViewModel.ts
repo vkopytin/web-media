@@ -13,48 +13,25 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class NewReleasesViewModel {
-    errors$!: BehaviorSubject<ServiceResult<any, Error>[]>;
     @State errors = [] as Result<Error, unknown>[];
-
-    newReleases$!: BehaviorSubject<NewReleasesViewModel['newReleases']>;
     @State newReleases = [] as AlbumViewModelItem[];
-
-    featuredPlaylists$!: BehaviorSubject<NewReleasesViewModel['featuredPlaylists']>;
     @State featuredPlaylists = [] as PlaylistsViewModelItem[];
-
-    currentAlbum$!: BehaviorSubject<NewReleasesViewModel['currentAlbum']>;
     @State currentAlbum: AlbumViewModelItem | null = null;
-
-    currentPlaylist$!: BehaviorSubject<NewReleasesViewModel['currentPlaylist']>;
     @State currentPlaylist: PlaylistsViewModelItem | null = null;
-
-    currentTracks$!: BehaviorSubject<NewReleasesViewModel['currentTracks']>;
     @State currentTracks = [] as TrackViewModelItem[];
-
-    tracks$!: BehaviorSubject<NewReleasesViewModel['tracks']>;
     @State tracks = [] as TrackViewModelItem[];
-
-    likedAlbums$!: BehaviorSubject<NewReleasesViewModel['likedAlbums']>;
     @State likedAlbums = [] as AlbumViewModelItem[];
-
-    selectAlbumCommand$!: BehaviorSubject<NewReleasesViewModel['selectAlbumCommand']>;
     @State selectAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => {
         this.currentPlaylist = null;
         this.currentAlbum = album;
         this.loadTracks();
     });
-
-    selectPlaylistCommand$!: BehaviorSubject<NewReleasesViewModel['selectPlaylistCommand']>;
     @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => {
         this.currentAlbum = null;
         this.currentPlaylist = playlist;
         this.loadTracks();
     });
-
-    likeAlbumCommand$!: BehaviorSubject<NewReleasesViewModel['likeAlbumCommand']>;
     @State likeAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.likeAlbum(album));
-
-    unlikeAlbumCommand$!: BehaviorSubject<NewReleasesViewModel['unlikeAlbumCommand']>;
     @State unlikeAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.unlikeAlbum(album));
 
     constructor(

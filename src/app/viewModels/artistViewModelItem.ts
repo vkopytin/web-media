@@ -9,13 +9,8 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 
 class ArtistViewModelItem {
-    errors$!: BehaviorSubject<ArtistViewModelItem['errors']>;
     @State errors = [] as Result<Error, unknown>[];
-
-    playlists$!: BehaviorSubject<ArtistViewModelItem['playlists']>;
     @State playlists = [] as PlaylistsViewModelItem[];
-
-    isLiked$!: BehaviorSubject<ArtistViewModelItem['playlists']>;
     @State isLiked = false;
 
     isInit = _.delay(() => {
