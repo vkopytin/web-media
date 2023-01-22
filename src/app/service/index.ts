@@ -9,7 +9,7 @@ import { SpotifyPlayerService } from './spotifyPlayer';
 import { SpotifySyncService } from './spotifySyncService';
 
 
-class AppService {
+export class AppService {
     constructor(
         private settingsService: SettingsService,
         private loginService: LoginService,
@@ -112,5 +112,3 @@ class AppService {
     }
 
 }
-
-export { Service };
