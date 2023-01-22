@@ -66,7 +66,7 @@ The UI update notification would force UI to redraw. Which is just to read all d
 
 ## Data selectors and commands
 There is another smaller but yet important separation. Such an approach helps to comprehend data synchronisation issues.
-Similar to data binding there is agreement to split state synchronisation on two big taks: read and write. Reading state
+Similar to data binding there is agreement to split state synchronisation on two big tasks: read and write. Reading state
 is done by selectors. Writing state is performed by command methods.
 
 Addressing this concept in the project. Selectors are represented by lists of properties grouped into ViewModels.
