@@ -55,17 +55,17 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
         }
     }
 
-    refresh() {
+    refresh(): void {
         this.setState({
             ...this.state,
         });
     }
 
-    isPlaying(track: TrackViewModelItem) {
+    isPlaying(track: TrackViewModelItem): boolean {
         return this.props.currentTrackId === track.id();
     }
 
-    showErrors(errors: Result<Error>[]) {
+    showErrors(errors: Result<Error>[]): void {
         this.props.showErrors(errors);
     }
 

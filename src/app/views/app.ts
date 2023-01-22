@@ -72,18 +72,18 @@ class AppView extends React.Component {
         });
     }
 
-    openDevices(show: 'show' | 'hide' | boolean) {
+    openDevices(show: 'show' | 'hide' | boolean): void {
         this.toggleSelectDevices(show ? 'hide' : 'show');
         if (show === 'show') {
             this.refreshDevicesCommand.exec();
         }
     }
 
-    isPlaying(track: TrackViewModelItem) {
+    isPlaying(track: TrackViewModelItem): boolean {
         return this.currentTrackId === track.id();
     }
 
-    toggleSelectDevices(fromState?: 'show' | 'hide') {
+    toggleSelectDevices(fromState?: 'show' | 'hide'): void {
         const lastValue = fromState || this.state.showSelectDevices;
         if (fromState && (fromState !== this.state.showSelectDevices)) {
 
@@ -103,7 +103,7 @@ class AppView extends React.Component {
         }, 100);
     }
 
-    onPageScrollInternal() {
+    onPageScrollInternal(): void {
         const scrollThreshold = 15,
             distance = this.getBottomDistance();
         if (distance <= scrollThreshold) {
@@ -119,26 +119,30 @@ class AppView extends React.Component {
         }
     }
 
-    getBottomDistance() {
+    getBottomDistance(): number {
         const elementScroll = this.elScroller;
         if (elementScroll) {
             return this.getElementBottomDistance();
         }
+
         return 0;
     }
 
-    getElementBottomDistance() {
+    getElementBottomDistance(): number {
         if (!this.elScroller) {
+
             return 0;
         }
         const scroller = this.elScroller,
             bottom = scroller?.scrollHeight,
             scrollY = scroller.scrollTop + scroller.clientHeight;
+
         return bottom - scrollY;
     }
 
-    showErrors(errors: Result<Error, unknown>[]) {
+    showErrors(errors: Result<Error, unknown>[]): void {
         if (_.isEmpty(errors)) {
+
             return;
         }
         const tokenExpired = _.filter(errors, err => err.is(TokenExpiredError));
@@ -148,18 +152,20 @@ class AppView extends React.Component {
             this.errors = _.filter(errors, err => !err.is(TokenExpiredError));
             this.openLogin = true;
             setTimeout(() => this.refreshTokenCommand.exec());
+
             return;
         }
 
         if (!_.isEmpty(activeDevice)) {
             this.errors = _.filter(errors, err => !err.is(NoActiveDeviceError));
             setTimeout(() => this.toggleSelectDevices('hide'));
+
             return;
         }
         this.errors = errors;
     }
 
-    clearErrors(evnt: React.MouseEvent<HTMLElement, MouseEvent>) {
+    clearErrors(evnt: React.MouseEvent<HTMLElement, MouseEvent>): void {
         evnt && evnt.preventDefault();
         this.errors = [];
     }

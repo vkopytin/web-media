@@ -71,7 +71,7 @@ class PlaylistsViewModel {
         };
     }
 
-    async fetchData() {
+    async fetchData(): Promise<void> {
         const result = await this.spotify.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
         result.map(({ items: playlists }) => {
             this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
@@ -81,7 +81,7 @@ class PlaylistsViewModel {
     }
 
     @isLoading
-    async loadMore() {
+    async loadMore(): Promise<void> {
         const result = await this.spotify.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
         result.map(({ items: playlists }) => {
             this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
@@ -90,7 +90,7 @@ class PlaylistsViewModel {
         }).error(e => this.errors = [Result.error(e)]);
     }
 
-    async fetchTracks() {
+    async fetchTracks(): Promise<void> {
         this.settings.track.offset = 0;
         this.settings.track.total = 0;
         const currentPlaylistId = this.currentPlaylistId;
@@ -107,7 +107,7 @@ class PlaylistsViewModel {
         }
     }
 
-    async loadMoreTracks() {
+    async loadMoreTracks(): Promise<void> {
         const currentPlaylistId = this.currentPlaylistId;
         if (currentPlaylistId) {
             const result = await this.spotify.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
@@ -124,13 +124,13 @@ class PlaylistsViewModel {
         }
     }
 
-    async loadTracks(...args: unknown[]) {
+    async loadTracks(...args: unknown[]): Promise<void> {
         if (!~args.indexOf('playlistTracks')) {
             return;
         }
     }
 
-    async checkTracks(tracks: TrackViewModelItem[]) {
+    async checkTracks(tracks: TrackViewModelItem[]): Promise<void> {
         const tracksToCheck = tracks;
         this.likedTracks = _.filter(this.tracks, track => track.isLiked);
         if (!tracksToCheck.length) {
@@ -147,12 +147,12 @@ class PlaylistsViewModel {
         res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
     }
 
-    playlistsAddRange(value: PlaylistsViewModelItem[]) {
+    playlistsAddRange(value: PlaylistsViewModelItem[]): void {
         const array = [...this.playlists, ...value];
         this.playlists = array;
     }
 
-    async createNewPlaylist(isPublic: boolean) {
+    async createNewPlaylist(isPublic: boolean): Promise<void> {
         if (!this.newPlaylistName) {
             return;
         }
@@ -172,12 +172,12 @@ class PlaylistsViewModel {
         await spotifyResult.map(() => this.fetchData()).error(e => this.errors = [Result.error(e)]);
     }
 
-    async likeTrack(track: TrackViewModelItem) {
+    async likeTrack(track: TrackViewModelItem): Promise<void> {
         await track.likeTrack();
         await this.checkTracks([track]);
     }
 
-    async unlikeTrack(track: TrackViewModelItem) {
+    async unlikeTrack(track: TrackViewModelItem): Promise<void> {
         await track.unlikeTrack();
         await this.checkTracks([track]);
     }
@@ -205,7 +205,7 @@ class PlaylistsViewModel {
         });
     }
 
-    async reorderTrack(track: TrackViewModelItem, beforeTrack: TrackViewModelItem) {
+    async reorderTrack(track: TrackViewModelItem, beforeTrack: TrackViewModelItem): Promise<void> {
         const tracks = this.tracks;
         const oldPosition = tracks.indexOf(track);
         const newPosition = tracks.indexOf(beforeTrack);
@@ -223,7 +223,7 @@ class PlaylistsViewModel {
     }
 
     @isLoading
-    async bannTrack(track: TrackViewModelItem) {
+    async bannTrack(track: TrackViewModelItem): Promise<void> {
         await track.bannTrack();
         const res = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
 
@@ -231,7 +231,7 @@ class PlaylistsViewModel {
     }
 
     @isLoading
-    async removeBannFromTrack(track: TrackViewModelItem) {
+    async removeBannFromTrack(track: TrackViewModelItem): Promise<void> {
         await track.removeBannFromTrack();
         const res = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
 

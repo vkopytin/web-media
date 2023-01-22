@@ -39,18 +39,18 @@ class DevicesView extends React.Component<IDevicesViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh() {
+    refresh(): void {
         this.setState({
             ...this.state,
         });
     }
 
-    async switchDevice(device: DeviceViewModelItem) {
+    async switchDevice(device: DeviceViewModelItem): Promise<void> {
         await this.switchDeviceCommand.exec(device);
         this.props.openShowDevices(false);
     }
 
-    showErrors(errors: Result<Error>[]) {
+    showErrors(errors: Result<Error>[]): void {
         this.props.showErrors(errors);
     }
 

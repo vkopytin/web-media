@@ -64,17 +64,17 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh() {
+    refresh(): void {
         this.setState({
             ...this.state,
         });
     }
 
-    isPlaying(track: TrackViewModelItem) {
+    isPlaying(track: TrackViewModelItem): boolean {
         return this.currentTrackId === track.id();
     }
 
-    showErrors(errors: Result[]) {
+    showErrors(errors: Result[]): void {
         this.props.showErrors(errors);
     }
 

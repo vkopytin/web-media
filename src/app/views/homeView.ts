@@ -66,23 +66,23 @@ class HomeView extends React.Component<IHomeViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh() {
+    refresh(): void {
         this.setState({
             ...this.state,
         });
     }
 
-    isPlaying(track: TrackViewModelItem) {
+    isPlaying(track: TrackViewModelItem): boolean {
         return this.props.currentTrackId === track.id();
     }
 
-    isBanned(track: TrackViewModelItem) {
+    isBanned(track: TrackViewModelItem): boolean {
         const res = this.bannedTrackIds.find(trackId => trackId === track.id());
 
         return !!res;
     }
 
-    showErrors(errors: Result<Error>[]) {
+    showErrors(errors: Result<Error>[]): void {
         this.props.showErrors(errors);
     }
 

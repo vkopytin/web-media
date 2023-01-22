@@ -92,13 +92,13 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh() {
+    refresh(): void {
         this.setState({
             ...this.state,
         });
     }
 
-    seekTrack(evnt: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    seekTrack(evnt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
         const rect = (evnt.currentTarget as HTMLDivElement).getBoundingClientRect();
         const x = evnt.clientX - rect.left; //x position within the element.
         // const y = evnt.clientY - rect.top;  //y position within the element.
@@ -107,7 +107,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
         this.seekPlaybackCommand.exec(Math.round(progressPercent));
     }
 
-    updateVolume(evnt: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    updateVolume(evnt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
         const rect = (evnt.currentTarget as HTMLDivElement).getBoundingClientRect();
         const x = evnt.clientX - rect.left; //x position within the element.
         // const y = evnt.clientY - rect.top;  //y position within the element.
@@ -116,23 +116,23 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
         this.volumeCommand.exec(Math.round(progressPercent));
     }
 
-    getVolume() {
+    getVolume(): number {
         return this.logposition(this.volume);
     }
 
-    titlePlayed() {
+    titlePlayed(): string {
         return formatTime(this.timePlayed);
     }
 
-    titleLeft() {
+    titleLeft(): string {
         return formatTime(this.duration - this.timePlayed);
     }
 
-    showErrors(errors: Result<Error>[]) {
+    showErrors(errors: Result<Error>[]): void {
         this.props.showErrors(errors);
     }
 
-    logslider(position: number) {
+    logslider(position: number): number {
         // position will be between 0 and 100
         const minp = 0;
         const maxp = 100;
@@ -147,7 +147,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
         return Math.exp(minv + scale * (position - minp));
     }
 
-    logposition(value: number) {
+    logposition(value: number): number {
         // position will be between 0 and 100
         const minp = 0;
         const maxp = 100;

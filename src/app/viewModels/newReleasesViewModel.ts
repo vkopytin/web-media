@@ -39,16 +39,16 @@ class NewReleasesViewModel {
 
     }
 
-    async init() {
+    async init(): Promise<void> {
         await this.connect();
         await this.fetchData();
     }
 
-    async connect() {
+    async connect(): Promise<void> {
         this.spotify.on('change:state', () => this.checkAlbums());
     }
 
-    async fetchData() {
+    async fetchData(): Promise<void> {
         const res = await this.spotify.newReleases();
         const res2 = await res.map(releases => {
             this.newReleases = _.map(releases.albums?.items || [], album => new AlbumViewModelItem(album));
@@ -60,7 +60,7 @@ class NewReleasesViewModel {
         res3.error(e => this.errors = [Result.error(e)]);
     }
 
-    async loadTracks() {
+    async loadTracks(): Promise<void> {
         const currentAlbum = this.currentAlbum;
         if (currentAlbum) {
             const result = await this.spotify.listAlbumTracks(currentAlbum.id());
@@ -84,7 +84,7 @@ class NewReleasesViewModel {
         }
     }
 
-    async checkAlbums() {
+    async checkAlbums(): Promise<void> {
         const albums = this.newReleases;
         const ids = _.map(albums, (album: AlbumViewModelItem) => album.id());
         if (ids.length === 0) {
@@ -102,12 +102,12 @@ class NewReleasesViewModel {
         }).error(e => this.errors = [Result.error(e)]);
     }
 
-    async likeAlbum(album: AlbumViewModelItem) {
+    async likeAlbum(album: AlbumViewModelItem): Promise<void> {
         const likedResult = await this.spotify.addAlbums(album.id());
         likedResult.error(() => this.errors = [likedResult]);
     }
 
-    async unlikeAlbum(album: AlbumViewModelItem) {
+    async unlikeAlbum(album: AlbumViewModelItem): Promise<void> {
         const likedResult = await this.spotify.removeAlbums(album.id());
         likedResult.error(() => this.errors = [likedResult]);
     }

@@ -38,13 +38,13 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh() {
+    refresh(): void {
         this.setState({
             ...this.state,
         });
     }
 
-    showErrors(errors: Result<Error>[]) {
+    showErrors(errors: Result<Error>[]): void {
         this.props.showErrors(errors);
     }
 

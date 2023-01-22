@@ -57,7 +57,7 @@ class MediaPlayerViewModel {
 
     }
 
-    async init() {
+    async init(): Promise<void> {
         try {
             await this.connect();
             await this.fetchData();
@@ -66,19 +66,19 @@ class MediaPlayerViewModel {
         }
     }
 
-    async connect() {
+    async connect(): Promise<void> {
         this.spotifyPlayerService.on('playerStateChanged', (en: unknown, state: IWebPlaybackState) => this.updateFromPlayerState(state));
         this.spotify.on('change:state', () => this.fetchData());
 
         await this.fetchData();
     }
 
-    async currentPlayerState() {
+    async currentPlayerState(): Promise<Result<Error, IWebPlaybackState>> {
         const state = await this.spotifyPlayerService.getCurrentState();
         return state;
     }
 
-    async updateFromPlayerState(state: IWebPlaybackState) {
+    async updateFromPlayerState(state: IWebPlaybackState): Promise<void> {
         if (!state) {
             return;
         }
@@ -112,7 +112,7 @@ class MediaPlayerViewModel {
             });
     }
 
-    async fetchDataInternal() {
+    async fetchDataInternal(): Promise<void> {
         const res = await this.spotify.player();
         res.map(currentlyPlaying => {
             this.lastTime = +new Date();
@@ -140,7 +140,7 @@ class MediaPlayerViewModel {
         });
     }
 
-    async checkTrackExists() {
+    async checkTrackExists(): Promise<void> {
         if (!this.currentTrackId) {
             return;
         }
@@ -149,7 +149,7 @@ class MediaPlayerViewModel {
             .error(e => this.errors = [Result.error(e)]);
     }
 
-    async monitorPlybackInternal() {
+    async monitorPlybackInternal(): Promise<void> {
         if (!this.isPlaying) {
             await this.fetchData();
             await this.monitorPlyback();
@@ -157,7 +157,7 @@ class MediaPlayerViewModel {
     }
 
     lastTime = +new Date();
-    async autoSeekInternal() {
+    async autoSeekInternal(): Promise<void> {
         try {
             if (!this.isPlaying) {
                 await this.monitorPlyback();
@@ -179,175 +179,199 @@ class MediaPlayerViewModel {
         }
     }
 
-    manualSeek(percent: number) {
+    manualSeek(percent: number): Promise<void> {
         const max = this.duration;
         const timePlayed = max * percent / 100;
 
-        lockSection.push(async (next) => {
-            try {
-                this.timePlayed = timePlayed;
-                const res = await this.spotify.seek(timePlayed);
-                res.error(() => this.errors = [res]);
-            } catch (ex) {
-                this.errors = [Result.error(ex as Error)];
-            }
-            next();
+        return new Promise(resolve => {
+            lockSection.push(async (next) => {
+                try {
+                    this.timePlayed = timePlayed;
+                    const res = await this.spotify.seek(timePlayed);
+                    res.error(() => this.errors = [res]);
+                } catch (ex) {
+                    this.errors = [Result.error(ex as Error)];
+                }
+                resolve();
+                next();
+            });
         });
     }
 
-    async setVolume(percent: number) {
-        lockSection.push(async next => {
-            try {
-                const state = await this.spotifyPlayerService.getCurrentState();
-                await state.map(async state => {
-                    if (_.isEmpty(state)) {
-                        this.volume = percent;
-                        const res = await this.spotify.volume(percent);
-                        res.error(e => this.errors = [Result.error(e)]);
-                    } else {
-                        this.volume = percent;
-                        const res = await this.spotifyPlayerService.setVolume(percent);
-                        res.map(e => this.errors = [Result.error(e)]);
-                    }
+    setVolume(percent: number): Promise<void> {
+        return new Promise(resolve => {
+            lockSection.push(async next => {
+                try {
+                    const state = await this.spotifyPlayerService.getCurrentState();
+                    await state.map(async state => {
+                        if (_.isEmpty(state)) {
+                            this.volume = percent;
+                            const res = await this.spotify.volume(percent);
+                            res.error(e => this.errors = [Result.error(e)]);
+                        } else {
+                            this.volume = percent;
+                            const res = await this.spotifyPlayerService.setVolume(percent);
+                            res.map(e => this.errors = [Result.error(e)]);
+                        }
 
-                    this.settingsSerivce.volume(this.volume = percent);
-                }).await();
-            } catch (ex) {
-                this.errors = [Result.error(ex as Error)];
-            }
-            next();
+                        this.settingsSerivce.volume(this.volume = percent);
+                    }).await();
+                } catch (ex) {
+                    this.errors = [Result.error(ex as Error)];
+                }
+                resolve();
+                next();
+            });
         });
     }
 
-    async play() {
-        lockSection.push(async next => {
-            try {
-                const state = await this.spotifyPlayerService.getCurrentState();
-                await state.map(async state => {
-                    if (_.isEmpty(state)) {
-                        const res = await this.spotify.play();
-                        res.map(() => this.isPlaying = true)
-                            .error(e => this.errors = [Result.error(e)]);
-                    } else {
-                        const res = await this.spotifyPlayerService.resume();
-                        res.map(e => this.errors = [Result.error(e)]);
-                        this.isPlaying = true;
-                    }
-                }).await();
-            } catch (ex) {
-                this.errors = [Result.error(ex as Error)];
-            }
-            next();
+    play(): Promise<void> {
+        return new Promise(resolve => {
+            lockSection.push(async next => {
+                try {
+                    const state = await this.spotifyPlayerService.getCurrentState();
+                    await state.map(async state => {
+                        if (_.isEmpty(state)) {
+                            const res = await this.spotify.play();
+                            res.map(() => this.isPlaying = true)
+                                .error(e => this.errors = [Result.error(e)]);
+                        } else {
+                            const res = await this.spotifyPlayerService.resume();
+                            res.map(e => this.errors = [Result.error(e)]);
+                            this.isPlaying = true;
+                        }
+                    }).await();
+                } catch (ex) {
+                    this.errors = [Result.error(ex as Error)];
+                }
+                resolve();
+                next();
+            });
         });
     }
 
-    async pause() {
-        lockSection.push(async next => {
-            try {
-                const state = await this.spotifyPlayerService.getCurrentState();
-                await state.map(async state => {
-                    if (_.isEmpty(state)) {
-                        const res = await this.spotify.pause();
-                        res.map(() => this.isPlaying = false)
-                            .error(e => this.errors = [Result.error(e)]);
-                    } else {
-                        const res = await this.spotifyPlayerService.pause();
-                        res.map(e => this.errors = [Result.error(e)]);
-                        this.isPlaying = false;
-                    }
-                }).await();
-            } catch (ex) {
-                this.errors = [Result.error(ex as Error)];
-            }
-            next();
+    pause(): Promise<void> {
+        return new Promise(resolve => {
+            lockSection.push(async next => {
+                try {
+                    const state = await this.spotifyPlayerService.getCurrentState();
+                    await state.map(async state => {
+                        if (_.isEmpty(state)) {
+                            const res = await this.spotify.pause();
+                            res.map(() => this.isPlaying = false)
+                                .error(e => this.errors = [Result.error(e)]);
+                        } else {
+                            const res = await this.spotifyPlayerService.pause();
+                            res.map(e => this.errors = [Result.error(e)]);
+                            this.isPlaying = false;
+                        }
+                    }).await();
+                } catch (ex) {
+                    this.errors = [Result.error(ex as Error)];
+                }
+                resolve();
+                next();
+            });
         });
     }
 
-    async previous() {
-        lockSection.push(async next => {
-            try {
-                const state = await this.spotifyPlayerService.getCurrentState();
-                await state.map(async state => {
-                    if (_.isEmpty(state)) {
-                        const res = await this.spotify.previous();
-                        res.error(() => this.errors = [res]);
-                    } else {
-                        const res = await this.spotifyPlayerService.previouseTrack();
-                        res.map(e => this.errors = [Result.error(e)])
-                    }
-                }).await();
-            } catch (ex) {
-                this.errors = [Result.error(ex as Error)];
-            }
-            next();
+    previous(): Promise<void> {
+        return new Promise(resolve => {
+            lockSection.push(async next => {
+                try {
+                    const state = await this.spotifyPlayerService.getCurrentState();
+                    await state.map(async state => {
+                        if (_.isEmpty(state)) {
+                            const res = await this.spotify.previous();
+                            res.error(() => this.errors = [res]);
+                        } else {
+                            const res = await this.spotifyPlayerService.previouseTrack();
+                            res.map(e => this.errors = [Result.error(e)])
+                        }
+                    }).await();
+                } catch (ex) {
+                    this.errors = [Result.error(ex as Error)];
+                }
+                resolve();
+                next();
+            });
         });
     }
 
-    async next() {
-        lockSection.push(async next => {
-            try {
-                const state = await this.spotifyPlayerService.getCurrentState();
-                await state.map(async state => {
-                    if (_.isEmpty(state)) {
-                        const res = await this.spotify.next();
-                        res.error(() => this.errors = [res]);
-                    } else {
-                        const res = await this.spotifyPlayerService.nextTrack();
-                        res.map(e => this.errors = [Result.error(e)]);
-                    }
-                }).await();
-            } catch (ex) {
-                this.errors = [Result.error(ex as Error)];
-            }
-            next();
+    next(): Promise<void> {
+        return new Promise(resolve => {
+            lockSection.push(async next => {
+                try {
+                    const state = await this.spotifyPlayerService.getCurrentState();
+                    await state.map(async state => {
+                        if (_.isEmpty(state)) {
+                            const res = await this.spotify.next();
+                            res.error(() => this.errors = [res]);
+                        } else {
+                            const res = await this.spotifyPlayerService.nextTrack();
+                            res.map(e => this.errors = [Result.error(e)]);
+                        }
+                    }).await();
+                } catch (ex) {
+                    this.errors = [Result.error(ex as Error)];
+                }
+                resolve();
+                next();
+            });
         });
     }
 
-    async volumeUp() {
-        lockSection.push(async (next) => {
-            try {
-                const state = await this.spotifyPlayerService.getCurrentState();
-                await state.map(async state => {
-                    if (_.isEmpty(state)) {
-                        const volume = this.volume;
-                        const res = await this.spotify.volume(volume * 1.1);
-                        res.error(() => this.errors = [res]);
-                    } else {
-                        const volume = await this.spotifyPlayerService.getVolume();
-                        volume.map(v => this.volume = v * 1.1)
-                            .error(e => this.errors = [Result.error(e)]);
-                    }
-                }).await();
-            } catch (ex) {
-                this.errors = [Result.error(ex as Error)];
-            }
-            next();
+    volumeUp(): Promise<void> {
+        return new Promise(resolve => {
+            lockSection.push(async (next) => {
+                try {
+                    const state = await this.spotifyPlayerService.getCurrentState();
+                    await state.map(async state => {
+                        if (_.isEmpty(state)) {
+                            const volume = this.volume;
+                            const res = await this.spotify.volume(volume * 1.1);
+                            res.error(() => this.errors = [res]);
+                        } else {
+                            const volume = await this.spotifyPlayerService.getVolume();
+                            volume.map(v => this.volume = v * 1.1)
+                                .error(e => this.errors = [Result.error(e)]);
+                        }
+                    }).await();
+                } catch (ex) {
+                    this.errors = [Result.error(ex as Error)];
+                }
+                resolve();
+                next();
+            });
         });
     }
 
-    async volumeDown() {
-        lockSection.push(async next => {
-            try {
-                const state = await this.spotifyPlayerService.getCurrentState();
-                await state.map(async state => {
-                    if (_.isEmpty(state)) {
-                        const volume = this.volume;
-                        const res = await this.spotify.volume(volume * 0.9);
-                        res.error(e => this.errors = [Result.error(e)]);
-                    } else {
-                        const volume = await this.spotifyPlayerService.getVolume();
-                        volume.map(v => this.volume = v * 0.9)
-                            .error(e => this.errors = [Result.error(e)]);
-                    }
-                }).await();
-            } catch (ex) {
-                this.errors = [Result.error(ex as Error)];
-            }
-            next();
+    volumeDown(): Promise<void> {
+        return new Promise(resolve => {
+            lockSection.push(async next => {
+                try {
+                    const state = await this.spotifyPlayerService.getCurrentState();
+                    await state.map(async state => {
+                        if (_.isEmpty(state)) {
+                            const volume = this.volume;
+                            const res = await this.spotify.volume(volume * 0.9);
+                            res.error(e => this.errors = [Result.error(e)]);
+                        } else {
+                            const volume = await this.spotifyPlayerService.getVolume();
+                            volume.map(v => this.volume = v * 0.9)
+                                .error(e => this.errors = [Result.error(e)]);
+                        }
+                    }).await();
+                } catch (ex) {
+                    this.errors = [Result.error(ex as Error)];
+                }
+                resolve();
+                next();
+            });
         });
     }
 
-    async likeTrack() {
+    likeTrack(): void {
         lockSection.push(async (next) => {
             try {
                 if (!this.currentTrack) {
@@ -363,7 +387,7 @@ class MediaPlayerViewModel {
         });
     }
 
-    async unlikeTrack() {
+    unlikeTrack(): void {
         lockSection.push(async (next) => {
             if (!this.currentTrack) {
                 next();
@@ -379,11 +403,11 @@ class MediaPlayerViewModel {
         });
     }
 
-    playInTracks(item: TrackViewModelItem) {
+    playInTracks(item: TrackViewModelItem): Promise<void> {
         return item.playTracks(this.queue);
     }
 
-    async resume() {
+    async resume(): Promise<void> {
         const res = await this.spotifyPlayerService.resume();
         res.map(e => this.errors = [Result.error(e)]);
     }

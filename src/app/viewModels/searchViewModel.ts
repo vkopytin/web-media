@@ -64,7 +64,7 @@ class SearchViewModel {
 
     }
 
-    async init() {
+    async init(): Promise<void> {
         this.settings = {
             offset: 0,
             total: 0,
@@ -77,27 +77,27 @@ class SearchViewModel {
         await this.fetchData();
     }
 
-    changeSearchType(searchType: ISearchType) {
+    changeSearchType(searchType: ISearchType): void {
         this.searchType = searchType;
         this.fetchData();
     }
 
-    selectAlbum(album: AlbumViewModelItem | null) {
+    selectAlbum(album: AlbumViewModelItem | null): void {
         this.currentAlbum = album;
         this.fetchTracks();
     }
 
-    selectPlaylist(playlist: PlaylistsViewModelItem | null) {
+    selectPlaylist(playlist: PlaylistsViewModelItem | null): void {
         this.currentPlaylist = playlist;
         this.fetchTracks();
     }
 
-    selectArtist(artist: ArtistViewModelItem | null) {
+    selectArtist(artist: ArtistViewModelItem | null): void {
         this.currentArtist = artist;
         this.fetchTracks();
     }
 
-    async fetchData() {
+    async fetchData(): Promise<void> {
         this.isLoading = true;
         this.tracks = [];
         this.artists = [];
@@ -135,7 +135,7 @@ class SearchViewModel {
         this.isLoading = false;
     }
 
-    async loadMore() {
+    async loadMore(): Promise<void> {
         if (this.settings.offset >= this.settings.total) {
             return;
         }
@@ -167,13 +167,13 @@ class SearchViewModel {
         this.isLoading = false;
     }
 
-    async fetchTracks() {
+    async fetchTracks(): Promise<void> {
         this.currentTracks = [];
 
         if (this.searchType === 'album' && this.currentAlbum) {
             const albumTrackssResult = await this.spotify.listAlbumTracks(this.currentAlbum.id());
 
-            return albumTrackssResult
+            albumTrackssResult
                 .map(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem({ track: item } as ISpotifySong, index)))
                 .error(e => this.errors = [Result.error(e)]);
         }
@@ -181,7 +181,7 @@ class SearchViewModel {
         if (this.searchType === 'playlist' && this.currentPlaylist) {
             const playlistTracksResult = await this.spotify.fetchPlaylistTracks(this.currentPlaylist.id());
 
-            return playlistTracksResult
+            playlistTracksResult
                 .map(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem(item, index)))
                 .error(e => this.errors = [Result.error(e)]);
         }
@@ -189,33 +189,33 @@ class SearchViewModel {
         if (this.searchType === 'artist' && this.currentArtist) {
             const artistTracksResult = await this.spotify.fetchArtistTopTracks(this.currentArtist.id(), 'US');
 
-            return artistTracksResult
+            artistTracksResult
                 .map(tr => this.currentTracks = _.map(tr.tracks, (item, index) => new TrackViewModelItem({ track: item } as ISpotifySong, index)))
                 .error(e => this.errors = [Result.error(e)]);
         }
     }
 
-    tracksAddRange(value: TrackViewModelItem[]) {
+    tracksAddRange(value: TrackViewModelItem[]): void {
         const array = [...this.tracks, ...value];
         this.tracks = array;
     }
 
-    artistsAddRange(value: ArtistViewModelItem[]) {
+    artistsAddRange(value: ArtistViewModelItem[]): void {
         const array = [...this.artists, ...value];
         this.artists = array;
     }
 
-    albumsAddRange(value: AlbumViewModelItem[]) {
+    albumsAddRange(value: AlbumViewModelItem[]): void {
         const array = [...this.albums, ...value];
         this.albums = array;
     }
 
-    playlistsAddRange(value: PlaylistsViewModelItem[]) {
+    playlistsAddRange(value: PlaylistsViewModelItem[]): void {
         const array = [...this.playlists, ...value];
         this.playlists = array;
     }
 
-    playInTracks(item: TrackViewModelItem) {
+    playInTracks(item: TrackViewModelItem): Promise<void> {
         return item.playTracks(this.tracks);
     }
 }

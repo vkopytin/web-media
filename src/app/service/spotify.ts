@@ -171,7 +171,7 @@ class SpotifyService extends Events {
 
     async userPlaylists(user: IUserInfo): Promise<Result<Error, IUserPlaylistsResult>> {
         if (!user.id) {
-            throw new Error('Can\'t fetch playlist. Empty id');
+            return Result.error(new Error('Can\'t fetch playlist. Empty id'));
         }
         try {
             const res = await this.adapter.userPlaylists(user.id);

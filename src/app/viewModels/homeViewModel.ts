@@ -39,17 +39,17 @@ class HomeViewModel {
 
     }
 
-    async init() {
+    async init(): Promise<void> {
         await this.connect();
         await this.fetchData();
     }
 
-    async connect() {
+    connect(): void {
         this.spotify.on('change:state', (...args: unknown[]) => this.loadData(...args));
     }
 
     @isLoading
-    async fetchData(trackId?: string) {
+    async fetchData(trackId?: string): Promise<void> {
         const artistIds = [] as string[];
         let trackIds = trackId ? [trackId] : [];
 
@@ -81,13 +81,13 @@ class HomeViewModel {
         res.error(() => this.errors = [res]);
     }
 
-    async loadData(...args: unknown[]) {
+    async loadData(...args: unknown[]): Promise<void> {
         if (!~args.indexOf('recommendations')) {
             return;
         }
     }
 
-    async checkTracks(tracks: TrackViewModelItem[]) {
+    async checkTracks(tracks: TrackViewModelItem[]): Promise<void> {
         if (!tracks.length) {
             return;
         }
@@ -104,27 +104,27 @@ class HomeViewModel {
         res2.error(() => this.errors = [res2]);
     }
 
-    playInTracks(item: TrackViewModelItem) {
-        return item.playTracks(this.tracks);
+    async playInTracks(item: TrackViewModelItem): Promise<void> {
+        await item.playTracks(this.tracks);
     }
 
-    async resume() {
+    async resume(): Promise<void> {
         await this.spotifyPlayer.resume();
     }
 
-    async selectPlaylist(playlist: PlaylistsViewModelItem) {
+    async selectPlaylist(playlist: PlaylistsViewModelItem): Promise<void> {
         this.selectedPlaylist = playlist;
         await this.fetchData();
     }
 
-    async likeTrack(track: TrackViewModelItem) {
+    async likeTrack(track: TrackViewModelItem): Promise<void> {
         const res = await track.likeTrack();
         res.map(() => {
             this.checkTracks([track]);
         }).error((e) => this.errors = [Result.error(e)]);
     }
 
-    async unlikeTrack(track: TrackViewModelItem) {
+    async unlikeTrack(track: TrackViewModelItem): Promise<void> {
         const res = await track.unlikeTrack();
         res.map(() => {
             this.checkTracks([track]);
@@ -155,14 +155,14 @@ class HomeViewModel {
         });
     }
 
-    async bannTrack(track: TrackViewModelItem) {
+    async bannTrack(track: TrackViewModelItem): Promise<void> {
         await track.bannTrack();
         const res = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
 
         res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
     }
 
-    async removeBannFromTrack(track: TrackViewModelItem) {
+    async removeBannFromTrack(track: TrackViewModelItem): Promise<void> {
         await track.removeBannFromTrack();
         const res = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
 

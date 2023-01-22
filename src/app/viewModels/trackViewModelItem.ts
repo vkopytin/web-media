@@ -40,7 +40,7 @@ class TrackViewModelItem {
 
     }
 
-    id() {
+    id(): string {
         if (!this.song.track) {
             return '<Missing track>' + (+new Date());
         }
@@ -48,7 +48,7 @@ class TrackViewModelItem {
         return this.song.track.id;
     }
 
-    name() {
+    name(): string {
         if (!this.song.track) {
             return '<Missing track>';
         }
@@ -56,7 +56,7 @@ class TrackViewModelItem {
         return this.song.track.name;
     }
 
-    album() {
+    album(): string {
         if (!this.song.track) {
             return '<Can\'t read album. Missing track>';
         }
@@ -67,7 +67,7 @@ class TrackViewModelItem {
         return this.song.track.album?.name;
     }
 
-    artist() {
+    artist(): string {
         if (!this.song.track) {
             return '<Can\'t read artists. Missing track>';
         }
@@ -76,22 +76,23 @@ class TrackViewModelItem {
         return (artist && artist.name) || '';
     }
 
-    duration() {
+    duration(): string {
         if (!this.song.track) {
-            return 0;
+            return '0';
         }
 
         return formatTime(this.song.track?.duration_ms || 0);
     }
 
-    uri() {
+    uri(): string {
         if (!this.song.track) {
             return '';
         }
+
         return this.song.track.uri;
     }
 
-    thumbnailUrl() {
+    thumbnailUrl(): string | undefined {
         if (!this.song.track) {
             return '';
         }
@@ -99,16 +100,17 @@ class TrackViewModelItem {
             return '';
         }
         const image = _.first(this.song.track.album?.images);
+
         return image?.url;
     }
 
-    async fetchData() {
+    async fetchData(): Promise<void> {
         this.listPlaylists();
         const res = await this.data.isBannedTrack(this.song.track.id);
         res.map(r => this.isBanned = r).error(e => this.errors = [Result.error(e)]);
     }
 
-    async listPlaylists() {
+    async listPlaylists(): Promise<Result<Result<Error, unknown>[], PlaylistsViewModelItem[]>> {
         const res = await this.data.listPlaylistsByTrack(this.song.track);
 
         return res
@@ -116,13 +118,13 @@ class TrackViewModelItem {
             .error(e => this.errors = [Result.error(e)]);
     }
 
-    async play(playlistUri: string) {
+    async play(playlistUri: string): Promise<void> {
         const playResult = await this.spotify.play('', playlistUri, this.uri());
         playResult.map(() => this.mediaPlayerViewModel.fetchDataInternal())
             .error(e => this.errors = [Result.error(e)]);
     }
 
-    async playTracks(tracks: TrackViewModelItem[]) {
+    async playTracks(tracks: TrackViewModelItem[]): Promise<void> {
         const allowedTracks = _.filter(tracks, track => !track.isBanned);
         const playResult = await this.spotify.play('', _.map(allowedTracks, item => item.uri()), this.uri());
         playResult.map(() => this.mediaPlayerViewModel.fetchDataInternal())
@@ -130,7 +132,7 @@ class TrackViewModelItem {
     }
 
     @isLoading
-    async addToPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
+    async addToPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem): Promise<void> {
         const result = await this.ss.addTrackToPlaylist(track.song.track, playlist.playlist);
         result.map(() => setTimeout(() => {
             this.fetchData();
@@ -138,7 +140,7 @@ class TrackViewModelItem {
     }
 
     @isLoading
-    async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem) {
+    async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem): Promise<void> {
         const result = await this.ss.removeTrackFromPlaylist(track.song.track, playlist.id());
         await result.map(() => this.fetchData()).error(e => this.errors = [Result.error(e)]);
     }
@@ -150,23 +152,23 @@ class TrackViewModelItem {
         return result;
     }
 
-    async unlikeTrack() {
+    async unlikeTrack(): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
         const result = await this.ss.removeTracks(this.song.track);
         result.error(e => this.errors = [Result.error(e)]);
 
         return result;
     }
 
-    updateIsCached(playlists: PlaylistsViewModelItem[]) {
+    updateIsCached(playlists: PlaylistsViewModelItem[]): void {
         this.trackPlaylists = playlists;
     }
 
-    async bannTrack() {
+    async bannTrack(): Promise<void> {
         const res = await this.data.bannTrack(this.id());
         res.map(r => this.isBanned = r).error(e => this.errors = [Result.error(e)]);
     }
 
-    async removeBannFromTrack() {
+    async removeBannFromTrack(): Promise<void> {
         const res = await this.data.removeBannFromTrack(this.id());
         res.map(r => this.isBanned = !r).error(e => this.errors = [Result.error(e)]);
     }

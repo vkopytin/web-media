@@ -65,13 +65,13 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
         }
     }
 
-    refresh() {
+    refresh(): void {
         this.setState({
             ...this.state,
         });
     }
 
-    showErrors(errors: Result<Error>[]) {
+    showErrors(errors: Result<Error>[]): void {
         this.props.showErrors(errors);
     }
 

@@ -18,43 +18,43 @@ class PlaylistsViewModelItem {
     constructor(public playlist: IUserPlaylist) {
     }
 
-    id() {
+    id(): string {
         return this.playlist.id;
     }
 
-    uri() {
+    uri(): string {
         return this.playlist.uri;
     }
 
-    name() {
+    name(): string {
         return this.playlist.name;
     }
 
-    owner() {
-        return this.playlist.owner.display_name;
+    owner(): string {
+        return this.playlist.owner.display_name || '';
     }
 
-    ownerUrl() {
-        return this.playlist.owner.href;
+    ownerUrl(): string {
+        return this.playlist.owner.href || '';
     }
 
-    tracksTotal() {
+    tracksTotal(): number {
         return this.playlist.tracks.total;
     }
 
-    description() {
+    description(): string {
         return unsafeHtml(this.playlist.description || '');
     }
 
-    thumbnailUrl() {
-        return _.first(this.playlist.images)?.url;
+    thumbnailUrl(): string {
+        return _.first(this.playlist.images)?.url || '';
     }
 
-    snapshotId() {
+    snapshotId(): string {
         return this.playlist.snapshot_id;
     }
 
-    equals(inst: PlaylistsViewModelItem) {
+    equals(inst: PlaylistsViewModelItem): boolean {
         if (inst == null || inst == undefined) {
             return false;
         }

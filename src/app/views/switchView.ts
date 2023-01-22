@@ -20,7 +20,7 @@ class SwitchView extends React.Component<ISwitchViewProps> {
         transition: ['', '']
     };
 
-    getSlideEffect(panelKey: string, nextPanelKey: string) {
+    getSlideEffect(panelKey: string, nextPanelKey: string): string[] {
         const aIndex = panels.indexOf(panelKey),
             bIndex = panels.indexOf(nextPanelKey);
 
@@ -30,7 +30,7 @@ class SwitchView extends React.Component<ISwitchViewProps> {
         return ['right 3', '4'];
     }
 
-    getInitSlideEffect(panelKey: string, nextPanelKey: string) {
+    getInitSlideEffect(panelKey: string, nextPanelKey: string): string[] {
         const aIndex = panels.indexOf(panelKey),
             bIndex = panels.indexOf(nextPanelKey);
 

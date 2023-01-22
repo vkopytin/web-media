@@ -87,29 +87,25 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh() {
+    refresh(): void {
         this.setState({
             ...this.state,
         });
     }
 
-    uri() {
+    uri(): string {
         return this.props.playlist.uri();
     }
 
-    isPlaying(track: TrackViewModelItem) {
+    isPlaying(track: TrackViewModelItem): boolean {
         return track.id() === this.props.currentTrackId;
     }
 
-    showErrors(errors: Result[]) {
+    showErrors(errors: Result[]): void {
         this.props.showErrors(errors);
     }
 
-    render() {
-        return template(this);
-    }
-
-    onMouseDown(e: React.MouseEvent<HTMLElement, MouseEvent> | React.TouchEvent<HTMLElement>) {
+    onMouseDown(e: React.MouseEvent<HTMLElement, MouseEvent> | React.TouchEvent<HTMLElement>): void {
         console.log('onMouseDown');
         const target = this.getTrNode(e.target as HTMLElement);
         if (target) {
@@ -119,7 +115,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         }
     }
 
-    onDragStart(e: DragEvent) {
+    onDragStart(e: DragEvent): void {
         console.log('onDragStart');
         const target = this.getTrNode(e.target as HTMLElement);
         if (target) {
@@ -146,7 +142,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         }
     }
 
-    onDragEnter(e: Event, el: HTMLElement) {
+    onDragEnter(e: Event, el: HTMLElement): void {
         const target = this.getTrNode(e.target as HTMLElement);
         $(target).toggleClass('dragged-place', true);
         const rowIndex = elementIndex(target);
@@ -159,12 +155,12 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         }
     }
 
-    onDragLeave(e: Event) {
+    onDragLeave(e: Event): void {
         const target = this.getTrNode(e.target as HTMLElement);
         $(target).toggleClass('dragged-place', false);
     }
 
-    onDragEnd(e: DragEvent) {
+    onDragEnd(e: DragEvent): void {
         console.log('onDragEnd');
         const target = this.getTrNode(e.target as HTMLElement);
         if (target) {
@@ -186,7 +182,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         return $(target).closest('li')[0];
     }
 
-    changeRowIndex() {
+    changeRowIndex(): void {
         const dragIndex = this.state.dragIndex;
         const draggedIndex = this.state.draggedIndex;
         if (
@@ -199,10 +195,14 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         this.state.draggedIndex = -1;
     }
 
-    isBanned(track: TrackViewModelItem) {
+    isBanned(track: TrackViewModelItem): boolean {
         const res = this.bannedTrackIds.find(trackId => trackId === track.id());
 
         return !!res;
+    }
+
+    render() {
+        return template(this);
     }
 }
 

@@ -98,17 +98,17 @@ class SearchView extends React.Component<ISearchViewProps> {
         }
     }
 
-    refresh() {
+    refresh(): void {
         this.setState({
             ...this.state,
         });
     }
 
-    isPlaying(track: TrackViewModelItem) {
+    isPlaying(track: TrackViewModelItem): boolean {
         return track.id() === this.props.currentTrackId;
     }
 
-    showErrors(errors: Result[]) {
+    showErrors(errors: Result[]): void {
         this.props.showErrors(errors);
     }
 

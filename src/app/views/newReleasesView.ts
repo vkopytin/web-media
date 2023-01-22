@@ -62,17 +62,17 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    refresh() {
+    refresh(): void {
         this.setState({
             ...this.state,
         });
     }
 
-    isLiked(album: AlbumViewModelItem) {
+    isLiked(album: AlbumViewModelItem): boolean {
         return !!_.find(this.likedAlbums, (item: AlbumViewModelItem) => item.id() === album.id());
     }
 
-    showErrors(errors: Result<Error>[]) {
+    showErrors(errors: Result<Error>[]): void {
         this.props.showErrors(errors);
     }
 

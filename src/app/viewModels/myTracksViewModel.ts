@@ -32,7 +32,7 @@ class MyTracksViewModel {
 
     }
 
-    async init() {
+    async init(): Promise<void> {
         this.settings = {
             total: 1,
             limit: 20,
@@ -42,11 +42,11 @@ class MyTracksViewModel {
         await this.fetchData();
     }
 
-    async connect() {
+    async connect(): Promise<void> {
         this.spotify.on('change:state', (...args: unknown[]) => this.loadData(...args));
     }
 
-    async fetchData() {
+    async fetchData(): Promise<void> {
         this.isLoading = true;
         this.settings.offset = 0;
         this.loadData('myTracks');
@@ -61,7 +61,7 @@ class MyTracksViewModel {
         this.isLoading = false;
     }
 
-    async loadMore() {
+    async loadMore(): Promise<void> {
         if (this.settings.offset >= this.settings.total) {
             return;
         }
@@ -79,13 +79,13 @@ class MyTracksViewModel {
         this.isLoading = false;
     }
 
-    async loadData(...args: unknown[]) {
+    async loadData(...args: unknown[]): Promise<void> {
         if (!~args.indexOf('myTracks')) {
             return;
         }
     }
 
-    async checkTracks(tracks: TrackViewModelItem[], offset = 0) {
+    async checkTracks(tracks: TrackViewModelItem[], offset = 0): Promise<void> {
         const tracksToCheck = tracks.slice(offset, offset + 50);
         this.likedTracks = _.filter(this.tracks, track => track.isLiked);
         if (!tracksToCheck.length) {
@@ -100,12 +100,12 @@ class MyTracksViewModel {
         }).error(e => this.errors = [Result.error(e)]);
     }
 
-    tracksAddRange(value: TrackViewModelItem[]) {
+    tracksAddRange(value: TrackViewModelItem[]): void {
         const array = [...this.tracks, ...value];
         this.tracks = array;
     }
 
-    playInTracks(item: TrackViewModelItem) {
+    playInTracks(item: TrackViewModelItem): void {
         item.playTracks(this.tracks);
     }
 

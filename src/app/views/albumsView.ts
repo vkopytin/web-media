@@ -39,21 +39,21 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
         this.tracks = this.props.tracks;
     }
 
-    refresh() {
+    refresh(): void {
         this.setState({
             ...this.state,
         });
     }
 
-    uri() {
+    uri(): string {
         return this.props.uri;
     }
 
-    isPlaying(track: TrackViewModelItem) {
+    isPlaying(track: TrackViewModelItem): boolean {
         return this.props.currentTrackId === track.id();
     }
 
-    showErrors(errors: Result<Error>[]) {
+    showErrors(errors: Result<Error>[]): void {
         this.props.showErrors(errors);
     }
 
