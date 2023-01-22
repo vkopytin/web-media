@@ -20,11 +20,11 @@ export const template = (view: PlaylistsView) => <>
         >Create private</a>
     </div>
     <ul className="table-view">
-        {_.map(view.playlists, (item: PlaylistsView['playlists'][0], index) => {
+        {_.map(view.playlists, (item: PlaylistsView['playlists'][0]) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media">
                     <a className="navigate-right"
-                        onClick={evnt => { view.selectPlaylistCommand.exec(item.id() === view.currentPlaylistId ? null : item.id()) }}
+                        onClick={() => { view.selectPlaylistCommand.exec(item.id() === view.currentPlaylistId ? null : item.id()) }}
                     >
                         <img className="media-object pull-left" height="60" src={item.thumbnailUrl()} alt={item.name()} />
                         <div className="media-body">
@@ -43,7 +43,7 @@ export const template = (view: PlaylistsView) => <>
                     />
                     <div key={2} className="center">
                         {view.isLoading || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
-                            onClick={evnt => view.loadMoreTracksCommand.exec()}
+                            onClick={() => view.loadMoreTracksCommand.exec()}
                         ></button>}
                         {view.isLoading && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
                     </div>
@@ -53,7 +53,7 @@ export const template = (view: PlaylistsView) => <>
     </ul>
     <div className="center">
         {view.isLoading || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
-            onClick={evnt => view.loadMoreCommand.exec()}
+            onClick={() => view.loadMoreCommand.exec()}
         ></button>}
         {view.isLoading && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
     </div>

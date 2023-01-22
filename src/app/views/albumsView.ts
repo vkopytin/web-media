@@ -35,7 +35,7 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    componentDidUpdate(prevProps: IAlbumsViewProps) {
+    componentDidUpdate() {
         this.tracks = this.props.tracks;
     }
 

@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { IUserInfo } from '../adapter/spotify';
+import { ISpotifySong, IUserInfo } from '../adapter/spotify';
 import { Service } from '../service';
 import { LoginService } from '../service/loginService';
 import { SettingsService } from '../service/settings';
@@ -40,11 +40,11 @@ class UserProfileViewModel {
 
     }
 
-    async init() {
+    async init(): Promise<void> {
         await this.fetchData();
     }
 
-    async fetchData() {
+    async fetchData(): Promise<void> {
         this.apiseedsKey = this.settingsService.apiseedsKey();
 
         const spotifyTokenUrlResult = await this.login.getSpotifyAuthUrl();
@@ -69,15 +69,15 @@ class UserProfileViewModel {
 
         const topTracksResult = await this.spotify.listTopTracks();
         topTracksResult.map(topTracks => {
-            this.topTracks = _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index));
+            this.topTracks = _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
         }).error(e => this.errors = [Result.error(e)]);
     }
 
-    saveApiseedsKey(val: string) {
+    saveApiseedsKey(val: string): void {
         this.settingsService.apiseedsKey(val);
     }
 
-    async logout() {
+    async logout(): Promise<void> {
         const res = await this.spotify.logout();
         res.map(() => {
             this.isLoggedin = false;

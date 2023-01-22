@@ -1,15 +1,15 @@
 import * as _ from 'underscore';
 import { className as cn } from '../utils';
 import { UserProfileView } from '../views';
-const imgSrc = require('../../images/Spotify_Logo_RGB_Green.png');
+import imgSrc from '../../images/Spotify_Logo_RGB_Green.png';
 
 export const template = (view: UserProfileView) => <div className={cn(`${view.props.className}`)}>
     <header className="bar bar-nav">
         <a className="icon icon-close pull-right" href="#"
-            onClick={evnt => view.openLogin = false}
+            onClick={() => view.openLogin = false}
         ></a>
         <h1 className="title">
-            <img className="spotify-logo" src={imgSrc.default.src} height="32" />
+            <img className="spotify-logo" alt="spotify-logo" src={imgSrc.src} height="32" />
         </h1>
     </header>
 
@@ -57,10 +57,10 @@ export const template = (view: UserProfileView) => <div className={cn(`${view.pr
             </div>
         </form>
         <ul className="table-view">
-            {_.map(view.topTracks, (item, index) => {
+            {_.map(view.topTracks, (item) => {
                 return <li key={item.id()} className="table-view-cell media">
                     <span className="media-object pull-left player-left--32"
-                        onClick={evnt => item.playTracks(view.topTracks)}
+                        onClick={() => item.playTracks(view.topTracks)}
                     >
                         <div className="region">
                             <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>

@@ -20,8 +20,9 @@ class Result<E = Error, R = unknown> {
         }
     }
 
-    tap(f: (v: R) => any): Result<E, R> {
+    tap(f: (v: R) => void): Result<E, R> {
         this.left.match(
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             () => { }
             ,
             () => f(this.right)
@@ -51,7 +52,7 @@ class Result<E = Error, R = unknown> {
         return this.match(
             v => v
             ,
-            e => def
+            () => def
         );
     }
 
@@ -87,7 +88,8 @@ class Result<E = Error, R = unknown> {
         );
     }
 
-    is(a: new (...args: any[]) => E): boolean {
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    is(a: Function): boolean {
         return this.left.match(e => e instanceof a, () => this.right instanceof a);
     }
 }

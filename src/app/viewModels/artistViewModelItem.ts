@@ -14,7 +14,6 @@ class ArtistViewModelItem {
     @State isLiked = false;
 
     isInit = _.delay(() => {
-        this.connect();
         this.loadData('playlistTracks');
     });
 
@@ -40,10 +39,6 @@ class ArtistViewModelItem {
     thumbnailUrl() {
         const image = _.first(this.artist.images);
         return image?.url;
-    }
-
-    async connect() {
-
     }
 
     async loadData(...args: unknown[]) {

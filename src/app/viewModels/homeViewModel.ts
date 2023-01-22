@@ -1,6 +1,5 @@
 import * as _ from 'underscore';
 import { ISpotifySong } from '../adapter/spotify';
-import { Service } from '../service';
 import { DataService } from '../service/dataService';
 import { LyricsService } from '../service/lyricsService';
 import { SpotifyService } from '../service/spotify';
@@ -103,10 +102,6 @@ class HomeViewModel {
         const bannedTrackIdsResult = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
         const res2 = bannedTrackIdsResult.map(r => this.bannedTrackIds = r);
         res2.error(() => this.errors = [res2]);
-    }
-
-    loadMore() {
-
     }
 
     playInTracks(item: TrackViewModelItem) {

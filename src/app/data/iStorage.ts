@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 export interface IStorageConfig {
     name: string;
     options: {

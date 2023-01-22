@@ -85,7 +85,7 @@ class MyTracksViewModel {
         }
     }
 
-    async checkTracks(tracks: TrackViewModelItem[], offset = 0, limit = tracks.length) {
+    async checkTracks(tracks: TrackViewModelItem[], offset = 0) {
         const tracksToCheck = tracks.slice(offset, offset + 50);
         this.likedTracks = _.filter(this.tracks, track => track.isLiked);
         if (!tracksToCheck.length) {

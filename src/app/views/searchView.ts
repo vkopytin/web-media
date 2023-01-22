@@ -92,7 +92,7 @@ class SearchView extends React.Component<ISearchViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    componentDidUpdate(prevProps: ISearchViewProps) {
+    componentDidUpdate() {
         if (this.props.loadMore) {
             this.loadMoreCommand.exec();
         }

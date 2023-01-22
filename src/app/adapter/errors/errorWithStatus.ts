@@ -1,6 +1,6 @@
 class ErrorWithStatus extends Error {
 
-    static fromJqXhr(jqXHR: { responseJSON?: { error?: { message?: string } }; status: number; statusText: string; responseText: string; }) {
+    static fromJqXhr<T extends { error?: { message?: string } }>(jqXHR: { responseJSON?: T; status: number; statusText: string; responseText: string; }) {
         const details = jqXHR.responseJSON;
 
         return new ErrorWithStatus(details?.error?.message || jqXHR.responseText,
@@ -10,7 +10,7 @@ class ErrorWithStatus extends Error {
         );
     }
 
-    constructor(public msg: string, public status: number, public statusText: string, public details?: {}) {
+    constructor(public msg: string, public status: number, public statusText: string, public details?: unknown) {
         super(msg);
 
         this.name = 'ErrorWithStatus';

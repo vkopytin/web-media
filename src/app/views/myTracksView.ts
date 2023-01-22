@@ -49,7 +49,7 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    componentDidUpdate(prevProps: IMyTracksViewProps) {
+    componentDidUpdate() {
         if (this.props.loadMore) {
             this.loadMoreCommand.exec();
         }

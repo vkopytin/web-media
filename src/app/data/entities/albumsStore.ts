@@ -83,7 +83,7 @@ export class AlbumsStore {
         });
     }
 
-    where(where: { [key: string]: any }) {
+    where(where: { [key: string]: unknown }) {
         return asAsyncOf(this.storage, this.storage.where, this.storeConfig, where);
     }
 

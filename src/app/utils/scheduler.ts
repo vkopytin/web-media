@@ -18,6 +18,7 @@ export class Scheduler {
         return Scheduler.inst;
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     static Command<T extends Function>(fn: T) {
         const current = Scheduler.getCurrent();
 

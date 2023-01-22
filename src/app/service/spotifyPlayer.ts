@@ -64,8 +64,8 @@ export interface IWebPlaybackState {
     };
 }
 
-interface IPlayer {
-    new(...args: unknown[]): IPlayer;
+type SDKPlayer = {
+    new(...args: unknown[]): SDKPlayer;
     addListener(eventName: 'ready', cb?: (player: IWebPlaybackPlayer) => void): void;
     addListener(eventName: 'playback_error', cb?: (res: IWebPlaybackError) => void): void;
     addListener(eventName: 'player_state_changed', cb?: (res: IWebPlaybackState) => void): void;
@@ -89,21 +89,21 @@ interface IPlayer {
         getOAuthToken(fn: (access_token: string) => void): void;
         id: string;
     };
-};
+}
 
 declare global {
     interface Window {
         Spotify: {
-            Player: IPlayer
+            Player: SDKPlayer
         };
         onSpotifyWebPlaybackSDKReady(): void;
     }
 }
 
 class SpotifyPlayerService extends Events {
-    public player?: IPlayer;
+    public player?: SDKPlayer;
 
-    deviceId: string = '';
+    deviceId = '';
     onInitializationError = (error: IWebPlaybackError): void => {
         console.log('initializationErrpr', error);
         this.trigger('initializationErrpr', error);
@@ -214,7 +214,7 @@ class SpotifyPlayerService extends Events {
         return Option.none();
     }
 
-    async refreshToken(newToken: string): Promise<Result<Error, boolean>> {
+    async refreshToken(): Promise<Result<Error, boolean>> {
         if (!this.player) {
             return Result.error(new Error('[Spotify SDK] Player is not initialized'));
         }

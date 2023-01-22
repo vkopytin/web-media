@@ -1,7 +1,8 @@
 const instances = new WeakMap();
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function inject<T extends {}>(
-    ctor: { new(...args: any[]): T },
+    ctor: { new(...args: any[]): T }, // eslint-disable-line @typescript-eslint/no-explicit-any
     ...options: unknown[]
 ): T {
     if (instances.has(ctor)) {

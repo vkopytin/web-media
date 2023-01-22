@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { SpotifyAdapter } from '../../adapter/spotify';
 import { DataStorage } from '../../data/dataStorage';
 import { AppViewModel } from '../appViewModel';
@@ -88,10 +90,10 @@ describe('App View Model', () => {
         spotify = new SpotifyService(adapter);
         spotifyPlayer = new SpotifyPlayerService(settings);
         dataService = new DataService();
-        spotifySync = new SpotifySyncService(spotify, dataService);
-        service = new Service(settings, login, {} as any, dataService, spotify, spotifySync, spotifyPlayer);
+        spotifySync = new SpotifySyncService(dataService, spotify);
+        service = new Service(settings, login, dataService, spotify, spotifySync, spotifyPlayer);
         mockedInit = jest.spyOn(AppViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
-        vm = new AppViewModel(spotifySync, spotify, spotifyPlayer, service);
+        vm = new AppViewModel(login, spotifySync, spotify, spotifyPlayer, service);
     });
 
     afterEach(() => {

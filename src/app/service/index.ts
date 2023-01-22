@@ -54,7 +54,7 @@ class Service {
         const playerResult = await refreshPlayerTokenResult.map(() => this.spotifyPlayerService);
 
         return await playerResult.cata(async player => {
-            await player.refreshToken(newToken);
+            await player.refreshToken();
 
             return Result.of(true);
         });
@@ -75,7 +75,7 @@ class Service {
     }
 
     async createNewPlaylist(userId: string, name: string, description = '', isPublic = false) {
-        const result = await this.spotifyService.createNewPlaylist(userId, name, description, isPublic);
+        await this.spotifyService.createNewPlaylist(userId, name, description, isPublic);
 
         const syncPlaylistsResult = await this.spotifySyncService.syncMyPlaylists();
 
@@ -92,7 +92,7 @@ class Service {
                 added_at: new Date().toISOString(),
                 track
             });
-        };
+        }
 
         return result;
     }

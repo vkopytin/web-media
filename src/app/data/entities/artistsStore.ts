@@ -1,6 +1,5 @@
-import * as _ from 'underscore';
-import { IStorage, IStorageConfig } from "../iStorage";
 import { asAsync, asAsyncOf } from '../../utils';
+import { IStorage, IStorageConfig } from "../iStorage";
 import { IArtist } from './interfaces/iArtist';
 
 
@@ -84,7 +83,7 @@ export class ArtistsStore {
         });
     }
 
-    where(where: { [key: string]: any }) {
+    where(where: { [key: string]: unknown }) {
         return asAsyncOf(this.storage, this.storage.where, this.storeConfig, where);
     }
 

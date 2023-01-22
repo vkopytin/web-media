@@ -26,9 +26,9 @@ class DataService extends Events {
                 }
 
                 try {
-                    const tracksStore = new TracksStore(storage!);
-                    const albumsStore = new AlbumsStore(storage!);
-                    const artistsStore = new ArtistsStore(storage!);
+                    const tracksStore = new TracksStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+                    const albumsStore = new AlbumsStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+                    const artistsStore = new ArtistsStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
                     const res = await tracksStore.refresh(track);
 
                     await albumsStore.refresh(track.album);
@@ -50,8 +50,8 @@ class DataService extends Events {
                 }
 
                 try {
-                    const playlistsStore = new PlaylistsStore(storage!);
-                    const imagesStore = new ImagesStore(storage!);
+                    const playlistsStore = new PlaylistsStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+                    const imagesStore = new ImagesStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
                     const res = await playlistsStore.refresh(playlist);
                     await Promise.all(playlist.images.map(image => imagesStore.refresh(image)));
 
@@ -71,7 +71,7 @@ class DataService extends Events {
                 }
 
                 try {
-                    const playlistRowsStore = new PlaylistRowsStore(storage!);
+                    const playlistRowsStore = new PlaylistRowsStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
                     const indexStr = '0000000000000000' + index;
                     const id = `${indexStr.substr(-8)}:${playlist.id}`;
                     playlistRowsStore.refresh({
@@ -91,14 +91,14 @@ class DataService extends Events {
     }
 
     async removeTrackFromPlaylist(playlistId: string, song: ISpotifySong): Promise<boolean> {
-        return new Promise<any>((resolve, reject) => {
+        return new Promise<boolean>((resolve, reject) => {
             DataStorage.create(async (err, storage) => {
                 if (err) {
                     return reject(err);
                 }
 
                 try {
-                    const playlistRowsStore = new PlaylistRowsStore(storage!);
+                    const playlistRowsStore = new PlaylistRowsStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
                     const rows = playlistRowsStore.where({
                         playlistId,
                         trackId: song.track.id
@@ -123,7 +123,7 @@ class DataService extends Events {
 
                 try {
                     const res = [] as IUserPlaylist[];
-                    const playlistRowsStore = new PlaylistRowsStore(storage!);
+                    const playlistRowsStore = new PlaylistRowsStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
                     for await (const row of playlistRowsStore.where({ trackId: track.id })) {
                         res.push((row as IPlaylistRow).playlist as IUserPlaylist);
                     }
@@ -144,7 +144,7 @@ class DataService extends Events {
                 }
 
                 try {
-                    const bannedTracksStore = new BannedTracksStore(storage!);
+                    const bannedTracksStore = new BannedTracksStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
                     await bannedTracksStore.refresh({ id: trackId } as ITrack);
 
                     resolve(Result.of(true));
@@ -163,7 +163,7 @@ class DataService extends Events {
                 }
 
                 try {
-                    const bannedTracksStore = new BannedTracksStore(storage!);
+                    const bannedTracksStore = new BannedTracksStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
                     const res = await bannedTracksStore.delete(trackId);
 
                     resolve(Result.of(res));
@@ -182,7 +182,7 @@ class DataService extends Events {
                 }
 
                 try {
-                    const bannedTracksStore = new BannedTracksStore(storage!);
+                    const bannedTracksStore = new BannedTracksStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
                     const track = await bannedTracksStore.get(trackId);
 
                     resolve(Result.of(!!track));
@@ -203,7 +203,7 @@ class DataService extends Events {
 
                 try {
                     const bannedIds = [] as string[];
-                    const bannedTracksStore = new BannedTracksStore(storage!);
+                    const bannedTracksStore = new BannedTracksStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
                     for await (const track of bannedTracksStore.list()) {
                         if (trackIds.indexOf(track.id) !== -1) {
                             bannedIds.push(track.id);

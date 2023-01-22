@@ -1,20 +1,18 @@
 import * as React from 'react';
 import * as _ from 'underscore';
-import { ServiceResult } from '../base/serviceResult';
 
 type PanelType = 'home' | 'playlists' | 'profile' | 'releases' | 'search' | 'tracks';
 
 export interface ISwitchViewProps {
     currentView: PanelType;
-    onClick?(evnt: {}): void;
-    children: Array<{}>;
+    onClick?(evnt: Event): void;
+    children: Array<React.ReactElement>;
 }
 
 const panels = ['home', 'playlists', 'tracks', 'search', 'releases'];
 
-class SwitchView extends React.Component<ISwitchViewProps, {}> {
+class SwitchView extends React.Component<ISwitchViewProps> {
     state = {
-        errors: [] as ServiceResult<any, Error>[],
         prevPanel: this.props.currentView,
         currentView: this.props.currentView,
         renderCurrent: false,
@@ -62,22 +60,26 @@ class SwitchView extends React.Component<ISwitchViewProps, {}> {
                     transition: this.getSlideEffect(prevPanel, nextPanel)
                 });
             }, 50);
-            const currentView = _.findWhere(this.props.children as any[], { key: prevPanel }),
-                nextView = _.findWhere(this.props.children as any[], { key: nextPanel });
+            const currentView = _.findWhere(this.props.children, { key: prevPanel });
+            const nextView = _.findWhere(this.props.children, { key: nextPanel });
 
             if (!this.state.trDone) {
                 this.state.transition = this.getInitSlideEffect(prevPanel, nextPanel);
             }
 
-            return [React.cloneElement(currentView, {
+            return [currentView ? React.cloneElement(currentView, {
                 className: [currentView.props.className, 'sliding', 'sliding-in', ...this.state.transition[0].split(' ')].join(' ')
-            }),
-            React.cloneElement(nextView, {
+            }) : currentView,
+            nextView ? React.cloneElement(nextView, {
                 className: [nextView.props.className, 'sliding', ...this.state.transition[1].split(' ')].join(' ')
-            })];
+            }) : nextView];
         }
 
-        const element = _.findWhere(this.props.children as any[], { key: this.state.currentView });
+        const element = _.findWhere(this.props.children, { key: this.state.currentView });
+
+        if (!element) {
+            return element;
+        }
 
         return React.cloneElement(element, {
             ...element.props,

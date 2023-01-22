@@ -1,9 +1,8 @@
-import * as _ from 'underscore';
 import { asyncDebounce } from '../utils';
 import { IStorage, IStorageConfig } from './iStorage';
 
 
-const db = {} as { [key: string]: { [key: string]: {} } };
+const db = {} as { [key: string]: { [key: string]: unknown } };
 
 class InMemoryStorage implements IStorage {
     db = db;
@@ -87,7 +86,8 @@ class InMemoryStorage implements IStorage {
         }
     }
 
-    where<T>(config: IStorageConfig, where: { [key: string]: any }, cb: { (err?: Error | null, result?: T): boolean }) {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+    where<T>(config: IStorageConfig, where: { [key: string]: unknown }, cb: { (err?: Error | null, result?: T): boolean }) {
 
     }
 

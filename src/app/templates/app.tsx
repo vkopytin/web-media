@@ -2,7 +2,7 @@ import * as _ from 'underscore';
 import { className as cn } from '../utils';
 import { Result } from '../utils/result';
 import { AppView, DevicesView, HomeView, MediaPlayerView, MyTracksView, NewReleasesView, PlaylistsView, SearchView, SwitchView, UserProfileView } from '../views';
-const imgSrc = require('../../images/Spotify_Logo_RGB_Green.png');
+import imgSrc from '../../images/Spotify_Logo_RGB_Green.png';
 
 export const template = (view: AppView) => <main>
     <section className="device-content">
@@ -39,7 +39,7 @@ export const template = (view: AppView) => <main>
             <ul className="table-view">
                 {_.map(view.errors, (error: Result, index) => {
                     return <li key={index} className="table-view-cell"
-                        onClick={evnt => error.error(e => console.log(e))}
+                        onClick={() => error.error(e => console.log(e))}
                     >
                         {'' + error.match(() => '', e => e.message)}
                     </li>
@@ -51,15 +51,15 @@ export const template = (view: AppView) => <main>
                 : <div className="meter animate"><span style={{ width: `${view.isSyncing}%` }}></span></div>
             }
             <a className="icon icon-info pull-left"
-                onClick={evnt => view.openDevices('show')}
+                onClick={() => view.openDevices('show')}
             >
             </a>
             <a className="icon icon-person pull-right"
-                onClick={evnt => view.openLogin = true}
+                onClick={() => view.openLogin = true}
             ></a>
             <h1 className="title">
-                <img className="spotify-logo" src={imgSrc.default.src} height="32"
-                    onClick={evnt => view.refreshTokenCommand.exec()}
+                <img className="spotify-logo" src={imgSrc.src} height="32"
+                    onClick={() => view.refreshTokenCommand.exec()}
                 />
             </h1>
         </header>
@@ -72,40 +72,40 @@ export const template = (view: AppView) => <main>
         </div>
         <nav className="footer bar bar-tab bar-footer">
             <a className={cn('tab-item ?active', view.currentPanel === 'home')} href="#"
-                onClick={evnt => view.currentPanel = 'home'}
+                onClick={() => view.currentPanel = 'home'}
             >
                 <span className="icon icon-home"></span>
                 <span className="tab-label">Home</span>
             </a>
             <a className={cn('tab-item ?active', view.currentPanel === 'playlists')} href="#"
-                onClick={evnt => view.currentPanel = 'playlists'}
+                onClick={() => view.currentPanel = 'playlists'}
             >
                 <span className="icon icon icon-list"></span>
                 <span className="tab-label">Playlists</span>
             </a>
             <a className={cn('tab-item ?active', view.currentPanel === 'tracks')} href="#"
-                onClick={evnt => view.currentPanel = 'tracks'}
+                onClick={() => view.currentPanel = 'tracks'}
             >
                 <span className="icon icon-star-filled"></span>
                 <span className="tab-label">Favorites</span>
             </a>
             <a className={cn('tab-item ?active', view.currentPanel === 'search')} href="#"
-                onClick={evnt => view.currentPanel = 'search'}
+                onClick={() => view.currentPanel = 'search'}
             >
                 <span className="icon icon-search"></span>
                 <span className="tab-label">Search</span>
             </a>
             <a className={cn('tab-item ?active', view.currentPanel === 'releases')} href="#"
-                onClick={evnt => view.currentPanel = 'releases'}
+                onClick={() => view.currentPanel = 'releases'}
             >
                 <span className="icon icon icon-info"></span>
                 <span className="tab-label">Releases</span>
             </a>
         </nav>
-        <SwitchView currentView={view.currentPanel} onClick={evnt => view.toggleSelectDevices('show')}>
+        <SwitchView currentView={view.currentPanel} onClick={() => view.toggleSelectDevices('show')}>
             <section key="home" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
                 ref={el => el && (view.elScroller = el)}
-                onScroll={evnt => view.onPageScroll()}
+                onScroll={() => view.onPageScroll()}
             >
                 <HomeView
                     showErrors={errors => view.showErrors(errors)}
@@ -114,7 +114,7 @@ export const template = (view: AppView) => <main>
             </section>
             <section key="playlists" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
                 ref={el => el && (view.elScroller = el)}
-                onScroll={evnt => view.onPageScroll()}
+                onScroll={() => view.onPageScroll()}
             >
                 <PlaylistsView
                     showErrors={errors => view.showErrors(errors)}
@@ -123,7 +123,7 @@ export const template = (view: AppView) => <main>
                 />
             </section>
             <section key="tracks" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
-                ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll()}
+                ref={el => el && (view.elScroller = el)} onScroll={() => view.onPageScroll()}
             >
                 <MyTracksView
                     showErrors={errors => view.showErrors(errors)}
@@ -132,7 +132,7 @@ export const template = (view: AppView) => <main>
                 />
             </section>
             <section key="search" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
-                ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll()}
+                ref={el => el && (view.elScroller = el)} onScroll={() => view.onPageScroll()}
             >
                 <SearchView
                     showErrors={errors => view.showErrors(errors)}
@@ -141,7 +141,7 @@ export const template = (view: AppView) => <main>
                 />
             </section>
             <section key="releases" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
-                ref={el => el && (view.elScroller = el)} onScroll={evnt => view.onPageScroll()}>
+                ref={el => el && (view.elScroller = el)} onScroll={() => view.onPageScroll()}>
                 <NewReleasesView
                     showErrors={errors => view.showErrors(errors)}
                     currentTrackId={view.currentTrackId}

@@ -1,6 +1,5 @@
-import * as _ from 'underscore';
+/* eslint-disable */
 import { IStorage, IStorageConfig } from './iStorage';
-
 
 class RemoteStorage implements IStorage {
     constructor(public connection: string | null) {

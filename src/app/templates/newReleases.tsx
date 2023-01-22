@@ -3,7 +3,7 @@ import { AlbumsView, NewReleasesView } from '../views';
 
 export const template = (view: NewReleasesView) => <>
     <ul className="stack albums">
-        {_.map(view.newReleases, (item: NewReleasesView['newReleases'][0], index) => {
+        {_.map(view.newReleases, (item: NewReleasesView['newReleases'][0]) => {
             return <li key={item.id()} className="stack__card">
                 <div className="card__img" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}></div>
                 <a href="#" className="card_link"
@@ -44,7 +44,7 @@ export const template = (view: NewReleasesView) => <>
         tracks={view.tracks}
     />}
     <ul className="stack playlists">
-        {_.map(view.featuredPlaylists, (item: NewReleasesView['featuredPlaylists'][0], index) => {
+        {_.map(view.featuredPlaylists, (item: NewReleasesView['featuredPlaylists'][0]) => {
             return <li key={item.id()} className="stack__card">
                 <div className="card__img" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}></div>
                 <a href="#" className="card_link"

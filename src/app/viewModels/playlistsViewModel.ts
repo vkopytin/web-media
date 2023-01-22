@@ -1,5 +1,4 @@
 import * as _ from 'underscore';
-import { ViewModel } from '../base/viewModel';
 import { Service } from '../service';
 import { DataService } from '../service/dataService';
 import { LyricsService } from '../service/lyricsService';
@@ -54,7 +53,6 @@ class PlaylistsViewModel {
 
     defaultSettings() {
         return {
-            ...(this as any as ViewModel).settings,
             tracks: [] as TrackViewModelItem[],
 
             currentPlaylistId: '',

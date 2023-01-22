@@ -6,7 +6,7 @@ export interface IPlaylistRow {
     playlist: IPlaylist;
     playlistId: string;
     added_at?: string;
-    added_by?: {};
+    added_by?: unknown;
     is_local?: boolean;
     primary_color?: string;
     track: ITrack;
@@ -14,4 +14,4 @@ export interface IPlaylistRow {
     video_thumbnail?: {
         url: string;
     }
-};
+}

@@ -8,7 +8,7 @@ export function formatTime(ms: number): string {
     return ''.concat(minutes, ':').concat(seconds < 10 ? '0' : '').concat('' + seconds);
 }
 
-export function className(str: string, ...args: Array<{}>): string {
+export function className(str: string, ...args: unknown[]): string {
     str = str || '';
     const classArray = str.split(/\s+/gi);
     const res = classArray.reduce((res, val) => {
@@ -71,7 +71,7 @@ function asAsync<T1, T2, T3, Y>(c: unknown, fn: { (a: T1, a1: T2, a2: T3, cb: { 
 function asAsync<T1, T2, Y>(c: unknown, fn: { (a: T1, a1: T2, cb: { (err?: unknown, res?: Y): void }): void }, a: T1, a1: T2): Promise<Y>
 function asAsync<T, Y>(c: unknown, fn: { (a: T, cb: { (err?: unknown, res?: Y): void }): void }, a: T): Promise<Y>
 function asAsync<Y>(c: unknown, fn: { (cb: { (err?: unknown, res?: Y): void }): void }): Promise<Y>
-function asAsync(c: unknown, fn: Function, ...args: unknown[]) {
+function asAsync(c: unknown, fn: Function, ...args: unknown[]) { // eslint-disable-line @typescript-eslint/ban-types
     return new Promise((resolve, reject) => {
         try {
             fn.apply(c, [...args, (err?: unknown, res?: unknown) => {
@@ -93,14 +93,15 @@ function asAsyncOf<T1, T2, T3, Y>(c: unknown, fn: { (a: T1, a1: T2, a2: T3, cb: 
 function asAsyncOf<T1, T2, Y>(c: unknown, fn: { (a: T1, a1: T2, cb: { (err?: unknown, res?: Y, index?: number): boolean }): void }, a: T1, a1: T2): AsyncGenerator<Y>
 function asAsyncOf<T, Y>(c: unknown, fn: { (a: T, cb: { (err?: unknown, res?: Y, index?: number): boolean }): void }, a: T): AsyncGenerator<Y>
 function asAsyncOf<Y>(c: unknown, fn: { (cb: { (err?: unknown, res?: Y, index?: number): boolean }): void }): AsyncGenerator<Y>
-async function* asAsyncOf(context: unknown, fn: Function, ...args: unknown[]) {
-    let next = (result?: unknown) => { };
-    let fail = (err: Error) => { };
-    let finish = {};
+async function* asAsyncOf(context: unknown, fn: Function, ...args: unknown[]) { // eslint-disable-line @typescript-eslint/ban-types
+    let next = (result?: unknown) => { }; // eslint-disable-line @typescript-eslint/no-empty-function,@typescript-eslint/no-unused-vars
+    let fail = (err: Error) => { }; // eslint-disable-line @typescript-eslint/no-empty-function,@typescript-eslint/no-unused-vars
+    const finish = {};
     const items = [] as unknown[];
     let started = true;
     try {
-        fn.apply(context, [...args, function (err: Error, result: unknown, index: number) {
+        fn.apply(context, [...args, function (err: Error, result: unknown, index: number) { // eslint-disable-line @typescript-eslint/no-unused-vars
+            // eslint-disable-next-line prefer-rest-params
             const nextArgs = [].slice.call(arguments, 0);
             if (nextArgs.length === 0) {
                 started = false;
@@ -137,8 +138,9 @@ async function* asAsyncOf(context: unknown, fn: Function, ...args: unknown[]) {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function debounce<T extends Function>(func: T, wait = 0, cancelObj = 'canceled') {
-    let timerId: number | null, latestResolve: {} | null, shouldCancel: boolean;
+    let timerId: number | null, latestResolve: unknown | null, shouldCancel: boolean;
     let allArgs = [] as unknown[][];
     return function (this: unknown, ...args: unknown[]) {
         allArgs = [...allArgs, args];
@@ -174,10 +176,12 @@ export function debounce<T extends Function>(func: T, wait = 0, cancelObj = 'can
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type ArgumentTypes<T> = T extends (...args: infer U) => infer R ? U : never;
 type ReplaceReturnType<T, TNewReturn> = (...a: ArgumentTypes<T>) => TNewReturn;
 
-export const asyncDebounce = <F extends (...args: any) => any>(fn: F, timeout: number): ReplaceReturnType<F, Promise<ReturnType<F>>> => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const asyncDebounce = <F extends (...args: any[]) => any>(fn: F, timeout: number): ReplaceReturnType<F, Promise<ReturnType<F>>> => {
     let subscribers: Array<[(arg: ReturnType<F>) => void, (arg: unknown) => void]> = [];
     const dfn = debounce(async (...args: unknown[]) => {
         try {

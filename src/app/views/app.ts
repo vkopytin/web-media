@@ -8,11 +8,7 @@ import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { AppViewModel, DeviceViewModelItem, TrackViewModelItem } from '../viewModels';
 
-export interface IAppViewProps {
-
-}
-
-class AppView extends React.Component<IAppViewProps> {
+class AppView extends React.Component {
     didRefresh: AppView['refresh'] = this.refresh.bind(this);
     vm = inject(AppViewModel);
 

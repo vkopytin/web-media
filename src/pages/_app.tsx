@@ -5,7 +5,7 @@ import '../global.scss';
 let authenticating = false;
 
 const fromEntries = (str: string) => {
-  const obj: { [key: string]: {} } = {};
+  const obj: { [key: string]: string } = {};
   str.replace(/([^=&]+)=([^&]*)/g, function (m, key, value): string {
     obj[decodeURIComponent(key)] = decodeURIComponent(value);
     return '';

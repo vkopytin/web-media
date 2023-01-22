@@ -68,7 +68,7 @@ class MediaPlayerViewModel {
 
     async connect() {
         this.spotifyPlayerService.on('playerStateChanged', (en: unknown, state: IWebPlaybackState) => this.updateFromPlayerState(state));
-        this.spotify.on('change:state', (state: IWebPlaybackState) => this.fetchData());
+        this.spotify.on('change:state', () => this.fetchData());
 
         await this.fetchData();
     }
@@ -83,7 +83,7 @@ class MediaPlayerViewModel {
             return;
         }
         const [artist] = state.track_window.current_track?.artists || [];
-        this.currentTrack = state.track_window.current_track as any;
+        this.currentTrack = state.track_window.current_track as ITrack | null;
         this.currentTrackUri = state.track_window.current_track?.uri || '';
         this.currentTrackId = state.track_window.current_track?.id || '';
         this.trackName = state.track_window.current_track?.name || '';
@@ -333,7 +333,7 @@ class MediaPlayerViewModel {
                     if (_.isEmpty(state)) {
                         const volume = this.volume;
                         const res = await this.spotify.volume(volume * 0.9);
-                        res.error(e => this.errors = [res]);
+                        res.error(e => this.errors = [Result.error(e)]);
                     } else {
                         const volume = await this.spotifyPlayerService.getVolume();
                         volume.map(v => this.volume = v * 0.9)
@@ -371,7 +371,7 @@ class MediaPlayerViewModel {
             }
             try {
                 const stateResult = await this.app.removeTracks(this.currentTrack);
-                stateResult.error(e => this.errors = [stateResult]);
+                stateResult.error(e => this.errors = [Result.error(e)]);
             } catch (ex) {
                 this.errors = [Result.error(ex as Error)];
             }

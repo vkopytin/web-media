@@ -1,6 +1,5 @@
-import * as _ from 'underscore';
-import { IStorage, IStorageConfig } from "../iStorage";
 import { asAsync, asAsyncOf } from '../../utils';
+import { IStorage, IStorageConfig } from "../iStorage";
 import { IRecord } from './interfaces/iRecord';
 
 
@@ -85,7 +84,7 @@ class RecordsStore {
         });
     }
 
-    where(where: { [key: string]: any }) {
+    where(where: { [key: string]: unknown }) {
         return asAsyncOf(this.storage, this.storage.where, this.storeConfig, where);
     }
 

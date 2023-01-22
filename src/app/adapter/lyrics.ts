@@ -30,7 +30,7 @@ class LyricsAdapter {
                 success(response) {
                     resolve(response);
                 },
-                error(jqXHR, textStatus: string, errorThrown: string) {
+                error(jqXHR) {
                     reject(ErrorWithStatus.fromJqXhr(jqXHR));
                 }
             });

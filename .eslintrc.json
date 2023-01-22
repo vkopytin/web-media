@@ -1,0 +1,10 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "next/core-web-vitals"
+  ],
+  "rules": {
+    "react/no-direct-mutation-state": "off"
+  }
+}

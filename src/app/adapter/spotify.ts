@@ -4,7 +4,7 @@ export interface IImageInfo {
     width: number;
     height: number;
     url: string;
-};
+}
 
 export interface IDevice {
     id: string;
@@ -38,7 +38,7 @@ export interface IUserInfo {
     product?: 'open' | string;
     type?: 'user' | string;
     uri?: string;
-};
+}
 
 export interface ITrack {
     id: string;
@@ -89,7 +89,7 @@ export interface IDevicesResponse {
 
 export interface IRecommendationsResult {
     tracks: ITrack[];
-    seeds: Array<{}>;
+    seeds: Array<unknown>;
 }
 
 export interface ITopTracksResult {
@@ -143,7 +143,7 @@ export interface IPlayerResult {
     shuffle_state: boolean;
     repeat_state: 'off' | string;
     timestamp: number;
-    context: {};
+    context: unknown;
     progress_ms: number;
     item: ITrack;
     currently_playing_type: 'track' | string;
@@ -157,7 +157,7 @@ export interface IPlayerResult {
 
 export interface ICurrentlyPlayingResult {
     timestamp: number;
-    context: {};
+    context: unknown;
     progress_ms: number;
     item: ITrack;
     currently_playing_type: 'track' | string;
@@ -178,7 +178,7 @@ export interface ICategory {
     name: string;
     href: string;
     icons: IImageInfo[];
-};
+}
 
 export interface IBrowseResult {
     tracks?: IResponseResult<ITrack>;
@@ -189,7 +189,7 @@ export interface IBrowseResult {
 }
 
 export interface IPLayerQueueResult {
-    currently_playing: {};
+    currently_playing: unknown;
     queue: ITrack[];
 }
 
@@ -258,14 +258,14 @@ const toString = (obj: { toString?: () => string }) => {
         console.log(ex);
     }
 };
-const toUrlQueryParams = (obj: {}) => Object.entries<{}>(obj)
+const toUrlQueryParams = (obj: object) => Object.entries(obj)
     .map(([key, value]) => [key, toString(value)])
     .map(([key, value]) => `${key}=${encodeURIComponent(value || '')}`)
     .join('&');
 
 const baseUrl = 'https://api.spotify.com';
 
-let index = 0;
+//let index = 0;
 
 class SpotifyAdapter {
     fetch: typeof fetch = async (input, init) => {
@@ -502,7 +502,7 @@ class SpotifyAdapter {
     async play(tracksUriList?: string | string[], indexOrUri: number | string = '', deviceId?: string) {
         const urlParts = [`${baseUrl}/v1/me/player/play`];
         const numberRx = /^\d+$/i;
-        const position = numberRx.test('' + indexOrUri) ? +indexOrUri! : -1;
+        const position = numberRx.test('' + indexOrUri) ? +indexOrUri : -1;
         const uri = (!numberRx.test('' + indexOrUri)) ? indexOrUri : '';
         const uris = ([] as string[]).concat(tracksUriList || []);
         const contextUri = uris.length === 1 ? uris[0] : '';
@@ -526,7 +526,7 @@ class SpotifyAdapter {
         return await resultOrError(response);
     }
 
-    async next(deviceId: string = ''): Promise<unknown> {
+    async next(deviceId = ''): Promise<unknown> {
         await delayWithin();
         const urlParts = [`${baseUrl}/v1/me/player/next`];
         deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
@@ -541,7 +541,7 @@ class SpotifyAdapter {
         return await resultOrError(response);
     }
 
-    async previous(deviceId: string = ''): Promise<unknown> {
+    async previous(deviceId = ''): Promise<unknown> {
         await delayWithin();
         const urlParts = [`${baseUrl}/v1/me/player/previous`];
         deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
@@ -556,7 +556,7 @@ class SpotifyAdapter {
         return await resultOrError(response);
     }
 
-    async pause(deviceId: string = ''): Promise<unknown> {
+    async pause(deviceId = ''): Promise<unknown> {
         await delayWithin();
         const urlParts = [`${baseUrl}/v1/me/player/pause`];
         deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);

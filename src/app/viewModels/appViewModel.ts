@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { IUserInfo } from '../adapter/spotify';
+import { ISpotifySong, IUserInfo } from '../adapter/spotify';
 import { Service } from '../service';
 import { LoginService } from '../service/loginService';
 import { SpotifyService } from '../service/spotify';
@@ -67,7 +67,7 @@ class AppViewModel {
     async startSync() {
         this.isSyncing = 1;
         const res = await this.spotifySync.syncData();
-        res.error(e => this.errors = [Result.error(e as Error)]);
+        res.error(e => this.errors = [Result.error(e)]);
         this.isSyncing = 0;
     }
 
@@ -83,14 +83,14 @@ class AppViewModel {
         const isLoggedInResult = await this.app.isLoggedIn();
         this.openLogin = isLoggedInResult.match(
             r => !r,
-            e => (this.errors = [isLoggedInResult], false)
+            e => (this.errors = [Result.error(e)], false)
         );
 
         const updateDevicesHandler = async (eventName: string, device: { device_id: string; }) => {
             await this.updateDevices();
             if (!this.currentDevice) {
                 const res = await this.spotify.player(device.device_id, false);
-                res.error(e => this.errors = [Result.of(e)]);
+                res.error(e => this.errors = [Result.error(e)]);
             }
         };
         this.spotifyPlayer.on('ready', updateDevicesHandler);
@@ -98,15 +98,15 @@ class AppViewModel {
 
     async fetchData() {
         const userInfoResult = await this.spotify.profile();
-        userInfoResult.error(e => this.errors = [userInfoResult])
+        userInfoResult.error(e => this.errors = [Result.error(e)])
             .map(r => this.profile = r);
 
         await this.updateDevices();
 
         const topTracksResult = await this.spotify.listTopTracks();
         this.topTracks = topTracksResult.match(
-            topTracks => _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index)),
-            e => (this.errors = [topTracksResult], [])
+            topTracks => _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index)),
+            e => (this.errors = [Result.error(e)], [])
         );
     }
 
@@ -114,7 +114,7 @@ class AppViewModel {
         const devicesResult = await this.spotify.listDevices();
         devicesResult
             .map(devices => this.devices = _.map(devices, item => new DeviceViewModelItem(item)))
-            .error(e => this.errors = [devicesResult]);
+            .error(e => this.errors = [Result.error(e)]);
 
         const currentDevice = _.find(this.devices, d => d.isActive()) || null;
         this.currentDevice = currentDevice;
@@ -125,7 +125,7 @@ class AppViewModel {
 
         res.map(() => _.delay(() => {
             this.updateDevices();
-        }, 1000)).error(e => this.errors = [res]);
+        }, 1000)).error(e => this.errors = [Result.error(e)]);
     }
 }
 

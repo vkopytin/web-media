@@ -1,4 +1,6 @@
-import { Subject } from "rxjs";
+/* eslint-disable */
+
+import { Subject } from 'rxjs';
 
 const assert = {
     instanceOf(instance: unknown, assetType: Function, message: string) {

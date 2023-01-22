@@ -1,6 +1,4 @@
-import { BaseService } from '../base/baseService';
 import { Result } from '../utils/result';
-
 
 export interface ISettings {
     lastSearch: {
@@ -42,12 +40,12 @@ const getCookie = (key: string, defVal = ''): string => {
     if (!cookieRx.test(document.cookie)) {
         return defVal;
     }
-    const [a, k, value] = cookieRx.exec(document.cookie) || [];
+    const [, , value] = cookieRx.exec(document.cookie) || [];
 
     return value;
 }
 
-class SettingsService extends BaseService {
+class SettingsService {
     static makeDefaultSettings(): ISettings {
         if (typeof document === 'undefined' || typeof window === 'undefined') {
             return {
@@ -67,9 +65,9 @@ class SettingsService extends BaseService {
                 }
             };
         }
-        let sToken = getCookie('spat');
-        let gToken = getCookie('gsat');
-        let gCode = getCookie('gcode');
+        const sToken = getCookie('spat');
+        const gToken = getCookie('gsat');
+        const gCode = getCookie('gcode');
         const lastSearch = getCookie('lastSearch', '');
         const apiseesKey = getCookie('apsk');
         const volume = +(getCookie('lastVolume') || 50);
@@ -110,7 +108,7 @@ class SettingsService extends BaseService {
     }
 
     constructor(public config: ISettings = { lastSearch: { val: '' }, apiseeds: { key: '' }, genius: {}, spotify: {} }) {
-        super();
+
     }
 
     volume(val?: number): number | undefined {
@@ -132,7 +130,7 @@ class SettingsService extends BaseService {
     }
 
     get<K extends keyof SettingsService['config']>(
-        propName: K, val?: SettingsService['config'][K]
+        propName: K
     ): Result<Error, SettingsService['config'][K]> {
         this.refreshConfig(); //toDO: Make something more specific. Like get already refreshed value individualy.
 
@@ -148,7 +146,7 @@ class SettingsService extends BaseService {
                 ...val
             };
             if (propName === 'spotify' && 'accessToken' in val) {
-                document.cookie = 'spat=' + btoa((val as any).accessToken);
+                document.cookie = 'spat=' + btoa((val as { accessToken: string }).accessToken);
             }
             if (propName === 'lastSearch') {
                 document.cookie = 'lastSearch=' + btoa(((val as { val: string }).val));

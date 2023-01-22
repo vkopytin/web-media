@@ -5,4 +5,4 @@ export interface ITrack {
     id: string;
     album: IAlbum;
     artists: IArtist[];
-};
+}

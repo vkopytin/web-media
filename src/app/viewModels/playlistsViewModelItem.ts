@@ -3,15 +3,15 @@ import { IUserPlaylist } from '../adapter/spotify';
 
 
 function unsafeHtml(html: string) {
-    const el = document.createElement('div');
-    el.innerHTML = html;
+    const div = document.createElement('div');
+    div.innerHTML = html;
 
-    const els = el.getElementsByTagName('script');
-    for (let el of ([] as HTMLScriptElement[]).slice.call(els, 0)) {
-        el.parentElement?.removeChild(el);
+    const elements = div.getElementsByTagName('script');
+    for (const element of ([] as HTMLScriptElement[]).slice.call(elements, 0)) {
+        element.parentElement?.removeChild(element);
     }
 
-    return el.innerHTML;
+    return div.innerHTML;
 }
 
 class PlaylistsViewModelItem {

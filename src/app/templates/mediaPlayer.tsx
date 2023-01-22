@@ -5,10 +5,10 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
         <div className="region">
             <div className="album-media" style={{ backgroundImage: `url(${view.thumbnailUrl})` }}>
                 {view.isPlaying || <button className="button-play icon icon-play"
-                    onClick={evnt => view.resumeCommand.exec()}
+                    onClick={() => view.resumeCommand.exec()}
                 ></button>}
                 {view.isPlaying && <button className="button-play icon icon-pause"
-                    onClick={evnt => view.pauseCommand.exec()}
+                    onClick={() => view.pauseCommand.exec()}
                 ></button>}
             </div>
         </div>
@@ -26,7 +26,7 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
                 </a>
                 <div className="playback-controls">
                     <button className="button-previous icon icon-back"
-                        onClick={evnt => view.prevCommand.exec()}
+                        onClick={() => view.prevCommand.exec()}
                     ></button>
                     <div className="playback">
                         <div className="progress-max"
@@ -37,11 +37,11 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
                         <div className="time-played">{view.titlePlayed()}</div>
                     </div>
                     <button className="button-next icon icon-forward"
-                        onClick={evnt => view.nextCommand.exec()}
+                        onClick={() => view.nextCommand.exec()}
                     ></button>
                     <div className="time-next">-{view.titleLeft()}</div>
                     <button className="button-previous icon icon-sound4"
-                        onClick={evnt => view.volumeDownCommand.exec()}
+                        onClick={() => view.volumeDownCommand.exec()}
                     ></button>
                     <div className="playback-volume">
                         <div className="progress-max" onClick={evnt => view.updateVolume(evnt)}>
@@ -52,19 +52,19 @@ export const template = (view: MediaPlayerView) => <div className="player-playba
                         </div>
                     </div>
                     <button className="button-next icon icon-sound"
-                        onClick={evnt => view.volumeUpCommand.exec()}
+                        onClick={() => view.volumeUpCommand.exec()}
                     ></button>
                 </div>
             </div>
             <div className="extra-controls">
                 {view.isLiked && <button className="track-more icon icon-star-filled"
-                    onClick={evnt => view.unlikeSongCommand.exec()}
+                    onClick={() => view.unlikeSongCommand.exec()}
                 ></button>}
                 {view.isLiked || <button className="track-more icon icon-star"
-                    onClick={evnt => view.likeSongCommand.exec()}
+                    onClick={() => view.likeSongCommand.exec()}
                 ></button>}
                 <button className="track-more icon icon-refresh"
-                    onClick={evnt => view.refreshPlaybackCommand.exec()}
+                    onClick={() => view.refreshPlaybackCommand.exec()}
                 ></button>
             </div>
         </div>

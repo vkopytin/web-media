@@ -1,6 +1,5 @@
-import * as _ from 'underscore';
-import { IStorage, IStorageConfig } from "../iStorage";
 import { asAsync, asAsyncOf } from '../../utils';
+import { IStorage, IStorageConfig } from "../iStorage";
 import { IPlaylistRow } from './interfaces/iPlaylistRow';
 
 
@@ -55,7 +54,7 @@ export class PlaylistRowsStore {
     }
 
     async refresh(myStore: IPlaylistRow) {
-        const record = await asAsync(this.storage, this.storage.getById<{}>, this.storeConfig, myStore.id);
+        const record = await asAsync(this.storage, this.storage.getById<object>, this.storeConfig, myStore.id);
         if (record) {
             return await this.update({
                 ...record,

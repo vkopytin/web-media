@@ -101,7 +101,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     seekTrack(evnt: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         const rect = (evnt.currentTarget as HTMLDivElement).getBoundingClientRect();
         const x = evnt.clientX - rect.left; //x position within the element.
-        const y = evnt.clientY - rect.top;  //y position within the element.
+        // const y = evnt.clientY - rect.top;  //y position within the element.
         const progressPercent = x / rect.width * 100;
 
         this.seekPlaybackCommand.exec(Math.round(progressPercent));
@@ -110,7 +110,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     updateVolume(evnt: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         const rect = (evnt.currentTarget as HTMLDivElement).getBoundingClientRect();
         const x = evnt.clientX - rect.left; //x position within the element.
-        const y = evnt.clientY - rect.top;  //y position within the element.
+        // const y = evnt.clientY - rect.top;  //y position within the element.
         const progressPercent = this.logslider(x / rect.width * 100);
 
         this.volumeCommand.exec(Math.round(progressPercent));
@@ -134,30 +134,30 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
 
     logslider(position: number) {
         // position will be between 0 and 100
-        var minp = 0;
-        var maxp = 100;
+        const minp = 0;
+        const maxp = 100;
 
         // The result should be between 100 an 10000000
-        var minv = Math.log(1);
-        var maxv = Math.log(100);
+        const minv = Math.log(1);
+        const maxv = Math.log(100);
 
         // calculate adjustment factor
-        var scale = (maxv - minv) / (maxp - minp);
+        const scale = (maxv - minv) / (maxp - minp);
 
         return Math.exp(minv + scale * (position - minp));
     }
 
     logposition(value: number) {
         // position will be between 0 and 100
-        var minp = 0;
-        var maxp = 100;
+        const minp = 0;
+        const maxp = 100;
 
         // The result should be between 100 an 10000000
-        var minv = Math.log(1);
-        var maxv = Math.log(100);
+        const minv = Math.log(1);
+        const maxv = Math.log(100);
 
         // calculate adjustment factor
-        var scale = (maxv - minv) / (maxp - minp);
+        const scale = (maxv - minv) / (maxp - minp);
 
         return (Math.log(value) - minv) / scale + minp;
     }

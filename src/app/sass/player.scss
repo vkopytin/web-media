@@ -25,11 +25,12 @@ $text-color: #999 !default;
 .content {
   height: 100vh;
 }
-.bar-header-playback ~ .content {
+
+.bar-header-playback~.content {
   padding-top: 135px;
 }
 
-.bar-header-playback ~ .content .bar + * {
+.bar-header-playback~.content .bar+* {
   padding-top: 50px;
 }
 
@@ -41,6 +42,7 @@ footer:before {
   from {
     -webkit-transform: rotate(0deg);
   }
+
   to {
     -webkit-transform: rotate(360deg);
   }
@@ -69,6 +71,7 @@ footer:before {
 .button-round:focus {
   outline: none;
 }
+
 .button-round {
   vertical-align: middle;
   border-radius: 25px;
@@ -169,12 +172,14 @@ footer:before {
     width: 100%;
     position: relative;
   }
+
   .button-play {
     width: 80%;
     height: 80%;
     left: 10%;
     top: 10%;
   }
+
   .album-media .button-play {
     font-size: 20px;
   }
@@ -391,6 +396,7 @@ footer:before {
   vertical-align: middle;
   fill: #ad7d52;
 }
+
 .card__time {
   font-size: 12px;
   color: #ad7d52;
@@ -531,7 +537,7 @@ footer:before {
 }
 
 .table-view-cell {
-  > .list-item:not(.btn) {
+  >.list-item:not(.btn) {
     position: relative;
     display: block;
     padding: inherit;
@@ -542,6 +548,7 @@ footer:before {
 
   .media-body {
     filter: drop-shadow(2px 4px 6px black);
+
     .chips-list {
       padding-top: 0;
       display: inline;
@@ -553,8 +560,7 @@ footer:before {
     }
   }
 
-  .media-object {
-  }
+  .media-object {}
 
   .navigate-right {
     margin-right: 8px;
@@ -565,8 +571,7 @@ footer:before {
     display: block;
   }
 
-  .center {
-  }
+  .center {}
 }
 
 .handle {

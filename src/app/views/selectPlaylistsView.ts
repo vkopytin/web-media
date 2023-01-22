@@ -56,22 +56,22 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
         }
     }
 
-    fetchData() {
-        return this.playlistsViewModel.fetchData();
+    async fetchData(): Promise<void> {
+        await this.playlistsViewModel.fetchData();
     }
 
-    refresh() {
+    refresh(): void {
         this.setState({
             ...this.state,
         });
     }
 
-    playlistHasTrack(playlist: PlaylistsViewModelItem, track: TrackViewModelItem) {
+    isPlaylistInTracksPlaylist(playlist: PlaylistsViewModelItem): boolean {
         const res = _.find(this.trackPlaylists, (p: PlaylistsViewModelItem) => p.id() === playlist.id());
         return !!res;
     }
 
-    showErrors(errors: Result[]) {
+    showErrors(errors: Result[]): void {
         this.props.showErrors(errors);
     }
 

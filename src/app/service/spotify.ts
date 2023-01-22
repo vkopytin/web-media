@@ -25,7 +25,7 @@ function returnErrorResult<T>(message: string, err: Error): Result<Error, T> {
 
 class SpotifyService extends Events {
     currentProfile: IUserInfo | null = null;
-    onStateChanged = asyncDebounce((...args: Array<{}>) => this.onStateChangedInternal(...args), 500);
+    onStateChanged = asyncDebounce((...args: Array<unknown>) => this.onStateChangedInternal(...args), 500);
 
     constructor(public adapter: SpotifyAdapter) {
         super();
@@ -36,7 +36,7 @@ class SpotifyService extends Events {
         return Result.of(true);
     }
 
-    onStateChangedInternal(...args: Array<{}>): void {
+    onStateChangedInternal(...args: Array<unknown>): void {
         this.trigger('change:state', ...args);
     }
 
@@ -84,7 +84,7 @@ class SpotifyService extends Events {
         }
     }
 
-    async previous(deviceId: string = ''): Promise<Result<Error, unknown>> {
+    async previous(deviceId = ''): Promise<Result<Error, unknown>> {
         try {
             const res = await this.adapter.previous(deviceId);
 

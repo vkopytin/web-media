@@ -1,10 +1,8 @@
 import { IDevice } from '../adapter/spotify';
-import { ViewModel } from '../base/viewModel';
 
-
-class DeviceViewModelItem extends ViewModel {
+class DeviceViewModelItem {
     constructor(public device: IDevice) {
-        super();
+
     }
 
     id() {

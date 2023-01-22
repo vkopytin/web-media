@@ -1,27 +1,27 @@
-import * as _ from 'underscore';
-import { DataStorage } from '../dataStorage';
 import { asAsync } from '../../utils';
-import { RecordsStore } from '../entities/recordsStore';
-import { TracksStore } from '../entities/tracksStore';
-import { PlaylistsStore } from '../entities/playlistsStore';
+import { DataStorage } from '../dataStorage';
 import { AlbumsStore } from '../entities/albumsStore';
 import { ArtistsStore } from '../entities/artistsStore';
+import { BannedTracksStore } from '../entities/bannedTracksStore';
 import { ImagesStore } from '../entities/imagesStore';
 import { PlaylistRowsStore } from '../entities/playlistRowsStore';
-import { BannedTracksStore } from '../entities/bannedTracksStore';
+import { PlaylistsStore } from '../entities/playlistsStore';
+import { RecordsStore } from '../entities/recordsStore';
+import { TracksStore } from '../entities/tracksStore';
 
 export function initializeStructure() {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     return asAsync(() => { }, cb => {
         DataStorage.create((err, storage) => {
-            const recordsStore = new RecordsStore(storage!);
-            const tracksStore = new TracksStore(storage!);
-            const playlistsStore = new PlaylistsStore(storage!);
-            const albumsStore = new AlbumsStore(storage!);
-            const artistsStore = new ArtistsStore(storage!);
-            const imagesStore = new ImagesStore(storage!);
-            const playlistRows = new PlaylistRowsStore(storage!);
-            const bannedTracksStore = new BannedTracksStore(storage!);
-            storage!.initializeStructure(async (err, isInitializing) => {
+            const recordsStore = new RecordsStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+            const tracksStore = new TracksStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+            const playlistsStore = new PlaylistsStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+            const albumsStore = new AlbumsStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+            const artistsStore = new ArtistsStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+            const imagesStore = new ImagesStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+            const playlistRows = new PlaylistRowsStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+            const bannedTracksStore = new BannedTracksStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+            storage!.initializeStructure(async (err, isInitializing) => { // eslint-disable-line @typescript-eslint/no-non-null-assertion
                 try {
                     if (!isInitializing) {
 

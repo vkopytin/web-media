@@ -1,6 +1,5 @@
 import * as _ from 'underscore';
 import { ISearchType, ISpotifySong } from '../adapter/spotify';
-import { Service } from '../service';
 import { SettingsService } from '../service/settings';
 import { SpotifyService } from '../service/spotify';
 import { asyncDebounce, asyncQueue, State } from '../utils';
@@ -42,8 +41,8 @@ class SearchViewModel {
     @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => this.selectPlaylist(playlist));
     @State selectArtistCommand = Scheduler.Command((artist: ArtistViewModelItem) => this.selectArtist(artist));
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
-    @State likeTrackCommand = Scheduler.Command(() => { });
-    @State unlikeTrackCommand = Scheduler.Command(() => { });
+    @State likeTrackCommand = Scheduler.Command(() => { throw new Error('not implemented') });
+    @State unlikeTrackCommand = Scheduler.Command(() => { throw new Error('not implemented') });
 
     onChangeTerm = asyncDebounce((term: string) => {
         searchQueue.push(async (next) => {
@@ -61,7 +60,7 @@ class SearchViewModel {
         });
     }, 300);
 
-    constructor(private spotify: SpotifyService, private settingsService: SettingsService, private ss: Service) {
+    constructor(private spotify: SpotifyService, private settingsService: SettingsService) {
 
     }
 
@@ -81,7 +80,7 @@ class SearchViewModel {
     changeSearchType(searchType: ISearchType) {
         this.searchType = searchType;
         this.fetchData();
-    };
+    }
 
     selectAlbum(album: AlbumViewModelItem | null) {
         this.currentAlbum = album;
@@ -125,12 +124,12 @@ class SearchViewModel {
                 this.settings.total = search.albums.total;
                 this.settings.offset = search.albums.offset + Math.min(this.settings.limit, search.albums.items.length);
 
-                this.albums = _.map(search.albums.items, (album, index) => new AlbumViewModelItem(album));
+                this.albums = _.map(search.albums.items, (album) => new AlbumViewModelItem(album));
             } else if ('playlists' in search && search.playlists) {
                 this.settings.total = search.playlists.total;
                 this.settings.offset = search.playlists.offset + Math.min(this.settings.limit, search.playlists.items.length);
 
-                this.playlists = _.map(search.playlists.items, (playlist, index) => new PlaylistsViewModelItem(playlist));
+                this.playlists = _.map(search.playlists.items, (playlist) => new PlaylistsViewModelItem(playlist));
             }
         }).error(e => this.errors = [Result.error(e)]);
         this.isLoading = false;
@@ -144,22 +143,22 @@ class SearchViewModel {
         const res = await this.spotify.search(this.searchType, this.term, this.settings.offset, this.settings.limit);
         res.map(search => {
             if (search?.tracks) {
-                this.tracksAddRange(_.map(search.tracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, search.tracks!.offset + index)));
+                this.tracksAddRange(_.map(search.tracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, (search.tracks?.offset || 0) + index)));
 
                 this.settings.total = search.tracks.total;
                 this.settings.offset = search.tracks.offset + Math.min(this.settings.limit, search.tracks.items.length);
             } else if (search?.artists) {
-                this.artistsAddRange(_.map(search.artists.items, (artist, index) => new ArtistViewModelItem(artist, search.artists!.offset + index)));
+                this.artistsAddRange(_.map(search.artists.items, (artist, index) => new ArtistViewModelItem(artist, (search.artists?.offset || 0) + index)));
 
                 this.settings.total = search.artists.total;
                 this.settings.offset = search.artists.offset + Math.min(this.settings.limit, search.artists.items.length);
             } else if (search?.albums) {
-                this.albumsAddRange(_.map(search.albums.items, (album, index) => new AlbumViewModelItem(album)));
+                this.albumsAddRange(_.map(search.albums.items, (album) => new AlbumViewModelItem(album)));
 
                 this.settings.total = search.albums.total;
                 this.settings.offset = search.albums.offset + Math.min(this.settings.limit, search.albums.items.length);
             } else if (search?.playlists) {
-                this.playlistsAddRange(_.map(search.playlists.items, (artist, index) => new PlaylistsViewModelItem(artist)));
+                this.playlistsAddRange(_.map(search.playlists.items, (artist) => new PlaylistsViewModelItem(artist)));
 
                 this.settings.total = search.playlists.total;
                 this.settings.offset = search.playlists.offset + Math.min(this.settings.limit, search.playlists.items.length);
@@ -172,15 +171,15 @@ class SearchViewModel {
         this.currentTracks = [];
 
         if (this.searchType === 'album' && this.currentAlbum) {
-            const albumTrackssResult = await this.spotify.listAlbumTracks(this.currentAlbum!.id());
+            const albumTrackssResult = await this.spotify.listAlbumTracks(this.currentAlbum.id());
 
             return albumTrackssResult
-                .map(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem({ track: item } as any, index)))
+                .map(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem({ track: item } as ISpotifySong, index)))
                 .error(e => this.errors = [Result.error(e)]);
         }
 
         if (this.searchType === 'playlist' && this.currentPlaylist) {
-            const playlistTracksResult = await this.spotify.fetchPlaylistTracks(this.currentPlaylist!.id());
+            const playlistTracksResult = await this.spotify.fetchPlaylistTracks(this.currentPlaylist.id());
 
             return playlistTracksResult
                 .map(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem(item, index)))
@@ -188,10 +187,10 @@ class SearchViewModel {
         }
 
         if (this.searchType === 'artist' && this.currentArtist) {
-            const artistTracksResult = await this.spotify.fetchArtistTopTracks(this.currentArtist!.id(), 'US');
+            const artistTracksResult = await this.spotify.fetchArtistTopTracks(this.currentArtist.id(), 'US');
 
             return artistTracksResult
-                .map(tr => this.currentTracks = _.map(tr.tracks, (item, index) => new TrackViewModelItem({ track: item } as any, index)))
+                .map(tr => this.currentTracks = _.map(tr.tracks, (item, index) => new TrackViewModelItem({ track: item } as ISpotifySong, index)))
                 .error(e => this.errors = [Result.error(e)]);
         }
     }

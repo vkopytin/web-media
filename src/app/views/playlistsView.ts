@@ -59,7 +59,7 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    componentDidUpdate(prevProps: IPlaylistsViewProps) {
+    componentDidUpdate() {
         if (this.props.loadMore) {
             this.loadMoreCommand.exec();
         }

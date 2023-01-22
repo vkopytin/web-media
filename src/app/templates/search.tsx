@@ -26,10 +26,10 @@ export const template = (view: SearchView) => <>
         >Playlists</a>
     </div>
     <ul className="table-view">
-        {_.map(view.tracks, (item: SearchView['tracks'][0], index) => {
+        {_.map(view.tracks, (item: SearchView['tracks'][0]) => {
             return <li key={item.id()} className="table-view-cell media">
                 <span className="media-object pull-left player-left--32"
-                    onClick={evnt => item.playTracks(view.tracks)}
+                    onClick={() => item.playTracks(view.tracks)}
                 >
                     <div className="region">
                         <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
@@ -40,7 +40,7 @@ export const template = (view: SearchView) => <>
                     </div>
                 </span>
                 <div className="media-body"
-                    onClick={evnt => view.selectedItem = view.selectedItem === item ? null : item}
+                    onClick={() => view.selectedItem = view.selectedItem === item ? null : item}
                 >
                     <div>
                         <span className="song-title">{item.name()}</span>
@@ -56,14 +56,14 @@ export const template = (view: SearchView) => <>
                     showErrors={e => view.showErrors(e)}
                     track={item} />}
                 {item.isLiked && <span className="badge badge-positive"
-                    onClick={evnt => view.unlikeTrackCommand.exec(item)}
+                    onClick={() => view.unlikeTrackCommand.exec(item)}
                 >{item.duration()}</span>}
                 {item.isLiked || <span className="badge"
-                    onClick={evnt => view.likeTrackCommand.exec(item)}
+                    onClick={() => view.likeTrackCommand.exec(item)}
                 >{item.duration()}</span>}
             </li>
         })}
-        {_.map(view.artists, (item: SearchView['artists'][0], index) => {
+        {_.map(view.artists, (item: SearchView['artists'][0]) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media"
                     onClick={() => view.selectArtistCommand.exec(view.currentArtist?.id() === item.id() ? null : item)}
@@ -91,10 +91,10 @@ export const template = (view: SearchView) => <>
                 </div>}
             </li>
         })}
-        {_.map(view.albums, (item: SearchView['albums'][0], index) => {
+        {_.map(view.albums, (item: SearchView['albums'][0]) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media"
-                    onClick={evnt => view.selectAlbumCommand.exec(view.currentAlbum?.id() === item.id() ? null : item)}
+                    onClick={() => view.selectAlbumCommand.exec(view.currentAlbum?.id() === item.id() ? null : item)}
                 >
                     <span className="media-object pull-left player-left--32">
                         <div className="region">
@@ -120,7 +120,7 @@ export const template = (view: SearchView) => <>
                 </div>}
             </li>
         })}
-        {_.map(view.playlists, (item: SearchView['playlists'][0], index) => {
+        {_.map(view.playlists, (item: SearchView['playlists'][0]) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media"
                     onClick={() => view.selectPlaylistCommand.exec(view.currentPlaylist?.id() === item.id() ? null : item)}

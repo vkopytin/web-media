@@ -38,9 +38,6 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
         Notifications.stopObserving(this, this.didRefresh);
     }
 
-    componentDidUpdate(prevProps: IPickPlaylistsViewProps) {
-    }
-
     refresh() {
         this.setState({
             ...this.state,
@@ -57,4 +54,3 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
 }
 
 export { PickPlaylistsView };
-

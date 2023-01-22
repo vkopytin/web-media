@@ -3,10 +3,10 @@ import { AlbumsView, SelectPlaylistsView } from '../views';
 
 export const template = (view: AlbumsView) => <>
     <ul className="table-view albums-view">
-        {_.map(view.tracks, (item: AlbumsView['tracks'][0], index) => {
+        {_.map(view.tracks, (item: AlbumsView['tracks'][0]) => {
             return <li key={item.id()} className="table-view-cell media">
                 <span className="media-object pull-left player-left--32"
-                    onClick={evnt => view.uri() ? item.play(view.uri()) : item.playTracks(view.tracks)}
+                    onClick={() => view.uri() ? item.play(view.uri()) : item.playTracks(view.tracks)}
                 >
                     <div className="region">
                         <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
@@ -17,7 +17,7 @@ export const template = (view: AlbumsView) => <>
                     </div>
                 </span>
                 <div className="media-body"
-                    onClick={evnt => view.selectedItem = view.selectedItem === item ? null : item}
+                    onClick={() => view.selectedItem = view.selectedItem === item ? null : item}
                 >
                     <span>{item.name()}&nbsp;-&nbsp;{item.artist()}</span>
                     <p>{item.album()}</p>

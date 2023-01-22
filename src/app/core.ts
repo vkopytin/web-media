@@ -20,8 +20,8 @@ import { UserProfileViewModel } from './viewModels/userProfileViewModel';
 
 export class Core {
     settingsService = inject(SettingsService, SettingsService.makeDefaultSettings());
-    lyricsAdapter = inject(LyricsAdapter, this.settingsService.get('apiseeds').map(({ key }) => key).match(r => r, e => ''));
-    sptifyAdapter = inject(SpotifyAdapter, this.settingsService.get('spotify').map(({ accessToken: key }) => key).match(r => r, e => ''));
+    lyricsAdapter = inject(LyricsAdapter, this.settingsService.get('apiseeds').map(({ key }) => key).match(r => r, () => ''));
+    sptifyAdapter = inject(SpotifyAdapter, this.settingsService.get('spotify').map(({ accessToken: key }) => key).match(r => r, () => ''));
     lyricsService = inject(LyricsService, this.lyricsAdapter);
     dataService = inject(DataService);
     spotifyService = inject(SpotifyService, this.sptifyAdapter);
@@ -35,7 +35,7 @@ export class Core {
     myTracksViewModel = inject(MyTracksViewModel, this.spotifyService, this.lyricsService, this.appService);
     newReleasesViewModel = inject(NewReleasesViewModel, this.spotifyService, this.appService);
     playlistsViewModel = inject(PlaylistsViewModel, this.dataService, this.spotifyService, this.lyricsService, this.appService);
-    searchViewModel = inject(SearchViewModel, this.spotifyService, this.settingsService, this.appService);
+    searchViewModel = inject(SearchViewModel, this.spotifyService, this.settingsService);
     userProfileViewModel = inject(UserProfileViewModel, this.appViewModel, this.loginService, this.settingsService, this.spotifyService, this.appService);
 
     async run(): Promise<void> {

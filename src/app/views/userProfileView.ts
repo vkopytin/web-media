@@ -9,7 +9,7 @@ import { AppViewModel, TrackViewModelItem, UserProfileViewModel } from '../viewM
 
 export interface IUserProfileViewProps {
     className?: string;
-    showErrors<T>(errors: Result<Error, T>[]): void;
+    showErrors(errors: Result[]): void;
 }
 
 class UserProfileView extends React.Component<IUserProfileViewProps> {
@@ -74,7 +74,7 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
         return this.currentTrackId === track.id();
     }
 
-    showErrors<T>(errors: Result[]) {
+    showErrors(errors: Result[]) {
         this.props.showErrors(errors);
     }
 

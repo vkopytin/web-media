@@ -13,7 +13,7 @@ export const template = (view: MyTracksView) => <>
                         >receipt</span>
                     </div>
                     <span className="media-object pull-left player-left--32"
-                        onClick={evnt => item.playTracks(view.tracks)}
+                        onClick={() => item.playTracks(view.tracks)}
                     >
                         <div className="region">
                             <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
@@ -24,7 +24,7 @@ export const template = (view: MyTracksView) => <>
                         </div>
                     </span>
                     <div className="media-body"
-                        onClick={evnt => view.selectedItem = view.selectedItem === item ? null : item}
+                        onClick={() => view.selectedItem = view.selectedItem === item ? null : item}
                     >
                         <div>
                             <span className="song-title">{item.name()}</span>
@@ -51,7 +51,7 @@ export const template = (view: MyTracksView) => <>
     </ul>
     <div className="center">
         {view.isLoading || <button className="button-round btn btn-primary btn-block btn-outlined icon icon icon-down"
-            onClick={evnt => view.loadMoreCommand.exec()}
+            onClick={() => view.loadMoreCommand.exec()}
         ></button>}
         {view.isLoading && <button className="loading button-round btn btn-primary btn-block btn-outlined icon icon icon-refresh"></button>}
     </div>

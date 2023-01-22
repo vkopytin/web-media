@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
-import { IStorage, IStorageConfig } from '../iStorage';
 import { asAsync, asAsyncOf } from '../../utils';
+import { IStorage, IStorageConfig } from '../iStorage';
 
 class Relation<T extends { [key: string]: unknown }> {
     tableName = '';
@@ -82,8 +82,9 @@ class Relation<T extends { [key: string]: unknown }> {
         return asAsync(this.storage, this.storage.getById, this.storeConfig, this.getId(pair));
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     list(offset = 0, limit?: number) {
-        return asAsyncOf(this.storage, this.storage.each as ((config: IStorageConfig, cb: (err?: any, result?: T, index?: number) => boolean) => any), this.storeConfig);
+        return asAsyncOf(this.storage, this.storage.each as ((config: IStorageConfig, cb: (err?: Error, result?: T, index?: number) => boolean) => boolean), this.storeConfig);
     }
 
     where(where: Partial<T>) {

@@ -5,17 +5,21 @@ import { HomeView } from '../views/homeView';
 export const template = (view: HomeView) => <>
     <div className="center">
         {view.isLoading || <button className="pull-right button-round small btn btn-primary btn-block btn-outlined icon icon-refresh"
-            onClick={evnt => view.refreshCommand.exec()}
+            onClick={() => view.refreshCommand.exec()}
         ></button>}
         {view.isLoading && <button className="pull-right loading small button-round btn btn-primary btn-block btn-outlined icon icon-refresh"
         ></button>}
         <div className="chips-list pull-left">
-            <span className="chips chips-positive" onClick={evnt => view.refreshCommand.exec(view.props.currentTrackId)}>Current Song</span>
+            <span className="chips chips-positive"
+                onClick={() => view.refreshCommand.exec(view.props.currentTrackId)}
+            >
+                Current Song
+            </span>
         </div>
         <PickPlaylistsView showErrors={e => view.showErrors(e)} />
     </div>
     <ul className="table-view">
-        {_.map(view.tracks, (item: HomeView['tracks'][0], index) =>
+        {_.map(view.tracks, (item: HomeView['tracks'][0]) =>
             <li key={item.id()}>
                 <div className="table-view-cell media">
                     <div className="info-list">
@@ -24,7 +28,7 @@ export const template = (view: HomeView) => <>
                         >receipt</span>
                     </div>
                     <span className="media-object pull-left player-left--32"
-                        onClick={evnt => { view.isBanned(item) || item.playTracksCommand.exec(view.tracks) }}
+                        onClick={() => { view.isBanned(item) || item.playTracksCommand.exec(view.tracks) }}
                     >
                         <div className="region">
                             <div className="album-media" style={{ backgroundImage: `url(${item.thumbnailUrl()})` }}>
@@ -38,7 +42,7 @@ export const template = (view: HomeView) => <>
                     </span>
                     <span className="list-item push-right">
                         <div className="media-body"
-                            onClick={evnt => view.selectedTrack = view.selectedTrack === item ? null : item}
+                            onClick={() => view.selectedTrack = view.selectedTrack === item ? null : item}
                         >
                             <div>
                                 <span className="song-title">{item.name()}</span>
@@ -56,18 +60,18 @@ export const template = (view: HomeView) => <>
                         </div>
                         {view.isBanned(item) ? <button className="action chips btn btn-negative btn-outlined material-icons"
                             title="Banned, tap to remove Bann"
-                            onClick={evnt => view.removeBannFromTrackCommand.exec(item)}
+                            onClick={() => view.removeBannFromTrackCommand.exec(item)}
                         >block</button>
                             : <button className="action chips btn btn-positive btn-outlined material-icons"
                                 title="Allowed, tab to set a bann"
-                                onClick={evnt => view.bannTrackCommand.exec(item)}
+                                onClick={() => view.bannTrackCommand.exec(item)}
                             >done</button>}
                     </span>
                     {item.isLiked && <span className="badge badge-positive"
-                        onClick={evnt => view.unlikeTrackCommand.exec(item)}
+                        onClick={() => view.unlikeTrackCommand.exec(item)}
                     >{item.duration()}</span>}
                     {item.isLiked || <span className="badge"
-                        onClick={evnt => view.likeTrackCommand.exec(item)}
+                        onClick={() => view.likeTrackCommand.exec(item)}
                     >{item.duration()}</span>}
                 </div>
                 {!view.isBanned(item) && view.selectedTrack === item && <SelectPlaylistsView

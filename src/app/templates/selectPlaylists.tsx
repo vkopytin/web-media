@@ -7,7 +7,7 @@ export const template = (view: SelectPlaylistsView) => <div className={cn(`${vie
         : !view.props.active ? <span className="chips chips-positive material-icons">refresh</span>
             : null}
     {_.map(view.playlists, (item: SelectPlaylistsView['playlists'][0]) => {
-        if (view.playlistHasTrack(item, view.props.track)) {
+        if (view.isPlaylistInTracksPlaylist(item)) {
             return view.props.active
                 ? <span className="chips chips-positive" key={item.id()}>{item.name()}</span>
                 : <span className="chips chips-positive" key={item.id()}
