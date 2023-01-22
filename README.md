@@ -11,7 +11,7 @@ The solution contains the list of following patterns
 - Properties Data Binding
 - Data selectors and Commands
 
-The declarative UI programming provides clear UI structure. It is used by React. With Angular it can be achieved even with smaller efforts.
+The declarative UI programming provides clear UI structure. It is done in React. With Angular it can be achieved even with smaller efforts.
 Eventually with some efforts it can be done for other frameworks.
 
 ### How to run the application. After checkout
