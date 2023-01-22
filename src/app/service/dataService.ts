@@ -1,4 +1,3 @@
-import { ISpotifySong, IUserPlaylist } from '../adapter/spotify';
 import { DataStorage } from '../data/dataStorage';
 import { AlbumsStore } from '../data/entities/albumsStore';
 import { ArtistsStore } from '../data/entities/artistsStore';
@@ -10,6 +9,7 @@ import { PlaylistRowsStore } from '../data/entities/playlistRowsStore';
 import { PlaylistsStore } from '../data/entities/playlistsStore';
 import { TracksStore } from '../data/entities/tracksStore';
 import { Events } from '../events';
+import { ISpotifySong, IUserPlaylist } from '../ports/iMediaProt';
 import { Result } from '../utils/result';
 
 

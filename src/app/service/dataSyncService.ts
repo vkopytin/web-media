@@ -1,14 +1,14 @@
-import { ISpotifySong, IUserPlaylist } from '../adapter/spotify';
 import { Events } from '../events';
+import { ISpotifySong, IUserPlaylist } from '../ports/iMediaProt';
 import { Result } from '../utils/result';
 import { DataService } from './dataService';
-import { SpotifyService } from './spotify';
+import { MediaService } from './mediaService';
 
 
-class SpotifySyncService extends Events {
+export class DataSyncService extends Events {
     limit = 49;
 
-    constructor(private data: DataService, public spotify: SpotifyService) {
+    constructor(private data: DataService, public media: MediaService) {
         super();
     }
 
@@ -82,7 +82,7 @@ class SpotifySyncService extends Events {
         let offset = 0;
         while (offset < total) {
             const currentOffset = offset;
-            const result = await this.spotify.fetchPlaylistTracks(playlistId, offset, this.limit + 1);
+            const result = await this.media.fetchPlaylistTracks(playlistId, offset, this.limit + 1);
 
             const response = result.match(s => s, e => { throw e });
 
@@ -101,7 +101,7 @@ class SpotifySyncService extends Events {
         let offset = 0;
         while (offset < total) {
             const currOffset = offset;
-            const result = await this.spotify.fetchMyPlaylists(offset, this.limit + 1);
+            const result = await this.media.fetchMyPlaylists(offset, this.limit + 1);
 
             const response = result.match(s => s, e => { throw e });
             total = offset + Math.min(this.limit + 1, response.items.length);
@@ -119,7 +119,7 @@ class SpotifySyncService extends Events {
         let offset = 0;
         while (offset < total) {
             const currentOffset = offset,
-                result = await this.spotify.fetchTracks(offset, this.limit + 1);
+                result = await this.media.fetchTracks(offset, this.limit + 1);
 
             const response = result.match(s => s, e => { throw e });
             total = offset + Math.min(this.limit + 1, response.items.length);
@@ -136,5 +136,3 @@ class SpotifySyncService extends Events {
         return true;
     }
 }
-
-export { SpotifySyncService };

@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { IAlbum } from '../adapter/spotify';
+import { IAlbum } from '../ports/iMediaProt';
 import { State } from '../utils';
 import { Result } from '../utils/result';
 

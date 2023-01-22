@@ -1,21 +1,19 @@
 import { Result } from '../../utils/result';
 
-class SpotifyServiceUnexpectedError extends Error {
+export class MediaServiceUnexpectedError extends Error {
 
     static of<T>(message: string, details = {}): Result<Error, T> {
-        return Result.error<Error, T>(new SpotifyServiceUnexpectedError(message, details));
+        return Result.error<Error, T>(new MediaServiceUnexpectedError(message, details));
     }
 
     constructor(public msg: string, public details: { stack?: string }) {
         super(msg);
 
-        this.name = 'SpotifyServiceUnexpectedError';
+        this.name = 'MediaServiceUnexpectedError';
         if ('stack' in details) {
             this.stack = ([] as string[]).concat(msg, details.stack || '').join('\r\n');
         }
 
-        Object.setPrototypeOf(this, SpotifyServiceUnexpectedError.prototype);
+        Object.setPrototypeOf(this, MediaServiceUnexpectedError.prototype);
     }
 }
-
-export { SpotifyServiceUnexpectedError };

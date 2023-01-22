@@ -1,8 +1,8 @@
 import * as _ from 'underscore';
-import { IResponseResult, ISpotifySong } from '../adapter/spotify';
+import { IResponseResult, ISpotifySong } from '../ports/iMediaProt';
 import { AppService } from '../service';
 import { DataService } from '../service/dataService';
-import { SpotifyService } from '../service/spotify';
+import { RemotePlaybackService } from '../service/remotePlaybackService';
 import { formatTime, isLoading, State } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
@@ -34,7 +34,7 @@ class TrackViewModelItem {
         public song: ISpotifySong,
         private index: number,
         private data = inject(DataService),
-        private spotify = inject(SpotifyService),
+        private remotePlayback = inject(RemotePlaybackService),
         private app = inject(AppService)
     ) {
 
@@ -121,14 +121,14 @@ class TrackViewModelItem {
     }
 
     async play(playlistUri: string): Promise<void> {
-        const playResult = await this.spotify.play('', playlistUri, this.uri());
+        const playResult = await this.remotePlayback.play('', playlistUri, this.uri());
         playResult.map(() => this.mediaPlayerViewModel.fetchDataInternal())
             .error(e => this.errors = [Result.error(e)]);
     }
 
     async playTracks(tracks: TrackViewModelItem[]): Promise<void> {
         const allowedTracks = _.filter(tracks, track => !track.isBanned);
-        const playResult = await this.spotify.play('', _.map(allowedTracks, item => item.uri()), this.uri());
+        const playResult = await this.remotePlayback.play('', _.map(allowedTracks, item => item.uri()), this.uri());
         playResult.map(() => this.mediaPlayerViewModel.fetchDataInternal())
             .error(e => this.errors = [Result.error(e)]);
     }

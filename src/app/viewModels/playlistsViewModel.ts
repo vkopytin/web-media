@@ -2,7 +2,7 @@ import * as _ from 'underscore';
 import { AppService } from '../service';
 import { DataService } from '../service/dataService';
 import { LyricsService } from '../service/lyricsService';
-import { SpotifyService } from '../service/spotify';
+import { MediaService } from '../service/mediaService';
 import { isLoading, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
@@ -39,7 +39,7 @@ class PlaylistsViewModel {
 
     constructor(
         private data: DataService,
-        private spotify: SpotifyService,
+        private media: MediaService,
         private lyrics: LyricsService,
         private app: AppService
     ) {
@@ -72,7 +72,7 @@ class PlaylistsViewModel {
     }
 
     async fetchData(): Promise<void> {
-        const result = await this.spotify.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
+        const result = await this.media.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
         result.map(({ items: playlists }) => {
             this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
             this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
@@ -82,7 +82,7 @@ class PlaylistsViewModel {
 
     @isLoading
     async loadMore(): Promise<void> {
-        const result = await this.spotify.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
+        const result = await this.media.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
         result.map(({ items: playlists }) => {
             this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
             this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
@@ -97,7 +97,7 @@ class PlaylistsViewModel {
         this.tracks = [];
         if (currentPlaylistId) {
             this.loadTracks('playlistTracks');
-            const result = await this.spotify.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
+            const result = await this.media.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
             result.map(({ items: tracks }) => {
                 this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
                 this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);
@@ -110,7 +110,7 @@ class PlaylistsViewModel {
     async loadMoreTracks(): Promise<void> {
         const currentPlaylistId = this.currentPlaylistId;
         if (currentPlaylistId) {
-            const result = await this.spotify.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
+            const result = await this.media.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
             result.map(({ items: tracks }) => {
                 this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
                 this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);
@@ -136,7 +136,7 @@ class PlaylistsViewModel {
         if (!tracksToCheck.length) {
             return;
         }
-        const likedResult = await this.spotify.hasTracks(_.map(tracksToCheck, t => t.id()));
+        const likedResult = await this.media.hasTracks(_.map(tracksToCheck, t => t.id()));
         likedResult.map(likedList => {
             _.each(likedList, (liked, index) => {
                 tracksToCheck[index].isLiked = liked;
@@ -156,20 +156,20 @@ class PlaylistsViewModel {
         if (!this.newPlaylistName) {
             return;
         }
-        const meResult = await this.spotify.profile();
+        const meResult = await this.media.profile();
         const meId = meResult.map(me => {
             if (me.id) {
                 return me.id;
             }
             throw new Error('My profile Id is empty');
         });
-        const spotifyResult = await meId.cata(id => this.app.createNewPlaylist(
+        const appResult = await meId.cata(id => this.app.createNewPlaylist(
             id,
             this.newPlaylistName,
             '',
             isPublic
         ));
-        await spotifyResult.map(() => this.fetchData()).error(e => this.errors = [Result.error(e)]);
+        await appResult.map(() => this.fetchData()).error(e => this.errors = [Result.error(e)]);
     }
 
     async likeTrack(track: TrackViewModelItem): Promise<void> {
@@ -215,9 +215,9 @@ class PlaylistsViewModel {
         this.tracks = data;
         let res;
         if (oldPosition < newPosition) {
-            res = await this.spotify.reorderTracks(this.currentPlaylistId, oldPosition, newPosition + 1);
+            res = await this.media.reorderTracks(this.currentPlaylistId, oldPosition, newPosition + 1);
         } else if (oldPosition > newPosition) {
-            res = await this.spotify.reorderTracks(this.currentPlaylistId, oldPosition, newPosition);
+            res = await this.media.reorderTracks(this.currentPlaylistId, oldPosition, newPosition);
         }
         res?.error(e => this.errors = [Result.error(e)]);
     }

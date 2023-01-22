@@ -1,16 +1,18 @@
 /* eslint-disable */
 
-import { SpotifyAdapter } from '../../adapter/spotify';
 import { DataStorage } from '../../data/dataStorage';
 import { AppViewModel } from '../appViewModel';
-import { SpotifySyncService } from '../../service/spotifySyncService';
-import { SpotifyService } from '../../service/spotify';
-import { SpotifyPlayerService } from '../../service/spotifyPlayer';
+import { DataSyncService } from '../../service/dataSyncService';
+import { MediaService } from '../../service/mediaService';
+import { PlaybackService } from '../../service/playbackService';
 import { AppService } from '../../service';
 import { SettingsService } from '../../service/settings';
 import { DataService } from '../../service/dataService';
 import { DeviceViewModelItem } from '../deviceViewModelItem';
 import { LoginService } from '../../service/loginService';
+import { RemotePlaybackService } from '../../service/remotePlaybackService';
+import { SpotifyMediaAdapter } from '../../adapter/spotify';
+import { SpotifyRemotePlaybackAdapter } from '../../adapter/spotifyRemotePlaybackAdapter';
 
 
 jest.mock('../../adapter/spotify', () => {
@@ -73,27 +75,31 @@ DataStorage.dbType = 'inMemory';
 
 
 describe('App View Model', () => {
-    let adapter: SpotifyAdapter;
+    let spotifyMedia: SpotifyMediaAdapter;
+    let spotifyRemotePlaybackAdapter: SpotifyRemotePlaybackAdapter;
     let vm: AppViewModel;
     let service: AppService;
     let mockedInit: jest.SpyInstance<ReturnType<AppViewModel['init']>>;
-    let spotifySync: SpotifySyncService;
-    let spotify: SpotifyService;
-    let spotifyPlayer: SpotifyPlayerService;
+    let spotifySync: DataSyncService;
+    let media: MediaService;
+    let playback: PlaybackService;
+    let remotePlayback: RemotePlaybackService;
     let dataService: DataService;
     let login: LoginService;
 
     beforeEach(async () => {
-        adapter = new SpotifyAdapter('key');
+        spotifyMedia = new SpotifyMediaAdapter('key');
+        spotifyRemotePlaybackAdapter = new SpotifyRemotePlaybackAdapter('key');
         const settings = new SettingsService({ apiseeds: { key: '' }, genius: {}, lastSearch: { val: '' }, spotify: {} });
         login = new LoginService(settings);
-        spotify = new SpotifyService(adapter);
-        spotifyPlayer = new SpotifyPlayerService(settings);
+        media = new MediaService(spotifyMedia);
+        playback = new PlaybackService(settings);
+        remotePlayback = new RemotePlaybackService(spotifyRemotePlaybackAdapter);
         dataService = new DataService();
-        spotifySync = new SpotifySyncService(dataService, spotify);
-        service = new AppService(settings, login, dataService, spotify, spotifySync, spotifyPlayer);
+        spotifySync = new DataSyncService(dataService, media);
+        service = new AppService(settings, login, dataService, media, spotifySync, playback, remotePlayback);
         mockedInit = jest.spyOn(AppViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
-        vm = new AppViewModel(login, spotifySync, spotify, spotifyPlayer, service);
+        vm = new AppViewModel(login, spotifySync, media, playback, remotePlayback, service);
     });
 
     afterEach(() => {
@@ -126,7 +132,7 @@ describe('App View Model', () => {
     });
 
     it('Should catch error when fetch devices', async () => {
-        jest.spyOn(adapter, 'devices').mockImplementation(() => {
+        jest.spyOn(spotifyRemotePlaybackAdapter, 'devices').mockImplementation(() => {
             throw new Error('fake error');
         });
 

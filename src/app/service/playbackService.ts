@@ -100,7 +100,8 @@ declare global {
     }
 }
 
-class SpotifyPlayerService extends Events {
+export class PlaybackService extends Events {
+    // toDO: Move SDK player to adapters
     public player?: SDKPlayer;
 
     deviceId = '';
@@ -300,5 +301,3 @@ class SpotifyPlayerService extends Events {
         return Option.none();
     }
 }
-
-export { SpotifyPlayerService };

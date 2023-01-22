@@ -1,6 +1,5 @@
 import * as _ from 'underscore';
-import { AppService } from '../service';
-import { SpotifyService } from '../service/spotify';
+import { MediaService } from '../service/mediaService';
 import { State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
@@ -33,7 +32,7 @@ class NewReleasesViewModel {
     @State unlikeAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.unlikeAlbum(album));
 
     constructor(
-        private spotify: SpotifyService,
+        private media: MediaService,
     ) {
 
     }
@@ -44,15 +43,15 @@ class NewReleasesViewModel {
     }
 
     async connect(): Promise<void> {
-        this.spotify.on('change:state', () => this.checkAlbums());
+        this.media.on('change:state', () => this.checkAlbums());
     }
 
     async fetchData(): Promise<void> {
-        const res = await this.spotify.newReleases();
+        const res = await this.media.newReleases();
         const res2 = await res.map(releases => {
             this.newReleases = _.map(releases.albums?.items || [], album => new AlbumViewModelItem(album));
             this.checkAlbums();
-        }).cata(() => this.spotify.featuredPlaylists());
+        }).cata(() => this.media.featuredPlaylists());
         const res3 = res2.map(featuredPlaylists => {
             this.featuredPlaylists = _.map(featuredPlaylists.playlists?.items || [], playlist => new PlaylistsViewModelItem(playlist));
         });
@@ -62,7 +61,7 @@ class NewReleasesViewModel {
     async loadTracks(): Promise<void> {
         const currentAlbum = this.currentAlbum;
         if (currentAlbum) {
-            const result = await this.spotify.listAlbumTracks(currentAlbum.id());
+            const result = await this.media.listAlbumTracks(currentAlbum.id());
             result.map(tracks => {
                 this.tracks = _.map(tracks.items, (item, index) => new TrackViewModelItem({
                     track: {
@@ -73,7 +72,7 @@ class NewReleasesViewModel {
                 }, index));
             }).error(e => this.errors = [Result.error(e)]);
         } else if (this.currentPlaylist) {
-            const playlistTracksResult = await this.spotify.fetchPlaylistTracks(this.currentPlaylist.id(), 0, 100);
+            const playlistTracksResult = await this.media.fetchPlaylistTracks(this.currentPlaylist.id(), 0, 100);
             playlistTracksResult.map(tracksResult => {
                 const tracksModels = _.map(tracksResult.items, (item, index) => new TrackViewModelItem(item, index));
                 this.currentTracks = tracksModels;
@@ -90,7 +89,7 @@ class NewReleasesViewModel {
             return;
         }
 
-        const likedResult = await this.spotify.hasAlbums(ids);
+        const likedResult = await this.media.hasAlbums(ids);
         likedResult.map(liked => {
             const likedAlbums = [] as AlbumViewModelItem[];
             _.each(liked, (liked, index) => {
@@ -102,12 +101,12 @@ class NewReleasesViewModel {
     }
 
     async likeAlbum(album: AlbumViewModelItem): Promise<void> {
-        const likedResult = await this.spotify.addAlbums(album.id());
+        const likedResult = await this.media.addAlbums(album.id());
         likedResult.error(() => this.errors = [likedResult]);
     }
 
     async unlikeAlbum(album: AlbumViewModelItem): Promise<void> {
-        const likedResult = await this.spotify.removeAlbums(album.id());
+        const likedResult = await this.media.removeAlbums(album.id());
         likedResult.error(() => this.errors = [likedResult]);
     }
 }

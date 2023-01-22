@@ -13,5 +13,5 @@ export function inject<T extends {}>(
         instances.set(ctor, inst);
         return inst;
     }
-    throw new Error(`[IoC] Conflict. Probably componenent was not initialized before. And it is not ready to be used from here.`);
+    throw new Error(`[IoC] Conflict. Probably '${ctor.name}' componenent was not initialized before. And it is not ready to be used from here.`);
 }

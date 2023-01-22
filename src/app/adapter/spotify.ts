@@ -1,204 +1,6 @@
+import { IMediaPort, IUserInfo, IResponseResult, ISpotifySong, IRecommendationsResult, IUserPlaylistsResult, IUserPlaylist, IArtist, ITrack, ITopTracksResult, IAlbum, ISearchResult, ISearchType, IBrowseResult, ISpotifyAlbum, IReorderTracksResult } from '../ports/iMediaProt';
+import { ICurrentlyPlayingResult } from '../ports/iRemotePlaybackPort';
 import { ErrorWithStatus } from './errors/errorWithStatus';
-
-export interface IImageInfo {
-    width: number;
-    height: number;
-    url: string;
-}
-
-export interface IDevice {
-    id: string;
-    is_active: boolean;
-    is_private_session: boolean;
-    is_restricted: boolean;
-    name: string;
-    type: string;
-    volume_percent: number;
-}
-
-export interface IUserInfo {
-    birthdate?: string;
-    country?: 'PL' | string;
-    display_name?: string;
-    email?: string;
-    explicit_content?: {
-        filter_enabled?: boolean;
-        filter_locked?: boolean;
-    };
-    external_urls?: {
-        spotify?: string;
-    };
-    followers?: {
-        href?: string;
-        total?: number;
-    };
-    href?: string;
-    id?: string;
-    images?: IImageInfo[];
-    product?: 'open' | string;
-    type?: 'user' | string;
-    uri?: string;
-}
-
-export interface ITrack {
-    id: string;
-    name: string;
-    album: IAlbum;
-    artists: IArtist[];
-    uri: string;
-    duration_ms?: number;
-    track_number?: number;
-}
-
-export interface IArtist {
-    external_urls: {
-        spotify: string;
-    };
-    images: IImageInfo[];
-    spotify: string;
-    href: string;
-    id: string;
-    name: string;
-    type: string;
-    uri: string;
-}
-
-export interface IUserPlaylist {
-    id: string;
-    name: string;
-    description: string;
-    uri: string;
-    tracks: {
-        total: number;
-    };
-    images: Array<IImageInfo>;
-    owner: IUserInfo;
-    snapshot_id: string;
-}
-
-export interface ISpotifySong {
-    track: ITrack;
-    played_at?: string;
-    added_at: string;
-    position?: number;
-}
-
-export interface IDevicesResponse {
-    devices: IDevice[];
-}
-
-export interface IRecommendationsResult {
-    tracks: ITrack[];
-    seeds: Array<unknown>;
-}
-
-export interface ITopTracksResult {
-    tracks: ITrack[];
-}
-
-export interface IAlbum {
-    album_type: string;
-    id: string;
-    name: string;
-    uri: string;
-    artists: IArtist[];
-    images: Array<IImageInfo>;
-    total_tracks: number;
-    release_date: string;
-    external_urls: {
-        spotify: string;
-    };
-}
-
-export interface IResponseResult<T> {
-    href: string;
-    items: T[];
-    limit: number;
-    next: string;
-    offset: number;
-    previous: string;
-    total: number;
-}
-
-export interface ISearchResult {
-    tracks?: IResponseResult<ITrack>;
-    artists?: IResponseResult<IArtist>;
-    albums?: IResponseResult<IAlbum>;
-    playlists?: IResponseResult<IUserPlaylist>;
-}
-
-export interface IUserPlaylistsResult {
-    index?: number;
-    href: string;
-    items: IUserPlaylist[];
-    limit: number;
-    next: string;
-    offset: number;
-    previous: string;
-    total: number;
-}
-
-export interface IPlayerResult {
-    device: IDevice;
-    shuffle_state: boolean;
-    repeat_state: 'off' | string;
-    timestamp: number;
-    context: unknown;
-    progress_ms: number;
-    item: ITrack;
-    currently_playing_type: 'track' | string;
-    actions: {
-        disallows: {
-            resuming: boolean;
-        }
-    };
-    is_playing: boolean;
-}
-
-export interface ICurrentlyPlayingResult {
-    timestamp: number;
-    context: unknown;
-    progress_ms: number;
-    item: ITrack;
-    currently_playing_type: 'track' | string;
-    actions: {
-        disallows: {
-            resuming: boolean;
-        }
-    };
-    is_playing: boolean;
-}
-
-export interface IReorderTracksResult {
-    snapshot_id: string;
-}
-
-export interface ICategory {
-    id: string;
-    name: string;
-    href: string;
-    icons: IImageInfo[];
-}
-
-export interface IBrowseResult {
-    tracks?: IResponseResult<ITrack>;
-    artists?: IResponseResult<IArtist>;
-    albums?: IResponseResult<IAlbum>;
-    playlists?: IResponseResult<IUserPlaylist>;
-    categories?: IResponseResult<ICategory>;
-}
-
-export interface IPLayerQueueResult {
-    currently_playing: unknown;
-    queue: ITrack[];
-}
-
-export interface ISpotifyAlbum {
-    added_at: string;
-    album: IAlbum;
-}
-
-export type ISearchType = 'track' | 'album' | 'artist' | 'playlist';
 
 const delayWithin = (ms = 800) => new Promise((resolve) => {
     setTimeout(() => resolve(true), ms);
@@ -267,7 +69,7 @@ const baseUrl = 'https://api.spotify.com';
 
 //let index = 0;
 
-class SpotifyAdapter {
+export class SpotifyMediaAdapter implements IMediaPort {
     fetch: typeof fetch = async (input, init) => {
         //if (index++ % 3 === 0) {
         //    input = ('' + input).replace('?', '/fail?') + 'fail';
@@ -301,18 +103,6 @@ class SpotifyAdapter {
         });
 
         return await resultOrError<IResponseResult<ISpotifySong>>(response);
-    }
-
-    async devices(): Promise<IDevicesResponse> {
-        await delayWithin();
-
-        const response = await this.fetch(`${baseUrl}/v1/me/player/devices`, {
-            headers: {
-                'Authorization': 'Bearer ' + this.token
-            },
-        });
-
-        return await resultOrError<IDevicesResponse>(response);
     }
 
     async recommendations(
@@ -499,78 +289,6 @@ class SpotifyAdapter {
         return await resultOrError(response);
     }
 
-    async play(tracksUriList?: string | string[], indexOrUri: number | string = '', deviceId?: string) {
-        const urlParts = [`${baseUrl}/v1/me/player/play`];
-        const numberRx = /^\d+$/i;
-        const position = numberRx.test('' + indexOrUri) ? +indexOrUri : -1;
-        const uri = (!numberRx.test('' + indexOrUri)) ? indexOrUri : '';
-        const uris = ([] as string[]).concat(tracksUriList || []);
-        const contextUri = uris.length === 1 ? uris[0] : '';
-        deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
-
-        const response = await this.fetch(urlParts.join('?'), {
-            method: 'PUT',
-            headers: {
-                'Authorization': 'Bearer ' + this.token,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify((tracksUriList && tracksUriList.length) ? {
-                ...contextUri ? { context_uri: contextUri } : { uris },
-
-                ...uri ? { offset: { uri } }
-                    : position !== -1 ? { offset: { position } }
-                        : {}
-            } : {}),
-        });
-
-        return await resultOrError(response);
-    }
-
-    async next(deviceId = ''): Promise<unknown> {
-        await delayWithin();
-        const urlParts = [`${baseUrl}/v1/me/player/next`];
-        deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
-
-        const response = await this.fetch(urlParts.join('?'), {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + this.token
-            },
-        });
-
-        return await resultOrError(response);
-    }
-
-    async previous(deviceId = ''): Promise<unknown> {
-        await delayWithin();
-        const urlParts = [`${baseUrl}/v1/me/player/previous`];
-        deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
-
-        const response = await this.fetch(urlParts.join('?'), {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + this.token
-            },
-        });
-
-        return await resultOrError(response);
-    }
-
-    async pause(deviceId = ''): Promise<unknown> {
-        await delayWithin();
-        const urlParts = [`${baseUrl}/v1/me/player/pause`];
-        deviceId && urlParts.push(`device_id=${encodeURIComponent(deviceId)}`);
-
-        const response = await this.fetch(urlParts.join('?'), {
-            method: 'PUT',
-            headers: {
-                'Authorization': 'Bearer ' + this.token
-            },
-        });
-
-        return await resultOrError(response);
-    }
-
     async newReleases(offset = 0, limit = 20): Promise<ISearchResult> {
         const response = await this.fetch(`${baseUrl}/v1/browse/new-releases?` + toUrlQueryParams({
             offset, limit
@@ -624,37 +342,6 @@ class SpotifyAdapter {
         }), {
             headers: {
                 'Authorization': 'Bearer ' + this.token
-            },
-        });
-
-        return await resultOrError(response);
-    }
-
-    async player(deviceId = '', play = null as boolean | null): Promise<IPlayerResult> {
-        await delayWithin();
-        const response = await this.fetch(`${baseUrl}/v1/me/player`, {
-            method: play === null ? 'GET' : 'PUT',
-            headers: {
-                'Authorization': 'Bearer ' + this.token,
-                'Content-Type': 'application/json',
-            },
-            ...play === null ? {} : {
-                body: JSON.stringify({
-                    device_ids: ([] as string[]).concat(deviceId),
-                    play: play
-                })
-            }
-        });
-
-        return await resultOrError(response);
-    }
-
-    async queue(): Promise<IPLayerQueueResult> {
-        const response = await this.fetch(`${baseUrl}/v1/me/player/queue`, {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + this.token,
-                'Content-Type': 'application/json',
             },
         });
 
@@ -837,5 +524,3 @@ class SpotifyAdapter {
         return await resultOrError(response);
     }
 }
-
-export { SpotifyAdapter };

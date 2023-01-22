@@ -1,7 +1,6 @@
 import * as _ from 'underscore';
-import { ISearchType, ISpotifySong } from '../adapter/spotify';
 import { SettingsService } from '../service/settings';
-import { SpotifyService } from '../service/spotify';
+import { MediaService } from '../service/mediaService';
 import { asyncDebounce, asyncQueue, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
@@ -9,6 +8,7 @@ import { AlbumViewModelItem } from './albumViewModelItem';
 import { ArtistViewModelItem } from './artistViewModelItem';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
+import { ISearchType, ISpotifySong } from '../ports/iMediaProt';
 
 
 const searchQueue = asyncQueue();
@@ -60,7 +60,7 @@ class SearchViewModel {
         });
     }, 300);
 
-    constructor(private spotify: SpotifyService, private settingsService: SettingsService) {
+    constructor(private media: MediaService, private settingsService: SettingsService) {
 
     }
 
@@ -108,7 +108,7 @@ class SearchViewModel {
             this.isLoading = false;
             return;
         }
-        const res = await this.spotify.search(this.searchType, this.term, this.settings.offset, this.settings.limit);
+        const res = await this.media.search(this.searchType, this.term, this.settings.offset, this.settings.limit);
         res.map(search => {
             if ('tracks' in search && search.tracks) {
                 this.settings.total = search.tracks.total || 0;
@@ -140,7 +140,7 @@ class SearchViewModel {
             return;
         }
         this.isLoading = true;
-        const res = await this.spotify.search(this.searchType, this.term, this.settings.offset, this.settings.limit);
+        const res = await this.media.search(this.searchType, this.term, this.settings.offset, this.settings.limit);
         res.map(search => {
             if (search?.tracks) {
                 this.tracksAddRange(_.map(search.tracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, (search.tracks?.offset || 0) + index)));
@@ -171,7 +171,7 @@ class SearchViewModel {
         this.currentTracks = [];
 
         if (this.searchType === 'album' && this.currentAlbum) {
-            const albumTrackssResult = await this.spotify.listAlbumTracks(this.currentAlbum.id());
+            const albumTrackssResult = await this.media.listAlbumTracks(this.currentAlbum.id());
 
             albumTrackssResult
                 .map(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem({ track: item } as ISpotifySong, index)))
@@ -179,7 +179,7 @@ class SearchViewModel {
         }
 
         if (this.searchType === 'playlist' && this.currentPlaylist) {
-            const playlistTracksResult = await this.spotify.fetchPlaylistTracks(this.currentPlaylist.id());
+            const playlistTracksResult = await this.media.fetchPlaylistTracks(this.currentPlaylist.id());
 
             playlistTracksResult
                 .map(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem(item, index)))
@@ -187,7 +187,7 @@ class SearchViewModel {
         }
 
         if (this.searchType === 'artist' && this.currentArtist) {
-            const artistTracksResult = await this.spotify.fetchArtistTopTracks(this.currentArtist.id(), 'US');
+            const artistTracksResult = await this.media.fetchArtistTopTracks(this.currentArtist.id(), 'US');
 
             artistTracksResult
                 .map(tr => this.currentTracks = _.map(tr.tracks, (item, index) => new TrackViewModelItem({ track: item } as ISpotifySong, index)))

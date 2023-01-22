@@ -1,12 +1,13 @@
 import * as _ from 'underscore';
-import { ITrack, IUserPlaylist } from '../adapter/spotify';
 import { Result } from '../utils/result';
 import { DataService } from './dataService';
 import { LoginService } from './loginService';
 import { SettingsService } from './settings';
-import { SpotifyService } from './spotify';
-import { SpotifyPlayerService } from './spotifyPlayer';
-import { SpotifySyncService } from './spotifySyncService';
+import { MediaService } from './mediaService';
+import { PlaybackService } from './playbackService';
+import { DataSyncService } from './dataSyncService';
+import { ITrack, IUserPlaylist } from '../ports/iMediaProt';
+import { RemotePlaybackService } from './remotePlaybackService';
 
 
 export class AppService {
@@ -14,9 +15,10 @@ export class AppService {
         private settingsService: SettingsService,
         private loginService: LoginService,
         private dataService: DataService,
-        private spotifyService: SpotifyService,
-        private spotifySyncService: SpotifySyncService,
-        private spotifyPlayerService: SpotifyPlayerService,
+        private mediaService: MediaService,
+        private dataSyncService: DataSyncService,
+        private playbackService: PlaybackService,
+        private remotePlaybackService: RemotePlaybackService,
     ) {
 
     }
@@ -29,7 +31,7 @@ export class AppService {
                 return isLoggedInResult;
             }
 
-            return await this.spotifyService.isLoggedIn();
+            return await this.mediaService.isLoggedIn();
         }, e => Promise.resolve(Result.error(e)));
     }
 
@@ -49,9 +51,11 @@ export class AppService {
 
     async refreshToken(newToken: string): Promise<Result<Error, boolean>> {
         const newSettingsResult = await this.settings('spotify', { accessToken: newToken });
-        const spotifyResult = await newSettingsResult.map(() => this.spotifyService);
-        const refreshPlayerTokenResult = await spotifyResult.cata(spotify => spotify.refreshToken(newToken));
-        const playerResult = await refreshPlayerTokenResult.map(() => this.spotifyPlayerService);
+        this.mediaService.refreshToken(newToken);
+        this.remotePlaybackService.refreshToken(newToken);
+        const mediaResult = newSettingsResult.map(() => this.mediaService);
+        const refreshPlayerTokenResult = await mediaResult.cata(media => media.refreshToken(newToken));
+        const playerResult = await refreshPlayerTokenResult.map(() => this.playbackService);
 
         return await playerResult.cata(async player => {
             await player.refreshToken();
@@ -62,29 +66,29 @@ export class AppService {
 
     async addTracks(tracks: ITrack | ITrack[]) {
         const arrTracks = ([] as ITrack[]).concat(tracks);
-        const result = await this.spotifyService.addTracks(_.map(arrTracks, t => t.id));
+        const result = await this.mediaService.addTracks(_.map(arrTracks, t => t.id));
 
         return result;
     }
 
     async removeTracks(tracks: ITrack | ITrack[]) {
         const arrTracks = ([] as ITrack[]).concat(tracks);
-        const result = await this.spotifyService.removeTracks(_.map(arrTracks, t => t.id));
+        const result = await this.mediaService.removeTracks(_.map(arrTracks, t => t.id));
 
         return result;
     }
 
     async createNewPlaylist(userId: string, name: string, description = '', isPublic = false) {
-        await this.spotifyService.createNewPlaylist(userId, name, description, isPublic);
+        await this.mediaService.createNewPlaylist(userId, name, description, isPublic);
 
-        const syncPlaylistsResult = await this.spotifySyncService.syncMyPlaylists();
+        const syncPlaylistsResult = await this.dataSyncService.syncMyPlaylists();
 
         return syncPlaylistsResult;
     }
 
     async addTrackToPlaylist(tracks: ITrack | ITrack[], playlist: IUserPlaylist) {
         tracks = ([] as ITrack[]).concat(tracks);
-        const result = await this.spotifyService.addTrackToPlaylist(_.map(([] as ITrack[]).concat(tracks), t => t.uri), playlist.id);
+        const result = await this.mediaService.addTrackToPlaylist(_.map(([] as ITrack[]).concat(tracks), t => t.uri), playlist.id);
 
         for (const track of tracks) {
             await this.dataService.createTrack(track);
@@ -99,7 +103,7 @@ export class AppService {
 
     async removeTrackFromPlaylist(tracks: ITrack | ITrack[], playlistId: string) {
         const arrTracks = ([] as ITrack[]).concat(tracks);
-        const result = await this.spotifyService.removeTrackFromPlaylist(_.map(arrTracks, t => t.uri), playlistId);
+        const result = await this.mediaService.removeTrackFromPlaylist(_.map(arrTracks, t => t.uri), playlistId);
 
         for (const track of arrTracks) {
             await this.dataService.removeTrackFromPlaylist(playlistId, {

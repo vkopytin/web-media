@@ -1,15 +1,15 @@
 import * as _ from 'underscore';
-import { ISpotifySong, IUserInfo } from '../adapter/spotify';
 import { AppService } from '../service';
 import { LoginService } from '../service/loginService';
 import { SettingsService } from '../service/settings';
-import { SpotifyService } from '../service/spotify';
+import { MediaService } from '../service/mediaService';
 import { Binding, State } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
 import { TrackViewModelItem } from './trackViewModelItem';
+import { ISpotifySong, IUserInfo } from '../ports/iMediaProt';
 
 
 class UserProfileViewModel {
@@ -34,7 +34,7 @@ class UserProfileViewModel {
         private appViewModel: AppViewModel,
         private login: LoginService,
         private settingsService: SettingsService,
-        private spotify: SpotifyService,
+        private media: MediaService,
         private app: AppService
     ) {
 
@@ -62,12 +62,12 @@ class UserProfileViewModel {
             this.geniusAuthUrl = geniusAuthUrl;
         }).error(e => this.errors = [Result.error(e)]);
 
-        const userInfoResult = await this.spotify.profile();
+        const userInfoResult = await this.media.profile();
         userInfoResult.map(userInfo => {
             this.profile = userInfo;
         }).error(e => this.errors = [Result.error(e)]);
 
-        const topTracksResult = await this.spotify.listTopTracks();
+        const topTracksResult = await this.media.listTopTracks();
         topTracksResult.map(topTracks => {
             this.topTracks = _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
         }).error(e => this.errors = [Result.error(e)]);
@@ -78,7 +78,7 @@ class UserProfileViewModel {
     }
 
     async logout(): Promise<void> {
-        const res = await this.spotify.logout();
+        const res = await this.media.logout();
         res.map(() => {
             this.isLoggedin = false;
         }).error(e => this.errors = [Result.error(e)]);

@@ -1,9 +1,9 @@
 import * as _ from 'underscore';
-import { ISpotifySong } from '../adapter/spotify';
+import { ISpotifySong } from '../ports/iMediaProt';
 import { DataService } from '../service/dataService';
 import { LyricsService } from '../service/lyricsService';
-import { SpotifyService } from '../service/spotify';
-import { SpotifyPlayerService } from '../service/spotifyPlayer';
+import { MediaService } from '../service/mediaService';
+import { PlaybackService } from '../service/playbackService';
 import { isLoading, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
@@ -32,8 +32,8 @@ class HomeViewModel {
 
     constructor(
         private data: DataService,
-        private spotify: SpotifyService,
-        private spotifyPlayer: SpotifyPlayerService,
+        private media: MediaService,
+        private playback: PlaybackService,
         private lyrics: LyricsService
     ) {
 
@@ -45,7 +45,7 @@ class HomeViewModel {
     }
 
     connect(): void {
-        this.spotify.on('change:state', (...args: unknown[]) => this.loadData(...args));
+        this.media.on('change:state', (...args: unknown[]) => this.loadData(...args));
     }
 
     @isLoading
@@ -54,8 +54,8 @@ class HomeViewModel {
         let trackIds = trackId ? [trackId] : [];
 
         if (!trackIds.length) {
-            const tracksResult = this.selectedPlaylist ? await this.spotify.fetchPlaylistTracks(this.selectedPlaylist.id(), 0, 20)
-                : await this.spotify.fetchTracks(0, 20);
+            const tracksResult = this.selectedPlaylist ? await this.media.fetchPlaylistTracks(this.selectedPlaylist.id(), 0, 20)
+                : await this.media.fetchTracks(0, 20);
 
             const res = tracksResult.map(tracks => {
                 trackIds = _.first(_.uniq(_.map(tracks.items, (song) => song.track.id)), 5);
@@ -64,14 +64,14 @@ class HomeViewModel {
         }
 
         if (!trackIds.length) {
-            const topTracksResult = await this.spotify.listTopTracks();
+            const topTracksResult = await this.media.listTopTracks();
 
             const res = topTracksResult.map(topTracks => {
                 trackIds = _.first(_.uniq(_.map(topTracks.items, (song) => song.id)), 5);
             });
             res.error(() => this.errors = [res]);
         }
-        const recomendationsResult = await this.spotify.fetchRecommendations('US', artistIds, trackIds);
+        const recomendationsResult = await this.media.fetchRecommendations('US', artistIds, trackIds);
 
         const res = recomendationsResult.map(recomendations => {
             const newTracks = _.map(recomendations.tracks, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
@@ -92,7 +92,7 @@ class HomeViewModel {
             return;
         }
         const tracksToCheck = tracks;
-        const likedResult = await this.spotify.hasTracks(_.map(tracksToCheck, t => t.id()));
+        const likedResult = await this.media.hasTracks(_.map(tracksToCheck, t => t.id()));
         const res1 = likedResult.map(liked => _.each(liked, (liked, index) => {
             tracksToCheck[index].isLiked = liked;
             this.likedTracks = _.filter(this.tracks, track => track.isLiked);
@@ -109,7 +109,7 @@ class HomeViewModel {
     }
 
     async resume(): Promise<void> {
-        await this.spotifyPlayer.resume();
+        await this.playback.resume();
     }
 
     async selectPlaylist(playlist: PlaylistsViewModelItem): Promise<void> {

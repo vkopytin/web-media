@@ -1,13 +1,12 @@
 import { LyricsAdapter } from './adapter/lyrics';
-import { SpotifyAdapter } from './adapter/spotify';
 import { AppService } from './service';
 import { DataService } from './service/dataService';
 import { LoginService } from './service/loginService';
 import { LyricsService } from './service/lyricsService';
 import { SettingsService } from './service/settings';
-import { SpotifyService } from './service/spotify';
-import { SpotifyPlayerService } from './service/spotifyPlayer';
-import { SpotifySyncService } from './service/spotifySyncService';
+import { MediaService } from './service/mediaService';
+import { PlaybackService } from './service/playbackService';
+import { DataSyncService } from './service/dataSyncService';
 import { inject } from './utils/inject';
 import { AppViewModel } from './viewModels/appViewModel';
 import { HomeViewModel } from './viewModels/homeViewModel';
@@ -17,30 +16,35 @@ import { NewReleasesViewModel } from './viewModels/newReleasesViewModel';
 import { PlaylistsViewModel } from './viewModels/playlistsViewModel';
 import { SearchViewModel } from './viewModels/searchViewModel';
 import { UserProfileViewModel } from './viewModels/userProfileViewModel';
+import { RemotePlaybackService } from './service/remotePlaybackService';
+import { SpotifyMediaAdapter } from './adapter/spotify';
+import { SpotifyRemotePlaybackAdapter } from './adapter/spotifyRemotePlaybackAdapter';
 
 export class Core {
     settingsService = inject(SettingsService, SettingsService.makeDefaultSettings());
     lyricsAdapter = inject(LyricsAdapter, this.settingsService.get('apiseeds').map(({ key }) => key).match(r => r, () => ''));
-    sptifyAdapter = inject(SpotifyAdapter, this.settingsService.get('spotify').map(({ accessToken: key }) => key).match(r => r, () => ''));
+    spotifyMediaAdapter = inject(SpotifyMediaAdapter, this.settingsService.get('spotify').map(({ accessToken: key }) => key).match(r => r, () => ''));
+    spotifyRemotePlaybackAdapter = inject(SpotifyRemotePlaybackAdapter, this.settingsService.get('spotify').map(({ accessToken: key }) => key).match(r => r, () => ''));
     lyricsService = inject(LyricsService, this.lyricsAdapter);
     dataService = inject(DataService);
-    spotifyService = inject(SpotifyService, this.sptifyAdapter);
+    mediaService = inject(MediaService, this.spotifyMediaAdapter);
+    remotePlaybackService = inject(RemotePlaybackService, this.spotifyRemotePlaybackAdapter);
     loginService = inject(LoginService, this.settingsService);
-    spotifySyncService = inject(SpotifySyncService, this.dataService, this.spotifyService);
-    spotifyPlayerService = inject(SpotifyPlayerService, this.settingsService);
-    appService = inject(AppService, this.settingsService, this.loginService, this.dataService, this.spotifyService, this.spotifySyncService, this.spotifyPlayerService);
-    appViewModel = inject(AppViewModel, this.loginService, this.spotifySyncService, this.spotifyService, this.spotifyPlayerService, this.appService);
-    homeViewModel = inject(HomeViewModel, this.dataService, this.spotifyService, this.spotifyPlayerService, this.lyricsService);
-    mediaPlayerViewModel = inject(MediaPlayerViewModel, this.appViewModel, this.spotifyService, this.settingsService, this.spotifyPlayerService, this.appService);
-    myTracksViewModel = inject(MyTracksViewModel, this.spotifyService, this.lyricsService);
-    newReleasesViewModel = inject(NewReleasesViewModel, this.spotifyService);
-    playlistsViewModel = inject(PlaylistsViewModel, this.dataService, this.spotifyService, this.lyricsService, this.appService);
-    searchViewModel = inject(SearchViewModel, this.spotifyService, this.settingsService);
-    userProfileViewModel = inject(UserProfileViewModel, this.appViewModel, this.loginService, this.settingsService, this.spotifyService, this.appService);
+    dataSyncService = inject(DataSyncService, this.dataService, this.mediaService);
+    playbackService = inject(PlaybackService, this.settingsService);
+    appService = inject(AppService, this.settingsService, this.loginService, this.dataService, this.mediaService, this.dataSyncService, this.playbackService, this.remotePlaybackService);
+    appViewModel = inject(AppViewModel, this.loginService, this.dataSyncService, this.mediaService, this.playbackService, this.remotePlaybackService, this.appService);
+    homeViewModel = inject(HomeViewModel, this.dataService, this.mediaService, this.playbackService, this.lyricsService);
+    mediaPlayerViewModel = inject(MediaPlayerViewModel, this.appViewModel, this.mediaService, this.settingsService, this.playbackService, this.remotePlaybackService, this.appService);
+    myTracksViewModel = inject(MyTracksViewModel, this.mediaService, this.lyricsService);
+    newReleasesViewModel = inject(NewReleasesViewModel, this.mediaService);
+    playlistsViewModel = inject(PlaylistsViewModel, this.dataService, this.mediaService, this.lyricsService, this.appService);
+    searchViewModel = inject(SearchViewModel, this.mediaService, this.settingsService);
+    userProfileViewModel = inject(UserProfileViewModel, this.appViewModel, this.loginService, this.settingsService, this.mediaService, this.appService);
 
     async run(): Promise<void> {
         await Promise.all([
-            this.spotifyPlayerService.init(),
+            this.playbackService.init(),
             this.appViewModel.init(),
             this.homeViewModel.init(),
             this.mediaPlayerViewModel.init(),

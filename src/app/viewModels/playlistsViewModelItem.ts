@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { IUserPlaylist } from '../adapter/spotify';
+import { IUserPlaylist } from '../ports/iMediaProt';
 
 
 function unsafeHtml(html: string) {

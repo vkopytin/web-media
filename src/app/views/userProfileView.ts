@@ -1,5 +1,5 @@
 import React from 'react';
-import { IUserInfo } from '../adapter/spotify';
+import { IUserInfo } from '../ports/iMediaProt';
 import { template } from '../templates/userProfile';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';

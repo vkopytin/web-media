@@ -1,5 +1,5 @@
 import React from 'react';
-import { ISearchType } from '../adapter/spotify';
+import { ISearchType } from '../ports/iMediaProt';
 import { template } from '../templates/search';
 import { asyncDebounce, Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';

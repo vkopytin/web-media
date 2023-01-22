@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
-import { IArtist } from '../adapter/spotify';
-import { SpotifyService } from '../service/spotify';
+import { IArtist } from '../ports/iMediaProt';
+import { RemotePlaybackService } from '../service/remotePlaybackService';
 import { State } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
@@ -19,7 +19,7 @@ class ArtistViewModelItem {
 
     constructor(public artist: IArtist, private index: number,
         private appViewModel = inject(AppViewModel),
-        private spotify = inject(SpotifyService),
+        private remotePlayback = inject(RemotePlaybackService),
     ) {
 
     }
@@ -50,13 +50,13 @@ class ArtistViewModelItem {
     async play(): Promise<void> {
         const device = this.appViewModel.currentDevice;
 
-        const res = await this.spotify.play(device?.id(), this.uri());
+        const res = await this.remotePlayback.play(device?.id(), this.uri());
         res.error(e => this.errors = [Result.error(e)]);
     }
 
     async playTracks(): Promise<void> {
         const device = this.appViewModel.currentDevice;
-        const playResult = await this.spotify.play(device?.id(), this.uri());
+        const playResult = await this.remotePlayback.play(device?.id(), this.uri());
         playResult.error(e => this.errors = [Result.error(e)]);
     }
 }

@@ -1,4 +1,4 @@
-import { IDevice } from '../adapter/spotify';
+import { IDevice } from '../ports/iRemotePlaybackPort';
 
 class DeviceViewModelItem {
     constructor(public device: IDevice) {

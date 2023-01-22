@@ -1,21 +1,19 @@
 import { Result } from '../../utils/result';
 
-class SpotifyPlayerServiceUnexpectedError extends Error {
+export class RemotePlaybackServiceError extends Error {
 
     static of<T>(message: string, details = {}): Result<Error, T> {
-        return Result.error<Error, T>(new SpotifyPlayerServiceUnexpectedError(message, details));
+        return Result.error<Error, T>(new RemotePlaybackServiceError(message, details));
     }
 
     constructor(public msg: string, public details: { stack?: string }) {
         super(msg);
 
-        this.name = 'SpotifyPlayerServiceUnexpectedError';
+        this.name = 'RemotePlaybackServiceError';
         if ('stack' in details) {
             this.stack = ([] as string[]).concat(msg, details.stack || '').join('\r\n');
         }
 
-        Object.setPrototypeOf(this, SpotifyPlayerServiceUnexpectedError.prototype);
+        Object.setPrototypeOf(this, RemotePlaybackServiceError.prototype);
     }
 }
-
-export { SpotifyPlayerServiceUnexpectedError };

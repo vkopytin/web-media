@@ -1,14 +1,15 @@
 import * as _ from 'underscore';
-import { ITrack } from '../adapter/spotify';
 import { AppService } from '../service';
 import { SettingsService } from '../service/settings';
-import { SpotifyService } from '../service/spotify';
-import { IWebPlaybackState, SpotifyPlayerService } from '../service/spotifyPlayer';
+import { MediaService } from '../service/mediaService';
+import { IWebPlaybackState, PlaybackService } from '../service/playbackService';
 import { asyncDebounce, asyncQueue, Binding, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
 import { TrackViewModelItem } from './trackViewModelItem';
+import { RemotePlaybackService } from '../service/remotePlaybackService';
+import { ITrack } from '../ports/iMediaProt';
 
 const lockSection = asyncQueue();
 
@@ -49,9 +50,10 @@ class MediaPlayerViewModel {
 
     constructor(
         private appViewModel: AppViewModel,
-        private spotify: SpotifyService,
+        private media: MediaService,
         private settingsSerivce: SettingsService,
-        private spotifyPlayerService: SpotifyPlayerService,
+        private playback: PlaybackService,
+        private remotePlaybackService: RemotePlaybackService,
         private app: AppService
     ) {
 
@@ -67,14 +69,14 @@ class MediaPlayerViewModel {
     }
 
     async connect(): Promise<void> {
-        this.spotifyPlayerService.on('playerStateChanged', (en: unknown, state: IWebPlaybackState) => this.updateFromPlayerState(state));
-        this.spotify.on('change:state', () => this.fetchData());
+        this.playback.on('playerStateChanged', (en: unknown, state: IWebPlaybackState) => this.updateFromPlayerState(state));
+        this.remotePlaybackService.on('change:state', () => this.fetchData());
 
         await this.fetchData();
     }
 
     async currentPlayerState(): Promise<Result<Error, IWebPlaybackState>> {
-        const state = await this.spotifyPlayerService.getCurrentState();
+        const state = await this.playback.getCurrentState();
         return state;
     }
 
@@ -99,12 +101,12 @@ class MediaPlayerViewModel {
         const settingsResult = await this.settingsSerivce.get('spotify');
         await settingsResult.map(settings => settings?.volume || this.volume)
             .match(async volume => {
-                const res = await this.spotifyPlayerService.setVolume(volume);
+                const res = await this.playback.setVolume(volume);
                 res.map(e => this.errors = [Result.error(e)]);
 
                 return this.volume = volume;
             }, async () => {
-                const volume = await this.spotifyPlayerService.getVolume();
+                const volume = await this.playback.getVolume();
                 volume.map(v => this.volume = v)
                     .error(e => (this.errors = [Result.error(e)], 0));
 
@@ -113,7 +115,7 @@ class MediaPlayerViewModel {
     }
 
     async fetchDataInternal(): Promise<void> {
-        const res = await this.spotify.player();
+        const res = await this.remotePlaybackService.player();
         res.map(currentlyPlaying => {
             this.lastTime = +new Date();
             if (currentlyPlaying && currentlyPlaying.item) {
@@ -144,7 +146,7 @@ class MediaPlayerViewModel {
         if (!this.currentTrackId) {
             return;
         }
-        const trackExistsResult = await this.spotify.hasTracks(this.currentTrackId);
+        const trackExistsResult = await this.media.hasTracks(this.currentTrackId);
         trackExistsResult.map(r => this.isLiked = _.first(r) || false)
             .error(e => this.errors = [Result.error(e)]);
     }
@@ -187,7 +189,7 @@ class MediaPlayerViewModel {
             lockSection.push(async (next) => {
                 try {
                     this.timePlayed = timePlayed;
-                    const res = await this.spotify.seek(timePlayed);
+                    const res = await this.remotePlaybackService.seek(timePlayed);
                     res.error(() => this.errors = [res]);
                 } catch (ex) {
                     this.errors = [Result.error(ex as Error)];
@@ -202,15 +204,15 @@ class MediaPlayerViewModel {
         return new Promise(resolve => {
             lockSection.push(async next => {
                 try {
-                    const state = await this.spotifyPlayerService.getCurrentState();
+                    const state = await this.playback.getCurrentState();
                     await state.map(async state => {
                         if (_.isEmpty(state)) {
                             this.volume = percent;
-                            const res = await this.spotify.volume(percent);
+                            const res = await this.remotePlaybackService.volume(percent);
                             res.error(e => this.errors = [Result.error(e)]);
                         } else {
                             this.volume = percent;
-                            const res = await this.spotifyPlayerService.setVolume(percent);
+                            const res = await this.playback.setVolume(percent);
                             res.map(e => this.errors = [Result.error(e)]);
                         }
 
@@ -229,14 +231,14 @@ class MediaPlayerViewModel {
         return new Promise(resolve => {
             lockSection.push(async next => {
                 try {
-                    const state = await this.spotifyPlayerService.getCurrentState();
+                    const state = await this.playback.getCurrentState();
                     await state.map(async state => {
                         if (_.isEmpty(state)) {
-                            const res = await this.spotify.play();
+                            const res = await this.remotePlaybackService.play();
                             res.map(() => this.isPlaying = true)
                                 .error(e => this.errors = [Result.error(e)]);
                         } else {
-                            const res = await this.spotifyPlayerService.resume();
+                            const res = await this.playback.resume();
                             res.map(e => this.errors = [Result.error(e)]);
                             this.isPlaying = true;
                         }
@@ -254,14 +256,14 @@ class MediaPlayerViewModel {
         return new Promise(resolve => {
             lockSection.push(async next => {
                 try {
-                    const state = await this.spotifyPlayerService.getCurrentState();
+                    const state = await this.playback.getCurrentState();
                     await state.map(async state => {
                         if (_.isEmpty(state)) {
-                            const res = await this.spotify.pause();
+                            const res = await this.remotePlaybackService.pause();
                             res.map(() => this.isPlaying = false)
                                 .error(e => this.errors = [Result.error(e)]);
                         } else {
-                            const res = await this.spotifyPlayerService.pause();
+                            const res = await this.playback.pause();
                             res.map(e => this.errors = [Result.error(e)]);
                             this.isPlaying = false;
                         }
@@ -279,13 +281,13 @@ class MediaPlayerViewModel {
         return new Promise(resolve => {
             lockSection.push(async next => {
                 try {
-                    const state = await this.spotifyPlayerService.getCurrentState();
+                    const state = await this.playback.getCurrentState();
                     await state.map(async state => {
                         if (_.isEmpty(state)) {
-                            const res = await this.spotify.previous();
+                            const res = await this.remotePlaybackService.previous();
                             res.error(() => this.errors = [res]);
                         } else {
-                            const res = await this.spotifyPlayerService.previouseTrack();
+                            const res = await this.playback.previouseTrack();
                             res.map(e => this.errors = [Result.error(e)])
                         }
                     }).await();
@@ -302,13 +304,13 @@ class MediaPlayerViewModel {
         return new Promise(resolve => {
             lockSection.push(async next => {
                 try {
-                    const state = await this.spotifyPlayerService.getCurrentState();
+                    const state = await this.playback.getCurrentState();
                     await state.map(async state => {
                         if (_.isEmpty(state)) {
-                            const res = await this.spotify.next();
+                            const res = await this.remotePlaybackService.next();
                             res.error(() => this.errors = [res]);
                         } else {
-                            const res = await this.spotifyPlayerService.nextTrack();
+                            const res = await this.playback.nextTrack();
                             res.map(e => this.errors = [Result.error(e)]);
                         }
                     }).await();
@@ -325,14 +327,14 @@ class MediaPlayerViewModel {
         return new Promise(resolve => {
             lockSection.push(async (next) => {
                 try {
-                    const state = await this.spotifyPlayerService.getCurrentState();
+                    const state = await this.playback.getCurrentState();
                     await state.map(async state => {
                         if (_.isEmpty(state)) {
                             const volume = this.volume;
-                            const res = await this.spotify.volume(volume * 1.1);
+                            const res = await this.remotePlaybackService.volume(volume * 1.1);
                             res.error(() => this.errors = [res]);
                         } else {
-                            const volume = await this.spotifyPlayerService.getVolume();
+                            const volume = await this.playback.getVolume();
                             volume.map(v => this.volume = v * 1.1)
                                 .error(e => this.errors = [Result.error(e)]);
                         }
@@ -350,14 +352,14 @@ class MediaPlayerViewModel {
         return new Promise(resolve => {
             lockSection.push(async next => {
                 try {
-                    const state = await this.spotifyPlayerService.getCurrentState();
+                    const state = await this.playback.getCurrentState();
                     await state.map(async state => {
                         if (_.isEmpty(state)) {
                             const volume = this.volume;
-                            const res = await this.spotify.volume(volume * 0.9);
+                            const res = await this.remotePlaybackService.volume(volume * 0.9);
                             res.error(e => this.errors = [Result.error(e)]);
                         } else {
-                            const volume = await this.spotifyPlayerService.getVolume();
+                            const volume = await this.playback.getVolume();
                             volume.map(v => this.volume = v * 0.9)
                                 .error(e => this.errors = [Result.error(e)]);
                         }
@@ -408,7 +410,7 @@ class MediaPlayerViewModel {
     }
 
     async resume(): Promise<void> {
-        const res = await this.spotifyPlayerService.resume();
+        const res = await this.playback.resume();
         res.map(e => this.errors = [Result.error(e)]);
     }
 }
