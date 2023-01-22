@@ -25,7 +25,7 @@ export const template = (view: SearchView) => <>
             onClick={evnt => { evnt.preventDefault(); view.changeSearchTypeCommand.exec('playlist') }}
         >Playlists</a>
     </div>
-    <ul className="table-view">
+    <ul className="tracks-list table-view">
         {_.map(view.tracks, (item: SearchView['tracks'][0]) => {
             return <li key={item.id()} className="table-view-cell media">
                 <span className="media-object pull-left player-left--32"
@@ -49,10 +49,12 @@ export const template = (view: SearchView) => <>
                     </div>
                     <div className="album-title">{item.album()}</div>
                     {view.selectedItem !== item && <SelectPlaylistsView
+                        className="select-playlist"
                         showErrors={e => view.showErrors(e)}
                         track={item} active={true} />}
                 </div>
                 {view.selectedItem === item && <SelectPlaylistsView
+                    className="select-playlist"
                     showErrors={e => view.showErrors(e)}
                     track={item} />}
                 {item.isLiked && <span className="badge badge-positive"

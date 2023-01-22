@@ -105,7 +105,9 @@ class TrackViewModelItem {
     }
 
     async fetchData(): Promise<void> {
-        this.listPlaylists();
+        const playlists = await this.listPlaylists();
+        this.trackPlaylists = playlists.valueOrDefault([]);
+
         const res = await this.data.isBannedTrack(this.song.track.id);
         res.map(r => this.isBanned = r).error(e => this.errors = [Result.error(e)]);
     }
