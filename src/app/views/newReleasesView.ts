@@ -4,7 +4,7 @@ import { template } from '../templates/newReleases';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
-import { AlbumViewModelItem, NewReleasesViewModel } from '../viewModels';
+import { AlbumViewModelItem, NewReleasesViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 
 export interface INewReleasesViewProps {
@@ -19,28 +19,28 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
     @Binding((a: NewReleasesView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
     })
-    errors!: NewReleasesView['vm']['errors'];
+    errors!: Result[];
 
     @Binding((a: NewReleasesView) => a.vm, 'newReleases')
-    newReleases!: NewReleasesView['vm']['newReleases'];
+    newReleases!: AlbumViewModelItem[];
 
     @Binding((a: NewReleasesView) => a.vm, 'featuredPlaylists')
-    featuredPlaylists!: NewReleasesView['vm']['featuredPlaylists'];
+    featuredPlaylists!: PlaylistsViewModelItem[];
 
     @Binding((a: NewReleasesView) => a.vm, 'currentAlbum')
-    currentAlbum!: NewReleasesView['vm']['currentAlbum'];
+    currentAlbum!: AlbumViewModelItem | null;
 
     @Binding((a: NewReleasesView) => a.vm, 'currentPlaylist')
-    currentPlaylist!: NewReleasesView['vm']['currentPlaylist'];
+    currentPlaylist!: PlaylistsViewModelItem | null;
 
     @Binding((a: NewReleasesView) => a.vm, 'tracks')
-    tracks!: NewReleasesView['vm']['tracks'];
+    tracks!: TrackViewModelItem[];
 
     @Binding((a: NewReleasesView) => a.vm, 'likedAlbums')
-    likedAlbums!: NewReleasesView['vm']['likedAlbums'];
+    likedAlbums!: AlbumViewModelItem[];
 
     @Binding((a: NewReleasesView) => a.vm, 'currentTracks')
-    currentTracks!: NewReleasesView['vm']['currentTracks'];
+    currentTracks!: TrackViewModelItem[];
 
     @Binding((a: NewReleasesView) => a.vm, 'selectAlbumCommand')
     selectAlbumCommand!: NewReleasesView['vm']['selectAlbumCommand'];

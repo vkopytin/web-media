@@ -12,12 +12,13 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 class TrackViewModelItem {
     mediaPlayerViewModel = inject(MediaPlayerViewModel);
 
-    @State errors = [] as Result<Error, unknown>[];
+    @State errors: Result[] = [];
+    @State isLoading = false;
     @State isLiked = false;
     @State isCached = false;
-    @State trackPlaylists = [] as PlaylistsViewModelItem[];
     @State isBanned = false;
-    @State isLoading = false;
+    @State trackPlaylists: PlaylistsViewModelItem[] = [];
+
     @State addToPlaylistCommand = Scheduler.Command((track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.addToPlaylist(track, playlist));
     @State removeFromPlaylistCommand = Scheduler.Command((track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist));
     @State playTracksCommand = Scheduler.Command((tracks: TrackViewModelItem[]) => this.playTracks(tracks));

@@ -3,7 +3,7 @@ import { template } from '../templates/mediaPlayer';
 import { Binding, formatTime, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
-import { AppViewModel, MediaPlayerViewModel } from '../viewModels';
+import { AppViewModel, MediaPlayerViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IMediaPlayerViewProps {
     showErrors<T>(errors: Result<Error, T>[]): void;
@@ -16,40 +16,40 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     @Binding((a: MediaPlayerView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
     })
-    errors!: MediaPlayerView['vm']['errors'];
+    errors!: Result[];
 
     @Binding(() => inject(AppViewModel), 'currentTrackId')
-    currentTrackId!: MediaPlayerView['vm']['currentTrackId'];
+    currentTrackId!: string;
 
     @Binding((a: MediaPlayerView) => a.vm, 'queue')
-    queue!: MediaPlayerView['vm']['queue'];
+    queue!: TrackViewModelItem[];
 
     @Binding((a: MediaPlayerView) => a.vm, 'timePlayed')
-    timePlayed!: MediaPlayerView['vm']['timePlayed'];
+    timePlayed!: number;
 
     @Binding((a: MediaPlayerView) => a.vm, 'duration')
-    duration!: MediaPlayerView['vm']['duration'];
+    duration!: number;
 
     @Binding((a: MediaPlayerView) => a.vm, 'isPlaying')
-    isPlaying!: MediaPlayerView['vm']['isPlaying'];
+    isPlaying!: boolean;
 
     @Binding((a: MediaPlayerView) => a.vm, 'trackName')
-    trackName!: MediaPlayerView['vm']['trackName'];
+    trackName!: string;
 
     @Binding((a: MediaPlayerView) => a.vm, 'albumName')
-    albumName!: MediaPlayerView['vm']['albumName'];
+    albumName!: string;
 
     @Binding((a: MediaPlayerView) => a.vm, 'artistName')
-    artistName!: MediaPlayerView['vm']['artistName'];
+    artistName!: string;
 
     @Binding((a: MediaPlayerView) => a.vm, 'volume')
-    volume!: MediaPlayerView['vm']['volume'];
+    volume!: number;
 
     @Binding((a: MediaPlayerView) => a.vm, 'thumbnailUrl')
-    thumbnailUrl!: MediaPlayerView['vm']['thumbnailUrl'];
+    thumbnailUrl!: string;
 
     @Binding((a: MediaPlayerView) => a.vm, 'isLiked')
-    isLiked!: MediaPlayerView['vm']['isLiked'];
+    isLiked!: boolean;
 
     @Binding((a: MediaPlayerView) => a.vm, 'resumeCommand')
     resumeCommand!: MediaPlayerView['vm']['resumeCommand'];

@@ -1,4 +1,5 @@
 import React from 'react';
+import { IUserInfo } from '../adapter/spotify';
 import { template } from '../templates/userProfile';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
@@ -18,34 +19,34 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
     @Binding((a: UserProfileView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
     })
-    errors!: UserProfileView['vm']['errors'];
+    errors!: Result[];
 
     @Binding(() => inject(AppViewModel), 'openLogin')
     openLogin!: boolean;
 
     @Binding((a: UserProfileView) => a.vm, 'isLoggedin')
-    isLoggedin!: UserProfileView['vm']['isLoggedin'];
+    isLoggedin!: boolean;
 
     @Binding((a: UserProfileView) => a.vm, 'profile')
-    profile!: UserProfileView['vm']['profile'];
+    profile!: IUserInfo;
 
     @Binding((a: UserProfileView) => a.vm, 'currentTrackId')
-    currentTrackId!: UserProfileView['vm']['currentTrackId'];
-
-    @Binding((a: UserProfileView) => a.vm, 'topTracks')
-    topTracks!: UserProfileView['vm']['topTracks'];
-
-    @Binding((a: UserProfileView) => a.vm, 'tracks')
-    tracks!: UserProfileView['vm']['tracks'];
+    currentTrackId!: string;
 
     @Binding((a: UserProfileView) => a.vm, 'spotifyAuthUrl')
-    spotifyAuthUrl!: UserProfileView['vm']['spotifyAuthUrl'];
+    spotifyAuthUrl!: string;
 
     @Binding((a: UserProfileView) => a.vm, 'geniusAuthUrl')
-    geniusAuthUrl!: UserProfileView['vm']['geniusAuthUrl'];
+    geniusAuthUrl!: string;
 
     @Binding((a: UserProfileView) => a.vm, 'apiseedsKey')
-    apiseedsKey!: UserProfileView['vm']['apiseedsKey'];
+    apiseedsKey!: string;
+
+    @Binding((a: UserProfileView) => a.vm, 'topTracks')
+    topTracks!: TrackViewModelItem[];
+
+    @Binding((a: UserProfileView) => a.vm, 'tracks')
+    tracks!: TrackViewModelItem[];
 
     @Binding((a: UserProfileView) => a.vm, 'logoutCommand')
     logoutCommand!: UserProfileView['vm']['logoutCommand'];

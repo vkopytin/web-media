@@ -8,18 +8,18 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 class PlaylistsViewModel {
-    @State errors = [] as Result<Error, unknown>[];
-    @State playlists = [] as PlaylistsViewModelItem[];
-    @State tracks = [] as TrackViewModelItem[];
+    settings = this.defaultSettings();
+
+    @State errors: Result[] = [];
+    @State playlists: PlaylistsViewModelItem[] = [];
+    @State tracks: TrackViewModelItem[] = [];
     @State isLoading = false;
-    @State likedTracks = [] as TrackViewModelItem[];
+    @State likedTracks: TrackViewModelItem[] = [];
     @State currentPlaylistId = '';
     @State newPlaylistName = '';
     @State selectedItem: TrackViewModelItem | null = null;
     @State trackLyrics: { trackId: string; lyrics: string } | null = null;
-    @State bannedTrackIds = [] as string[];
-
-    settings = this.defaultSettings();
+    @State bannedTrackIds: string[] = [];
 
     @State selectPlaylistCommand = Scheduler.Command((playlistId: string) => {
         this.currentPlaylistId = playlistId;

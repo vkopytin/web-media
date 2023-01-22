@@ -9,8 +9,8 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 
 class ArtistViewModelItem {
-    @State errors = [] as Result<Error, unknown>[];
-    @State playlists = [] as PlaylistsViewModelItem[];
+    @State errors: Result[] = [];
+    @State playlists: PlaylistsViewModelItem[] = [];
     @State isLiked = false;
 
     isInit = _.delay(() => {

@@ -22,18 +22,18 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
     @Binding((a: SelectPlaylistsView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
     })
-    errors!: SelectPlaylistsView['vm']['errors'];
+    errors!: Result[];
+
+    @Binding((a: SelectPlaylistsView) => a.playlistsViewModel, 'isLoading')
+    isLoading!: boolean;
 
     // playlists
     @Binding((a: SelectPlaylistsView) => a.vm, 'trackPlaylists')
-    trackPlaylists!: SelectPlaylistsView['vm']['trackPlaylists'];
+    trackPlaylists!: PlaylistsViewModelItem[];
 
     //items
     @Binding((a: SelectPlaylistsView) => a.playlistsViewModel, 'playlists')
-    playlists!: SelectPlaylistsView['playlistsViewModel']['playlists'];
-
-    @Binding((a: SelectPlaylistsView) => a.playlistsViewModel, 'isLoading')
-    isLoading!: SelectPlaylistsView['playlistsViewModel']['isLoading'];
+    playlists!: PlaylistsViewModelItem[];
 
     @Binding((a: SelectPlaylistsView) => a.vm, 'addToPlaylistCommand')
     addToPlaylistCommand!: SelectPlaylistsView['vm']['addToPlaylistCommand'];

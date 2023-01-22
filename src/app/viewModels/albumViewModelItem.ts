@@ -4,7 +4,7 @@ import { State } from '../utils';
 import { Result } from '../utils/result';
 
 class AlbumViewModelItem {
-    @State errors = [] as Result<Error, unknown>[];
+    @State errors: Result[] = [];
     @State isLiked = false;
 
     constructor(public album: IAlbum) {

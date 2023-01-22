@@ -36,22 +36,22 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
     @Binding((a: TracksView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
     })
-    errors!: TracksView['vm']['errors'];
+    errors!: Result[];
 
     @Binding((a: TracksView) => a.vm, 'tracks')
-    tracks!: TracksView['vm']['tracks'];
+    tracks!: TrackViewModelItem[];
 
     @Binding((a: TracksView) => a.vm, 'likedTracks')
-    likedTracks!: TracksView['vm']['likedTracks'];
+    likedTracks!: TrackViewModelItem[];
 
     @Binding((a: TracksView) => a.vm, 'selectedItem')
-    selectedItem!: TracksView['vm']['selectedItem'];
+    selectedItem!: TrackViewModelItem | null;
+
+    @Binding((a: TracksView) => a.vm, 'bannedTrackIds')
+    bannedTrackIds!: string[];
 
     @Binding((a: TracksView) => a.vm, 'trackLyrics')
     trackLyrics!: TracksView['vm']['trackLyrics'];
-
-    @Binding((a: TracksView) => a.vm, 'bannedTrackIds')
-    bannedTrackIds!: TracksView['vm']['bannedTrackIds'];
 
     @Binding((a: TracksView) => a.vm, 'likeTrackCommand')
     likeTrackCommand!: TracksView['vm']['likeTrackCommand'];

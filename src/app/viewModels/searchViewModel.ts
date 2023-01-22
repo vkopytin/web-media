@@ -22,18 +22,18 @@ class SearchViewModel {
         currentMediaUri: null as string | null,
     };
 
-    @State errors = [] as Result<Error, unknown>[];
+    @State errors: Result[] = [];
     @State term = '';
     @State isLoading = false;
-    @State tracks = [] as TrackViewModelItem[];
-    @State artists = [] as ArtistViewModelItem[];
-    @State albums = [] as AlbumViewModelItem[];
-    @State playlists = [] as PlaylistsViewModelItem[];
+    @State tracks: TrackViewModelItem[] = [];
+    @State artists: ArtistViewModelItem[] = [];
+    @State albums: AlbumViewModelItem[] = [];
+    @State playlists: PlaylistsViewModelItem[] = [];
     @State searchType: ISearchType = 'track';
     @State currentArtist: ArtistViewModelItem | null = null;
     @State currentAlbum: AlbumViewModelItem | null = null;
     @State currentPlaylist: PlaylistsViewModelItem | null = null;
-    @State currentTracks = [] as TrackViewModelItem[];
+    @State currentTracks: TrackViewModelItem[] = [];
     @State selectedItem: TrackViewModelItem | null = null;
 
     @State searchCommand = Scheduler.Command((term: string) => this.onChangeTerm(term));

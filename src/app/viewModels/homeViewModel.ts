@@ -11,19 +11,20 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class HomeViewModel {
-    @State errors = [] as Result<Error, unknown>[];
-    @State tracks = [] as TrackViewModelItem[];
-    @State likedTracks = [] as TrackViewModelItem[];
+    @State errors: Result[] = [];
+    @State tracks: TrackViewModelItem[] = [];
+    @State likedTracks: TrackViewModelItem[] = [];
     @State isLoading = false;
     @State selectedTrack: TrackViewModelItem | null = null;
     @State trackLyrics: { trackId: string; lyrics: string } | null = null;
     @State selectedPlaylist: PlaylistsViewModelItem | null = null;
+    @State bannedTrackIds: string[] = [];
+
     @State refreshCommand = Scheduler.Command((trackId?: string) => this.fetchData(trackId));
     @State selectTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.selectedTrack = track);
     @State likeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.likeTrack(track));
     @State unlikeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.unlikeTrack(track));
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
-    @State bannedTrackIds = [] as string[];
     @State bannTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.bannTrack(track));
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
     @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => this.selectPlaylist(playlist));

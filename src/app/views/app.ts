@@ -6,7 +6,7 @@ import { template } from '../templates/app';
 import { asyncDebounce, Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
-import { AppViewModel, TrackViewModelItem } from '../viewModels';
+import { AppViewModel, DeviceViewModelItem, TrackViewModelItem } from '../viewModels';
 
 export interface IAppViewProps {
 
@@ -19,16 +19,16 @@ class AppView extends React.Component<IAppViewProps> {
     @Binding((a: AppView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
     })
-    errors!: AppView['vm']['errors'];
+    errors!: Result[];
 
     @Binding((a: AppView) => a.vm, 'openLogin')
-    openLogin!: AppView['vm']['openLogin'];
+    openLogin!: boolean;
 
     @Binding((a: AppView) => a.vm, 'currentPanel')
     currentPanel!: AppView['vm']['currentPanel'];
 
     @Binding((a: AppView) => a.vm, 'devices')
-    devices!: AppView['vm']['devices'];
+    devices!: DeviceViewModelItem[];
 
     @Binding((a: AppView) => a.vm, 'profile')
     profile!: AppView['vm']['profile'];

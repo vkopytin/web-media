@@ -4,7 +4,7 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 
 export class AlbumsViewModel {
-    @State errors = [] as Result<Error, unknown>[];
-    @State tracks = [] as TrackViewModelItem[];
     @State selectedItem: TrackViewModelItem | null = null;
+    @State errors: Result[] = [];
+    @State tracks: TrackViewModelItem[] = [];
 }

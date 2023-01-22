@@ -18,19 +18,19 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
     @Binding((a: MyTracksView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
     })
-    errors!: MyTracksView['vm']['errors'];
-
-    @Binding((a: MyTracksView) => a.vm, 'tracks')
-    tracks!: MyTracksView['vm']['tracks'];
-
-    @Binding((a: MyTracksView) => a.vm, 'likedTracks')
-    likedTracks!: MyTracksView['vm']['likedTracks'];
+    errors!: Result[];
 
     @Binding((a: MyTracksView) => a.vm, 'isLoading')
-    isLoading!: MyTracksView['vm']['isLoading'];
+    isLoading!: boolean;
 
     @Binding((a: MyTracksView) => a.vm, 'selectedItem')
-    selectedItem!: MyTracksView['vm']['selectedItem'];
+    selectedItem!: TrackViewModelItem | null;
+
+    @Binding((a: MyTracksView) => a.vm, 'tracks')
+    tracks!: TrackViewModelItem[];
+
+    @Binding((a: MyTracksView) => a.vm, 'likedTracks')
+    likedTracks!: TrackViewModelItem[];
 
     @Binding((a: MyTracksView) => a.vm, 'trackLyrics')
     trackLyrics!: MyTracksView['vm']['trackLyrics'];

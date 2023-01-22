@@ -13,12 +13,13 @@ import { TrackViewModelItem } from './trackViewModelItem';
 class UserProfileViewModel {
     @State errors = [] as Result<Error, unknown>[];
     @State isLoggedin = false;
-    @State profile: IUserInfo = {};
-    @State topTracks = [] as TrackViewModelItem[];
-    @State tracks = [] as TrackViewModelItem[];
     @State spotifyAuthUrl = '';
     @State geniusAuthUrl = '';
     @State apiseedsKey = '';
+    @State profile: IUserInfo = {};
+    @State topTracks: TrackViewModelItem[] = [];
+    @State tracks: TrackViewModelItem[] = [];
+
     @State logoutCommand = Scheduler.Command(() => this.logout());
     @State updatApiseedsKeyCommand = Scheduler.Command((val: string) => {
         this.apiseedsKey = val;

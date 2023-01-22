@@ -10,14 +10,15 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class NewReleasesViewModel {
-    @State errors = [] as Result<Error, unknown>[];
-    @State newReleases = [] as AlbumViewModelItem[];
-    @State featuredPlaylists = [] as PlaylistsViewModelItem[];
+    @State errors: Result[] = [];
+    @State newReleases: AlbumViewModelItem[] = [];
+    @State featuredPlaylists: PlaylistsViewModelItem[] = [];
     @State currentAlbum: AlbumViewModelItem | null = null;
     @State currentPlaylist: PlaylistsViewModelItem | null = null;
-    @State currentTracks = [] as TrackViewModelItem[];
-    @State tracks = [] as TrackViewModelItem[];
-    @State likedAlbums = [] as AlbumViewModelItem[];
+    @State currentTracks: TrackViewModelItem[] = [];
+    @State tracks: TrackViewModelItem[] = [];
+    @State likedAlbums: AlbumViewModelItem[] = [];
+
     @State selectAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => {
         this.currentPlaylist = null;
         this.currentAlbum = album;

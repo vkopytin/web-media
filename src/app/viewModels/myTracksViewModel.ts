@@ -13,9 +13,9 @@ class MyTracksViewModel {
         offset: 0
     };
 
-    @State errors = [] as Result<Error, unknown>[];
-    @State tracks = [] as TrackViewModelItem[];
-    @State likedTracks = [] as TrackViewModelItem[];
+    @State errors: Result[] = [];
+    @State tracks: TrackViewModelItem[] = [];
+    @State likedTracks: TrackViewModelItem[] = [];
     @State isLoading = false;
     @State selectedItem: TrackViewModelItem | null = null;
     @State trackLyrics: { trackId: string; lyrics: string } | null = null;

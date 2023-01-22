@@ -3,7 +3,7 @@ import { template } from '../templates/pickPlaylist';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
-import { HomeViewModel, PlaylistsViewModel } from '../viewModels';
+import { HomeViewModel, PlaylistsViewModel, PlaylistsViewModelItem } from '../viewModels';
 
 
 export interface IPickPlaylistsViewProps {
@@ -18,13 +18,13 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
     @Binding((a: PickPlaylistsView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
     })
-    errors!: PickPlaylistsView['vm']['errors'];
-
-    @Binding((a: PickPlaylistsView) => a.vm, 'playlists')
-    playlists!: PickPlaylistsView['vm']['playlists'];
+    errors!: Result[];
 
     @Binding((a: PickPlaylistsView) => a.homeVm, 'selectedPlaylist')
-    selectedPlaylist!: PickPlaylistsView['homeVm']['selectedPlaylist'];
+    selectedPlaylist!: PlaylistsViewModelItem | null;
+
+    @Binding((a: PickPlaylistsView) => a.vm, 'playlists')
+    playlists!: PlaylistsViewModelItem[];
 
     @Binding((a: PickPlaylistsView) => a.homeVm, 'selectPlaylistCommand')
     selectPlaylistCommand!: PickPlaylistsView['homeVm']['selectPlaylistCommand'];

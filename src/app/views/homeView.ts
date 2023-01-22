@@ -17,25 +17,25 @@ class HomeView extends React.Component<IHomeViewProps> {
     @Binding((a: HomeView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
     })
-    errors!: HomeView['vm']['errors'];
+    errors!: Result[];
 
     @Binding((a: HomeView) => a.vm, 'tracks')
-    tracks!: HomeView['vm']['tracks'];
+    tracks!: TrackViewModelItem[];
 
     @Binding((a: HomeView) => a.vm, 'likedTracks')
-    likedTracks!: HomeView['vm']['likedTracks'];
+    likedTracks!: TrackViewModelItem[];
 
     @Binding((a: HomeView) => a.vm, 'isLoading')
-    isLoading!: HomeView['vm']['isLoading'];
+    isLoading!: boolean;
 
     @Binding((a: HomeView) => a.vm, 'selectedTrack')
-    selectedTrack!: HomeView['vm']['selectedTrack'];
+    selectedTrack!: TrackViewModelItem | null;
 
     @Binding((a: HomeView) => a.vm, 'trackLyrics')
     trackLyrics!: HomeView['vm']['trackLyrics'];
 
     @Binding((a: HomeView) => a.vm, 'bannedTrackIds')
-    bannedTrackIds!: HomeView['vm']['bannedTrackIds'];
+    bannedTrackIds!: string[];
 
     @Binding((a: HomeView) => a.vm, 'refreshCommand')
     refreshCommand!: HomeView['vm']['refreshCommand'];

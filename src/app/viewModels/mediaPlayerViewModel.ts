@@ -13,8 +13,8 @@ import { TrackViewModelItem } from './trackViewModelItem';
 const lockSection = asyncQueue();
 
 class MediaPlayerViewModel {
-    @State errors = [] as Result<Error, unknown>[];
-    @State queue = [] as TrackViewModelItem[];
+    @State errors: Result[] = [];
+    @State queue: TrackViewModelItem[] = [];
     @State timePlayed = 1;
     @State duration = 3.14 * 60 * 1000;
     @State isPlaying = false;
@@ -40,7 +40,8 @@ class MediaPlayerViewModel {
     @State unlikeSongCommand = Scheduler.Command(() => this.unlikeTrack());
     @State seekPlaybackCommand = Scheduler.Command((percent: number) => this.manualSeek(percent));
 
-    @Binding((vm: MediaPlayerViewModel) => vm.appViewModel, 'currentTrackId') currentTrackId = '';
+    @Binding((vm: MediaPlayerViewModel) => vm.appViewModel, 'currentTrackId')
+    currentTrackId = '';
 
     monitorPlyback = asyncDebounce(() => this.monitorPlybackInternal(), 5 * 1000);
     autoSeek = asyncDebounce(() => this.autoSeekInternal(), 500);

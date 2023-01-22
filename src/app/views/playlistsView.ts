@@ -3,7 +3,7 @@ import { template } from '../templates/playlists';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
-import { PlaylistsViewModel } from '../viewModels';
+import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 
 export interface IPlaylistsViewProps {
@@ -19,25 +19,25 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
     @Binding((a: PlaylistsView) => a.vm, 'errors', {
         didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
     })
-    errors!: PlaylistsView['vm']['errors'];
+    errors!: Result[];
+
+    @Binding((a: PlaylistsView) => a.vm, 'newPlaylistName')
+    newPlaylistName!: string;
 
     @Binding((a: PlaylistsView) => a.vm, 'playlists')
-    playlists!: PlaylistsView['vm']['playlists'];
+    playlists!: PlaylistsViewModelItem[];
 
     @Binding((a: PlaylistsView) => a.vm, 'tracks')
-    tracks!: PlaylistsView['vm']['tracks'];
+    tracks!: TrackViewModelItem[];
 
     @Binding((a: PlaylistsView) => a.vm, 'isLoading')
-    isLoading!: PlaylistsView['vm']['isLoading'];
+    isLoading!: boolean;
 
     @Binding((a: PlaylistsView) => a.vm, 'likedTracks')
-    likedTracks!: PlaylistsView['vm']['likedTracks'];
+    likedTracks!: TrackViewModelItem[];
 
     @Binding((a: PlaylistsView) => a.vm, 'currentPlaylistId')
     currentPlaylistId!: PlaylistsView['vm']['currentPlaylistId'];
-
-    @Binding((a: PlaylistsView) => a.vm, 'newPlaylistName')
-    newPlaylistName!: PlaylistsView['vm']['newPlaylistName'];
 
     @Binding((a: PlaylistsView) => a.vm, 'selectPlaylistCommand')
     selectPlaylistCommand!: PlaylistsView['vm']['selectPlaylistCommand'];

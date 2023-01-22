@@ -14,19 +14,20 @@ import { TrackViewModelItem } from './trackViewModelItem';
 type PanelType = 'home' | 'playlists' | 'profile' | 'releases' | 'search' | 'tracks';
 
 class AppViewModel {
-    @State errors = [] as Result<Error, unknown>[];
+    @State errors: Result[] = [];
     @State openLogin = false;
     @State currentPanel: PanelType = 'home';
     @State devices: DeviceViewModelItem[] = [];
     @State profile: IUserInfo = {};
+    @State currentTrackId = '';
+    @State topTracks: TrackViewModelItem[] = [];
+    @State currentDevice: DeviceViewModelItem | null = null;
+    @State autoRefreshUrl = '';
+    @State isSyncing = 0;
+
     @State refreshDevicesCommand = Scheduler.Command(() => this.updateDevices());
     @State switchDeviceCommand = Scheduler.Command((device: DeviceViewModelItem) => this.switchDevice(device));
     @State refreshTokenCommand = Scheduler.Command(() => this.refreshToken());
-    @State currentTrackId = '';
-    @State topTracks = [] as TrackViewModelItem[];
-    @State currentDevice = null as (DeviceViewModelItem | null);
-    @State autoRefreshUrl = '';
-    @State isSyncing = 0;
 
     constructor(
         private spotifySyncService: SpotifySyncService,

@@ -19,14 +19,14 @@ class DevicesView extends React.Component<IDevicesViewProps> {
     })
     errors!: DevicesView['vm']['errors'];
 
-    @Binding((a: DevicesView) => a.vm, 'switchDeviceCommand')
-    switchDeviceCommand!: DevicesView['vm']['switchDeviceCommand'];
-
     @Binding((a: DevicesView) => a.vm, 'devices')
-    devices!: DevicesView['vm']['devices'];
+    devices!: DeviceViewModelItem[];
 
     @Binding((a: DevicesView) => a.vm, 'currentDevice')
-    currentDevice!: DevicesView['vm']['currentDevice'];
+    currentDevice!: DeviceViewModelItem | null;
+
+    @Binding((a: DevicesView) => a.vm, 'switchDeviceCommand')
+    switchDeviceCommand!: DevicesView['vm']['switchDeviceCommand'];
 
     @Binding((a: DevicesView) => a.vm, 'refreshDevicesCommand')
     refreshDevicesCommand!: DevicesView['vm']['refreshDevicesCommand'];
