@@ -24,37 +24,37 @@ class ArtistViewModelItem {
 
     }
 
-    id() {
+    id(): string {
         return this.artist.id;
     }
 
-    name() {
+    name(): string {
         return this.artist.name;
     }
 
-    uri() {
+    uri(): string {
         return this.artist.uri;
     }
 
-    thumbnailUrl() {
+    thumbnailUrl(): string {
         const image = _.first(this.artist.images);
-        return image?.url;
+        return image?.url || '';
     }
 
-    async loadData(...args: unknown[]) {
+    loadData(...args: unknown[]): void {
         if (!~args.indexOf('playlistTracks')) {
             return;
         }
     }
 
-    async play() {
+    async play(): Promise<void> {
         const device = this.appViewModel.currentDevice;
 
         const res = await this.spotify.play(device?.id(), this.uri());
         res.error(e => this.errors = [Result.error(e)]);
     }
 
-    async playTracks() {
+    async playTracks(): Promise<void> {
         const device = this.appViewModel.currentDevice;
         const playResult = await this.spotify.play(device?.id(), this.uri());
         playResult.error(e => this.errors = [Result.error(e)]);

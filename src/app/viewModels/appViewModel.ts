@@ -40,14 +40,14 @@ class AppViewModel {
 
     }
 
-    async init() {
+    async init(): Promise<void> {
         this.attachToWindowMessageEvent();
         await this.startSync();
         await this.connect();
         await this.fetchData();
     }
 
-    attachToWindowMessageEvent() {
+    attachToWindowMessageEvent(): void {
         window.addEventListener('message', async evnt => {
             if (!(evnt.data instanceof Array)) {
                 return;
@@ -64,14 +64,14 @@ class AppViewModel {
         });
     }
 
-    async startSync() {
+    async startSync(): Promise<void> {
         this.isSyncing = 1;
         const res = await this.spotifySync.syncData();
         res.error(e => this.errors = [Result.error(e)]);
         this.isSyncing = 0;
     }
 
-    async refreshToken() {
+    async refreshToken(): Promise<void> {
         const tokenUrlResult = await this.login.getSpotifyAuthUrl();
         console.log('updating token...');
 
@@ -79,7 +79,7 @@ class AppViewModel {
             .error(e => this.errors = [Result.error(e)]);
     }
 
-    async connect() {
+    async connect(): Promise<void> {
         const isLoggedInResult = await this.app.isLoggedIn();
         this.openLogin = isLoggedInResult.match(
             r => !r,
@@ -96,7 +96,7 @@ class AppViewModel {
         this.spotifyPlayer.on('ready', updateDevicesHandler);
     }
 
-    async fetchData() {
+    async fetchData(): Promise<void> {
         const userInfoResult = await this.spotify.profile();
         userInfoResult.error(e => this.errors = [Result.error(e)])
             .map(r => this.profile = r);
@@ -110,7 +110,7 @@ class AppViewModel {
         );
     }
 
-    async updateDevices() {
+    async updateDevices(): Promise<void> {
         const devicesResult = await this.spotify.listDevices();
         devicesResult
             .map(devices => this.devices = _.map(devices, item => new DeviceViewModelItem(item)))
@@ -120,7 +120,7 @@ class AppViewModel {
         this.currentDevice = currentDevice;
     }
 
-    async switchDevice(device: DeviceViewModelItem) {
+    async switchDevice(device: DeviceViewModelItem): Promise<void> {
         const res = await this.spotify.player(device.id(), true);
 
         res.map(() => _.delay(() => {

@@ -11,23 +11,23 @@ class AlbumViewModelItem {
 
     }
 
-    id() {
+    id(): string {
         return this.album.id;
     }
 
-    name() {
+    name(): string {
         return this.album.name;
     }
 
-    albumType() {
+    albumType(): string {
         return this.album.album_type;
     }
 
-    firstArtist() {
+    firstArtist(): string {
         return _.first(this.album.artists)?.name || '';
     }
 
-    firstArtistUrl() {
+    firstArtistUrl(): string {
         const artist = _.first(this.album.artists);
         if (!artist) {
             return '#';
@@ -35,19 +35,19 @@ class AlbumViewModelItem {
         return artist?.external_urls?.spotify || '';
     }
 
-    uri() {
+    uri(): string {
         return this.album.uri;
     }
 
-    thumbnailUrl() {
-        return _.first(this.album.images)?.url;
+    thumbnailUrl(): string {
+        return _.first(this.album.images)?.url || '';
     }
 
-    releaseDate() {
+    releaseDate(): string {
         return this.album.release_date;
     }
 
-    totalTracks() {
+    totalTracks(): number {
         return this.album.total_tracks;
     }
 }

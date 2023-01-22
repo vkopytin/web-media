@@ -5,15 +5,15 @@ class DeviceViewModelItem {
 
     }
 
-    id() {
+    id(): string {
         return this.device.id;
     }
 
-    name() {
+    name(): string {
         return this.device.name;
     }
 
-    isActive() {
+    isActive(): boolean {
         return this.device.is_active;
     }
 }
