@@ -1,6 +1,6 @@
 import { LyricsAdapter } from './adapter/lyrics';
 import { SpotifyAdapter } from './adapter/spotify';
-import { Service } from './service';
+import { AppService } from './service';
 import { DataService } from './service/dataService';
 import { LoginService } from './service/loginService';
 import { LyricsService } from './service/lyricsService';
@@ -28,12 +28,12 @@ export class Core {
     loginService = inject(LoginService, this.settingsService);
     spotifySyncService = inject(SpotifySyncService, this.dataService, this.spotifyService);
     spotifyPlayerService = inject(SpotifyPlayerService, this.settingsService);
-    appService = inject(Service, this.settingsService, this.loginService, this.dataService, this.spotifyService, this.spotifySyncService, this.spotifyPlayerService);
+    appService = inject(AppService, this.settingsService, this.loginService, this.dataService, this.spotifyService, this.spotifySyncService, this.spotifyPlayerService);
     appViewModel = inject(AppViewModel, this.loginService, this.spotifySyncService, this.spotifyService, this.spotifyPlayerService, this.appService);
     homeViewModel = inject(HomeViewModel, this.dataService, this.spotifyService, this.spotifyPlayerService, this.lyricsService);
     mediaPlayerViewModel = inject(MediaPlayerViewModel, this.appViewModel, this.spotifyService, this.settingsService, this.spotifyPlayerService, this.appService);
-    myTracksViewModel = inject(MyTracksViewModel, this.spotifyService, this.lyricsService, this.appService);
-    newReleasesViewModel = inject(NewReleasesViewModel, this.spotifyService, this.appService);
+    myTracksViewModel = inject(MyTracksViewModel, this.spotifyService, this.lyricsService);
+    newReleasesViewModel = inject(NewReleasesViewModel, this.spotifyService);
     playlistsViewModel = inject(PlaylistsViewModel, this.dataService, this.spotifyService, this.lyricsService, this.appService);
     searchViewModel = inject(SearchViewModel, this.spotifyService, this.settingsService);
     userProfileViewModel = inject(UserProfileViewModel, this.appViewModel, this.loginService, this.settingsService, this.spotifyService, this.appService);

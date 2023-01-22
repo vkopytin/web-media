@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 import { ISpotifySong, IUserInfo } from '../adapter/spotify';
-import { Service } from '../service';
+import { AppService } from '../service';
 import { LoginService } from '../service/loginService';
 import { SettingsService } from '../service/settings';
 import { SpotifyService } from '../service/spotify';
@@ -35,7 +35,7 @@ class UserProfileViewModel {
         private login: LoginService,
         private settingsService: SettingsService,
         private spotify: SpotifyService,
-        private app: Service
+        private app: AppService
     ) {
 
     }

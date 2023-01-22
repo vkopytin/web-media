@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { Service } from '../service';
+import { AppService } from '../service';
 import { SpotifyService } from '../service/spotify';
 import { State } from '../utils';
 import { Result } from '../utils/result';
@@ -34,7 +34,6 @@ class NewReleasesViewModel {
 
     constructor(
         private spotify: SpotifyService,
-        private ss: Service,
     ) {
 
     }

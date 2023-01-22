@@ -1,6 +1,10 @@
 import * as _ from 'underscore';
 export * from './databinding';
 
+export const asyncDelay = (ms = 800) => new Promise((resolve) => {
+    setTimeout(() => resolve(true), ms);
+});
+
 export function formatTime(ms: number): string {
     const minutes = '' + Math.floor(ms / 60000),
         seconds = Math.floor(ms % 60000 / 1000);

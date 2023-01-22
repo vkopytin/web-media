@@ -1,11 +1,11 @@
 import * as _ from 'underscore';
-import { ISpotifySong, IUserInfo } from '../adapter/spotify';
-import { Service } from '../service';
+import { ISpotifySong, ITrack, IUserInfo } from '../adapter/spotify';
+import { AppService } from '../service';
 import { LoginService } from '../service/loginService';
 import { SpotifyService } from '../service/spotify';
 import { SpotifyPlayerService } from '../service/spotifyPlayer';
 import { SpotifySyncService } from '../service/spotifySyncService';
-import { State } from '../utils';
+import { asyncDelay, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { DeviceViewModelItem } from './deviceViewModelItem';
@@ -30,12 +30,20 @@ class AppViewModel {
     @State switchDeviceCommand = Scheduler.Command((device: DeviceViewModelItem) => this.switchDevice(device));
     @State refreshTokenCommand = Scheduler.Command(() => this.refreshToken());
 
+    updateDevicesHandler = async (eventName: string, device: { device_id: string; }): Promise<void> => {
+        await this.updateDevices();
+        if (!this.currentDevice) {
+            const res = await this.spotify.player(device.device_id, false);
+            res.error(e => this.errors = [Result.error(e)]);
+        }
+    };
+
     constructor(
         private login: LoginService,
         private spotifySync: SpotifySyncService,
         private spotify: SpotifyService,
         private spotifyPlayer: SpotifyPlayerService,
-        private app: Service,
+        private app: AppService,
     ) {
 
     }
@@ -86,14 +94,7 @@ class AppViewModel {
             e => (this.errors = [Result.error(e)], false)
         );
 
-        const updateDevicesHandler = async (eventName: string, device: { device_id: string; }) => {
-            await this.updateDevices();
-            if (!this.currentDevice) {
-                const res = await this.spotify.player(device.device_id, false);
-                res.error(e => this.errors = [Result.error(e)]);
-            }
-        };
-        this.spotifyPlayer.on('ready', updateDevicesHandler);
+        this.spotifyPlayer.on('ready', this.updateDevicesHandler);
     }
 
     async fetchData(): Promise<void> {
@@ -105,7 +106,7 @@ class AppViewModel {
 
         const topTracksResult = await this.spotify.listTopTracks();
         this.topTracks = topTracksResult.match(
-            topTracks => _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index)),
+            topTracks => _.map(topTracks.items, (track: ITrack, index) => new TrackViewModelItem({ track } as ISpotifySong, index)),
             e => (this.errors = [Result.error(e)], [])
         );
     }
@@ -122,10 +123,10 @@ class AppViewModel {
 
     async switchDevice(device: DeviceViewModelItem): Promise<void> {
         const res = await this.spotify.player(device.id(), true);
+        res.error(e => this.errors = [Result.error(e)]);
 
-        res.map(() => _.delay(() => {
-            this.updateDevices();
-        }, 1000)).error(e => this.errors = [Result.error(e)]);
+        await asyncDelay(1000);
+        res.map(() => this.updateDevices());
     }
 }
 

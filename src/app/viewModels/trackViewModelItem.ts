@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 import { IResponseResult, ISpotifySong } from '../adapter/spotify';
-import { Service } from '../service';
+import { AppService } from '../service';
 import { DataService } from '../service/dataService';
 import { SpotifyService } from '../service/spotify';
 import { formatTime, isLoading, State } from '../utils';
@@ -35,7 +35,7 @@ class TrackViewModelItem {
         private index: number,
         private data = inject(DataService),
         private spotify = inject(SpotifyService),
-        private ss = inject(Service)
+        private app = inject(AppService)
     ) {
 
     }
@@ -133,7 +133,7 @@ class TrackViewModelItem {
 
     @isLoading
     async addToPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem): Promise<void> {
-        const result = await this.ss.addTrackToPlaylist(track.song.track, playlist.playlist);
+        const result = await this.app.addTrackToPlaylist(track.song.track, playlist.playlist);
         result.map(() => setTimeout(() => {
             this.fetchData();
         }, 2000)).error(e => this.errors = [Result.error(e)]);
@@ -141,19 +141,19 @@ class TrackViewModelItem {
 
     @isLoading
     async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem): Promise<void> {
-        const result = await this.ss.removeTrackFromPlaylist(track.song.track, playlist.id());
+        const result = await this.app.removeTrackFromPlaylist(track.song.track, playlist.id());
         await result.map(() => this.fetchData()).error(e => this.errors = [Result.error(e)]);
     }
 
     async likeTrack(): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
-        const result = await this.ss.addTracks(this.song.track);
+        const result = await this.app.addTracks(this.song.track);
         result.error(e => this.errors = [Result.error(e)]);
 
         return result;
     }
 
     async unlikeTrack(): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
-        const result = await this.ss.removeTracks(this.song.track);
+        const result = await this.app.removeTracks(this.song.track);
         result.error(e => this.errors = [Result.error(e)]);
 
         return result;

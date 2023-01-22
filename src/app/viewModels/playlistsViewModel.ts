@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { Service } from '../service';
+import { AppService } from '../service';
 import { DataService } from '../service/dataService';
 import { LyricsService } from '../service/lyricsService';
 import { SpotifyService } from '../service/spotify';
@@ -41,7 +41,7 @@ class PlaylistsViewModel {
         private data: DataService,
         private spotify: SpotifyService,
         private lyrics: LyricsService,
-        private app: Service
+        private app: AppService
     ) {
 
     }

@@ -2,7 +2,7 @@
 
 import { SpotifyAdapter } from '../../adapter/spotify';
 import { DataStorage } from '../../data/dataStorage';
-import { Service } from '../../service';
+import { AppService } from '../../service';
 import { MediaPlayerViewModel } from '../mediaPlayerViewModel';
 import { SpotifyService } from '../../service/spotify';
 import { SpotifyPlayerService } from '../../service/spotifyPlayer';
@@ -59,7 +59,7 @@ DataStorage.dbType = 'inMemory';
 describe('Media Player View Model', () => {
     let adapter: SpotifyAdapter;
     let vm: MediaPlayerViewModel;
-    let service: Service;
+    let service: AppService;
     let mockedInit: jest.SpyInstance<ReturnType<MediaPlayerViewModel['init']>>;
     let spotifySync: SpotifySyncService;
     let spotify: SpotifyService;
@@ -76,7 +76,7 @@ describe('Media Player View Model', () => {
         spotifyPlayer = new SpotifyPlayerService(settings);
         dataService = new DataService();
         spotifySync = new SpotifySyncService(dataService, spotify);
-        service = new Service(settings, login, dataService, spotify, spotifySync, spotifyPlayer);
+        service = new AppService(settings, login, dataService, spotify, spotifySync, spotifyPlayer);
         appViewModel = new AppViewModel(login, spotifySync, spotify, spotifyPlayer, service);
 
         mockedInit = jest.spyOn(MediaPlayerViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());

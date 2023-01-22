@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 import { ITrack } from '../adapter/spotify';
-import { Service } from '../service';
+import { AppService } from '../service';
 import { SettingsService } from '../service/settings';
 import { SpotifyService } from '../service/spotify';
 import { IWebPlaybackState, SpotifyPlayerService } from '../service/spotifyPlayer';
@@ -52,7 +52,7 @@ class MediaPlayerViewModel {
         private spotify: SpotifyService,
         private settingsSerivce: SettingsService,
         private spotifyPlayerService: SpotifyPlayerService,
-        private app: Service
+        private app: AppService
     ) {
 
     }

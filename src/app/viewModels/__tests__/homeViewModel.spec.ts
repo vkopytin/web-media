@@ -2,7 +2,7 @@
 
 import { SpotifyAdapter } from '../../adapter/spotify';
 import { DataStorage } from '../../data/dataStorage';
-import { Service } from '../../service';
+import { AppService } from '../../service';
 import { HomeViewModel } from '../homeViewModel';
 import { SpotifyService } from '../../service/spotify';
 import { SpotifyPlayerService } from '../../service/spotifyPlayer';
@@ -33,7 +33,7 @@ DataStorage.dbType = 'inMemory';
 describe('Home View Model', () => {
     let adapter: SpotifyAdapter;
     let vm: HomeViewModel;
-    let service: Service;
+    let service: AppService;
     let mockedInit: jest.SpyInstance<ReturnType<HomeViewModel['init']>>;
     let spotifySync: SpotifySyncService;
     let spotify: SpotifyService;
@@ -49,7 +49,7 @@ describe('Home View Model', () => {
         spotifyPlayer = new SpotifyPlayerService(settings);
         dataService = new DataService();
         spotifySync = new SpotifySyncService(dataService, spotify);
-        service = new Service(settings, login, dataService, spotify, spotifySync, spotifyPlayer);
+        service = new AppService(settings, login, dataService, spotify, spotifySync, spotifyPlayer);
         mockedInit = jest.spyOn(HomeViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
         vm = new HomeViewModel(dataService, spotify, spotifyPlayer, {} as any);
     });

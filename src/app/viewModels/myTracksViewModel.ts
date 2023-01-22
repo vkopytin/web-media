@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { Service } from '../service';
+import { AppService } from '../service';
 import { LyricsService } from '../service/lyricsService';
 import { SpotifyService } from '../service/spotify';
 import { State } from '../utils';
@@ -27,7 +27,6 @@ class MyTracksViewModel {
     constructor(
         private spotify: SpotifyService,
         private lyrics: LyricsService,
-        private ss: Service,
     ) {
 
     }
