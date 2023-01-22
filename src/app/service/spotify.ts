@@ -36,7 +36,7 @@ class SpotifyService extends Events {
         return Result.of(true);
     }
 
-    onStateChangedInternal(...args: Array<{}>) {
+    onStateChangedInternal(...args: Array<{}>): void {
         this.trigger('change:state', ...args);
     }
 

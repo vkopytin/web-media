@@ -34,7 +34,7 @@ const fromEntries = <T,>(str: string): T => {
     return obj as T;
 };
 
-const getCookie = (key: string, defVal = '') => {
+const getCookie = (key: string, defVal = ''): string => {
     if (typeof document === 'undefined') {
         return '';
     }
@@ -113,7 +113,7 @@ class SettingsService extends BaseService {
         super();
     }
 
-    volume(val?: number) {
+    volume(val?: number): number | undefined {
         if (arguments.length && val !== this.config.spotify.volume) {
             this.config.spotify.volume = val;
             document.cookie = `lastVolume=${val}`;
@@ -122,7 +122,7 @@ class SettingsService extends BaseService {
         return this.config.spotify.volume;
     }
 
-    apiseedsKey(val?: string) {
+    apiseedsKey(val?: string): string {
         if (arguments.length && val && val !== this.config.apiseeds.key) {
             this.config.apiseeds.key = val;
             document.cookie = 'apsk=' + val;
@@ -158,7 +158,7 @@ class SettingsService extends BaseService {
         return Result.of(this.config[propName]);
     }
 
-    refreshConfig() {
+    refreshConfig(): void {
         const config = SettingsService.makeDefaultSettings();
         this.config = {
             ...this.config,

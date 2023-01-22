@@ -1,14 +1,14 @@
 import * as _ from 'underscore';
 export * from './databinding';
 
-export function formatTime(ms: number) {
+export function formatTime(ms: number): string {
     const minutes = '' + Math.floor(ms / 60000),
         seconds = Math.floor(ms % 60000 / 1000);
 
     return ''.concat(minutes, ':').concat(seconds < 10 ? '0' : '').concat('' + seconds);
 }
 
-export function className(str: string, ...args: Array<{}>) {
+export function className(str: string, ...args: Array<{}>): string {
     str = str || '';
     const classArray = str.split(/\s+/gi);
     const res = classArray.reduce((res, val) => {
@@ -64,16 +64,6 @@ export function asyncQueue(concurrency = 1) {
     return {
         push: (task: (a: () => void) => void) => running < concurrency ? runTask(task) : enqueueTask(task)
     };
-}
-
-export function assertNoErrors(...args: unknown[]) {
-    const fillErrors = _.last(args) as (errors: unknown[]) => void;
-    const results = _.flatten(_.initial(args)) as { isError: boolean }[];
-    const errors = _.filter(results, r => r.isError);
-
-    !_.isEmpty(errors) && fillErrors(errors);
-
-    return errors.length > 0;
 }
 
 function asAsync<T1, T2, T3, T4, Y>(c: unknown, fn: { (a: T1, a1: T2, a2: T3, a3: T4, cb: { (err?: unknown, res?: Y): void }): void }, a: T1, a1: T2, a2: T3, a3: T4): Promise<Y>

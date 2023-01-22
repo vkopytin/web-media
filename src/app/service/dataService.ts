@@ -18,8 +18,8 @@ class DataService extends Events {
         super();
     }
 
-    async createTrack(track: ITrack) {
-        return new Promise<any>((resolve, reject) => {
+    async createTrack(track: ITrack): Promise<unknown> {
+        return new Promise((resolve, reject) => {
             DataStorage.create(async (err, storage) => {
                 if (err) {
                     return reject(err);
@@ -42,8 +42,8 @@ class DataService extends Events {
         });
     }
 
-    async createPlaylist(playlist: IUserPlaylist) {
-        return new Promise<any>((resolve, reject) => {
+    async createPlaylist(playlist: IUserPlaylist): Promise<unknown> {
+        return new Promise((resolve, reject) => {
             DataStorage.create(async (err, storage) => {
                 if (err) {
                     return reject(err);
@@ -63,8 +63,8 @@ class DataService extends Events {
         });
     }
 
-    async addTrackToPlaylist(playlist: IUserPlaylist, song: ISpotifySong, index = 0) {
-        return new Promise<any>((resolve, reject) => {
+    async addTrackToPlaylist(playlist: IUserPlaylist, song: ISpotifySong, index = 0): Promise<boolean> {
+        return new Promise((resolve, reject) => {
             DataStorage.create(async (err, storage) => {
                 if (err) {
                     return reject(err);
@@ -90,7 +90,7 @@ class DataService extends Events {
         });
     }
 
-    async removeTrackFromPlaylist(playlistId: string, song: ISpotifySong) {
+    async removeTrackFromPlaylist(playlistId: string, song: ISpotifySong): Promise<boolean> {
         return new Promise<any>((resolve, reject) => {
             DataStorage.create(async (err, storage) => {
                 if (err) {

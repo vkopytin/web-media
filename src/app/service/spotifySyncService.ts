@@ -1,8 +1,5 @@
-import * as _ from 'underscore';
-import { IUserPlaylist } from '../adapter/spotify';
-import { ServiceResult } from '../base/serviceResult';
+import { ISpotifySong, IUserPlaylist } from '../adapter/spotify';
 import { Events } from '../events';
-import { assertNoErrors } from '../utils';
 import { Result } from '../utils/result';
 import { DataService } from './dataService';
 import { SpotifyService } from './spotify';
@@ -94,7 +91,7 @@ class SpotifySyncService extends Events {
             total = offset + Math.min(this.limit + 1, response.items.length);
             offset = offset + Math.min(this.limit, response.items.length);
 
-            yield _.map(response.items, (item, index) => ({
+            yield response.items.map((item: ISpotifySong, index: number): ISpotifySong => ({
                 position: currentOffset + index,
                 ...item
             }));
@@ -107,15 +104,13 @@ class SpotifySyncService extends Events {
         while (offset < total) {
             const currOffset = offset;
             const result = await this.spotify.fetchMyPlaylists(offset, this.limit + 1);
-            if (assertNoErrors(result, (e: ServiceResult<unknown, Error>[]) => _.delay(() => { throw e; }))) {
-                return;
-            }
+
             const response = result.match(s => s, e => { throw e });
             total = offset + Math.min(this.limit + 1, response.items.length);
             offset = offset + Math.min(this.limit, response.items.length);
 
-            yield _.map(response.items, (item, index) => ({
-                index: currOffset + index,
+            yield response.items.map((item: IUserPlaylist, index: number): IUserPlaylist & { index?: number } => ({
+                index: currOffset + index as number | undefined,
                 ...item
             }));
         }
@@ -127,21 +122,19 @@ class SpotifySyncService extends Events {
         while (offset < total) {
             const currentOffset = offset,
                 result = await this.spotify.fetchTracks(offset, this.limit + 1);
-            if (assertNoErrors(result, (e: ServiceResult<unknown, Error>[]) => _.delay(() => { throw e; }))) {
-                return;
-            }
+
             const response = result.match(s => s, e => { throw e });
             total = offset + Math.min(this.limit + 1, response.items.length);
             offset = offset + Math.min(this.limit, response.items.length);
 
-            yield _.map(response.items, (item, index) => ({
+            yield response.items.map((item: ISpotifySong, index: number): ISpotifySong => ({
                 position: currentOffset + index,
                 ...item
             }));
         }
     }
 
-    async cleanUpData() {
+    async cleanUpData(): Promise<boolean> {
         return true;
     }
 }

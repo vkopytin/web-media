@@ -6,6 +6,14 @@ import { AppView } from '../app/views/app';
 const core = inject(Core);
 
 export default function HomePage() {
+  useEffect(() => {
+    core.run();
+  }, []);
+
+  return <AppView></AppView>;
+}
+
+export function HomePageSsrOff() {
   const [isSsr, setIsSsr] = useState(true);
   useEffect(() => {
     core.run();

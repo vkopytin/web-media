@@ -1,12 +1,12 @@
 class Events {
-    subscribers = {} as { [key: string]: Function[] };
+    subscribers: { [key: string]: Function[] } = {};
 
-    on(name: string, handler: Function) {
+    on(name: string, handler: Function): void {
         const subscribers = this.subscribers[name] || (this.subscribers[name] = []);
         subscribers.push(handler);
     }
 
-    off(name: string, handler: Function) {
+    off(name: string, handler: Function): void {
         const subscribers = this.subscribers[name];
         if (!subscribers) {
 

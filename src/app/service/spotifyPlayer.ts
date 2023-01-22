@@ -104,31 +104,31 @@ class SpotifyPlayerService extends Events {
     public player?: IPlayer;
 
     deviceId: string = '';
-    onInitializationError = (error: IWebPlaybackError) => {
+    onInitializationError = (error: IWebPlaybackError): void => {
         console.log('initializationErrpr', error);
         this.trigger('initializationErrpr', error);
     };
-    onAuthenticationError = (error: IWebPlaybackError) => {
+    onAuthenticationError = (error: IWebPlaybackError): void => {
         console.log('authenticationError', error);
         this.trigger('authenticationError', error);
     };
-    onAccountError = (error: IWebPlaybackError) => {
+    onAccountError = (error: IWebPlaybackError): void => {
         console.log('accountError', error);
         this.trigger('accountError', error);
     };
-    onPlaybackError = (error: IWebPlaybackError) => {
+    onPlaybackError = (error: IWebPlaybackError): void => {
         console.log('playbackError', error);
         this.trigger('playbackError', error);
     };
-    onPlayerStateChanged = (state: IWebPlaybackState) => {
+    onPlayerStateChanged = (state: IWebPlaybackState): void => {
         console.log('playerStateChanged', state);
         this.trigger('playerStateChanged', state);
     }
-    onReady = (player: IWebPlaybackPlayer) => {
+    onReady = (player: IWebPlaybackPlayer): void => {
         console.log('ready', player);
         this.trigger('ready', player);
     }
-    onNotReady = (player: IWebPlaybackPlayer) => {
+    onNotReady = (player: IWebPlaybackPlayer): void => {
         console.log('notReady', player);
         this.trigger('notReady', player);
     }
@@ -137,7 +137,7 @@ class SpotifyPlayerService extends Events {
         super();
     }
 
-    async init() {
+    async init(): Promise<void> {
         const getOAuthToken = async (cb: (t: string) => void) => {
             this.settingsService.get('spotify').map(spotifySettings => {
                 console.log('[Spotify SDK] *** Requesting OAuth Token ***');
