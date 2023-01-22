@@ -8,6 +8,7 @@ import { Service } from '../../service';
 import { SettingsService } from '../../service/settings';
 import { DataService } from '../../service/dataService';
 import { DeviceViewModelItem } from '../deviceViewModelItem';
+import { LoginService } from '../../service/loginService';
 
 
 jest.mock('../../adapter/spotify', () => {
@@ -78,14 +79,17 @@ describe('App View Model', () => {
     let spotify: SpotifyService;
     let spotifyPlayer: SpotifyPlayerService;
     let dataService: DataService;
+    let login: LoginService;
 
     beforeEach(async () => {
         adapter = new SpotifyAdapter('key');
         const settings = new SettingsService({ apiseeds: { key: '' }, genius: {}, lastSearch: { val: '' }, spotify: {} });
+        login = new LoginService(settings);
         spotify = new SpotifyService(adapter);
         spotifyPlayer = new SpotifyPlayerService(settings);
         dataService = new DataService();
         spotifySync = new SpotifySyncService(spotify, dataService);
+        service = new Service(settings, login, {} as any, dataService, spotify, spotifySync, spotifyPlayer);
         mockedInit = jest.spyOn(AppViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
         vm = new AppViewModel(spotifySync, spotify, spotifyPlayer, service);
     });

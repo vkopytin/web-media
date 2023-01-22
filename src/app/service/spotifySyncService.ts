@@ -8,7 +8,7 @@ import { SpotifyService } from './spotify';
 class SpotifySyncService extends Events {
     limit = 49;
 
-    constructor(public spotify: SpotifyService, private data: DataService) {
+    constructor(private data: DataService, public spotify: SpotifyService) {
         super();
     }
 

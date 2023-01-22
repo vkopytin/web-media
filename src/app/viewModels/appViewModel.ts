@@ -1,6 +1,7 @@
 import * as _ from 'underscore';
 import { IUserInfo } from '../adapter/spotify';
 import { Service } from '../service';
+import { LoginService } from '../service/loginService';
 import { SpotifyService } from '../service/spotify';
 import { SpotifyPlayerService } from '../service/spotifyPlayer';
 import { SpotifySyncService } from '../service/spotifySyncService';
@@ -30,10 +31,11 @@ class AppViewModel {
     @State refreshTokenCommand = Scheduler.Command(() => this.refreshToken());
 
     constructor(
-        private spotifySyncService: SpotifySyncService,
-        private spotifyService: SpotifyService,
-        private spotifyPlayerService: SpotifyPlayerService,
-        private ss: Service,
+        private login: LoginService,
+        private spotifySync: SpotifySyncService,
+        private spotify: SpotifyService,
+        private spotifyPlayer: SpotifyPlayerService,
+        private app: Service,
     ) {
 
     }
@@ -54,7 +56,7 @@ class AppViewModel {
             switch (eventName) {
                 case 'accessToken':
                     this.autoRefreshUrl = '';
-                    await this.ss.refreshToken(value);
+                    await this.app.refreshToken(value);
                     this.openLogin = false;
                 default:
                     break;
@@ -64,13 +66,13 @@ class AppViewModel {
 
     async startSync() {
         this.isSyncing = 1;
-        const res = await this.spotifySyncService.syncData();
+        const res = await this.spotifySync.syncData();
         res.error(e => this.errors = [Result.error(e as Error)]);
         this.isSyncing = 0;
     }
 
     async refreshToken() {
-        const tokenUrlResult = await this.ss.getSpotifyAuthUrl();
+        const tokenUrlResult = await this.login.getSpotifyAuthUrl();
         console.log('updating token...');
 
         tokenUrlResult.map(spotifyAuthUrl => this.autoRefreshUrl = spotifyAuthUrl + '23')
@@ -78,7 +80,7 @@ class AppViewModel {
     }
 
     async connect() {
-        const isLoggedInResult = await this.ss.isLoggedIn();
+        const isLoggedInResult = await this.app.isLoggedIn();
         this.openLogin = isLoggedInResult.match(
             r => !r,
             e => (this.errors = [isLoggedInResult], false)
@@ -87,21 +89,21 @@ class AppViewModel {
         const updateDevicesHandler = async (eventName: string, device: { device_id: string; }) => {
             await this.updateDevices();
             if (!this.currentDevice) {
-                const res = await this.spotifyService.player(device.device_id, false);
+                const res = await this.spotify.player(device.device_id, false);
                 res.error(e => this.errors = [Result.of(e)]);
             }
         };
-        this.spotifyPlayerService.on('ready', updateDevicesHandler);
+        this.spotifyPlayer.on('ready', updateDevicesHandler);
     }
 
     async fetchData() {
-        const userInfoResult = await this.ss.profile();
+        const userInfoResult = await this.spotify.profile();
         userInfoResult.error(e => this.errors = [userInfoResult])
             .map(r => this.profile = r);
 
         await this.updateDevices();
 
-        const topTracksResult = await this.ss.listTopTracks();
+        const topTracksResult = await this.spotify.listTopTracks();
         this.topTracks = topTracksResult.match(
             topTracks => _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index)),
             e => (this.errors = [topTracksResult], [])
@@ -109,7 +111,7 @@ class AppViewModel {
     }
 
     async updateDevices() {
-        const devicesResult = await this.ss.listDevices();
+        const devicesResult = await this.spotify.listDevices();
         devicesResult
             .map(devices => this.devices = _.map(devices, item => new DeviceViewModelItem(item)))
             .error(e => this.errors = [devicesResult]);
@@ -119,7 +121,7 @@ class AppViewModel {
     }
 
     async switchDevice(device: DeviceViewModelItem) {
-        const res = await this.spotifyService.player(device.id(), true);
+        const res = await this.spotify.player(device.id(), true);
 
         res.map(() => _.delay(() => {
             this.updateDevices();

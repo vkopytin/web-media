@@ -7,6 +7,8 @@ import { SpotifyPlayerService } from '../../service/spotifyPlayer';
 import { SettingsService } from '../../service/settings';
 import { SpotifySyncService } from '../../service/spotifySyncService';
 import { DataService } from '../../service/dataService';
+import { LoginService } from '../../service/loginService';
+import { TrackViewModelItem } from '../trackViewModelItem';
 
 
 jest.mock('../../adapter/spotify', () => {
@@ -35,14 +37,17 @@ describe('Home View Model', () => {
     let spotify: SpotifyService;
     let spotifyPlayer: SpotifyPlayerService;
     let dataService: DataService;
+    let login: LoginService;
 
     beforeAll(async () => {
         adapter = new SpotifyAdapter('key');
         const settings = new SettingsService({ apiseeds: { key: '' }, genius: {}, lastSearch: { val: '' }, spotify: {} });
+        login = new LoginService(settings);
         spotify = new SpotifyService(adapter);
         spotifyPlayer = new SpotifyPlayerService(settings);
         dataService = new DataService();
         spotifySync = new SpotifySyncService(spotify, dataService);
+        service = new Service(settings, login, {} as any, dataService, spotify, spotifySync, spotifyPlayer);
         mockedInit = jest.spyOn(HomeViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
         vm = new HomeViewModel(spotify, spotifyPlayer, service);
     });
@@ -90,6 +95,7 @@ describe('Home View Model', () => {
     });
 
     it('Should unlike track', async () => {
+        vm.tracks = [new TrackViewModelItem({} as any, 0)];
         jest.spyOn(adapter, 'removeTracks').mockImplementation(() => Promise.resolve({} as any));
         await vm.unlikeTrack(vm.tracks[0]);
 

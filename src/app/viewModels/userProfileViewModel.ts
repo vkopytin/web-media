@@ -1,7 +1,9 @@
 import * as _ from 'underscore';
 import { IUserInfo } from '../adapter/spotify';
 import { Service } from '../service';
+import { LoginService } from '../service/loginService';
 import { SettingsService } from '../service/settings';
+import { SpotifyService } from '../service/spotify';
 import { Binding, State } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
@@ -11,7 +13,7 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class UserProfileViewModel {
-    @State errors = [] as Result<Error, unknown>[];
+    @State errors: Result[] = [];
     @State isLoggedin = false;
     @State spotifyAuthUrl = '';
     @State geniusAuthUrl = '';
@@ -30,8 +32,10 @@ class UserProfileViewModel {
 
     constructor(
         private appViewModel: AppViewModel,
+        private login: LoginService,
         private settingsService: SettingsService,
-        private ss: Service
+        private spotify: SpotifyService,
+        private app: Service
     ) {
 
     }
@@ -43,27 +47,27 @@ class UserProfileViewModel {
     async fetchData() {
         this.apiseedsKey = this.settingsService.apiseedsKey();
 
-        const spotifyTokenUrlResult = await this.ss.getSpotifyAuthUrl();
+        const spotifyTokenUrlResult = await this.login.getSpotifyAuthUrl();
         spotifyTokenUrlResult.map(spotifyAuthUrl => {
             this.spotifyAuthUrl = spotifyAuthUrl;
         }).error(e => this.errors = [Result.error(e)]);
 
-        const isLoggedinResult = await this.ss.isLoggedIn();
+        const isLoggedinResult = await this.app.isLoggedIn();
         isLoggedinResult.map(isLoggedIn => {
             this.isLoggedin = isLoggedIn;
         }).error(e => this.errors = [Result.error(e)]);
 
-        const geniusTokenUrlResult = await this.ss.getGeniusAuthUrl();
+        const geniusTokenUrlResult = await this.login.getGeniusAuthUrl();
         geniusTokenUrlResult.map(geniusAuthUrl => {
             this.geniusAuthUrl = geniusAuthUrl;
         }).error(e => this.errors = [Result.error(e)]);
 
-        const userInfoResult = await this.ss.profile();
+        const userInfoResult = await this.spotify.profile();
         userInfoResult.map(userInfo => {
             this.profile = userInfo;
         }).error(e => this.errors = [Result.error(e)]);
 
-        const topTracksResult = await this.ss.listTopTracks();
+        const topTracksResult = await this.spotify.listTopTracks();
         topTracksResult.map(topTracks => {
             this.topTracks = _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as any, index));
         }).error(e => this.errors = [Result.error(e)]);
@@ -74,7 +78,7 @@ class UserProfileViewModel {
     }
 
     async logout() {
-        const res = await this.ss.logout();
+        const res = await this.spotify.logout();
         res.map(() => {
             this.isLoggedin = false;
         }).error(e => this.errors = [Result.error(e)]);

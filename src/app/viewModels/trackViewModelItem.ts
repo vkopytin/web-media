@@ -2,6 +2,7 @@ import * as _ from 'underscore';
 import { IResponseResult, ISpotifySong } from '../adapter/spotify';
 import { Service } from '../service';
 import { DataService } from '../service/dataService';
+import { SpotifyService } from '../service/spotify';
 import { formatTime, isLoading, State } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
@@ -32,7 +33,8 @@ class TrackViewModelItem {
     constructor(
         public song: ISpotifySong,
         private index: number,
-        private dataService = inject(DataService),
+        private data = inject(DataService),
+        private spotify = inject(SpotifyService),
         private ss = inject(Service)
     ) {
 
@@ -102,12 +104,12 @@ class TrackViewModelItem {
 
     async fetchData() {
         this.listPlaylists();
-        const res = await this.ss.isBannedTrack(this.song.track.id);
+        const res = await this.data.isBannedTrack(this.song.track.id);
         res.map(r => this.isBanned = r).error(e => this.errors = [Result.error(e)]);
     }
 
     async listPlaylists() {
-        const res = await this.dataService.listPlaylistsByTrack(this.song.track);
+        const res = await this.data.listPlaylistsByTrack(this.song.track);
 
         return res
             .map(playlists => playlists.map(playlist => new PlaylistsViewModelItem(playlist)))
@@ -115,14 +117,14 @@ class TrackViewModelItem {
     }
 
     async play(playlistUri: string) {
-        const playResult = await this.ss.play('', playlistUri, this.uri());
+        const playResult = await this.spotify.play('', playlistUri, this.uri());
         playResult.map(() => this.mediaPlayerViewModel.fetchDataInternal())
             .error(e => this.errors = [Result.error(e)]);
     }
 
     async playTracks(tracks: TrackViewModelItem[]) {
         const allowedTracks = _.filter(tracks, track => !track.isBanned);
-        const playResult = await this.ss.play('', _.map(allowedTracks, item => item.uri()), this.uri());
+        const playResult = await this.spotify.play('', _.map(allowedTracks, item => item.uri()), this.uri());
         playResult.map(() => this.mediaPlayerViewModel.fetchDataInternal())
             .error(e => this.errors = [Result.error(e)]);
     }
@@ -160,12 +162,12 @@ class TrackViewModelItem {
     }
 
     async bannTrack() {
-        const res = await this.ss.bannTrack(this.id());
+        const res = await this.data.bannTrack(this.id());
         res.map(r => this.isBanned = r).error(e => this.errors = [Result.error(e)]);
     }
 
     async removeBannFromTrack() {
-        const res = await this.ss.removeBannFromTrak(this.id());
+        const res = await this.data.removeBannFromTrack(this.id());
         res.map(r => this.isBanned = !r).error(e => this.errors = [Result.error(e)]);
     }
 

@@ -1,5 +1,6 @@
 import * as _ from 'underscore';
 import { Service } from '../service';
+import { LyricsService } from '../service/lyricsService';
 import { SpotifyService } from '../service/spotify';
 import { State } from '../utils';
 import { Result } from '../utils/result';
@@ -24,7 +25,8 @@ class MyTracksViewModel {
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
 
     constructor(
-        private spotifyService: SpotifyService,
+        private spotify: SpotifyService,
+        private lyrics: LyricsService,
         private ss: Service,
     ) {
 
@@ -41,14 +43,14 @@ class MyTracksViewModel {
     }
 
     async connect() {
-        this.spotifyService.on('change:state', (...args: unknown[]) => this.loadData(...args));
+        this.spotify.on('change:state', (...args: unknown[]) => this.loadData(...args));
     }
 
     async fetchData() {
         this.isLoading = true;
         this.settings.offset = 0;
         this.loadData('myTracks');
-        const res = await this.ss.fetchTracks(this.settings.offset, this.settings.limit + 1);
+        const res = await this.spotify.fetchTracks(this.settings.offset, this.settings.limit + 1);
         res.map(tracks => {
             this.settings.total = this.settings.offset + Math.min(this.settings.limit + 1, tracks.items.length);
             this.settings.offset = this.settings.offset + Math.min(this.settings.limit, tracks.items.length);
@@ -65,7 +67,7 @@ class MyTracksViewModel {
         }
         this.isLoading = true;
         this.loadData('myTracks');
-        const res = await this.ss.fetchTracks(this.settings.offset, this.settings.limit + 1);
+        const res = await this.spotify.fetchTracks(this.settings.offset, this.settings.limit + 1);
         res.map(tracks => {
             this.settings.total = this.settings.offset + Math.min(this.settings.limit + 1, tracks.items.length);
             this.settings.offset = this.settings.offset + Math.min(this.settings.limit, tracks.items.length);
@@ -89,7 +91,7 @@ class MyTracksViewModel {
         if (!tracksToCheck.length) {
             return;
         }
-        const likedResult = await this.ss.hasTracks(_.map(tracksToCheck, t => t.id()));
+        const likedResult = await this.spotify.hasTracks(_.map(tracksToCheck, t => t.id()));
         likedResult.map(liked => {
             _.each(liked, (liked, index) => {
                 tracksToCheck[index].isLiked = liked;
@@ -112,7 +114,7 @@ class MyTracksViewModel {
             this.trackLyrics = null;
             return;
         }
-        const lyricsResult = await this.ss.findTrackLyrics({
+        const lyricsResult = await this.lyrics.search({
             name: track.name(),
             artist: track.artist()
         });

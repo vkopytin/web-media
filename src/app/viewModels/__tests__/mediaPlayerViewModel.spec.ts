@@ -9,6 +9,7 @@ import { SpotifySyncService } from '../../service/spotifySyncService';
 import { DataService } from '../../service/dataService';
 import { AppViewModel } from '../appViewModel';
 import { Option } from '../../utils/option';
+import { LoginService } from '../../service/loginService';
 
 jest.mock('../../adapter/spotify', () => {
     return {
@@ -63,16 +64,23 @@ describe('Media Player View Model', () => {
     let spotifyPlayer: SpotifyPlayerService;
     let dataService: DataService;
     let appViewModel: AppViewModel;
+    let login: LoginService;
 
     beforeAll(async () => {
         adapter = new SpotifyAdapter('key');
         const settings = new SettingsService({ apiseeds: { key: '' }, genius: {}, lastSearch: { val: '' }, spotify: {} });
+        login = new LoginService(settings);
         spotify = new SpotifyService(adapter);
         spotifyPlayer = new SpotifyPlayerService(settings);
         dataService = new DataService();
         spotifySync = new SpotifySyncService(spotify, dataService);
+        service = new Service(settings, login, {} as any, dataService, spotify, spotifySync, spotifyPlayer);
         appViewModel = new AppViewModel(spotifySync, spotify, spotifyPlayer, service);
+
         mockedInit = jest.spyOn(MediaPlayerViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
+        Object.defineProperty(MediaPlayerViewModel.prototype, 'currentTrackId', { get() { return 'test'; }, set(v) { } });
+        Object.defineProperty(MediaPlayerViewModel.prototype, 'currentTrack', { get() { return { id: 'test' }; }, set(v) { } });
+
         vm = new MediaPlayerViewModel(appViewModel, spotify, settings, spotifyPlayer, service);
     });
 
@@ -182,7 +190,7 @@ describe('Media Player View Model', () => {
 
     it('Should spotify unlikeTrack', async () => {
         jest.spyOn(adapter, 'removeTracks').mockImplementation(() => Promise.resolve({} as any));
-        vm.currentTrack = { id: 'test' } as any;
+
         await vm.unlikeTrack();
 
         expect(adapter.removeTracks).toHaveBeenCalled();
@@ -190,7 +198,7 @@ describe('Media Player View Model', () => {
 
     it('Should spotify resume', async () => {
         jest.spyOn(spotifyPlayer, 'resume').mockImplementation(() => Promise.resolve(Option.none()));
-        vm.currentTrack = { id: 'test' } as any;
+
         await vm.resume();
 
         expect(spotifyPlayer.resume).toHaveBeenCalled();

@@ -33,7 +33,7 @@ class NewReleasesViewModel {
     @State unlikeAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.unlikeAlbum(album));
 
     constructor(
-        private spotifyService: SpotifyService,
+        private spotify: SpotifyService,
         private ss: Service,
     ) {
 
@@ -45,15 +45,15 @@ class NewReleasesViewModel {
     }
 
     async connect() {
-        this.spotifyService.on('change:state', () => this.checkAlbums());
+        this.spotify.on('change:state', () => this.checkAlbums());
     }
 
     async fetchData() {
-        const res = await this.ss.newReleases();
+        const res = await this.spotify.newReleases();
         const res2 = await res.map(releases => {
             this.newReleases = _.map(releases.albums?.items || [], album => new AlbumViewModelItem(album));
             this.checkAlbums();
-        }).cata(() => this.ss.featuredPlaylists());
+        }).cata(() => this.spotify.featuredPlaylists());
         const res3 = res2.map(featuredPlaylists => {
             this.featuredPlaylists = _.map(featuredPlaylists.playlists?.items || [], playlist => new PlaylistsViewModelItem(playlist));
         });
@@ -63,7 +63,7 @@ class NewReleasesViewModel {
     async loadTracks() {
         const currentAlbum = this.currentAlbum;
         if (currentAlbum) {
-            const result = await this.ss.listAlbumTracks(currentAlbum.id());
+            const result = await this.spotify.listAlbumTracks(currentAlbum.id());
             result.map(tracks => {
                 this.tracks = _.map(tracks.items, (item, index) => new TrackViewModelItem({
                     track: {
@@ -74,7 +74,7 @@ class NewReleasesViewModel {
                 }, index));
             }).error(e => this.errors = [Result.error(e)]);
         } else if (this.currentPlaylist) {
-            const playlistTracksResult = await this.ss.fetchPlaylistTracks(this.currentPlaylist.id(), 0, 100);
+            const playlistTracksResult = await this.spotify.fetchPlaylistTracks(this.currentPlaylist.id(), 0, 100);
             playlistTracksResult.map(tracksResult => {
                 const tracksModels = _.map(tracksResult.items, (item, index) => new TrackViewModelItem(item, index));
                 this.currentTracks = tracksModels;
@@ -91,7 +91,7 @@ class NewReleasesViewModel {
             return;
         }
 
-        const likedResult = await this.ss.hasAlbums(ids);
+        const likedResult = await this.spotify.hasAlbums(ids);
         likedResult.map(liked => {
             const likedAlbums = [] as AlbumViewModelItem[];
             _.each(liked, (liked, index) => {
@@ -103,12 +103,12 @@ class NewReleasesViewModel {
     }
 
     async likeAlbum(album: AlbumViewModelItem) {
-        const likedResult = await this.ss.addAlbums(album.id());
+        const likedResult = await this.spotify.addAlbums(album.id());
         likedResult.error(() => this.errors = [likedResult]);
     }
 
     async unlikeAlbum(album: AlbumViewModelItem) {
-        const likedResult = await this.ss.removeAlbums(album.id());
+        const likedResult = await this.spotify.removeAlbums(album.id());
         likedResult.error(() => this.errors = [likedResult]);
     }
 }

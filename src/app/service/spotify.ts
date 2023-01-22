@@ -40,7 +40,7 @@ class SpotifyService extends Events {
         this.trigger('change:state', ...args);
     }
 
-    async seek(positionMs: number, deviceId: string): Promise<Result<Error, void>> {
+    async seek(positionMs: number, deviceId = ''): Promise<Result<Error, void>> {
         try {
             const res = await this.adapter.seek(Math.round(positionMs), deviceId);
 

@@ -49,10 +49,10 @@ class MediaPlayerViewModel {
 
     constructor(
         private appViewModel: AppViewModel,
-        private spotifyService: SpotifyService,
+        private spotify: SpotifyService,
         private settingsSerivce: SettingsService,
         private spotifyPlayerService: SpotifyPlayerService,
-        private ss: Service
+        private app: Service
     ) {
 
     }
@@ -68,7 +68,7 @@ class MediaPlayerViewModel {
 
     async connect() {
         this.spotifyPlayerService.on('playerStateChanged', (en: unknown, state: IWebPlaybackState) => this.updateFromPlayerState(state));
-        this.spotifyService.on('change:state', (state: IWebPlaybackState) => this.fetchData());
+        this.spotify.on('change:state', (state: IWebPlaybackState) => this.fetchData());
 
         await this.fetchData();
     }
@@ -113,7 +113,7 @@ class MediaPlayerViewModel {
     }
 
     async fetchDataInternal() {
-        const res = await this.spotifyService.player();
+        const res = await this.spotify.player();
         res.map(currentlyPlaying => {
             this.lastTime = +new Date();
             if (currentlyPlaying && currentlyPlaying.item) {
@@ -144,7 +144,7 @@ class MediaPlayerViewModel {
         if (!this.currentTrackId) {
             return;
         }
-        const trackExistsResult = await this.ss.hasTracks(this.currentTrackId);
+        const trackExistsResult = await this.spotify.hasTracks(this.currentTrackId);
         trackExistsResult.map(r => this.isLiked = _.first(r) || false)
             .error(e => this.errors = [Result.error(e)]);
     }
@@ -186,7 +186,7 @@ class MediaPlayerViewModel {
         lockSection.push(async (next) => {
             try {
                 this.timePlayed = timePlayed;
-                const res = await this.ss.seek(timePlayed);
+                const res = await this.spotify.seek(timePlayed);
                 res.error(() => this.errors = [res]);
             } catch (ex) {
                 this.errors = [Result.error(ex as Error)];
@@ -202,7 +202,7 @@ class MediaPlayerViewModel {
                 await state.map(async state => {
                     if (_.isEmpty(state)) {
                         this.volume = percent;
-                        const res = await this.ss.volume(percent);
+                        const res = await this.spotify.volume(percent);
                         res.error(e => this.errors = [Result.error(e)]);
                     } else {
                         this.volume = percent;
@@ -225,7 +225,7 @@ class MediaPlayerViewModel {
                 const state = await this.spotifyPlayerService.getCurrentState();
                 await state.map(async state => {
                     if (_.isEmpty(state)) {
-                        const res = await this.ss.play();
+                        const res = await this.spotify.play();
                         res.map(() => this.isPlaying = true)
                             .error(e => this.errors = [Result.error(e)]);
                     } else {
@@ -247,7 +247,7 @@ class MediaPlayerViewModel {
                 const state = await this.spotifyPlayerService.getCurrentState();
                 await state.map(async state => {
                     if (_.isEmpty(state)) {
-                        const res = await this.ss.pause();
+                        const res = await this.spotify.pause();
                         res.map(() => this.isPlaying = false)
                             .error(e => this.errors = [Result.error(e)]);
                     } else {
@@ -269,7 +269,7 @@ class MediaPlayerViewModel {
                 const state = await this.spotifyPlayerService.getCurrentState();
                 await state.map(async state => {
                     if (_.isEmpty(state)) {
-                        const res = await this.ss.previous();
+                        const res = await this.spotify.previous();
                         res.error(() => this.errors = [res]);
                     } else {
                         const res = await this.spotifyPlayerService.previouseTrack();
@@ -289,7 +289,7 @@ class MediaPlayerViewModel {
                 const state = await this.spotifyPlayerService.getCurrentState();
                 await state.map(async state => {
                     if (_.isEmpty(state)) {
-                        const res = await this.ss.next();
+                        const res = await this.spotify.next();
                         res.error(() => this.errors = [res]);
                     } else {
                         const res = await this.spotifyPlayerService.nextTrack();
@@ -310,7 +310,7 @@ class MediaPlayerViewModel {
                 await state.map(async state => {
                     if (_.isEmpty(state)) {
                         const volume = this.volume;
-                        const res = await this.ss.volume(volume * 1.1);
+                        const res = await this.spotify.volume(volume * 1.1);
                         res.error(() => this.errors = [res]);
                     } else {
                         const volume = await this.spotifyPlayerService.getVolume();
@@ -332,7 +332,7 @@ class MediaPlayerViewModel {
                 await state.map(async state => {
                     if (_.isEmpty(state)) {
                         const volume = this.volume;
-                        const res = await this.ss.volume(volume * 0.9);
+                        const res = await this.spotify.volume(volume * 0.9);
                         res.error(e => this.errors = [res]);
                     } else {
                         const volume = await this.spotifyPlayerService.getVolume();
@@ -354,7 +354,7 @@ class MediaPlayerViewModel {
                     next();
                     return;
                 }
-                const stateResult = await this.ss.addTracks(this.currentTrack);
+                const stateResult = await this.app.addTracks(this.currentTrack);
                 stateResult.error(() => this.errors = [stateResult]);
             } catch (ex) {
                 this.errors = [Result.error(ex as Error)];
@@ -370,7 +370,7 @@ class MediaPlayerViewModel {
                 return;
             }
             try {
-                const stateResult = await this.ss.removeTracks(this.currentTrack);
+                const stateResult = await this.app.removeTracks(this.currentTrack);
                 stateResult.error(e => this.errors = [stateResult]);
             } catch (ex) {
                 this.errors = [Result.error(ex as Error)];
