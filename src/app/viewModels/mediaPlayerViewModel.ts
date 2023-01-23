@@ -2,7 +2,7 @@ import * as _ from 'underscore';
 import { AppService } from '../service';
 import { SettingsService } from '../service/settings';
 import { MediaService } from '../service/mediaService';
-import { IWebPlaybackState, PlaybackService } from '../service/playbackService';
+import { PlaybackService } from '../service/playbackService';
 import { asyncDebounce, asyncQueue, Binding, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
@@ -10,6 +10,7 @@ import { AppViewModel } from './appViewModel';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { RemotePlaybackService } from '../service/remotePlaybackService';
 import { ITrack } from '../ports/iMediaProt';
+import { IWebPlaybackState } from '../ports/iPlaybackPort';
 
 const lockSection = asyncQueue();
 
@@ -206,7 +207,7 @@ class MediaPlayerViewModel {
                 try {
                     const state = await this.playback.getCurrentState();
                     await state.map(async state => {
-                        if (_.isEmpty(state)) {
+                        if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             this.volume = percent;
                             const res = await this.remotePlaybackService.volume(percent);
                             res.error(e => this.errors = [Result.error(e)]);
@@ -283,7 +284,7 @@ class MediaPlayerViewModel {
                 try {
                     const state = await this.playback.getCurrentState();
                     await state.map(async state => {
-                        if (_.isEmpty(state)) {
+                        if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             const res = await this.remotePlaybackService.previous();
                             res.error(() => this.errors = [res]);
                         } else {
@@ -306,7 +307,7 @@ class MediaPlayerViewModel {
                 try {
                     const state = await this.playback.getCurrentState();
                     await state.map(async state => {
-                        if (_.isEmpty(state)) {
+                        if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             const res = await this.remotePlaybackService.next();
                             res.error(() => this.errors = [res]);
                         } else {
@@ -329,7 +330,7 @@ class MediaPlayerViewModel {
                 try {
                     const state = await this.playback.getCurrentState();
                     await state.map(async state => {
-                        if (_.isEmpty(state)) {
+                        if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             const volume = this.volume;
                             const res = await this.remotePlaybackService.volume(volume * 1.1);
                             res.error(() => this.errors = [res]);
@@ -354,7 +355,7 @@ class MediaPlayerViewModel {
                 try {
                     const state = await this.playback.getCurrentState();
                     await state.map(async state => {
-                        if (_.isEmpty(state)) {
+                        if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             const volume = this.volume;
                             const res = await this.remotePlaybackService.volume(volume * 0.9);
                             res.error(e => this.errors = [Result.error(e)]);

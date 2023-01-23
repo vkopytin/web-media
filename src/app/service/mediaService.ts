@@ -268,6 +268,8 @@ export class MediaService extends Events {
         try {
             const res = await this.mediaPort.createNewPlaylist(userId, name, description, isPublic);
 
+            this.onStateChanged();
+
             return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify crate new playlist', ex as Error);
@@ -277,6 +279,8 @@ export class MediaService extends Events {
     async addTrackToPlaylist(trackUris: string | string[], playlistId: string): Promise<Result<Error, ISpotifySong>> {
         try {
             const res = await this.mediaPort.addTrackToPlaylist(trackUris, playlistId);
+
+            this.onStateChanged();
 
             return Result.of(res);
         } catch (ex) {
@@ -288,6 +292,8 @@ export class MediaService extends Events {
         try {
             const res = await this.mediaPort.removeTrackFromPlaylist(trackUris, playlistId);
 
+            this.onStateChanged();
+
             return Result.of(res);
         } catch (ex) {
             return returnErrorResult('Unexpected error on requesting spotify remove tracks from playlist', ex as Error);
@@ -297,6 +303,8 @@ export class MediaService extends Events {
     async reorderTracks(playlistId: string, rangeStart: number, insertBefore: number, rangeLength = 1): Promise<Result<Error, IReorderTracksResult>> {
         try {
             const res = await this.mediaPort.reorderTracks(playlistId, rangeStart, insertBefore, rangeLength);
+
+            this.onStateChanged();
 
             return Result.of(res);
         } catch (ex) {
