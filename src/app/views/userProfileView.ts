@@ -53,7 +53,7 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
     logoutCommand!: ICommand;
 
     @Binding((a: UserProfileView) => a.vm, 'updatApiseedsKeyCommand')
-    updatApiseedsKeyCommand!: ICommand;
+    updatApiseedsKeyCommand!: ICommand<string>;
 
     doLogout = false;
 
