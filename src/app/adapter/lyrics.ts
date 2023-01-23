@@ -1,4 +1,4 @@
-import * as $ from 'jquery';
+import $ from 'jquery';
 import { ErrorWithStatus } from './errors/errorWithStatus';
 
 
@@ -21,20 +21,22 @@ class LyricsAdapter {
     }
 
     async search(term: string) {
-        return new Promise<ILyricsSearchResult>((resolve, reject) => {
-            $.ajax({
-                url: 'https://orion.apiseeds.com/api/music/lyric/' + term,
-                data: {
-                    apikey: this.token
-                },
-                success(response) {
-                    resolve(response);
-                },
-                error(jqXHR) {
-                    reject(ErrorWithStatus.fromJqXhr(jqXHR));
-                }
-            });
+        const request = await fetch(`https://genius.com/${term}-lyrics`, {
+            credentials: 'include',
+            mode: 'no-cors',
+            redirect: 'follow',
+            referrerPolicy: 'no-referrer',
         });
+
+        const html = await request.text();
+
+        return {
+            track: { text: $('.lyrics', html).find('div:first').find('p:first').text() },
+            copyright: {
+                notice: 'Genius',
+                text: '',
+            }
+        };
     }
 }
 

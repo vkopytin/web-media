@@ -84,10 +84,9 @@ export class Scheduler {
                 console.log('Failed task: ', task);
                 throw ex;
             });
-        } finally {
-            task.isRunning = false;
-            done();
         }
+        task.isRunning = false;
+        done();
     }
 
     async exec(task: ITask) {

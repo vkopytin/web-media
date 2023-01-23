@@ -194,8 +194,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.errors = [Result.error(ex as Error)];
                 }
-                resolve();
                 next();
+                resolve();
             });
         });
     }
@@ -221,8 +221,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.errors = [Result.error(ex as Error)];
                 }
-                resolve();
                 next();
+                resolve();
             });
         });
     }
@@ -233,7 +233,7 @@ class MediaPlayerViewModel {
                 try {
                     const state = await this.playback.getCurrentState();
                     await state.map(async state => {
-                        if (_.isEmpty(state)) {
+                        if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             const res = await this.remotePlaybackService.play();
                             res.map(() => this.isPlaying = true)
                                 .error(e => this.errors = [Result.error(e)]);
@@ -246,8 +246,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.errors = [Result.error(ex as Error)];
                 }
-                resolve();
                 next();
+                resolve();
             });
         });
     }
@@ -258,7 +258,7 @@ class MediaPlayerViewModel {
                 try {
                     const state = await this.playback.getCurrentState();
                     await state.map(async state => {
-                        if (_.isEmpty(state)) {
+                        if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             const res = await this.remotePlaybackService.pause();
                             res.map(() => this.isPlaying = false)
                                 .error(e => this.errors = [Result.error(e)]);
@@ -271,8 +271,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.errors = [Result.error(ex as Error)];
                 }
-                resolve();
                 next();
+                resolve();
             });
         });
     }
@@ -294,8 +294,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.errors = [Result.error(ex as Error)];
                 }
-                resolve();
                 next();
+                resolve();
             });
         });
     }
@@ -317,8 +317,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.errors = [Result.error(ex as Error)];
                 }
-                resolve();
                 next();
+                resolve();
             });
         });
     }
@@ -342,8 +342,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.errors = [Result.error(ex as Error)];
                 }
-                resolve();
                 next();
+                resolve();
             });
         });
     }
@@ -367,8 +367,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.errors = [Result.error(ex as Error)];
                 }
-                resolve();
                 next();
+                resolve();
             });
         });
     }

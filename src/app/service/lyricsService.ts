@@ -23,12 +23,15 @@ class LyricsService extends Events {
 
     async search(songInfo: { name: string; artist: string; }): Promise<Result<Error, string>> {
         try {
-            const lyrics = await this.adapter.search([songInfo.artist, songInfo.name].join('/'));
+            const lyrics = await this.adapter.search([
+                ...songInfo.artist.split(' '),
+                ...songInfo.name.split(' ')
+            ].map(encodeURIComponent).join('-'));
 
             return Result.of<Error, string>([
-                lyrics.result.track.text,
-                '\nCopyright: ' + lyrics.result.copyright.notice,
-                lyrics.result.copyright.text
+                lyrics.track.text,
+                '\nCopyright: ' + lyrics.copyright.notice,
+                lyrics.copyright.text
             ].join('\n'));
         } catch (ex) {
             return returnErrorResult<string>('Unexpected error on requesting lyrics', ex as Error);
