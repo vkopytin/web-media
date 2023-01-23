@@ -97,6 +97,10 @@ class AppViewModel {
         );
 
         this.playback.on('ready', this.updateDevicesHandler);
+        this.playback.on('authenticationError', (error: { message?: string; }) => {
+            console.log('Error before refreshing token', error);
+            this.refreshTokenCommand.exec();
+        });
     }
 
     async fetchData(): Promise<void> {

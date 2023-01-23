@@ -8,6 +8,7 @@ import { ITrack } from '../data/entities/interfaces/iTrack';
 import { PlaylistRowsStore } from '../data/entities/playlistRowsStore';
 import { PlaylistsStore } from '../data/entities/playlistsStore';
 import { TracksStore } from '../data/entities/tracksStore';
+import { initializeStructure } from '../data/useCases';
 import { Events } from '../events';
 import { ISpotifySong, IUserPlaylist } from '../ports/iMediaProt';
 import { Result } from '../utils/result';
@@ -16,6 +17,8 @@ import { Result } from '../utils/result';
 class DataService extends Events {
     constructor() {
         super();
+
+        initializeStructure();
     }
 
     async createTrack(track: ITrack): Promise<unknown> {
