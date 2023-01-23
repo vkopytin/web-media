@@ -18,12 +18,12 @@ class NewReleasesViewModel {
     @State tracks: TrackViewModelItem[] = [];
     @State likedAlbums: AlbumViewModelItem[] = [];
 
-    @State selectAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => {
+    @State selectAlbumCommand = Scheduler.Command((album: AlbumViewModelItem | null) => {
         this.currentPlaylist = null;
         this.currentAlbum = album;
         this.loadTracks();
     });
-    @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => {
+    @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem | null) => {
         this.currentAlbum = null;
         this.currentPlaylist = playlist;
         this.loadTracks();

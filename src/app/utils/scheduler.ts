@@ -4,6 +4,13 @@ export interface ITask {
     exec(...args: unknown[]): void;
 }
 
+export interface ICommand<A, B> {
+    isRunning: boolean;
+    exec(a: A, b: B): void;
+    exec(a: A): void;
+    exec(): void;
+}
+
 export class Scheduler {
     running = 0;
     tasks: ITask[] = [];
@@ -18,13 +25,16 @@ export class Scheduler {
         return Scheduler.inst;
     }
 
+    static Command(fn: () => void): ICommand<never, never>;
+    static Command<A>(fn: (a: A) => void): ICommand<A, never>;
     // eslint-disable-next-line @typescript-eslint/ban-types
-    static Command<T extends Function>(fn: T) {
+    static Command<A, B>(fn: (a: A, b: B) => void): ICommand<A, B>;
+    static Command(fn: (...args: unknown[]) => void): ICommand<never, never> {
         const current = Scheduler.getCurrent();
 
         return {
             isRunning: false,
-            exec: (...args: unknown[]) => current.exec({
+            exec: (...args: []) => current.exec({
                 isRunning: false,
                 fails: 0,
                 exec: () => fn(...args)

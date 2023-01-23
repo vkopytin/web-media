@@ -38,17 +38,17 @@ class AppView extends React.Component {
     @Binding((a: AppView) => a.vm, 'currentDevice')
     currentDevice!: AppView['vm']['currentDevice'];
 
-    @Binding((a: AppView) => a.vm, 'refreshDevicesCommand')
-    refreshDevicesCommand!: AppView['vm']['refreshDevicesCommand'];
-
-    @Binding((a: AppView) => a.vm, 'refreshTokenCommand')
-    refreshTokenCommand!: AppView['vm']['refreshTokenCommand'];
-
     @Binding((a: AppView) => a.vm, 'autoRefreshUrl')
     autoRefreshUrl!: AppView['vm']['autoRefreshUrl'];
 
     @Binding((a: AppView) => a.vm, 'isSyncing')
     isSyncing!: AppView['vm']['isSyncing'];
+
+    @Binding((a: AppView) => a.vm, 'refreshDevicesCommand')
+    refreshDevicesCommand!: AppView['vm']['refreshDevicesCommand'];
+
+    @Binding((a: AppView) => a.vm, 'refreshTokenCommand')
+    refreshTokenCommand!: AppView['vm']['refreshTokenCommand'];
 
     state = {
         prevPanel: 'home',

@@ -37,12 +37,12 @@ class SearchViewModel {
 
     @State searchCommand = Scheduler.Command((term: string) => this.onChangeTerm(term));
     @State chageSearchTypeCommand = Scheduler.Command((searchType: ISearchType) => this.changeSearchType(searchType));
-    @State selectAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.selectAlbum(album));
-    @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => this.selectPlaylist(playlist));
-    @State selectArtistCommand = Scheduler.Command((artist: ArtistViewModelItem) => this.selectArtist(artist));
+    @State selectAlbumCommand = Scheduler.Command((album: AlbumViewModelItem | null) => this.selectAlbum(album));
+    @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem | null) => this.selectPlaylist(playlist));
+    @State selectArtistCommand = Scheduler.Command((artist: ArtistViewModelItem | null) => this.selectArtist(artist));
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
-    @State likeTrackCommand = Scheduler.Command(() => { throw new Error('not implemented') });
-    @State unlikeTrackCommand = Scheduler.Command(() => { throw new Error('not implemented') });
+    @State likeTrackCommand = Scheduler.Command((t: TrackViewModelItem) => { throw new Error('not implemented') });
+    @State unlikeTrackCommand = Scheduler.Command((t: TrackViewModelItem) => { throw new Error('not implemented') });
 
     onChangeTerm = asyncDebounce((term: string) => {
         searchQueue.push(async (next) => {

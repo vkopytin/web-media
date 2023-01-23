@@ -45,6 +45,25 @@ class DataService extends Events {
         });
     }
 
+    async getPlaylistById(playlistId: string): Promise<IUserPlaylist | null> {
+        return new Promise((resolve, reject) => {
+            DataStorage.create(async (err, storage) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                try {
+                    const playlistsStore = new PlaylistsStore(storage!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+                    const res = await playlistsStore.get(playlistId);
+
+                    resolve(res as IUserPlaylist | null);
+                } catch (ex) {
+                    reject(ex);
+                }
+            });
+        });
+    }
+
     async createPlaylist(playlist: IUserPlaylist): Promise<unknown> {
         return new Promise((resolve, reject) => {
             DataStorage.create(async (err, storage) => {

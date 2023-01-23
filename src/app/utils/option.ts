@@ -66,6 +66,15 @@ export class Option<T> extends Monad<T> {
             () => Option.some(f())
         )
     }
+
+    async await<T>(this: Option<Promise<Option<T>>>): Promise<Option<T>> {
+        const res = await this.match<Promise<Option<T>>>(async a => {
+            const res = await a;
+            return res;
+        }, () => Promise.resolve(Option.none()));
+
+        return res;
+    }
 }
 
 export class None<T, E = Error> extends Option<T> {

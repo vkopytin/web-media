@@ -73,6 +73,13 @@ type SDKPlayer = {
     addListener(eventName: 'account_error', cb?: (res: IWebPlaybackError) => void): void;
     addListener(eventName: 'initialization_error', cb?: (res: IWebPlaybackError) => void): void;
     addListener(eventName: 'authentication_error', cb?: (res: IWebPlaybackError) => void): void;
+    off(eventName: 'ready', cb?: (player: IWebPlaybackPlayer) => void): void;
+    off(eventName: 'playback_error', cb?: (res: IWebPlaybackError) => void): void;
+    off(eventName: 'player_state_changed', cb?: (res: IWebPlaybackState) => void): void;
+    off(eventName: 'not_ready', cb?: (player: IWebPlaybackPlayer) => void): void;
+    off(eventName: 'account_error', cb?: (res: IWebPlaybackError) => void): void;
+    off(eventName: 'initialization_error', cb?: (res: IWebPlaybackError) => void): void;
+    off(eventName: 'authentication_error', cb?: (res: IWebPlaybackError) => void): void;
     togglePlay(): Promise<void>;
     setName(name: string): Promise<void>;
     getVolume(): Promise<number>;
@@ -84,7 +91,7 @@ type SDKPlayer = {
     nextTrack(): Promise<void>;
     connect(): Promise<boolean>;
     getCurrentState(): Promise<IWebPlaybackState>;
-    disconnect(): Promise<void>;
+    disconnect(): Promise<number>;
     _options: {
         getOAuthToken(fn: (access_token: string) => void): void;
         id: string;
@@ -215,20 +222,52 @@ export class PlaybackService extends Events {
         return Option.none();
     }
 
-    async refreshToken(): Promise<Result<Error, boolean>> {
+    async disconnect(): Promise<Option<Error>> {
         if (!this.player) {
-            return Result.error(new Error('[Spotify SDK] Player is not initialized'));
+            return Option.some(new Error('[Spotify SDK] Player is not initialized'));
         }
+        // Error handling
+        this.player.off('initialization_error', this.onInitializationError);
+        this.player.addListener('authentication_error', this.onAuthenticationError);
+        this.player.addListener('account_error', this.onAccountError);
+        this.player.addListener('playback_error', this.onPlaybackError);
+
+        // Playback status updates
+        this.player.addListener('player_state_changed', this.onPlayerStateChanged);
+
+        // Ready
+        this.player.addListener('ready', this.onReady);
+
+        // Not Ready
+        this.player.addListener('not_ready', this.onNotReady);
+
         const isDisconnected = await this.player.disconnect();
-        console.log(isDisconnected);
-        const res = await this.player.connect();
-        if (res) {
-            console.log('[Spotify SDK] Successfully connected to Spotify!');
+        if (isDisconnected) {
+            console.log('[Spotify SDK] Disconnected from Spotify!');
         } else {
-            console.log('[Spotify SDK] Failed to connect to Spotify!');
+            console.log('[Spotify SDK] Error disconnecting from Spotify!');
         }
 
-        return Result.of(res);
+        return Option.none();
+    }
+
+    async refreshToken(): Promise<Option<Error>> {
+        if (!this.player) {
+            return Option.some(new Error('[Spotify SDK] Player is not initialized'));
+        }
+        const isDisconnected = await this.disconnect();
+        const res = await isDisconnected.orElse(async () => {
+            const res = await this.connect();
+            if (res) {
+                console.log('[Spotify SDK] Successfully connected to Spotify!');
+            } else {
+                console.log('[Spotify SDK] Failed to connect to Spotify!');
+            }
+
+            return Option.none<Error>();
+        }).await();
+
+        return res;
     }
 
     async resume(): Promise<Option<Error>> {

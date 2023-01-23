@@ -62,8 +62,8 @@ class SearchView extends React.Component<ISearchViewProps> {
     @Binding((a: SearchView) => a.vm, 'chageSearchTypeCommand')
     changeSearchTypeCommand!: SearchView['vm']['chageSearchTypeCommand'];
 
-    @Binding((a: SearchView) => a.vm, 'selectArtistCommand')
-    selectAlbumCommand!: SearchView['vm']['selectArtistCommand'];
+    @Binding((a: SearchView) => a.vm, 'selectAlbumCommand')
+    selectAlbumCommand!: SearchView['vm']['selectAlbumCommand'];
 
     @Binding((a: SearchView) => a.vm, 'selectPlaylistCommand')
     selectPlaylistCommand!: SearchView['vm']['selectPlaylistCommand'];

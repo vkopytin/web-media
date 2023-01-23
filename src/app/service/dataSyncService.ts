@@ -31,12 +31,15 @@ export class DataSyncService extends Events {
 
     async syncMyPlaylists(): Promise<Result<Error, IUserPlaylist[]>> {
         try {
-            let res = [] as IUserPlaylist[];
+            const res = [] as IUserPlaylist[];
             for await (const playlists of this.listMyPlaylists()) {
                 for (const playlist of playlists) {
-                    await this.data.createPlaylist(playlist);
+                    const currentPlaylist = await this.data.getPlaylistById(playlist.id);
+                    if (currentPlaylist?.snapshot_id !== playlist.snapshot_id) {
+                        await this.data.createPlaylist(playlist);
+                        res.push(playlist);
+                    }
                 }
-                res = [...res, ...playlists];
             }
             return Result.of(res);
         } catch (ex) {

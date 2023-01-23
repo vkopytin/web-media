@@ -21,14 +21,14 @@ class HomeViewModel {
     @State selectedPlaylist: PlaylistsViewModelItem | null = null;
     @State bannedTrackIds: string[] = [];
 
-    @State refreshCommand = Scheduler.Command((trackId?: string) => this.fetchData(trackId));
+    @State refreshCommand = Scheduler.Command((trackId: string) => this.fetchData(trackId));
     @State selectTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.selectedTrack = track);
     @State likeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.likeTrack(track));
     @State unlikeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.unlikeTrack(track));
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
     @State bannTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.bannTrack(track));
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
-    @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem) => this.selectPlaylist(playlist));
+    @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem | null) => this.selectPlaylist(playlist));
 
     constructor(
         private data: DataService,
@@ -112,7 +112,7 @@ class HomeViewModel {
         await this.playback.resume();
     }
 
-    async selectPlaylist(playlist: PlaylistsViewModelItem): Promise<void> {
+    async selectPlaylist(playlist: PlaylistsViewModelItem | null): Promise<void> {
         this.selectedPlaylist = playlist;
         await this.fetchData();
     }

@@ -17,13 +17,13 @@ class PlaylistsViewModel {
     @State tracks: TrackViewModelItem[] = [];
     @State isLoading = false;
     @State likedTracks: TrackViewModelItem[] = [];
-    @State currentPlaylistId = '';
+    @State currentPlaylistId: string | null = null;
     @State newPlaylistName = '';
     @State selectedItem: TrackViewModelItem | null = null;
     @State trackLyrics: { trackId: string; lyrics: string } | null = null;
     @State bannedTrackIds: string[] = [];
 
-    @State selectPlaylistCommand = Scheduler.Command((playlistId: string) => {
+    @State selectPlaylistCommand = Scheduler.Command((playlistId: string | null) => {
         this.currentPlaylistId = playlistId;
         this.fetchTracks();
     });
@@ -214,6 +214,10 @@ class PlaylistsViewModel {
         data.splice(newPosition, 0, item);
         this.tracks = data;
         let res;
+        if (!this.currentPlaylistId) {
+            return;
+        }
+
         if (oldPosition < newPosition) {
             res = await this.media.reorderTracks(this.currentPlaylistId, oldPosition, newPosition + 1);
         } else if (oldPosition > newPosition) {
