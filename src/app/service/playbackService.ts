@@ -228,18 +228,18 @@ export class PlaybackService extends Events {
         }
         // Error handling
         this.player.off('initialization_error', this.onInitializationError);
-        this.player.addListener('authentication_error', this.onAuthenticationError);
-        this.player.addListener('account_error', this.onAccountError);
-        this.player.addListener('playback_error', this.onPlaybackError);
+        this.player.off('authentication_error', this.onAuthenticationError);
+        this.player.off('account_error', this.onAccountError);
+        this.player.off('playback_error', this.onPlaybackError);
 
         // Playback status updates
-        this.player.addListener('player_state_changed', this.onPlayerStateChanged);
+        this.player.off('player_state_changed', this.onPlayerStateChanged);
 
         // Ready
-        this.player.addListener('ready', this.onReady);
+        this.player.off('ready', this.onReady);
 
         // Not Ready
-        this.player.addListener('not_ready', this.onNotReady);
+        this.player.off('not_ready', this.onNotReady);
 
         const isDisconnected = await this.player.disconnect();
         if (isDisconnected) {
