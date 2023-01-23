@@ -3,6 +3,7 @@ import { template } from '../templates/myTracks';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
+import { ICommand } from '../utils/scheduler';
 import { MyTracksViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IMyTracksViewProps {
@@ -36,10 +37,10 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
     trackLyrics!: MyTracksView['vm']['trackLyrics'];
 
     @Binding((a: MyTracksView) => a.vm, 'loadMoreCommand')
-    loadMoreCommand!: MyTracksView['vm']['loadMoreCommand'];
+    loadMoreCommand!: ICommand;
 
     @Binding((a: MyTracksView) => a.vm, 'findTrackLyricsCommand')
-    findTrackLyricsCommand!: MyTracksView['vm']['findTrackLyricsCommand'];
+    findTrackLyricsCommand!: ICommand<TrackViewModelItem>;
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

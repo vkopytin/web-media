@@ -4,6 +4,7 @@ import { template } from '../templates/userProfile';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
+import { ICommand } from '../utils/scheduler';
 import { AppViewModel, TrackViewModelItem, UserProfileViewModel } from '../viewModels';
 
 
@@ -49,10 +50,10 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
     tracks!: TrackViewModelItem[];
 
     @Binding((a: UserProfileView) => a.vm, 'logoutCommand')
-    logoutCommand!: UserProfileView['vm']['logoutCommand'];
+    logoutCommand!: ICommand;
 
     @Binding((a: UserProfileView) => a.vm, 'updatApiseedsKeyCommand')
-    updatApiseedsKeyCommand!: UserProfileView['vm']['updatApiseedsKeyCommand'];
+    updatApiseedsKeyCommand!: ICommand;
 
     doLogout = false;
 

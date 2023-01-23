@@ -3,6 +3,7 @@ import { template } from '../templates/playlists';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
+import { ICommand } from '../utils/scheduler';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 
@@ -40,16 +41,16 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
     currentPlaylistId!: PlaylistsView['vm']['currentPlaylistId'];
 
     @Binding((a: PlaylistsView) => a.vm, 'selectPlaylistCommand')
-    selectPlaylistCommand!: PlaylistsView['vm']['selectPlaylistCommand'];
+    selectPlaylistCommand!: ICommand<string | null>;
 
     @Binding((a: PlaylistsView) => a.vm, 'loadMoreCommand')
-    loadMoreCommand!: PlaylistsView['vm']['loadMoreCommand'];
+    loadMoreCommand!: ICommand;
 
     @Binding((a: PlaylistsView) => a.vm, 'loadMoreTracksCommand')
-    loadMoreTracksCommand!: PlaylistsView['vm']['loadMoreTracksCommand'];
+    loadMoreTracksCommand!: ICommand;
 
     @Binding((a: PlaylistsView) => a.vm, 'createPlaylistCommand')
-    createPlaylistCommand!: PlaylistsView['vm']['createPlaylistCommand'];
+    createPlaylistCommand!: ICommand<boolean>;
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

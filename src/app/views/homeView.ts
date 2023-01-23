@@ -3,6 +3,7 @@ import { template } from '../templates/home';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
+import { ICommand } from '../utils/scheduler';
 import { HomeViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IHomeViewProps {
@@ -38,25 +39,25 @@ class HomeView extends React.Component<IHomeViewProps> {
     bannedTrackIds!: string[];
 
     @Binding((a: HomeView) => a.vm, 'refreshCommand')
-    refreshCommand!: HomeView['vm']['refreshCommand'];
+    refreshCommand!: ICommand<string>;
 
     @Binding((a: HomeView) => a.vm, 'selectTrackCommand')
-    selectTrackCommand!: HomeView['vm']['selectTrackCommand'];
+    selectTrackCommand!: ICommand<TrackViewModelItem>;
 
     @Binding((a: HomeView) => a.vm, 'likeTrackCommand')
-    likeTrackCommand!: HomeView['vm']['likeTrackCommand'];
+    likeTrackCommand!: ICommand<TrackViewModelItem>;
 
     @Binding((a: HomeView) => a.vm, 'unlikeTrackCommand')
-    unlikeTrackCommand!: HomeView['vm']['unlikeTrackCommand'];
+    unlikeTrackCommand!: ICommand<TrackViewModelItem>;
 
     @Binding((a: HomeView) => a.vm, 'findTrackLyricsCommand')
-    findTrackLyricsCommand!: HomeView['vm']['findTrackLyricsCommand'];
+    findTrackLyricsCommand!: ICommand<TrackViewModelItem>;
 
     @Binding((a: HomeView) => a.vm, 'bannTrackCommand')
-    bannTrackCommand!: HomeView['vm']['bannTrackCommand'];
+    bannTrackCommand!: ICommand<TrackViewModelItem>;
 
     @Binding((a: HomeView) => a.vm, 'removeBannFromTrackCommand')
-    removeBannFromTrackCommand!: HomeView['vm']['removeBannFromTrackCommand'];
+    removeBannFromTrackCommand!: ICommand<TrackViewModelItem>;
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

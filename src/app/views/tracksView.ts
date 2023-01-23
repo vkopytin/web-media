@@ -4,6 +4,7 @@ import { template } from '../templates/tracks';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
+import { ICommand } from '../utils/scheduler';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 export interface ITracksViewProps {
@@ -54,22 +55,22 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
     trackLyrics!: TracksView['vm']['trackLyrics'];
 
     @Binding((a: TracksView) => a.vm, 'likeTrackCommand')
-    likeTrackCommand!: TracksView['vm']['likeTrackCommand'];
+    likeTrackCommand!: ICommand<TrackViewModelItem>;
 
     @Binding((a: TracksView) => a.vm, 'unlikeTrackCommand')
-    unlikeTrackCommand!: TracksView['vm']['unlikeTrackCommand'];
+    unlikeTrackCommand!: ICommand<TrackViewModelItem>;
 
     @Binding((a: TracksView) => a.vm, 'findTrackLyricsCommand')
-    findTrackLyricsCommand!: TracksView['vm']['findTrackLyricsCommand'];
+    findTrackLyricsCommand!: ICommand<TrackViewModelItem>;
 
     @Binding((a: TracksView) => a.vm, 'reorderTrackCommand')
-    reorderTrackCommand!: TracksView['vm']['reorderTrackCommand'];
+    reorderTrackCommand!: ICommand<TrackViewModelItem, TrackViewModelItem>;
 
     @Binding((a: TracksView) => a.vm, 'bannTrackCommand')
-    bannTrackCommand!: TracksView['vm']['bannTrackCommand'];
+    bannTrackCommand!: ICommand<TrackViewModelItem>;
 
     @Binding((a: TracksView) => a.vm, 'removeBannFromTrackCommand')
-    removeBannFromTrackCommand!: TracksView['vm']['removeBannFromTrackCommand'];
+    removeBannFromTrackCommand!: ICommand<TrackViewModelItem>;
 
     constructor(props: ITracksViewProps) {
         super(props);

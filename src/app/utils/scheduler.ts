@@ -4,7 +4,7 @@ export interface ITask {
     exec(...args: unknown[]): void;
 }
 
-export interface ICommand<A, B> {
+export interface ICommand<A = never, B = never> {
     isRunning: boolean;
     exec(a: A, b: B): void;
     exec(a: A): void;

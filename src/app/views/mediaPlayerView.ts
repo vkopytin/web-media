@@ -3,6 +3,7 @@ import { template } from '../templates/mediaPlayer';
 import { Binding, formatTime, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
+import { ICommand } from '../utils/scheduler';
 import { AppViewModel, MediaPlayerViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IMediaPlayerViewProps {
@@ -52,37 +53,37 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     isLiked!: boolean;
 
     @Binding((a: MediaPlayerView) => a.vm, 'resumeCommand')
-    resumeCommand!: MediaPlayerView['vm']['resumeCommand'];
+    resumeCommand!: ICommand;
 
     @Binding((a: MediaPlayerView) => a.vm, 'pauseCommand')
-    pauseCommand!: MediaPlayerView['vm']['pauseCommand'];
+    pauseCommand!: ICommand;
 
     @Binding((a: MediaPlayerView) => a.vm, 'prevCommand')
-    prevCommand!: MediaPlayerView['vm']['prevCommand'];
+    prevCommand!: ICommand;
 
     @Binding((a: MediaPlayerView) => a.vm, 'nextCommand')
-    nextCommand!: MediaPlayerView['vm']['nextCommand'];
+    nextCommand!: ICommand;
 
     @Binding((a: MediaPlayerView) => a.vm, 'volumeCommand')
-    volumeUpCommand!: MediaPlayerView['vm']['volumeUpCommand'];
+    volumeUpCommand!: ICommand;
 
     @Binding((a: MediaPlayerView) => a.vm, 'volumeDownCommand')
-    volumeDownCommand!: MediaPlayerView['vm']['volumeDownCommand'];
+    volumeDownCommand!: ICommand;
 
     @Binding((a: MediaPlayerView) => a.vm, 'refreshPlaybackCommand')
-    refreshPlaybackCommand!: MediaPlayerView['vm']['refreshPlaybackCommand'];
+    refreshPlaybackCommand!: ICommand;
 
     @Binding((a: MediaPlayerView) => a.vm, 'likeSongCommand')
-    likeSongCommand!: MediaPlayerView['vm']['likeSongCommand'];
+    likeSongCommand!: ICommand;
 
     @Binding((a: MediaPlayerView) => a.vm, 'unlikeSongCommand')
-    unlikeSongCommand!: MediaPlayerView['vm']['unlikeSongCommand'];
+    unlikeSongCommand!: ICommand;
 
     @Binding((a: MediaPlayerView) => a.vm, 'seekPlaybackCommand')
-    seekPlaybackCommand!: MediaPlayerView['vm']['seekPlaybackCommand'];
+    seekPlaybackCommand!: ICommand<number>;
 
     @Binding((a: MediaPlayerView) => a.vm, 'volumeCommand')
-    volumeCommand!: MediaPlayerView['vm']['volumeCommand'];
+    volumeCommand!: ICommand<number>;
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

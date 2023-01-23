@@ -4,6 +4,7 @@ import { template } from '../templates/selectPlaylists';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
+import { ICommand } from '../utils/scheduler';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 
@@ -36,10 +37,10 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
     playlists!: PlaylistsViewModelItem[];
 
     @Binding((a: SelectPlaylistsView) => a.vm, 'addToPlaylistCommand')
-    addToPlaylistCommand!: SelectPlaylistsView['vm']['addToPlaylistCommand'];
+    addToPlaylistCommand!: ICommand<TrackViewModelItem, PlaylistsViewModelItem>;
 
     @Binding((a: SelectPlaylistsView) => a.vm, 'removeFromPlaylistCommand')
-    removeFromPlaylistCommand!: SelectPlaylistsView['vm']['removeFromPlaylistCommand'];
+    removeFromPlaylistCommand!: ICommand<TrackViewModelItem, PlaylistsViewModelItem>;
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

@@ -6,6 +6,7 @@ import { template } from '../templates/app';
 import { asyncDebounce, Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
+import { ICommand } from '../utils/scheduler';
 import { AppViewModel, DeviceViewModelItem, TrackViewModelItem } from '../viewModels';
 
 class AppView extends React.Component {
@@ -45,10 +46,10 @@ class AppView extends React.Component {
     isSyncing!: AppView['vm']['isSyncing'];
 
     @Binding((a: AppView) => a.vm, 'refreshDevicesCommand')
-    refreshDevicesCommand!: AppView['vm']['refreshDevicesCommand'];
+    refreshDevicesCommand!: ICommand;
 
     @Binding((a: AppView) => a.vm, 'refreshTokenCommand')
-    refreshTokenCommand!: AppView['vm']['refreshTokenCommand'];
+    refreshTokenCommand!: ICommand;
 
     state = {
         prevPanel: 'home',

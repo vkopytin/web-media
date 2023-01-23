@@ -3,6 +3,7 @@ import { template } from '../templates/pickPlaylist';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
+import { ICommand } from '../utils/scheduler';
 import { HomeViewModel, PlaylistsViewModel, PlaylistsViewModelItem } from '../viewModels';
 
 
@@ -27,7 +28,7 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
     playlists!: PlaylistsViewModelItem[];
 
     @Binding((a: PickPlaylistsView) => a.homeVm, 'selectPlaylistCommand')
-    selectPlaylistCommand!: PickPlaylistsView['homeVm']['selectPlaylistCommand'];
+    selectPlaylistCommand!: ICommand<PlaylistsViewModelItem | null>;
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

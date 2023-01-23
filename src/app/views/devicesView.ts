@@ -3,6 +3,7 @@ import { template } from '../templates/devices';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
+import { ICommand } from '../utils/scheduler';
 import { AppViewModel, DeviceViewModelItem } from '../viewModels';
 
 export interface IDevicesViewProps {
@@ -26,10 +27,10 @@ class DevicesView extends React.Component<IDevicesViewProps> {
     currentDevice!: DeviceViewModelItem | null;
 
     @Binding((a: DevicesView) => a.vm, 'switchDeviceCommand')
-    switchDeviceCommand!: DevicesView['vm']['switchDeviceCommand'];
+    switchDeviceCommand!: ICommand<DeviceViewModelItem>;
 
     @Binding((a: DevicesView) => a.vm, 'refreshDevicesCommand')
-    refreshDevicesCommand!: DevicesView['vm']['refreshDevicesCommand'];
+    refreshDevicesCommand!: ICommand;
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);

@@ -4,6 +4,7 @@ import { template } from '../templates/search';
 import { asyncDebounce, Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
+import { ICommand } from '../utils/scheduler';
 import { AlbumViewModelItem, PlaylistsViewModelItem, SearchViewModel, TrackViewModelItem } from '../viewModels';
 import { ArtistViewModelItem } from '../viewModels/artistViewModelItem';
 
@@ -57,28 +58,28 @@ class SearchView extends React.Component<ISearchViewProps> {
     selectedItem!: TrackViewModelItem | null;
 
     @Binding((a: SearchView) => a.vm, 'searchCommand')
-    searchCommand!: SearchView['vm']['searchCommand'];
+    searchCommand!: ICommand<string>;
 
     @Binding((a: SearchView) => a.vm, 'chageSearchTypeCommand')
-    changeSearchTypeCommand!: SearchView['vm']['chageSearchTypeCommand'];
+    changeSearchTypeCommand!: ICommand<ISearchType>;
 
     @Binding((a: SearchView) => a.vm, 'selectAlbumCommand')
-    selectAlbumCommand!: SearchView['vm']['selectAlbumCommand'];
+    selectAlbumCommand!: ICommand<AlbumViewModelItem | null>;
 
     @Binding((a: SearchView) => a.vm, 'selectPlaylistCommand')
-    selectPlaylistCommand!: SearchView['vm']['selectPlaylistCommand'];
+    selectPlaylistCommand!: ICommand<PlaylistsViewModelItem | null>;
 
     @Binding((a: SearchView) => a.vm, 'selectArtistCommand')
-    selectArtistCommand!: SearchView['vm']['selectArtistCommand'];
+    selectArtistCommand!: ICommand<ArtistViewModelItem | null>;
 
     @Binding((a: SearchView) => a.vm, 'loadMoreCommand')
-    loadMoreCommand!: SearchView['vm']['loadMoreCommand'];
+    loadMoreCommand!: ICommand;;
 
     @Binding((a: SearchView) => a.vm, 'likeTrackCommand')
-    likeTrackCommand!: SearchView['vm']['likeTrackCommand'];
+    likeTrackCommand!: ICommand<TrackViewModelItem>;
 
     @Binding((a: SearchView) => a.vm, 'unlikeTrackCommand')
-    unlikeTrackCommand!: SearchView['vm']['unlikeTrackCommand'];
+    unlikeTrackCommand!: ICommand<TrackViewModelItem>;
 
     searchTracks = asyncDebounce((term: string) => {
         this.searchCommand.exec(term);

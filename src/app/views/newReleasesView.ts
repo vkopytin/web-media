@@ -4,6 +4,7 @@ import { template } from '../templates/newReleases';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
+import { ICommand } from '../utils/scheduler';
 import { AlbumViewModelItem, NewReleasesViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 
 
@@ -43,16 +44,16 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
     currentTracks!: TrackViewModelItem[];
 
     @Binding((a: NewReleasesView) => a.vm, 'selectAlbumCommand')
-    selectAlbumCommand!: NewReleasesView['vm']['selectAlbumCommand'];
+    selectAlbumCommand!: ICommand<AlbumViewModelItem | null>;
 
     @Binding((a: NewReleasesView) => a.vm, 'selectPlaylistCommand')
-    selectPlaylistCommand!: NewReleasesView['vm']['selectPlaylistCommand'];
+    selectPlaylistCommand!: ICommand<PlaylistsViewModelItem | null>;
 
     @Binding((a: NewReleasesView) => a.vm, 'likeAlbumCommand')
-    likeAlbumCommand!: NewReleasesView['vm']['likeAlbumCommand'];
+    likeAlbumCommand!: ICommand<AlbumViewModelItem>;
 
     @Binding((a: NewReleasesView) => a.vm, 'unlikeAlbumCommand')
-    unlikeAlbumCommand!: NewReleasesView['vm']['unlikeAlbumCommand'];
+    unlikeAlbumCommand!: ICommand<AlbumViewModelItem>;
 
     componentDidMount() {
         Notifications.observe(this, this.didRefresh);
