@@ -31,6 +31,8 @@ class Result<E = Error, R = unknown> {
         return this;
     }
 
+    cata<T>(f: (v: R) => Result<E, T>): Result<E, T>;
+    cata<T>(f: (v: R) => Promise<Result<E, T>>): Promise<Result<E, T>>;
     cata<T>(f: (v: R) => Result<E, T> | Promise<Result<E, T>>): Result<E, T> | Promise<Result<E, T>> {
         return this.left.match(
             e => Result.error(e)

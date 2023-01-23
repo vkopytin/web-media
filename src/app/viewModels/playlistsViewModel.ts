@@ -161,7 +161,7 @@ class PlaylistsViewModel {
             if (me.id) {
                 return me.id;
             }
-            throw new Error('My profile Id is empty');
+            this.errors = [Result.error(new Error('My profile Id is empty'))];
         });
         const appResult = await meId.cata(id => this.app.createNewPlaylist(
             id,
@@ -169,7 +169,8 @@ class PlaylistsViewModel {
             '',
             isPublic
         ));
-        await appResult.map(() => this.fetchData()).error(e => this.errors = [Result.error(e)]);
+        const fetchDataResult = await appResult.map(() => this.fetchData()).await();
+        fetchDataResult.error(e => this.errors = [Result.error(e)]);
     }
 
     async likeTrack(track: TrackViewModelItem): Promise<void> {
