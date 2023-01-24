@@ -7,6 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p $PORT",
+    "postinstall": "next build",
     "test": "jest",
     "lint": "next lint",
     "ts-version": "tsc --version"
