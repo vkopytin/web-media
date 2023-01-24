@@ -46,7 +46,7 @@ steps:
   displayName: "Deploy to azure"
   inputs:
     azureSubscription: $(azureSubscription)
-    appType: 'webAppLinux'
+    appType: 'webApp'
     appName: 'vkopytin'
     package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
     deploymentMethod: 'auto'
