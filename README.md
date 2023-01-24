@@ -55,7 +55,7 @@ runtime state of the application in smaller parts.
 The goal of databinding is to notify about state changes. Be a good basis platform to achieve correct data synchronisation.
 Prevent data synchronisation errors.
 
-This is a complex task. Wrong approach could lead to unexpected errors that are hard to understand. Byt I could try to resolve it.
+This is a complex task. Weak approach could lead to unexpected errors that are hard to understand. Byt I could try to resolve it.
 Let's set the following agreement. Just two rules.
 
 - There should be a single source of truth. Let's call it [state](src/app/utils/databinding.ts#:~:text=State<T>).
