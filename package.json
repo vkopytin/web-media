@@ -4,12 +4,9 @@
   "description": "Web Media Player",
   "main": "index.js",
   "scripts": {
-    "prepare": "next build",
     "dev": "next dev",
     "build": "next build",
     "start": "node_modules/next/dist/bin/next start -p $PORT",
-    "postinstall": "next build",
-    "heroku-postbuild": "next build",
     "test": "jest",
     "lint": "next lint",
     "ts-version": "tsc --version"
