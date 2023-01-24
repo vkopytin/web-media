@@ -5,7 +5,7 @@ Attempt to provide simple architecture. Just pure implementations. Small prototy
 Which would help focus on the understanding of the general concepts.
 
 The solution contains the list of following patterns
-- Architecture of ports and adapters (Hexagonal).
+- Architecture of ports and adapters (Hexagonal)
 - IoC for dependency injection
 - Model View ViewModel architecture
 - Properties Data Binding
