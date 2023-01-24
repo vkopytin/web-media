@@ -17,8 +17,10 @@ import { Result } from '../utils/result';
 class DataService extends Events {
     constructor() {
         super();
+    }
 
-        initializeStructure();
+    async init() {
+        await initializeStructure();
     }
 
     async createTrack(track: ITrack): Promise<unknown> {

@@ -23,7 +23,7 @@ import { SpotifyPlaybackAdapter } from './adapter/spotifyPlaybackAdapter';
 
 export class Core {
     settingsService = inject(SettingsService, SettingsService.makeDefaultSettings());
-    lyricsAdapter = inject(LyricsAdapter, this.settingsService.get('apiseeds').map(({ key }) => key).match(r => r, () => ''));
+    lyricsAdapter = inject(LyricsAdapter, this.settingsService.get('spotify').map(({ accessToken: key }) => key).match(r => r, () => ''));
     spotifyMediaAdapter = inject(SpotifyMediaAdapter, this.settingsService.get('spotify').map(({ accessToken: key }) => key).match(r => r, () => ''));
     spotifyPlaybackAdapter = inject(SpotifyPlaybackAdapter);
     spotifyRemotePlaybackAdapter = inject(SpotifyRemotePlaybackAdapter, this.settingsService.get('spotify').map(({ accessToken: key }) => key).match(r => r, () => ''));
@@ -46,6 +46,7 @@ export class Core {
 
     async run(): Promise<void> {
         await Promise.all([
+            this.dataService.init(),
             this.playbackService.init(),
             this.appViewModel.init(),
             this.homeViewModel.init(),

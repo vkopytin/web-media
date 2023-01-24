@@ -157,19 +157,19 @@ class PlaylistsViewModel {
             return;
         }
         const meResult = await this.media.profile();
-        const meId = meResult.map(me => {
+        const meId = meResult.cata(me => {
             if (me.id) {
-                return me.id;
+                return Result.of(me.id);
             }
-            this.errors = [Result.error(new Error('My profile Id is empty'))];
+            return Result.error<Error, string>(new Error('My profile Id is empty'));
         });
-        const appResult = await meId.cata(id => this.app.createNewPlaylist(
+        const createResult = await meId.cata(id => this.app.createNewPlaylist(
             id,
             this.newPlaylistName,
             '',
             isPublic
         ));
-        const fetchDataResult = await appResult.map(() => this.fetchData()).await();
+        const fetchDataResult = await createResult.map(() => this.fetchData()).await();
         fetchDataResult.error(e => this.errors = [Result.error(e)]);
     }
 

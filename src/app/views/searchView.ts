@@ -73,7 +73,7 @@ class SearchView extends React.Component<ISearchViewProps> {
     selectArtistCommand!: ICommand<ArtistViewModelItem | null>;
 
     @Binding((a: SearchView) => a.vm, 'loadMoreCommand')
-    loadMoreCommand!: ICommand;;
+    loadMoreCommand!: ICommand;
 
     @Binding((a: SearchView) => a.vm, 'likeTrackCommand')
     likeTrackCommand!: ICommand<TrackViewModelItem>;

@@ -17,23 +17,28 @@ export interface ILyricsSearchResult {
 
 class LyricsAdapter {
 
-    constructor(public token: string) {
+    constructor(public apiKey: string) {
+        this.apiKey = '9817ade5593e14c49ce4d97d362bc242';
     }
 
-    async search(term: string) {
-        const request = await fetch(`https://genius.com/${term}-lyrics`, {
-            credentials: 'include',
+    async search({ artist, song }: { artist: string; song: string; }) {
+        const encodedArtist = encodeURIComponent(artist);
+        const encodedSong = encodeURIComponent(song);
+        const request = await fetch(`http://api.musixmatch.com/ws/1.1/matcher.lyrics.get?q_artist=${encodedArtist}&q_track=${encodedSong}&format=json&apikey=${this.apiKey}`, {
             mode: 'no-cors',
-            redirect: 'follow',
             referrerPolicy: 'no-referrer',
+            headers: {
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'Content-Type': 'text/plain; charset=utf-8',
+            }
         });
 
-        const html = await request.text();
+        const text = await request.text();
 
         return {
-            track: { text: $('.lyrics', html).find('div:first').find('p:first').text() },
+            track: { text: text },
             copyright: {
-                notice: 'Genius',
+                notice: 'musixmatch',
                 text: '',
             }
         };

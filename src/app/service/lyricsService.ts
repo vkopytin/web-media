@@ -23,12 +23,12 @@ class LyricsService extends Events {
 
     async search(songInfo: { name: string; artist: string; }): Promise<Result<Error, string>> {
         try {
-            const lyrics = await this.adapter.search([
-                ...songInfo.artist.split(' '),
-                ...songInfo.name.split(' ')
-            ].map(encodeURIComponent).join('-'));
+            const lyrics = await this.adapter.search({
+                artist: songInfo.artist,
+                song: songInfo.name
+            });
 
-            return Result.of<Error, string>([
+            return Result.of([
                 lyrics.track.text,
                 '\nCopyright: ' + lyrics.copyright.notice,
                 lyrics.copyright.text
