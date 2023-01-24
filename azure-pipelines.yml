@@ -36,3 +36,12 @@ steps:
   displayName: 'Publish Artifact: SampleApp'
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)\\ArtifactsToBePublished'
+
+- task: AzureWebApp@1
+  displayName: "Deploy to azure"
+  inputs:
+    azureSubscription: 'Pay-As-You-Go(70ee527c-8af9-4f6b-b6fa-fd594595619c)'
+    appType: 'webApp'
+    appName: 'vkopytin'
+    package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+    deploymentMethod: 'auto'
