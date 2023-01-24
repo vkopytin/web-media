@@ -6,11 +6,6 @@
 trigger:
 - master
 
-variables:
-
-  # Azure Resource Manager connection created during pipeline creation
-  azureSubscription: 'azureConnection'
-
 pool:
   vmImage: 'ubuntu-latest'
 
@@ -45,8 +40,8 @@ steps:
 - task: AzureWebApp@1
   displayName: "Deploy to azure"
   inputs:
-    azureSubscription: $(azureSubscription)
-    appType: webApp
+    azureSubscription: 'Pay-As-You-Go(70ee527c-8af9-4f6b-b6fa-fd594595619c)'
+    appType: 'webApp'
     appName: 'vkopytin'
     package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
     deploymentMethod: 'auto'
