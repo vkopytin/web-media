@@ -1,4 +1,4 @@
-import $ = require('jquery');
+import $ from 'jquery';
 import React from 'react';
 import { template } from '../templates/tracks';
 import { Binding, Notifications } from '../utils';

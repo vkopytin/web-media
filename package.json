@@ -4,8 +4,9 @@
   "description": "Web Media Player",
   "main": "index.js",
   "scripts": {
-    "start": "next dev",
+    "dev": "next dev",
     "build": "next build",
+    "start": "next start",
     "test": "jest",
     "lint": "next lint",
     "ts-version": "tsc --version"
