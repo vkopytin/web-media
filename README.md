@@ -1,7 +1,7 @@
 # web-media
 _For example, a client application. Music player to Spotify Web SDK Player._
 
-Attempt to provide simple architecture. Just pure implementations. Small solutions combined together. Without any extra tools.
+Attempt to provide simple architecture. Just pure implementations. Small prototypes combined together. Without any extra tools.
 Which would help focus on the understanding of the general concepts.
 
 The solution contains the list of following patterns
