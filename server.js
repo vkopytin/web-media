@@ -1,10 +1,17 @@
-var express = require('express');
-const next = require('next');
-var expressServer = express();
-var app = next();
+const { createServer } = require("http");
+//const express = require('express') (Only if you app uses express)
+const next = require("next");
 
-expressServer.get('/', function (req, res) {
-    res.send('Express is working on IISNode!');
+const port = process.env.PORT || 3000;
+const dev = process.env.NODE_ENV !== "production";
+const app = next({ dev });
+const handle = app.getRequestHandler();
+
+app.prepare().then(() => {
+    createServer((req, res) => {
+        handle(req, res);
+    }).listen(port, (err) => {
+        if (err) throw err;
+        console.log(`> Ready on <http://localhost>:${port}`);
+    });
 });
-
-expressServer.listen(process.env.PORT || 8080);
