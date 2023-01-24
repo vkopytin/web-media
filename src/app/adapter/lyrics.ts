@@ -24,7 +24,7 @@ class LyricsAdapter {
     async search({ artist, song }: { artist: string; song: string; }) {
         const encodedArtist = encodeURIComponent(artist);
         const encodedSong = encodeURIComponent(song);
-        const request = await fetch(`http://api.musixmatch.com/ws/1.1/matcher.lyrics.get?q_artist=${encodedArtist}&q_track=${encodedSong}&format=json&apikey=${this.apiKey}`, {
+        const request = await fetch(`//api.musixmatch.com/ws/1.1/matcher.lyrics.get?q_artist=${encodedArtist}&q_track=${encodedSong}&format=json&apikey=${this.apiKey}`, {
             mode: 'no-cors',
             referrerPolicy: 'no-referrer',
             headers: {
