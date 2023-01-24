@@ -1,55 +1,47 @@
-# Node.js with webpack
-# Build a Node.js project using the webpack CLI.
+# Node.js
+# Build a general Node.js project with npm.
 # Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+# <https://docs.microsoft.com/azure/devops/pipelines/languages/javascript>
 
 trigger:
-- main
+- master
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'
 
 steps:
 - task: NodeTool@0
   inputs:
-    versionSpec: '14.x'
+    versionSpec: '16.x'
   displayName: 'Install Node.js'
 
 - script: |
-    npm install -g webpack webpack-cli --save-dev
     npm install
-  displayName: 'npm install'
-
-- script: |
-    npm run build-alpha
-  workingDirectory: $(System.DefaultWorkingDirectory)
-  displayName: 'Build web-app'
-
-- task: FtpUpload@2
+    npm run build
+  displayName: 'npm install and build'
+- task: ArchiveFiles@1
+  displayName: 'Archive files '
   inputs:
-    credentialsOption: 'inputs'
-    serverUrl: 'ftp://waws-prod-db3-041.ftp.azurewebsites.windows.net'
-    username: '$(FTP_NAME)'
-    password: '$(FTP_PASSWORD)'
-    rootDirectory: 'app/spotify'
-    filePatterns: '**'
-    remoteDirectory: '/site/wwwroot/Scripts/spotify'
-    enableUtf8: true
-    clean: true
-    preservePaths: true
-    trustSSL: true
+    rootFolder: '$(System.DefaultWorkingDirectory)'
+    includeRootFolder: false
 
-- task: FtpUpload@2
+- task: CopyFiles@2
+  displayName: 'Copy File to: $(TargetFolder)'
   inputs:
-    credentialsOption: 'inputs'
-    serverUrl: 'ftp://waws-prod-db3-041.ftp.azurewebsites.windows.net'
-    username: '$(FTP_NAME)'
-    password: '$(FTP_PASSWORD)'
-    rootDirectory: 'app/spotify'
-    filePatterns: '*.html'
-    remoteDirectory: '/site/wwwroot/'
-    enableUtf8: true
-    clean: false
-    preservePaths: false
-    trustSSL: true
-    cleanContents: false
+    SourceFolder: '$(Build.ArtifactStagingDirectory)'
+    Contents: '$(Build.BuildId).zip'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\\ArtifactsToBePublished'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: SampleApp'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)\\ArtifactsToBePublished'
+
+- task: AzureWebApp@1
+  displayName: "Deploy to azure"
+  inputs:
+    azureSubscription: 'Pay-As-You-Go(70ee527c-8af9-4f6b-b6fa-fd594595619c)'
+    appType: 'webApp'
+    appName: 'vkopytin'
+    package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+    deploymentMethod: 'auto'
