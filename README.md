@@ -26,7 +26,7 @@ To run unit tests
 npm run test
 ```
 
-## Hexagonal architecture
+## Architecture of ports and adapters (Hexagonal).
 To easily comprehend an application structure. The solution is broken into modules. The Hexagonal architecture works as glue.
 Between independent modules. Helps keep all composition loosely coupled. The [core.ts](src/app/core.ts) file contains the initialization part of the whole application.
 
