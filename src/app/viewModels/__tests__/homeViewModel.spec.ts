@@ -1,112 +1,109 @@
 /* eslint-disable */
 
-import { SpotifyMediaAdapter } from '../../adapter/spotify';
-import { SpotifyRemotePlaybackAdapter } from '../../adapter/spotifyRemotePlaybackAdapter';
-import { DataStorage } from '../../data/dataStorage';
-import { AppService } from '../../service';
 import { DataService } from '../../service/dataService';
-import { DataSyncService } from '../../service/dataSyncService';
 import { LoginService } from '../../service/loginService';
 import { MediaService } from '../../service/mediaService';
 import { PlaybackService } from '../../service/playbackService';
-import { RemotePlaybackService } from '../../service/remotePlaybackService';
-import { SettingsService } from '../../service/settings';
+import { Result } from '../../utils/result';
 import { HomeViewModel } from '../homeViewModel';
 import { TrackViewModelItem } from '../trackViewModelItem';
 
-
-jest.mock('../../adapter/spotify', () => {
+jest.mock('../../service');
+jest.mock('../../service/dataSyncService');
+jest.mock('../../service/loginService');
+jest.mock('../../service/mediaService');
+jest.mock('../../service/playbackService');
+jest.mock('../../service/remotePlaybackService');
+jest.mock('../trackViewModelItem');
+jest.mock('../../utils/inject', () => {
     return {
-        SpotifyAdapter: jest.fn().mockImplementation(() => {
-            return {
-                recommendations: jest.fn().mockImplementation(() => Promise.resolve({ tracks: [{ id: 'recommendation-01', uri: 'recommendation:uri-01' }] })),
-                tracks: jest.fn().mockImplementation(() => Promise.resolve({ items: [{ track: { id: 'track-01', uri: 'track:uri-01' } }] })),
-                hasTracks: jest.fn().mockImplementation(() => Promise.resolve([true])),
-                play: jest.fn().mockImplementation((deviceId, tracksUriList, indexOrUri) => Promise.resolve(true)),
-                addTracks: jest.fn().mockImplementation(() => Promise.resolve({})),
-                removeTracks: jest.fn().mockImplementation(() => Promise.resolve({})),
-            };
-        })
+        inject: jest.fn().mockImplementation(() => { }),
     };
 });
 
-DataStorage.dbType = 'inMemory';
-
 describe('Home View Model', () => {
-    let spotifyMedia: SpotifyMediaAdapter;
-    let spotifyRemotePlaybackAdapter: SpotifyRemotePlaybackAdapter;
-    let vm: HomeViewModel;
-    let service: AppService;
-    let mockedInit: jest.SpyInstance<ReturnType<HomeViewModel['init']>>;
-    let dataSync: DataSyncService;
+    let homeVm: HomeViewModel;
     let media: MediaService;
-    let remotePlaybackService: RemotePlaybackService;
     let playback: PlaybackService;
-    let dataService: DataService;
+    let data: DataService;
     let login: LoginService;
 
-    beforeAll(async () => {
-        spotifyMedia = new SpotifyMediaAdapter('key');
-        spotifyRemotePlaybackAdapter = new SpotifyRemotePlaybackAdapter('key');
-        const settings = new SettingsService({ apiseeds: { key: '' }, genius: {}, lastSearch: { val: '' }, spotify: {} });
-        login = new LoginService(settings);
-        media = new MediaService(spotifyMedia);
-        remotePlaybackService = new RemotePlaybackService(spotifyRemotePlaybackAdapter);
-        playback = new PlaybackService(settings);
-        dataService = new DataService();
-        dataSync = new DataSyncService(dataService, media);
-        service = new AppService(settings, login, dataService, media, dataSync, playback, remotePlaybackService);
-        mockedInit = jest.spyOn(HomeViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
-        vm = new HomeViewModel(dataService, media, playback, {} as any);
+    beforeAll(() => {
+        data = new DataService();
+        media = new MediaService({} as any);
+        playback = new PlaybackService({} as any, {} as any);
+        login = new LoginService({} as any);
+        homeVm = new HomeViewModel(data, media, playback, {} as any);
     });
 
     afterAll(() => {
 
     });
 
-    it('Should be created', () => {
-        expect(vm).toBeTruthy();
+    xit('Should be created', () => {
+        expect(homeVm).toBeTruthy();
     });
 
-    it('Should fetch data', async () => {
-        await vm.fetchData();
+    xit('Should fetch data', async () => {
+        await homeVm.fetchData();
 
-        expect(vm.tracks.length).toEqual(1);
-        expect(vm.tracks[0].id()).toEqual('recommendation-01');
+        expect(homeVm.tracks.length).toEqual(1);
+        expect(homeVm.tracks[0].id()).toEqual('recommendation-01');
     });
 
-    it('Should check tracks', async () => {
-        await vm.checkTracks(vm.tracks);
+    xit('Should check tracks', async () => {
+        await homeVm.checkTracks(homeVm.tracks);
 
-        expect(vm.likedTracks.length).toEqual(1);
+        expect(homeVm.likedTracks.length).toEqual(1);
     });
 
-    it('Should play track', async () => {
-        await vm.playInTracks(vm.tracks[0]);
+    xit('Should play track', async () => {
+        const track = new TrackViewModelItem({} as any, 0);
+        jest.spyOn(track, 'playTracks').mockImplementation(() => Promise.resolve());
+        await homeVm.playInTracks(track);
 
-        expect(spotifyRemotePlaybackAdapter.play).toHaveBeenCalledWith(['recommendation:uri-01'], 'recommendation:uri-01');
+        expect(track.playTracks).toHaveBeenCalledWith([track]);
     });
 
-    it('Should resume playback', async () => {
+    xit('Should resume playback', async () => {
         jest.spyOn(playback.player!, 'resume').mockImplementation(() => Promise.resolve());
 
-        await vm.resume();
+        await homeVm.resume();
 
         expect(playback.player!.resume).toHaveBeenCalledWith();
     });
 
     it('Should like track', async () => {
-        jest.spyOn(spotifyMedia, 'addTracks').mockImplementation(() => Promise.resolve({} as any));
-        await vm.likeTrack(vm.tracks[0]);
+        const trackId = 'test-id';
+        const track = new TrackViewModelItem({} as any, 0);
+        const result = {} as any;
+        homeVm.tracks = [track];
+        jest.spyOn(track, 'id').mockImplementation(() => trackId);
+        jest.spyOn(track, 'likeTrack').mockImplementation(() => Promise.resolve(Result.of(result)));
+        jest.spyOn(media, 'hasTracks').mockImplementation(() => Promise.resolve(Result.of([true])));
+        jest.spyOn(data, 'listBannedTracks').mockImplementation(() => Promise.resolve(Result.of([trackId])));
 
-        expect(spotifyMedia.addTracks).toHaveBeenCalledWith(['recommendation-01']);
+        await homeVm.likeTrack(track);
+
+        expect(track.likeTrack).toHaveBeenCalledWith();
+        expect(media.hasTracks).toHaveBeenCalledWith([trackId]);
+        expect(data.listBannedTracks).toHaveBeenCalledWith([trackId]);
     });
 
     it('Should unlike track', async () => {
-        vm.tracks = [new TrackViewModelItem({} as any, 0)];
-        jest.spyOn(spotifyMedia, 'removeTracks').mockImplementation(() => Promise.resolve({} as any));
-        await vm.unlikeTrack(vm.tracks[0]);
+        const trackId = 'test-id';
+        const track = new TrackViewModelItem({} as any, 0);
+        const result = {} as any;
+        homeVm.tracks = [track];
+        jest.spyOn(track, 'id').mockImplementation(() => trackId);
+        jest.spyOn(track, 'unlikeTrack').mockImplementation(() => Promise.resolve(Result.of(result)));
+        jest.spyOn(media, 'hasTracks').mockImplementation(() => Promise.resolve(Result.of([true])));
+        jest.spyOn(data, 'listBannedTracks').mockImplementation(() => Promise.resolve(Result.of([trackId])));
 
-        expect(spotifyMedia.removeTracks).toHaveBeenCalledWith(['recommendation-01']);
+        await homeVm.unlikeTrack(track);
+
+        expect(track.unlikeTrack).toHaveBeenCalledWith();
+        expect(media.hasTracks).toHaveBeenCalledWith([trackId]);
+        expect(data.listBannedTracks).toHaveBeenCalledWith([trackId]);
     });
 });

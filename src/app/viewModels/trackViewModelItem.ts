@@ -122,14 +122,14 @@ class TrackViewModelItem {
 
     async play(playlistUri: string): Promise<void> {
         const playResult = await this.remotePlayback.play('', playlistUri, this.uri());
-        playResult.map(() => this.mediaPlayerViewModel.fetchDataInternal())
+        playResult.map(() => this.mediaPlayerViewModel.fetchData())
             .error(e => this.errors = [Result.error(e)]);
     }
 
     async playTracks(tracks: TrackViewModelItem[]): Promise<void> {
         const allowedTracks = _.filter(tracks, track => !track.isBanned);
         const playResult = await this.remotePlayback.play('', _.map(allowedTracks, item => item.uri()), this.uri());
-        playResult.map(() => this.mediaPlayerViewModel.fetchDataInternal())
+        playResult.map(() => this.mediaPlayerViewModel.fetchData())
             .error(e => this.errors = [Result.error(e)]);
     }
 

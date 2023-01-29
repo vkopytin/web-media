@@ -1,155 +1,109 @@
 /* eslint-disable */
 
-import { DataStorage } from '../../data/dataStorage';
-import { AppViewModel } from '../appViewModel';
+import { AppService } from '../../service';
 import { DataSyncService } from '../../service/dataSyncService';
+import { LoginService } from '../../service/loginService';
 import { MediaService } from '../../service/mediaService';
 import { PlaybackService } from '../../service/playbackService';
-import { AppService } from '../../service';
-import { SettingsService } from '../../service/settings';
-import { DataService } from '../../service/dataService';
-import { DeviceViewModelItem } from '../deviceViewModelItem';
-import { LoginService } from '../../service/loginService';
 import { RemotePlaybackService } from '../../service/remotePlaybackService';
-import { SpotifyMediaAdapter } from '../../adapter/spotify';
-import { SpotifyRemotePlaybackAdapter } from '../../adapter/spotifyRemotePlaybackAdapter';
+import * as ioc from '../../utils/inject';
+import { Result } from '../../utils/result';
+import { AppViewModel } from '../appViewModel';
+import { DeviceViewModelItem } from '../deviceViewModelItem';
+import { TrackViewModelItem } from '../trackViewModelItem';
 
 
-jest.mock('../../adapter/spotify', () => {
+jest.mock('../../service');
+jest.mock('../../service/dataSyncService');
+jest.mock('../../service/loginService');
+jest.mock('../../service/mediaService');
+jest.mock('../../service/playbackService');
+jest.mock('../../service/remotePlaybackService');
+jest.mock('../trackViewModelItem');
+jest.mock('../../utils/inject', () => {
     return {
-        SpotifyAdapter: jest.fn().mockImplementation(() => {
-            return {
-                me: jest.fn().mockImplementation(() => Promise.resolve({ email: 'test@test.test' })),
-                seek: jest.fn().mockImplementation(() => Promise.resolve(true)),
-                myTopTracks: jest.fn().mockImplementation(() => Promise.resolve({ items: [{ id: 'track-1', name: 'track-name-1' }] })),
-                devices: jest.fn().mockImplementation(() => Promise.resolve({ devices: [{ id: 'device-01', is_active: true }] })),
-                player: jest.fn().mockImplementation(() => Promise.resolve({})),
-                tracks: jest.fn().mockImplementation(() => Promise.resolve({
-                    items: [{
-                        track: {
-                            id: 'track-01',
-                            uri: 'track:uri-01',
-                            album: { id: 'album-01' },
-                            images: [],
-                            artists: []
-                        }
-                    }]
-                })),
-                myPlaylists: jest.fn().mockImplementation(() => Promise.resolve({ items: [] })),
-            };
-        })
+        inject: jest.fn().mockImplementation(() => { }),
     };
 });
-
-jest.mock('../../service/dataService', () => {
-    return {
-        DataService: jest.fn().mockImplementation(() => {
-            return {
-
-            };
-        })
-    };
-});
-
-jest.mock('../../service/spotifySyncService', () => {
-    return {
-        SpotifySyncService: jest.fn().mockImplementation(() => {
-            return {
-                syncData: jest.fn().mockImplementation(() => Promise.resolve()),
-            };
-        })
-    };
-});
-
-jest.mock('../deviceViewModelItem', () => {
-    return {
-        DeviceViewModelItem: jest.fn().mockImplementation(() => {
-            return {
-
-            };
-        })
-    };
-});
-
-DataStorage.dbType = 'inMemory';
-
 
 describe('App View Model', () => {
-    let spotifyMedia: SpotifyMediaAdapter;
-    let spotifyRemotePlaybackAdapter: SpotifyRemotePlaybackAdapter;
-    let vm: AppViewModel;
-    let service: AppService;
-    let mockedInit: jest.SpyInstance<ReturnType<AppViewModel['init']>>;
+    let appVm: AppViewModel;
+    let app: AppService;
     let spotifySync: DataSyncService;
     let media: MediaService;
     let playback: PlaybackService;
     let remotePlayback: RemotePlaybackService;
-    let dataService: DataService;
     let login: LoginService;
 
     beforeEach(async () => {
-        spotifyMedia = new SpotifyMediaAdapter('key');
-        spotifyRemotePlaybackAdapter = new SpotifyRemotePlaybackAdapter('key');
-        const settings = new SettingsService({ apiseeds: { key: '' }, genius: {}, lastSearch: { val: '' }, spotify: {} });
-        login = new LoginService(settings);
-        media = new MediaService(spotifyMedia);
-        playback = new PlaybackService(settings);
-        remotePlayback = new RemotePlaybackService(spotifyRemotePlaybackAdapter);
-        dataService = new DataService();
-        spotifySync = new DataSyncService(dataService, media);
-        service = new AppService(settings, login, dataService, media, spotifySync, playback, remotePlayback);
-        mockedInit = jest.spyOn(AppViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
-        vm = new AppViewModel(login, spotifySync, media, playback, remotePlayback, service);
-    });
-
-    afterEach(() => {
-        mockedInit.mockClear();
+        login = new LoginService({} as any);
+        spotifySync = new DataSyncService({} as any, {} as any);
+        media = new MediaService({} as any);
+        playback = new PlaybackService({} as any, {} as any);
+        remotePlayback = new RemotePlaybackService({} as any);
+        app = new AppService({} as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any);
+        appVm = new AppViewModel(login, spotifySync, media, playback, remotePlayback, app);
     });
 
     it('Should be created', () => {
-        expect(vm).toBeTruthy();
-        expect(vm.openLogin).toBeFalsy();
+        expect(appVm).toBeTruthy();
+        expect(appVm.openLogin).toBeFalsy();
     });
 
     it('Should have url on refresh token', async () => {
-        await vm.refreshToken();
+        const url = 'test';
+        jest.spyOn(login, 'getSpotifyAuthUrl').mockImplementation(() => Promise.resolve(Result.of(url)));
 
-        expect(vm.autoRefreshUrl).toContain('redirect_uri=');
+        await appVm.refreshToken();
+
+        expect(appVm.autoRefreshUrl).toContain(url);
     });
 
     it('Should fetch data', async () => {
-        await vm.fetchData();
+        const device = { id: 'test', is_active: true, is_private_session: true, is_restricted: true, name: 'test', type: 'test', volume_percent: 0 };
+        const track = { id: 'track-1', name: 'track-name-1' };
+        jest.spyOn(remotePlayback, 'listDevices').mockImplementation(() => Promise.resolve(Result.of([device])));
+        jest.spyOn(media, 'listTopTracks').mockImplementation(
+            () => Promise.resolve(Result.of({ items: [track] } as any))
+        );
+        jest.spyOn(media, 'profile').mockImplementation(() => Promise.resolve(Result.of({})));
+        jest.spyOn(ioc, 'inject').mockImplementation(() => ({}));
+        jest.spyOn(TrackViewModelItem.prototype, 'id').mockImplementation(() => track.id);
+        jest.spyOn(TrackViewModelItem.prototype, 'name').mockImplementation(() => track.name);
 
-        expect(vm.topTracks[0].id()).toEqual('track-1');
-        expect(vm.topTracks[0].name()).toEqual('track-name-1');
+        await appVm.fetchData();
+
+        expect(appVm.topTracks[0].id()).toEqual('track-1');
+        expect(appVm.topTracks[0].name()).toEqual('track-name-1');
     });
 
     it('Should fetch devices', async () => {
-        await vm.updateDevices();
+        const device = { id: 'test', is_active: true, is_private_session: true, is_restricted: true, name: 'test', type: 'test', volume_percent: 0 };
+        jest.spyOn(remotePlayback, 'listDevices').mockImplementation(() => Promise.resolve(Result.of([device])));
 
-        expect(vm.devices[0].id()).toBe('device-01');
-        expect(vm.currentDevice!.id()).toBe('device-01');
+        await appVm.updateDevices();
+
+        expect(appVm.devices[0].id()).toBe(device.id);
+        expect(appVm.currentDevice!.id()).toBe(device.id);
     });
 
     it('Should catch error when fetch devices', async () => {
-        jest.spyOn(spotifyRemotePlaybackAdapter, 'devices').mockImplementation(() => {
-            throw new Error('fake error');
-        });
+        jest.spyOn(remotePlayback, 'listDevices').mockImplementation(() => Promise.resolve(Result.error(new Error('error'))));
 
-        await vm.updateDevices();
+        await appVm.updateDevices();
 
-        expect(vm.errors.length).toEqual(1);
-        console.log(vm.errors[0].error);
-
-        expect(vm.devices[0].id()).toBe('device-01');
-        expect(vm.currentDevice!.id()).toBe('device-01');
+        expect(appVm.errors.length).toEqual(1);
     });
 
     it('Should switch device', async () => {
-        const device = new DeviceViewModelItem({ id: 'test', is_active: false, is_private_session: true, is_restricted: true, name: 'test', type: 'test', volume_percent: 0 });
-        await vm.switchDevice(device);
+        const device = { id: 'test', is_active: true, is_private_session: true, is_restricted: true, name: 'test', type: 'test', volume_percent: 0 };
+        const deviceItem = new DeviceViewModelItem(device);
+        jest.spyOn(remotePlayback, 'player').mockImplementation(() => Promise.resolve(Result.of({} as any)));
+        jest.spyOn(remotePlayback, 'listDevices').mockImplementation(() => Promise.resolve(Result.of([device])));
 
-        expect(vm.devices[0].id()).toBe('device-01');
-        expect(vm.currentDevice!.id()).toBe('device-01');
+        await appVm.switchDevice(deviceItem);
+
+        expect(appVm.devices[0].id()).toBe(device.id);
+        expect(appVm.currentDevice!.id()).toBe(device.id);
     });
 });

@@ -11,6 +11,7 @@ import { TrackViewModelItem } from './trackViewModelItem';
 import { RemotePlaybackService } from '../service/remotePlaybackService';
 import { ITrack } from '../ports/iMediaProt';
 import { IWebPlaybackState } from '../ports/iPlaybackPort';
+import { Option, Some } from '../utils/option';
 
 const lockSection = asyncQueue();
 
@@ -47,7 +48,6 @@ class MediaPlayerViewModel {
 
     monitorPlyback = asyncDebounce(() => this.monitorPlybackInternal(), 5 * 1000);
     autoSeek = asyncDebounce(() => this.autoSeekInternal(), 500);
-    fetchData = asyncDebounce(() => this.fetchDataInternal(), 500);
 
     constructor(
         private appViewModel: AppViewModel,
@@ -72,8 +72,6 @@ class MediaPlayerViewModel {
     async connect(): Promise<void> {
         this.playback.on('playerStateChanged', (en: unknown, state: IWebPlaybackState) => this.updateFromPlayerState(state));
         this.remotePlaybackService.on('change:state', () => this.fetchData());
-
-        await this.fetchData();
     }
 
     async currentPlayerState(): Promise<Result<Error, IWebPlaybackState>> {
@@ -115,9 +113,16 @@ class MediaPlayerViewModel {
             });
     }
 
-    async fetchDataInternal(): Promise<void> {
+    async refreshPlayback() {
+        const res = await this.fetchData();
+        res.map(e => {
+            throw e;
+        });
+    }
+
+    async fetchData(): Promise<Option<Error>> {
         const res = await this.remotePlaybackService.player();
-        res.map(currentlyPlaying => {
+        return res.match(currentlyPlaying => {
             this.lastTime = +new Date();
             if (currentlyPlaying && currentlyPlaying.item) {
                 const [artist] = currentlyPlaying.item.artists;
@@ -137,9 +142,12 @@ class MediaPlayerViewModel {
             } else {
                 this.isPlaying = currentlyPlaying?.is_playing || false;
             }
-        }).error(e => {
+
+            return Option.none<Error>();
+        }, e => {
             this.errors = [Result.error(e)];
-            throw e;
+
+            return Some.some(e);
         });
     }
 
@@ -152,10 +160,12 @@ class MediaPlayerViewModel {
             .error(e => this.errors = [Result.error(e)]);
     }
 
-    async monitorPlybackInternal(): Promise<void> {
+    monitorPlybackInternal(): void {
         if (!this.isPlaying) {
-            await this.fetchData();
-            await this.monitorPlyback();
+            (async () => {
+                await this.fetchData();
+                await this.monitorPlyback();
+            })();
         }
     }
 
