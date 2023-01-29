@@ -19,7 +19,7 @@ Eventually with some efforts it can be done for other frameworks.
 npm install
 npm run start
 ```
-Then opern the following URL from your favorite browser: http://localhost:3000
+Then open the following URL from your favorite browser: http://localhost:3000
 
 To run unit tests
 ```sh
