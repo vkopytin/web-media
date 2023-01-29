@@ -377,4 +377,50 @@ describe('Spotify Media Adapter', () => {
         });
     });
 
+    each([
+        ['track-id-123', 'track-id-123'],
+        ['track-id-123%2Ctrack-id-4343', ['track-id-123', 'track-id-4343']],
+    ]).it('should request add track', (expected, trackIds) => {
+        const method = 'PUT';
+        const body = {};
+        jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
+            status: 200,
+            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+        } as any));
+
+        spotifyMediaAdapter.addTracks(trackIds);
+
+        expect(spotifyMediaAdapter.fetch).toHaveBeenCalledWith(`${urlDomain}/v1/me/tracks?ids=${expected}`, {
+            method,
+            headers: {
+                ...headers,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+    });
+
+    each([
+        ['track-id-123', 'track-id-123'],
+        ['track-id-123%2Ctrack-id-4343', ['track-id-123', 'track-id-4343']],
+    ]).it('should request add track', (expected, trackIds) => {
+        const method = 'DELETE';
+        const body = {};
+        jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
+            status: 200,
+            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+        } as any));
+
+        spotifyMediaAdapter.removeTracks(trackIds);
+
+        expect(spotifyMediaAdapter.fetch).toHaveBeenCalledWith(`${urlDomain}/v1/me/tracks?ids=${expected}`, {
+            method,
+            headers: {
+                ...headers,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+    });
+
 });
