@@ -128,7 +128,7 @@ export class MediaService extends Events {
 
     async fetchArtistTopTracks(artistId: string, country = 'US'): Promise<Result<Error, ITopTracksResult>> {
         try {
-            const res = await this.mediaPort.artistTopTracks(artistId, country);
+            const res = await this.mediaPort.listArtistTopTracks(artistId, country);
 
             return Result.of(res);
         } catch (ex) {

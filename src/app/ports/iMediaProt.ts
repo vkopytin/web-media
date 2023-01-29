@@ -155,7 +155,7 @@ export interface IMediaPort {
     myPlaylists(offset?: number, limit?: number): Promise<IUserPlaylistsResult>;
     listPlaylistTracks(playlistId: string, offset?: number, limit?: number): Promise<IResponseResult<ISpotifySong>>;
     myTopTracks(offset?: number, limit?: number): Promise<IResponseResult<ITrack>>;
-    artistTopTracks(artistId: string, country?: string): Promise<ITopTracksResult>;
+    listArtistTopTracks(artistId: string, country?: string): Promise<ITopTracksResult>;
     addTracks(trackIds: string | string[]): Promise<IResponseResult<ISpotifySong>>;
     removeTracks(trackIds: string | string[]): Promise<IResponseResult<ISpotifySong>>;
     hasTracks(trackIds: string | string[]): Promise<boolean[]>;

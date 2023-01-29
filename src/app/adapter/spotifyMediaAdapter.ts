@@ -243,18 +243,6 @@ export class SpotifyMediaAdapter implements IMediaPort {
         return await resultOrError(response);
     }
 
-    async artistTopTracks(artistId: string, country = 'US'): Promise<ITopTracksResult> {
-        const response = await this.fetch(`${baseUrl}/v1/artists/${artistId}/top-tracks?` + toUrlQueryParams({
-            country: country
-        }), {
-            headers: {
-                'Authorization': 'Bearer ' + this.token
-            },
-        });
-
-        return await resultOrError(response);
-    }
-
     async listAlbumTracks(albumId: string, offset = 0, limit = 20): Promise<IResponseResult<ITrack>> {
         const response = await this.fetch(`${baseUrl}/v1/albums/${albumId}/tracks?` + toUrlQueryParams({
             offset, limit
@@ -348,32 +336,6 @@ export class SpotifyMediaAdapter implements IMediaPort {
         return await resultOrError(response);
     }
 
-    async seek(positionMs: number, deviceId = ''): Promise<void> {
-        const response = await this.fetch(`${baseUrl}/v1/me/player/seek?` + toUrlQueryParams({
-            position_ms: positionMs,
-            ...deviceId ? { device_id: deviceId } : {}
-        }), {
-            method: 'PUT',
-            headers: {
-                'Authorization': 'Bearer ' + this.token,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({}),
-        });
-
-        return await resultOrError(response);
-    }
-
-    async currentlyPlaying(): Promise<ICurrentlyPlayingResult> {
-        const response = await this.fetch(`${baseUrl}/v1/me/player/currently-playing`, {
-            headers: {
-                'Authorization': 'Bearer ' + this.token
-            },
-        });
-
-        return await resultOrError(response);
-    }
-
     async tracks(offset = 0, limit = 20): Promise<IResponseResult<ISpotifySong>> {
         const response = await this.fetch(`${baseUrl}/v1/me/tracks?` + toUrlQueryParams({
             offset: offset,
@@ -439,23 +401,6 @@ export class SpotifyMediaAdapter implements IMediaPort {
             headers: {
                 'Authorization': 'Bearer ' + this.token
             },
-        });
-
-        return await resultOrError(response);
-    }
-
-    async volume(precent: number, deviceId?: string): Promise<IResponseResult<ISpotifySong>> {
-
-        const response = await this.fetch(`${baseUrl}/v1/me/player/volume?` + toUrlQueryParams({
-            volume_percent: precent,
-            ...deviceId ? { device_id: deviceId } : {}
-        }), {
-            method: 'PUT',
-            headers: {
-                'Authorization': 'Bearer ' + this.token,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({}),
         });
 
         return await resultOrError(response);
