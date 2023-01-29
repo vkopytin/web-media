@@ -17,7 +17,7 @@ import { PlaylistsViewModel } from './viewModels/playlistsViewModel';
 import { SearchViewModel } from './viewModels/searchViewModel';
 import { UserProfileViewModel } from './viewModels/userProfileViewModel';
 import { RemotePlaybackService } from './service/remotePlaybackService';
-import { SpotifyMediaAdapter } from './adapter/spotify';
+import { SpotifyMediaAdapter } from './adapter/spotifyMediaAdapter';
 import { SpotifyRemotePlaybackAdapter } from './adapter/spotifyRemotePlaybackAdapter';
 import { SpotifyPlaybackAdapter } from './adapter/spotifyPlaybackAdapter';
 

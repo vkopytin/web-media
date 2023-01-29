@@ -12,11 +12,11 @@ import { AppViewModel } from '../appViewModel';
 import { Option } from '../../utils/option';
 import { LoginService } from '../../service/loginService';
 import { RemotePlaybackService } from '../../service/remotePlaybackService';
-import { SpotifyMediaAdapter } from '../../adapter/spotify';
+import { SpotifyMediaAdapter } from '../../adapter/spotifyMediaAdapter';
 import { SpotifyRemotePlaybackAdapter } from '../../adapter/spotifyRemotePlaybackAdapter';
 import { SpotifyPlaybackAdapter } from '../../adapter/spotifyPlaybackAdapter';
 
-jest.mock('../../adapter/spotify', () => {
+jest.mock('../../adapter/spotifyMediaAdapter', () => {
     return {
         SpotifyMediaAdapter: jest.fn().mockImplementation(() => {
             return {
