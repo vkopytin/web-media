@@ -3,7 +3,9 @@ import { AppService } from '../service';
 import { DataService } from '../service/dataService';
 import { LyricsService } from '../service/lyricsService';
 import { MediaService } from '../service/mediaService';
-import { isLoading, State } from '../utils';
+import { PlaylistsService } from '../service/playlistsService';
+import { Binding, isLoading, State } from '../utils';
+import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
@@ -13,7 +15,6 @@ class PlaylistsViewModel {
     settings = this.defaultSettings();
 
     @State errors: Result[] = [];
-    @State playlists: PlaylistsViewModelItem[] = [];
     @State tracks: TrackViewModelItem[] = [];
     @State isLoading = false;
     @State likedTracks: TrackViewModelItem[] = [];
@@ -37,11 +38,15 @@ class PlaylistsViewModel {
     @State bannTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.bannTrack(track));
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
 
+    @Binding((vm: PlaylistsViewModel) => vm.playlistsService, 'playlists')
+    playlists: PlaylistsViewModelItem[] = [];
+
     constructor(
         private data: DataService,
         private media: MediaService,
         private lyrics: LyricsService,
-        private app: AppService
+        private app: AppService,
+        private playlistsService: PlaylistsService,
     ) {
 
     }
@@ -72,22 +77,12 @@ class PlaylistsViewModel {
     }
 
     async fetchData(): Promise<void> {
-        const result = await this.media.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
-        result.map(({ items: playlists }) => {
-            this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
-            this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
-            this.playlists = _.map(_.first(playlists, this.settings.playlist.limit), item => new PlaylistsViewModelItem(item));
-        }).error(e => this.errors = [Result.error(e)]);
+        await this.playlistsService.listPlaylists();
     }
 
     @isLoading
     async loadMore(): Promise<void> {
-        const result = await this.media.fetchMyPlaylists(this.settings.playlist.offset, this.settings.playlist.limit + 1);
-        result.map(({ items: playlists }) => {
-            this.settings.playlist.total = this.settings.playlist.offset + Math.min(this.settings.playlist.limit + 1, playlists.length);
-            this.settings.playlist.offset = this.settings.playlist.offset + Math.min(this.settings.playlist.limit, playlists.length);
-            this.playlists = [...this.playlists, ..._.map(_.first(playlists, this.settings.playlist.limit), item => new PlaylistsViewModelItem(item))];
-        }).error(e => this.errors = [Result.error(e)]);
+        await this.playlistsService.loadMorePlaylists();
     }
 
     async fetchTracks(): Promise<void> {
@@ -145,11 +140,6 @@ class PlaylistsViewModel {
         }).error(e => this.errors = [Result.error(e)]);
         const res = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
         res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
-    }
-
-    playlistsAddRange(value: PlaylistsViewModelItem[]): void {
-        const array = [...this.playlists, ...value];
-        this.playlists = array;
     }
 
     async createNewPlaylist(isPublic: boolean): Promise<void> {

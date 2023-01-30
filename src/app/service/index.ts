@@ -9,6 +9,7 @@ import { DataSyncService } from './dataSyncService';
 import { ITrack, IUserPlaylist } from '../ports/iMediaProt';
 import { RemotePlaybackService } from './remotePlaybackService';
 
+export { PlaybackService } from './playbackService';
 
 export class AppService {
     constructor(

@@ -1,5 +1,4 @@
 import { IMediaPort, IUserInfo, IResponseResult, ISpotifySong, IRecommendationsResult, IUserPlaylistsResult, IUserPlaylist, IArtist, ITrack, ITopTracksResult, IAlbum, ISearchResult, ISearchType, IBrowseResult, ISpotifyAlbum, IReorderTracksResult } from '../ports/iMediaProt';
-import { ICurrentlyPlayingResult } from '../ports/iRemotePlaybackPort';
 import { ErrorWithStatus } from './errors/errorWithStatus';
 
 const delayWithin = (ms = 800) => new Promise((resolve) => {
@@ -23,13 +22,13 @@ const resultOrError = async <T,>(response: Response): Promise<T> => {
         const result = await response.text();
         const res = JSON.parse(result);
 
-        if (!('error' in res)) {
+        if (!(typeof (res) === 'object' && 'error' in res)) {
             throw new ErrorWithStatus(result, response.status, response.statusText);
         }
 
         const error = res.error;
-        if (!('message' in error)) {
-            throw new ErrorWithStatus(res.error, response.status, response.statusText);
+        if (!(typeof (error) === 'object' && 'message' in error)) {
+            throw new ErrorWithStatus(error, response.status, response.statusText);
         }
 
         throw new ErrorWithStatus(error.message, response.status, response.statusText, res);
@@ -90,19 +89,6 @@ export class SpotifyMediaAdapter implements IMediaPort {
         const result = await resultOrError<IUserInfo>(response);
 
         return result;
-    }
-
-    async recentlyPlayed(before = new Date() as Date | number, limit = 20): Promise<IResponseResult<ISpotifySong>> {
-        before = +before;
-        const response = await this.fetch(`${baseUrl}/v1/me/player/recently-played?` + toUrlQueryParams({
-            before, limit
-        }), {
-            headers: {
-                'Authorization': 'Bearer ' + this.token
-            }
-        });
-
-        return await resultOrError<IResponseResult<ISpotifySong>>(response);
     }
 
     async recommendations(

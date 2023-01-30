@@ -1,5 +1,6 @@
 import { SpotifyMediaAdapter } from '../spotifyMediaAdapter';
 import each from 'jest-each';
+import { ErrorWithStatus } from '../errors/errorWithStatus';
 
 describe('Spotify Media Adapter', () => {
     let spotifyMediaAdapter: SpotifyMediaAdapter;
@@ -13,31 +14,86 @@ describe('Spotify Media Adapter', () => {
         spotifyMediaAdapter = new SpotifyMediaAdapter(token);
     });
 
-    it('should request me', () => {
+    it('should throw error with status 401 The access token expired message', async () => {
+        const errorWithMessage = {
+            error: {
+                message: 'The access token expired',
+            },
+        };
+        try {
+            jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
+                status: 401,
+                text: jest.fn().mockImplementation(() => Promise.resolve(JSON.stringify(errorWithMessage))),
+            } as any));
+
+            await spotifyMediaAdapter.me();
+        } catch (ex) {
+            expect(ex).toEqual(new ErrorWithStatus('The access token expired', 401, '401 error', ex));
+        }
+    });
+
+    it('should throw error with status 503 Service unavailable message', async () => {
+        const errorWithMessage = {
+            error: {
+                message: 'Service unavailable',
+            },
+        };
+        try {
+            jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
+                status: 503,
+                text: jest.fn().mockImplementation(() => Promise.resolve(JSON.stringify(errorWithMessage))),
+            } as any));
+
+            await spotifyMediaAdapter.me();
+        } catch (ex) {
+            expect(ex).toEqual(new ErrorWithStatus('Service unavailable', 503, '503 error', ex));
+        }
+    });
+
+    it('should throw some error', async () => {
+        const errorWithMessage = {
+            error: 'Some error',
+        };
+        try {
+            jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
+                status: 400,
+                text: jest.fn().mockImplementation(() => Promise.resolve(JSON.stringify(errorWithMessage))),
+            } as any));
+
+            await spotifyMediaAdapter.me();
+        } catch (ex) {
+            expect(ex).toEqual(new ErrorWithStatus('Some error', 400, '400 error', ex));
+        }
+    });
+
+    it('should throw unexpected error', async () => {
+        const errorWithMessage = '{}';
+        try {
+            jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
+                status: 400,
+                text: jest.fn().mockImplementation(() => Promise.resolve(errorWithMessage)),
+            } as any));
+
+            await spotifyMediaAdapter.me();
+        } catch (ex) {
+            expect(ex).toEqual(new ErrorWithStatus('{}', 400, '400 error', ex));
+        }
+    });
+
+    it('should request me', async () => {
+        const displayName = 'test-name';
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve({ display_name: displayName })),
         } as any));
 
-        spotifyMediaAdapter.me();
+        const result = await spotifyMediaAdapter.me();
 
         expect(spotifyMediaAdapter.fetch).toHaveBeenCalledWith(`${urlDomain}/v1/me`, {
             headers
         });
-    });
-
-    it('should request recently played', () => {
-        const before = +Date();
-        const limit = 15;
-        jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
-            status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
-        } as any));
-
-        spotifyMediaAdapter.recentlyPlayed(before, limit);
-
-        expect(spotifyMediaAdapter.fetch).toHaveBeenCalledWith(`${urlDomain}/v1/me/player/recently-played?before=${before}&limit=${limit}`, {
-            headers
+        expect(result).toEqual({
+            display_name: displayName
         });
     });
 
@@ -45,7 +101,7 @@ describe('Spotify Media Adapter', () => {
 
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.recommendations('test', 'test2', 'test3');
@@ -59,7 +115,7 @@ describe('Spotify Media Adapter', () => {
         const userId = 'user-id-123';
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.userPlaylists(userId);
@@ -81,7 +137,7 @@ describe('Spotify Media Adapter', () => {
         };
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.createNewPlaylist(userId, name, description, true);
@@ -101,7 +157,7 @@ describe('Spotify Media Adapter', () => {
         const limit = 14;
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.myPlaylists(offset, limit);
@@ -124,7 +180,7 @@ describe('Spotify Media Adapter', () => {
         };
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.addTrackToPlaylist(trackId, playlistId);
@@ -150,7 +206,7 @@ describe('Spotify Media Adapter', () => {
         };
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.removeTrackFromPlaylist(trackId, playlistId);
@@ -169,7 +225,7 @@ describe('Spotify Media Adapter', () => {
         const playlistId = 'playlist-id-123';
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.getPlaylistDetails(playlistId);
@@ -185,7 +241,7 @@ describe('Spotify Media Adapter', () => {
         const limit = 14;
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.listPlaylistTracks(playlistId, offset, limit);
@@ -200,7 +256,7 @@ describe('Spotify Media Adapter', () => {
         const limit = 14;
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.myTopArtists(offset, limit);
@@ -215,7 +271,7 @@ describe('Spotify Media Adapter', () => {
         const limit = 14;
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.myTopTracks(offset, limit);
@@ -232,7 +288,7 @@ describe('Spotify Media Adapter', () => {
         const limit = 14;
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.listArtistTopTracks(artistId, country, offset, limit);
@@ -248,7 +304,7 @@ describe('Spotify Media Adapter', () => {
         const limit = 14;
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.listAlbumTracks(albumId, offset, limit);
@@ -262,7 +318,7 @@ describe('Spotify Media Adapter', () => {
         const albumId = 'album-id-123';
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.getAlbumDetails(albumId);
@@ -277,7 +333,7 @@ describe('Spotify Media Adapter', () => {
         const limit = 14;
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.newReleases(offset, limit);
@@ -298,7 +354,7 @@ describe('Spotify Media Adapter', () => {
         const limit = 14;
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.featuredPlaylists(offset, limit, country, locale, timestamp);
@@ -319,7 +375,7 @@ describe('Spotify Media Adapter', () => {
         const limit = 14;
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.categories(offset, limit, country, locale, timestamp);
@@ -337,7 +393,7 @@ describe('Spotify Media Adapter', () => {
         const expectedTerm = '%7Bterm%7D';
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.search(searchType, term, offset, limit);
@@ -352,7 +408,7 @@ describe('Spotify Media Adapter', () => {
         const limit = 14;
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.tracks(offset, limit);
@@ -367,7 +423,7 @@ describe('Spotify Media Adapter', () => {
         const limit = 14;
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.albums(offset, limit);
@@ -385,7 +441,7 @@ describe('Spotify Media Adapter', () => {
         const body = {};
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.addTracks(trackIds);
@@ -403,12 +459,12 @@ describe('Spotify Media Adapter', () => {
     each([
         ['track-id-123', 'track-id-123'],
         ['track-id-123%2Ctrack-id-4343', ['track-id-123', 'track-id-4343']],
-    ]).it('should request add track', (expected, trackIds) => {
+    ]).it('should request remove track', (expected, trackIds) => {
         const method = 'DELETE';
         const body = {};
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
-            text: () => jest.fn().mockImplementation(() => Promise.resolve('{}')),
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
         spotifyMediaAdapter.removeTracks(trackIds);
@@ -423,4 +479,109 @@ describe('Spotify Media Adapter', () => {
         });
     });
 
+    each([
+        ['track-id-123', 'track-id-123'],
+        ['track-id-123%2Ctrack-id-4343', ['track-id-123', 'track-id-4343']],
+    ]).it('should request has tracks', (expected, trackIds) => {
+        jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
+            status: 200,
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
+        } as any));
+
+        spotifyMediaAdapter.hasTracks(trackIds);
+
+        expect(spotifyMediaAdapter.fetch).toHaveBeenCalledWith(`${urlDomain}/v1/me/tracks/contains?ids=${expected}`, {
+            headers,
+        });
+    });
+
+    each([
+        ['album-id-123', 'album-id-123'],
+        ['album-id-123%2Calbum-id-4343', ['album-id-123', 'album-id-4343']],
+    ]).it('should request add albums', (expected, albumIds) => {
+        const method = 'PUT';
+        const body = {};
+        jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
+            status: 200,
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
+        } as any));
+
+        spotifyMediaAdapter.addAlbums(albumIds);
+
+        expect(spotifyMediaAdapter.fetch).toHaveBeenCalledWith(`${urlDomain}/v1/me/albums?ids=${expected}`, {
+            method,
+            headers: {
+                ...headers,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+    });
+
+    each([
+        ['album-id-123', 'album-id-123'],
+        ['album-id-123%2Calbum-id-4343', ['album-id-123', 'album-id-4343']],
+    ]).it('should request remove album', (expected, albumIds) => {
+        const method = 'DELETE';
+        const body = {};
+        jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
+            status: 200,
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
+        } as any));
+
+        spotifyMediaAdapter.removeAlbums(albumIds);
+
+        expect(spotifyMediaAdapter.fetch).toHaveBeenCalledWith(`${urlDomain}/v1/me/albums?ids=${expected}`, {
+            method,
+            headers: {
+                ...headers,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+    });
+
+    each([
+        ['album-id-123', 'album-id-123'],
+        ['album-id-123%2Calbum-id-4343', ['album-id-123', 'album-id-4343']],
+    ]).it('should request has album', async (expected, albumIds) => {
+        jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
+            status: 200,
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
+        } as any));
+
+        await spotifyMediaAdapter.hasAlbums(albumIds);
+
+        expect(spotifyMediaAdapter.fetch).toHaveBeenCalledWith(`${urlDomain}/v1/me/albums/contains?ids=${expected}`, {
+            headers,
+        });
+    });
+
+    it('should request reorder tracks', () => {
+        const method = 'PUT';
+        const playlistId = 'playlist-id-123';
+        const rangeStart = 2;
+        const insertBefore = 5;
+        const rangeLength = 1;
+        const body = {
+            range_start: rangeStart,
+            insert_before: insertBefore,
+            range_length: rangeLength
+        };
+        jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
+            status: 200,
+            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
+        } as any));
+
+        spotifyMediaAdapter.reorderTracks(playlistId, rangeStart, insertBefore, rangeLength);
+
+        expect(spotifyMediaAdapter.fetch).toHaveBeenCalledWith(`${urlDomain}/v1/playlists/${playlistId}/tracks`, {
+            method,
+            headers: {
+                ...headers,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+    });
 });

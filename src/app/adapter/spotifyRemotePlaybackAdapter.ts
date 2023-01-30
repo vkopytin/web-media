@@ -23,13 +23,13 @@ const resultOrError = async <T,>(response: Response): Promise<T> => {
         const result = await response.text();
         const res = JSON.parse(result);
 
-        if (!('error' in res)) {
+        if (!(typeof (res) === 'object' && 'error' in res)) {
             throw new ErrorWithStatus(result, response.status, response.statusText);
         }
 
         const error = res.error;
-        if (!('message' in error)) {
-            throw new ErrorWithStatus(res.error, response.status, response.statusText);
+        if (!(typeof (error) === 'object' && 'message' in error)) {
+            throw new ErrorWithStatus(error, response.status, response.statusText);
         }
 
         throw new ErrorWithStatus(error.message, response.status, response.statusText, res);
@@ -242,10 +242,8 @@ export class SpotifyRemotePlaybackAdapter implements IRemotePlaybackPort {
 
     async queue(): Promise<IPLayerQueueResult> {
         const response = await this.fetch(`${baseUrl}/v1/me/player/queue`, {
-            method: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + this.token,
-                'Content-Type': 'application/json',
             },
         });
 

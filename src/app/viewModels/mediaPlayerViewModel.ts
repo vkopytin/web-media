@@ -86,7 +86,10 @@ class MediaPlayerViewModel {
         const [artist] = state.track_window.current_track?.artists || [];
         this.currentTrack = state.track_window.current_track as ITrack | null;
         this.currentTrackUri = state.track_window.current_track?.uri || '';
-        this.currentTrackId = state.track_window.current_track?.id || '';
+        if (this.currentTrackId !== this.currentTrack?.id) {
+            this.currentTrackId = state.track_window.current_track?.id || '';
+            this.checkTrackExists();
+        }
         this.trackName = state.track_window.current_track?.name || '';
         this.albumName = state.track_window.current_track?.album.name || '';
         this.thumbnailUrl = _.first(state.track_window.current_track?.album?.images || [])?.url || '';
@@ -95,7 +98,6 @@ class MediaPlayerViewModel {
         this.isPlaying = !state.paused;
         this.artistName = artist?.name || '';
         this.autoSeek();
-        this.checkTrackExists();
 
         const settingsResult = await this.settingsSerivce.get('spotify');
         await settingsResult.map(settings => settings?.volume || this.volume)
@@ -128,7 +130,10 @@ class MediaPlayerViewModel {
                 const [artist] = currentlyPlaying.item.artists;
                 this.currentTrack = currentlyPlaying.item;
                 this.currentTrackUri = currentlyPlaying.item.uri;
-                this.currentTrackId = currentlyPlaying.item.id;
+                if (this.currentTrackId !== currentlyPlaying.item.id) {
+                    this.currentTrackId = currentlyPlaying.item.id;
+                    this.checkTrackExists();
+                }
                 this.duration = currentlyPlaying.item.duration_ms || 0;
                 this.trackName = currentlyPlaying.item.name;
                 this.albumName = currentlyPlaying.item.album.name;
@@ -138,7 +143,6 @@ class MediaPlayerViewModel {
                 this.artistName = artist.name;
                 this.thumbnailUrl = _.first(currentlyPlaying.item.album.images)?.url || '';
                 this.autoSeek();
-                this.checkTrackExists();
             } else {
                 this.isPlaying = currentlyPlaying?.is_playing || false;
             }
