@@ -2,6 +2,9 @@
   "name": "media-player",
   "version": "1.0.0",
   "description": "Web Media Player",
+  "engines": {
+    "node": "18.x"
+  },
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
