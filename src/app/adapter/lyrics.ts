@@ -1,7 +1,3 @@
-import $ from 'jquery';
-import { ErrorWithStatus } from './errors/errorWithStatus';
-
-
 export interface ILyricsSearchResult {
     result: {
         track: {

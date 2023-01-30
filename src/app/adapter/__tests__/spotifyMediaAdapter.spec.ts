@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { SpotifyMediaAdapter } from '../spotifyMediaAdapter';
 import each from 'jest-each';
 import { ErrorWithStatus } from '../errors/errorWithStatus';

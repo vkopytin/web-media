@@ -5,7 +5,6 @@ import { LyricsService } from '../service/lyricsService';
 import { MediaService } from '../service/mediaService';
 import { PlaylistsService } from '../service/playlistsService';
 import { Binding, isLoading, State } from '../utils';
-import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';

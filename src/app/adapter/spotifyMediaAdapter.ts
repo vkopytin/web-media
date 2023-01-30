@@ -1,4 +1,4 @@
-import { IMediaPort, IUserInfo, IResponseResult, ISpotifySong, IRecommendationsResult, IUserPlaylistsResult, IUserPlaylist, IArtist, ITrack, ITopTracksResult, IAlbum, ISearchResult, ISearchType, IBrowseResult, ISpotifyAlbum, IReorderTracksResult } from '../ports/iMediaProt';
+import { IMediaPort, IUserInfo, IResponseResult, ISpotifySong, IRecommendationsResult, IUserPlaylistsResult, IUserPlaylist, IArtist, ITrack, IAlbum, ISearchResult, ISearchType, IBrowseResult, ISpotifyAlbum, IReorderTracksResult } from '../ports/iMediaProt';
 import { ErrorWithStatus } from './errors/errorWithStatus';
 
 const delayWithin = (ms = 800) => new Promise((resolve) => {

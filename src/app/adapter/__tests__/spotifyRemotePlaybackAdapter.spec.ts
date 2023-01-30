@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import each from 'jest-each';
 import { ErrorWithStatus } from '../errors/errorWithStatus';
 import { SpotifyRemotePlaybackAdapter } from '../spotifyRemotePlaybackAdapter';

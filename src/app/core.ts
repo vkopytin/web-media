@@ -26,7 +26,7 @@ export class Core {
     settingsService = inject(SettingsService, SettingsService.makeDefaultSettings());
     lyricsAdapter = inject(LyricsAdapter, this.settingsService.get('spotify').map(({ accessToken: key }) => key).match(r => r, () => ''));
     spotifyMediaAdapter = inject(SpotifyMediaAdapter, this.settingsService.get('spotify').map(({ accessToken: key }) => key).match(r => r, () => ''));
-    spotifyPlaybackAdapter = inject(SpotifyPlaybackAdapter, typeof window === 'object' ? window : {} as any, typeof document === 'object' ? document : {} as any);
+    spotifyPlaybackAdapter = inject(SpotifyPlaybackAdapter, typeof window === 'object' ? window : {}, typeof document === 'object' ? document : {});
     spotifyRemotePlaybackAdapter = inject(SpotifyRemotePlaybackAdapter, this.settingsService.get('spotify').map(({ accessToken: key }) => key).match(r => r, () => ''));
     playlistsService = inject(PlaylistsService, this.spotifyMediaAdapter);
     lyricsService = inject(LyricsService, this.lyricsAdapter);

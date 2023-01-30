@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { SpotifyPlaybackAdapter } from '../spotifyPlaybackAdapter';
 
 describe('Spotify Playback Adapter', () => {
