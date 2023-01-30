@@ -1,23 +1,12 @@
-export interface ILyricsSearchResult {
-    result: {
-        track: {
-            text: string;
-        };
-        copyright: {
-            notice: string;
-            articst: string;
-            text: string;
-        }
-    };
-}
+import { ILyricsPort, ILyricsSearchResult } from '../ports/iLyricsPort';
 
-class LyricsAdapter {
+export class LyricsAdapter implements ILyricsPort {
 
     constructor(public apiKey: string) {
         this.apiKey = '9817ade5593e14c49ce4d97d362bc242';
     }
 
-    async search({ artist, song }: { artist: string; song: string; }) {
+    async search({ artist, song }: { artist: string; song: string; }): Promise<ILyricsSearchResult> {
         const encodedArtist = encodeURIComponent(artist);
         const encodedSong = encodeURIComponent(song);
         const request = await fetch(`//api.musixmatch.com/ws/1.1/matcher.lyrics.get?q_artist=${encodedArtist}&q_track=${encodedSong}&format=json&apikey=${this.apiKey}`, {
@@ -40,5 +29,3 @@ class LyricsAdapter {
         };
     }
 }
-
-export { LyricsAdapter };

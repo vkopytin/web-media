@@ -1,20 +1,18 @@
 /* eslint-disable */
 
+import { SpotifyMediaAdapter, SpotifyPlaybackAdapter, SpotifyRemotePlaybackAdapter } from '../../adapter';
 import { DataStorage } from '../../data/dataStorage';
 import { AppService } from '../../service';
-import { MediaPlayerViewModel } from '../mediaPlayerViewModel';
+import { DataService } from '../../service/dataService';
+import { DataSyncService } from '../../service/dataSyncService';
+import { LoginService } from '../../service/loginService';
 import { MediaService } from '../../service/mediaService';
 import { PlaybackService } from '../../service/playbackService';
-import { SettingsService } from '../../service/settings';
-import { DataSyncService } from '../../service/dataSyncService';
-import { DataService } from '../../service/dataService';
-import { AppViewModel } from '../appViewModel';
-import { Option } from '../../utils/option';
-import { LoginService } from '../../service/loginService';
 import { RemotePlaybackService } from '../../service/remotePlaybackService';
-import { SpotifyMediaAdapter } from '../../adapter/spotifyMediaAdapter';
-import { SpotifyRemotePlaybackAdapter } from '../../adapter/spotifyRemotePlaybackAdapter';
-import { SpotifyPlaybackAdapter } from '../../adapter/spotifyPlaybackAdapter';
+import { SettingsService } from '../../service/settings';
+import { Option } from '../../utils/option';
+import { AppViewModel } from '../appViewModel';
+import { MediaPlayerViewModel } from '../mediaPlayerViewModel';
 
 jest.mock('../../adapter/spotifyMediaAdapter', () => {
     return {

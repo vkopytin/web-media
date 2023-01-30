@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import { SpotifyMediaAdapter } from '../../adapter/spotifyMediaAdapter';
+import { SpotifyMediaAdapter } from '../../adapter';
 import { IUserPlaylist, IUserPlaylistsResult } from '../../ports/iMediaProt';
 import { PlaylistsService } from '../playlistsService';
 

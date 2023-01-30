@@ -1,12 +1,21 @@
-import { LyricsAdapter } from './adapter/lyrics';
-import { AppService } from './service';
-import { DataService } from './service/dataService';
-import { LoginService } from './service/loginService';
-import { LyricsService } from './service/lyricsService';
-import { SettingsService } from './service/settings';
-import { MediaService } from './service/mediaService';
-import { PlaybackService } from './service/playbackService';
-import { DataSyncService } from './service/dataSyncService';
+import {
+    LyricsAdapter,
+    SpotifyMediaAdapter,
+    SpotifyPlaybackAdapter,
+    SpotifyRemotePlaybackAdapter
+} from './adapter';
+import {
+    AppService,
+    DataService,
+    DataSyncService,
+    LoginService,
+    LyricsService,
+    MediaService,
+    PlaybackService,
+    PlaylistsService,
+    RemotePlaybackService,
+    SettingsService
+} from './service';
 import { inject } from './utils/inject';
 import { AppViewModel } from './viewModels/appViewModel';
 import { HomeViewModel } from './viewModels/homeViewModel';
@@ -16,11 +25,6 @@ import { NewReleasesViewModel } from './viewModels/newReleasesViewModel';
 import { PlaylistsViewModel } from './viewModels/playlistsViewModel';
 import { SearchViewModel } from './viewModels/searchViewModel';
 import { UserProfileViewModel } from './viewModels/userProfileViewModel';
-import { RemotePlaybackService } from './service/remotePlaybackService';
-import { SpotifyMediaAdapter } from './adapter/spotifyMediaAdapter';
-import { SpotifyRemotePlaybackAdapter } from './adapter/spotifyRemotePlaybackAdapter';
-import { SpotifyPlaybackAdapter } from './adapter/spotifyPlaybackAdapter';
-import { PlaylistsService } from './service/playlistsService';
 
 export class Core {
     settingsService = inject(SettingsService, SettingsService.makeDefaultSettings());

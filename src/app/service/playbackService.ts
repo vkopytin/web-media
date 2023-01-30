@@ -1,6 +1,6 @@
-import { SpotifyPlaybackAdapter } from '../adapter/spotifyPlaybackAdapter';
+import { SpotifyPlaybackAdapter } from '../adapter';
 import { Events } from '../events';
-import { IWebPlaybackError, IWebPlaybackPlayer, IWebPlaybackState, SDKPlayer } from '../ports/iPlaybackPort';
+import { IPlaybackPort, IWebPlaybackError, IWebPlaybackPlayer, IWebPlaybackState, SDKPlayer } from '../ports/iPlaybackPort';
 import { Option } from '../utils/option';
 import { Result } from '../utils/result';
 import { SettingsService } from './settings';
@@ -39,12 +39,12 @@ export class PlaybackService extends Events {
         this.trigger('notReady', player);
     }
 
-    constructor(private spotifyPlaybackAdapter: SpotifyPlaybackAdapter, private settingsService: SettingsService) {
+    constructor(private spotifyPlaybackAdapter: IPlaybackPort, private settingsService: SettingsService) {
         super();
     }
 
     async init(): Promise<void> {
-        const getOAuthToken = async (cb: (t: string) => void) => {
+        const getOAuthToken = (cb: (t: string) => void) => {
             this.settingsService.get('spotify').map(spotifySettings => {
                 console.log('[Spotify SDK] *** Requesting OAuth Token ***');
                 const token = spotifySettings?.accessToken || '';

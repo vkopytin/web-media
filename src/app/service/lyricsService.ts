@@ -1,6 +1,6 @@
 import { ErrorWithStatus } from '../adapter/errors/errorWithStatus';
-import { LyricsAdapter } from '../adapter/lyrics';
 import { Events } from '../events';
+import { ILyricsPort } from '../ports/iLyricsPort';
 import { Result } from '../utils/result';
 import { LyricsServiceError } from './errors/lyricsServiceError';
 import { LyricsServiceUnexpectedError } from './errors/lyricsServiceUnexpectedError';
@@ -17,7 +17,7 @@ function returnErrorResult<T>(message: string, ex: Error): Result<Error, T> {
 }
 
 class LyricsService extends Events {
-    constructor(public adapter: LyricsAdapter) {
+    constructor(public adapter: ILyricsPort) {
         super();
     }
 

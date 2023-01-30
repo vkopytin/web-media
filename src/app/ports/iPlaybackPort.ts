@@ -94,5 +94,5 @@ export type SDKPlayer = {
 }
 
 export interface IPlaybackPort {
-    createPlayer(getOAuthToken: () => void): Promise<SDKPlayer>;
+    createPlayer(getOAuthToken: (cb: (t: string) => void) => void): Promise<SDKPlayer>;
 }
