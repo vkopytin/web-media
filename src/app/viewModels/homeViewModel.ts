@@ -5,7 +5,7 @@ import { DataService } from '../service/dataService';
 import { LyricsService } from '../service/lyricsService';
 import { MediaService } from '../service/mediaService';
 import { PlaybackService } from '../service/playbackService';
-import { isLoading, State } from '../utils';
+import { Binding, isLoading, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
@@ -14,12 +14,9 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 class HomeViewModel {
     @State errors: Result[] = [];
-    @State tracks: TrackViewModelItem[] = [];
-    @State likedTracks: TrackViewModelItem[] = [];
     @State isLoading = false;
     @State selectedTrack: TrackViewModelItem | null = null;
     @State trackLyrics: { trackId: string; lyrics: string } | null = null;
-    @State selectedPlaylist: PlaylistsViewModelItem | null = null;
     @State bannedTrackIds: string[] = [];
 
     @State refreshCommand = Scheduler.Command((trackId: string) => this.fetchData(trackId));
@@ -30,6 +27,13 @@ class HomeViewModel {
     @State bannTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.bannTrack(track));
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
     @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem | null) => this.selectPlaylist(playlist));
+
+    @Binding((vm: HomeViewModel) => vm.suggestions, 'tracks')
+    tracks: TrackViewModelItem[] = [];
+    @Binding((vm: HomeViewModel) => vm.suggestions, 'selectedPlaylist')
+    selectedPlaylist: PlaylistsViewModelItem | null = null;
+    @Binding((vm: HomeViewModel) => vm.suggestions, 'likedTracks')
+    likedTracks: TrackViewModelItem[] = [];
 
     constructor(
         private data: DataService,
@@ -52,35 +56,9 @@ class HomeViewModel {
 
     @isLoading
     async fetchData(trackId?: string): Promise<void> {
-        const artistIds = [] as string[];
-        let trackIds = trackId ? [trackId] : [];
+        await this.suggestions.fetchData(trackId);
 
-        if (!trackIds.length) {
-            const tracksResult = this.selectedPlaylist ? await this.media.fetchPlaylistTracks(this.selectedPlaylist.id(), 0, 20)
-                : await this.media.fetchTracks(0, 20);
-
-            const res = tracksResult.map(tracks => {
-                trackIds = _.first(_.uniq(_.map(tracks.items, (song) => song.track.id)), 5);
-            });
-            res.error(() => this.errors = [res]);
-        }
-
-        if (!trackIds.length) {
-            const topTracksResult = await this.media.listTopTracks();
-
-            const res = topTracksResult.map(topTracks => {
-                trackIds = _.first(_.uniq(_.map(topTracks.items, (song) => song.id)), 5);
-            });
-            res.error(() => this.errors = [res]);
-        }
-        const recomendationsResult = await this.media.fetchRecommendations('US', artistIds, trackIds);
-
-        const res = recomendationsResult.map(recomendations => {
-            const newTracks = _.map(recomendations.tracks, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
-            this.tracks = newTracks;
-            this.checkTracks(newTracks);
-        });
-        res.error(() => this.errors = [res]);
+        this.checkBannedTracks();
     }
 
     async loadData(...args: unknown[]): Promise<void> {
@@ -89,18 +67,7 @@ class HomeViewModel {
         }
     }
 
-    async checkTracks(tracks: TrackViewModelItem[]): Promise<void> {
-        if (!tracks.length) {
-            return;
-        }
-        const tracksToCheck = tracks;
-        const likedResult = await this.media.hasTracks(_.map(tracksToCheck, t => t.id()));
-        const res1 = likedResult.map(liked => _.each(liked, (liked, index) => {
-            tracksToCheck[index].isLiked = liked;
-            this.likedTracks = _.filter(this.tracks, track => track.isLiked);
-        }));
-        res1.error(() => this.errors = [res1]);
-
+    async checkBannedTracks(): Promise<void> {
         const bannedTrackIdsResult = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
         const res2 = bannedTrackIdsResult.map(r => this.bannedTrackIds = r);
         res2.error(() => this.errors = [res2]);
@@ -121,16 +88,18 @@ class HomeViewModel {
 
     async likeTrack(track: TrackViewModelItem): Promise<void> {
         const res = await track.likeTrack();
-        res.map(() => {
-            this.checkTracks([track]);
-        }).error((e) => this.errors = [Result.error(e)]);
+        await res.map(async () => {
+            this.suggestions.checkTracks([track]);
+            await this.checkBannedTracks();
+        }).error((e) => this.errors = [Result.error(e)]).await();
     }
 
     async unlikeTrack(track: TrackViewModelItem): Promise<void> {
         const res = await track.unlikeTrack();
-        res.map(() => {
-            this.checkTracks([track]);
-        }).error(e => this.errors = [Result.error(e)]);
+        await res.map(async () => {
+            await this.suggestions.checkTracks([track]);
+            await this.checkBannedTracks();
+        }).error(e => this.errors = [Result.error(e)]).await();
     }
 
     async findTrackLyrics(track: TrackViewModelItem): Promise<void> {

@@ -99,16 +99,20 @@ describe('Spotify Media Adapter', () => {
         });
     });
 
-    it('should request recommendations', () => {
+    each([
+        ['seed_artists=test-123', 'test-123', undefined],
+        ['seed_tracks=test-123', undefined, 'test-123'],
+        ['seed_artists=test-123&seed_tracks=test-456', 'test-123', 'test-456'],
+    ]).it('should request recommendations', (expected, seedArtists, seedTracks) => {
 
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
             status: 200,
             text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
         } as any));
 
-        spotifyMediaAdapter.recommendations('test', 'test2', 'test3');
+        spotifyMediaAdapter.recommendations('test', seedArtists, seedTracks);
 
-        expect(spotifyMediaAdapter.fetch).toHaveBeenCalledWith(`${urlDomain}/v1/recommendations?market=test&seed_artists=test2&seed_tracks=test3&min_energy=0.4&min_popularity=50&limit=0`, {
+        expect(spotifyMediaAdapter.fetch).toHaveBeenCalledWith(`${urlDomain}/v1/recommendations?market=test&${expected}&min_energy=0.4&min_popularity=50&limit=20`, {
             headers
         });
     });

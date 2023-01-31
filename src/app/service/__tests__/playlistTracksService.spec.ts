@@ -135,7 +135,7 @@ describe('Playlist Tracks Service', () => {
 function makePlaylistTracksResult(offset = 0, limit = 20, total = 45): IResponseResult<ISpotifySong> {
     const res: ISpotifySong[] = [];
     for (let i = offset; i < Math.min(offset + limit, total); i++) {
-        res.push(makePlaylistRowItem(('000' + i).substring(-2)))
+        res.push(makePlaylistRowItem(('000' + i).substring(2)))
     }
 
     return {

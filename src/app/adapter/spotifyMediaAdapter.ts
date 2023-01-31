@@ -94,12 +94,14 @@ export class SpotifyMediaAdapter implements IMediaPort {
     async recommendations(
         market: string,
         seedArtists: string | string[], seedTracks: string | string[],
-        minEnergy = 0.4, minPopularity = 50, limit = 0
+        minEnergy = 0.4, minPopularity = 50, limit = 20
     ): Promise<IRecommendationsResult> {
+        const seedArtistsArg = ([] as string[]).concat(seedArtists || []).join(',');
+        const seedTracksArg = ([] as string[]).concat(seedTracks || []).join(',');
         const response = await this.fetch(`${baseUrl}/v1/recommendations?` + toUrlQueryParams({
             market,
-            seed_artists: ([] as string[]).concat(seedArtists).join(','),
-            seed_tracks: ([] as string[]).concat(seedTracks).join(','),
+            ...seedArtistsArg.length ? { seed_artists: seedArtistsArg } : {},
+            ...seedTracksArg ? { seed_tracks: seedTracksArg } : {},
             min_energy: minEnergy,
             min_popularity: minPopularity,
             limit

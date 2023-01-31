@@ -46,7 +46,7 @@ describe('Playlists Service', () => {
 function makePlaylistsResult(offset = 0, limit = 20, total = 45): IUserPlaylistsResult {
     const res: IUserPlaylist[] = [];
     for (let i = offset; i < Math.min(offset + limit, total); i++) {
-        res.push(makePlaylistItem(('000' + i).substring(-2)))
+        res.push(makePlaylistItem(('000' + i).substring(2)))
     }
 
     return {

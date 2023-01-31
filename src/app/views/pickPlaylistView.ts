@@ -27,7 +27,7 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
     selectedPlaylist!: PlaylistsViewModelItem | null;
 
     @Binding((a: PickPlaylistsView) => a.playlistsService, 'playlists')
-    playlists!: PlaylistsViewModelItem[];
+    playlists: PlaylistsViewModelItem[] = [];
 
     @Binding((a: PickPlaylistsView) => a.homeVm, 'selectPlaylistCommand')
     selectPlaylistCommand!: ICommand<PlaylistsViewModelItem | null>;
