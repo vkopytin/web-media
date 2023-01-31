@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { SpotifyMediaAdapter } from '../../adapter';
 import { IMediaPort, IResponseResult, ISpotifySong } from '../../ports/iMediaProt';
 import { TrackViewModelItem } from '../../viewModels';

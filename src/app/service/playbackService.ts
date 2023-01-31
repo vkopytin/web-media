@@ -1,4 +1,3 @@
-import { SpotifyPlaybackAdapter } from '../adapter';
 import { Events } from '../events';
 import { IPlaybackPort, IWebPlaybackError, IWebPlaybackPlayer, IWebPlaybackState, SDKPlayer } from '../ports/iPlaybackPort';
 import { Option } from '../utils/option';
