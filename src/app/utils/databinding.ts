@@ -208,21 +208,23 @@ export function Binding<T, R>(path: (a: T) => R, bindableProperty: keyof R, opti
             if (traits[propName] && traits[propName] !== state) {
                 throw new Error(`The binding is alreayd defined on the object with property ${propName}`);
             }
+            traits[propName] = state;
 
             const didSetCb = options?.didSet && ((value: T[keyof T]) => {
                 options?.didSet?.call(this, this, value);
             });
             didSetCb && Notifications.subscribe(state, this, didSetCb);
 
-            traits[propName] = state;
             Object.defineProperty(this, propName, {
                 get() {
-                    return state.get();
+                    const traits: IPropertyInfo<unknown> = Notifications.GetTraits(this);
+                    return traits[propName].get();
                 },
                 set(v) {
-                    const value = state.get();
+                    const traits: IPropertyInfo<unknown> = Notifications.GetTraits(this);
+                    const value = traits[propName].get();
                     if (value !== v) {
-                        state.next(v);
+                        traits[propName].next(v);
                     }
                 },
                 enumerable: true,

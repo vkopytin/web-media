@@ -47,6 +47,7 @@ export class SuggestionsService {
         if (!tracks.length) {
             return;
         }
+        this.likedTracks = this.tracks.filter(track => track.isLiked);
         const tracksToCheck = tracks;
         const liked = await this.media.hasTracks(tracksToCheck.map(t => t.id()));
         liked.forEach((liked, index) => {

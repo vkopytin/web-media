@@ -82,11 +82,12 @@ export class PlaylistTracksService {
     }
 
     private async checkTracks(tracks: TrackViewModelItem[]): Promise<void> {
-        const tracksToCheck = tracks;
-        this.likedTracks = this.tracks.filter(track => track.isLiked);
-        if (!tracksToCheck.length) {
+        if (!tracks.length) {
             return;
         }
+        this.likedTracks = this.tracks.filter(track => track.isLiked);
+
+        const tracksToCheck = tracks;
         const likedList = await this.media.hasTracks(tracksToCheck.map(t => t.id()));
         likedList.forEach((liked, index) => {
             tracksToCheck[index].isLiked = liked;
