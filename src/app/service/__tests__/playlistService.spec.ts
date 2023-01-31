@@ -1,20 +1,20 @@
 /* eslint-disable */
 
 import { SpotifyMediaAdapter } from '../../adapter';
-import { IUserPlaylist, IUserPlaylistsResult } from '../../ports/iMediaProt';
+import { IMediaPort, IUserPlaylist, IUserPlaylistsResult } from '../../ports/iMediaProt';
 import { PlaylistsService } from '../playlistsService';
 
 describe('Playlists Service', () => {
-    let adapter: SpotifyMediaAdapter;
+    let media: IMediaPort;
     let playlistsService: PlaylistsService;
 
     beforeEach(() => {
-        adapter = new SpotifyMediaAdapter('test');
-        playlistsService = new PlaylistsService(adapter);
+        media = new SpotifyMediaAdapter('test');
+        playlistsService = new PlaylistsService(media);
     });
 
     it('should list playlists', async () => {
-        jest.spyOn(adapter, 'myPlaylists').mockImplementation((o, l) => Promise.resolve(makePlaylistsResult(o, l, 15)));
+        jest.spyOn(media, 'myPlaylists').mockImplementation((o, l) => Promise.resolve(makePlaylistsResult(o, l, 15)));
 
         await playlistsService.listPlaylists();
 
@@ -24,7 +24,7 @@ describe('Playlists Service', () => {
 
     it('should load more playlists', async () => {
         playlistsService.limit = 5;
-        jest.spyOn(adapter, 'myPlaylists').mockImplementation((o, l) => Promise.resolve(makePlaylistsResult(o, l, 12)));
+        jest.spyOn(media, 'myPlaylists').mockImplementation((o, l) => Promise.resolve(makePlaylistsResult(o, l, 12)));
 
         await playlistsService.listPlaylists();
 
@@ -46,7 +46,7 @@ describe('Playlists Service', () => {
 function makePlaylistsResult(offset = 0, limit = 20, total = 45): IUserPlaylistsResult {
     const res: IUserPlaylist[] = [];
     for (let i = offset; i < Math.min(offset + limit, total); i++) {
-        res.push(makeTrackItem(('000' + i).substring(-2)))
+        res.push(makePlaylistItem(('000' + i).substring(-2)))
     }
 
     return {
@@ -60,7 +60,7 @@ function makePlaylistsResult(offset = 0, limit = 20, total = 45): IUserPlaylists
     };
 }
 
-function makeTrackItem(id = '01'): IUserPlaylist {
+function makePlaylistItem(id = '01'): IUserPlaylist {
     return {
         id: 'id-' + id,
         description: ['descriptio', id].join(' '),

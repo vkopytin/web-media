@@ -33,7 +33,7 @@ describe('Home View Model', () => {
         media = new MediaService({} as any);
         playback = new PlaybackService({} as any, {} as any);
         login = new LoginService({} as any);
-        homeVm = new HomeViewModel(data, media, playback, {} as any);
+        homeVm = new HomeViewModel(data, media, playback, {} as any, {} as any);
     });
 
     afterAll(() => {

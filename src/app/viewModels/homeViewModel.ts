@@ -1,5 +1,6 @@
 import * as _ from 'underscore';
 import { ISpotifySong } from '../ports/iMediaProt';
+import { SuggestionsService } from '../service';
 import { DataService } from '../service/dataService';
 import { LyricsService } from '../service/lyricsService';
 import { MediaService } from '../service/mediaService';
@@ -34,7 +35,8 @@ class HomeViewModel {
         private data: DataService,
         private media: MediaService,
         private playback: PlaybackService,
-        private lyrics: LyricsService
+        private lyrics: LyricsService,
+        private suggestions: SuggestionsService,
     ) {
 
     }

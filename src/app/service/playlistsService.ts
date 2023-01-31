@@ -9,12 +9,8 @@ export class PlaylistsService {
     total = 0;
     @State playlists: PlaylistsViewModelItem[] = [];
 
-    constructor(public mediaPort: IMediaPort) {
+    constructor(private mediaPort: IMediaPort) {
 
-    }
-
-    async init() {
-        await this.listPlaylists();
     }
 
     async listPlaylists() {

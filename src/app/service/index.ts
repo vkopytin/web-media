@@ -9,3 +9,4 @@ export { PlaylistsService } from './playlistsService';
 export { PlaylistTracksService } from './playlistTracksService';
 export { RemotePlaybackService } from './remotePlaybackService';
 export { SettingsService } from './settings';
+export { SuggestionsService } from './suggestionsService';

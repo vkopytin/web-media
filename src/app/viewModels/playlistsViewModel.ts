@@ -1,9 +1,4 @@
-import * as _ from 'underscore';
-import { AppService } from '../service';
-import { DataService } from '../service/dataService';
-import { LyricsService } from '../service/lyricsService';
-import { MediaService } from '../service/mediaService';
-import { PlaylistsService } from '../service/playlistsService';
+import { AppService, DataService, LyricsService, MediaService, PlaylistsService, PlaylistTracksService } from '../service';
 import { Binding, isLoading, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
@@ -11,25 +6,20 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 class PlaylistsViewModel {
-    settings = this.defaultSettings();
-
     @State errors: Result[] = [];
-    @State tracks: TrackViewModelItem[] = [];
     @State isLoading = false;
-    @State likedTracks: TrackViewModelItem[] = [];
-    @State currentPlaylistId: string | null = null;
     @State newPlaylistName = '';
     @State selectedItem: TrackViewModelItem | null = null;
     @State trackLyrics: { trackId: string; lyrics: string } | null = null;
     @State bannedTrackIds: string[] = [];
 
+    @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
+    @State createPlaylistCommand = Scheduler.Command((isPublic: boolean) => this.createNewPlaylist(isPublic));
     @State selectPlaylistCommand = Scheduler.Command((playlistId: string | null) => {
         this.currentPlaylistId = playlistId;
         this.fetchTracks();
     });
-    @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
     @State loadMoreTracksCommand = Scheduler.Command(() => this.loadMoreTracks());
-    @State createPlaylistCommand = Scheduler.Command((isPublic: boolean) => this.createNewPlaylist(isPublic));
     @State likeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.likeTrack(track));
     @State unlikeTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.unlikeTrack(track));
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
@@ -39,6 +29,12 @@ class PlaylistsViewModel {
 
     @Binding((vm: PlaylistsViewModel) => vm.playlistsService, 'playlists')
     playlists: PlaylistsViewModelItem[] = [];
+    @Binding((vm: PlaylistsViewModel) => vm.playlistTracksService, 'currentPlaylistId')
+    currentPlaylistId: string | null = null;
+    @Binding((vm: PlaylistsViewModel) => vm.playlistTracksService, 'tracks')
+    tracks: TrackViewModelItem[] = [];
+    @Binding((vm: PlaylistsViewModel) => vm.playlistTracksService, 'likedTracks')
+    likedTracks: TrackViewModelItem[] = [];
 
     constructor(
         private data: DataService,
@@ -46,33 +42,13 @@ class PlaylistsViewModel {
         private lyrics: LyricsService,
         private app: AppService,
         private playlistsService: PlaylistsService,
+        private playlistTracksService: PlaylistTracksService,
     ) {
 
     }
 
     async init() {
-        this.settings = this.defaultSettings();
         await this.fetchData();
-    }
-
-    defaultSettings() {
-        return {
-            tracks: [] as TrackViewModelItem[],
-
-            currentPlaylistId: '',
-            playlist: {
-                offset: 0,
-                limit: 20,
-                total: 0
-            },
-            track: {
-                offset: 0,
-                limit: 20,
-                total: 0
-            },
-            isLoading: false,
-            newPlaylistName: '',
-        };
     }
 
     async fetchData(): Promise<void> {
@@ -85,58 +61,13 @@ class PlaylistsViewModel {
     }
 
     async fetchTracks(): Promise<void> {
-        this.settings.track.offset = 0;
-        this.settings.track.total = 0;
-        const currentPlaylistId = this.currentPlaylistId;
-        this.tracks = [];
-        if (currentPlaylistId) {
-            this.loadTracks('playlistTracks');
-            const result = await this.media.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
-            result.map(({ items: tracks }) => {
-                this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
-                this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);
-                this.tracks = _.map(_.first(tracks, this.settings.track.limit), (item, index) => new TrackViewModelItem(item, index));
-                this.checkTracks(this.tracks);
-            }).error(e => this.errors = [Result.error(e)]);
-        }
+        await this.playlistTracksService.listPlaylistTracks();
+        const res = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
+        res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
     }
 
     async loadMoreTracks(): Promise<void> {
-        const currentPlaylistId = this.currentPlaylistId;
-        if (currentPlaylistId) {
-            const result = await this.media.fetchPlaylistTracks(currentPlaylistId, this.settings.track.offset, this.settings.track.limit + 1);
-            result.map(({ items: tracks }) => {
-                this.settings.track.total = this.settings.track.offset + Math.min(this.settings.track.limit + 1, tracks.length);
-                this.settings.track.offset = this.settings.track.offset + Math.min(this.settings.track.limit, tracks.length);
-                const moreTracks = _.map(_.first(tracks, this.settings.track.limit), (item, index) => new TrackViewModelItem(item, index));
-                this.tracks = [
-                    ...this.tracks,
-                    ...moreTracks
-                ];
-                this.checkTracks(moreTracks);
-            }).error(e => this.errors = [Result.error(e)]);
-        }
-    }
-
-    async loadTracks(...args: unknown[]): Promise<void> {
-        if (!~args.indexOf('playlistTracks')) {
-            return;
-        }
-    }
-
-    async checkTracks(tracks: TrackViewModelItem[]): Promise<void> {
-        const tracksToCheck = tracks;
-        this.likedTracks = _.filter(this.tracks, track => track.isLiked);
-        if (!tracksToCheck.length) {
-            return;
-        }
-        const likedResult = await this.media.hasTracks(_.map(tracksToCheck, t => t.id()));
-        likedResult.map(likedList => {
-            _.each(likedList, (liked, index) => {
-                tracksToCheck[index].isLiked = liked;
-            });
-            this.likedTracks = _.filter(this.tracks, track => track.isLiked);
-        }).error(e => this.errors = [Result.error(e)]);
+        await this.playlistTracksService.loadMoreTracks();
         const res = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
         res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
     }
@@ -163,13 +94,11 @@ class PlaylistsViewModel {
     }
 
     async likeTrack(track: TrackViewModelItem): Promise<void> {
-        await track.likeTrack();
-        await this.checkTracks([track]);
+        await this.playlistTracksService.likeTrack(track);
     }
 
     async unlikeTrack(track: TrackViewModelItem): Promise<void> {
-        await track.unlikeTrack();
-        await this.checkTracks([track]);
+        await this.playlistTracksService.unlikeTrack(track);
     }
 
     async findTrackLyrics(track: TrackViewModelItem): Promise<void> {
@@ -181,39 +110,17 @@ class PlaylistsViewModel {
             name: track.name(),
             artist: track.artist()
         });
-        lyricsResult.error(e => {
-            this.trackLyrics = {
-                trackId: track.id(),
-                lyrics: e.message || 'unknown-error'
-            };
-            return;
-        }).map(val => {
-            this.trackLyrics = {
-                trackId: track.id(),
-                lyrics: '' + val
-            };
-        });
+        this.trackLyrics = lyricsResult.match(val => ({
+            trackId: track.id(),
+            lyrics: val
+        }), e => ({
+            trackId: track.id(),
+            lyrics: e.message || 'unknown-error'
+        }));
     }
 
     async reorderTrack(track: TrackViewModelItem, beforeTrack: TrackViewModelItem): Promise<void> {
-        const tracks = this.tracks;
-        const oldPosition = tracks.indexOf(track);
-        const newPosition = tracks.indexOf(beforeTrack);
-        const data = [...tracks];
-        const item = data.splice(oldPosition, 1)[0];
-        data.splice(newPosition, 0, item);
-        this.tracks = data;
-        let res;
-        if (!this.currentPlaylistId) {
-            return;
-        }
-
-        if (oldPosition < newPosition) {
-            res = await this.media.reorderTracks(this.currentPlaylistId, oldPosition, newPosition + 1);
-        } else if (oldPosition > newPosition) {
-            res = await this.media.reorderTracks(this.currentPlaylistId, oldPosition, newPosition);
-        }
-        res?.error(e => this.errors = [Result.error(e)]);
+        await this.playlistTracksService.reorderTrack(track, beforeTrack);
     }
 
     @isLoading
@@ -234,4 +141,3 @@ class PlaylistsViewModel {
 }
 
 export { PlaylistsViewModel };
-

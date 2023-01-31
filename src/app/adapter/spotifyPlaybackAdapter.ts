@@ -1,12 +1,16 @@
 import { IPlaybackPort, SDKPlayer } from '../ports/iPlaybackPort';
 
+interface WindowExt {
+    Spotify?: {
+        Player?: SDKPlayer,
+        inst?: SDKPlayer,
+    };
+    onSpotifyWebPlaybackSDKReady(): void;
+}
+
 declare global {
-    interface Window {
-        Spotify: {
-            Player: SDKPlayer,
-            inst: SDKPlayer,
-        };
-        onSpotifyWebPlaybackSDKReady(): void;
+    interface Window extends WindowExt {
+
     }
 }
 
@@ -14,10 +18,18 @@ export class SpotifyPlaybackAdapter implements IPlaybackPort {
     public player?: SDKPlayer;
 
     constructor(
-        private window: Window = window,
-        private document: Document = document,
+        private window = SpotifyPlaybackAdapter.resolveWindow(),
+        private document: Document = SpotifyPlaybackAdapter.resolveDocument(),
     ) {
 
+    }
+
+    static resolveWindow() {
+        return typeof window === 'object' ? window : {} as Window;
+    }
+
+    static resolveDocument() {
+        return typeof document === 'object' ? document : {} as Document;
     }
 
     createPlayer(getOAuthToken: (cb: (t: string) => void) => void): Promise<SDKPlayer> {
@@ -29,18 +41,23 @@ export class SpotifyPlaybackAdapter implements IPlaybackPort {
 
             const name = process.env.PLAYER_NAME || 'Dev Player for Spotify';
             try {
-                if (this.window.Spotify) {
-                    const Spotify = this.window.Spotify;
-                    const player = this.window.Spotify.inst = new Spotify.Player({
+                if (this.window.Spotify?.Player) {
+                    const SDKPlayer = this.window.Spotify.Player;
+                    const player = this.window.Spotify.inst = new SDKPlayer({
                         name,
                         getOAuthToken: getOAuthToken
                     });
 
                     return resolve(player);
                 }
+
                 this.window.onSpotifyWebPlaybackSDKReady = () => {
-                    const Spotify = this.window.Spotify;
-                    const player = this.window.Spotify.inst = new Spotify.Player({
+                    if (!this.window.Spotify || !this.window.Spotify?.Player) {
+                        reject(new Error('[Spotify SDK] Player library has failed to load'));
+                        return;
+                    }
+                    const SDKPlayer = this.window.Spotify?.Player;
+                    const player = this.window.Spotify.inst = new SDKPlayer({
                         name,
                         getOAuthToken: getOAuthToken
                     });

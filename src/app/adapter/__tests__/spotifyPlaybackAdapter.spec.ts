@@ -8,20 +8,17 @@ describe('Spotify Playback Adapter', () => {
         Spotify?: { Player: Function };
         onSpotifyWebPlaybackSDKReady: Function;
         setTimeout: Function;
-    } = {
-        onSpotifyWebPlaybackSDKReady() {
-
-        },
-        setTimeout: () => { },
     };
-    let theDocument = {
-        createElement: () => ({}),
+    let theDocument: {
+        createElement: () => unknown,
         head: {
-            appendChild() { },
+            appendChild(): void,
         },
     };
 
     beforeEach(() => {
+        theWindow = makeSDKWindow();
+        theDocument = makeDomDocument();
         spotifyPlaybackAdapter = new SpotifyPlaybackAdapter(theWindow as any, theDocument as any);
     });
 
@@ -40,4 +37,35 @@ describe('Spotify Playback Adapter', () => {
         expect(player).toBeDefined();
         expect(player).toBe(samePlayer);
     });
+
+    it('should fail creating SDK player instance with load library error', async () => {
+        try {
+            jest.spyOn(theDocument, 'createElement').mockImplementation(() => {
+                return {};
+            });
+            jest.spyOn(theDocument.head, 'appendChild').mockImplementation(() => theWindow.onSpotifyWebPlaybackSDKReady());
+
+            await spotifyPlaybackAdapter.createPlayer(() => { });
+        } catch (ex) {
+            expect(ex).toEqual(new Error('[Spotify SDK] Player library has failed to load'));
+        }
+    });
 });
+
+function makeSDKWindow() {
+    return {
+        onSpotifyWebPlaybackSDKReady() {
+
+        },
+        setTimeout: () => { },
+    };
+}
+
+function makeDomDocument() {
+    return {
+        createElement: () => ({}),
+        head: {
+            appendChild() { },
+        },
+    };
+}

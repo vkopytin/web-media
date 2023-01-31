@@ -11,8 +11,6 @@ import { MediaPlayerViewModel } from './mediaPlayerViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 class TrackViewModelItem {
-    mediaPlayerViewModel = inject(MediaPlayerViewModel);
-
     @State errors: Result[] = [];
     @State isLoading = false;
     @State isLiked = false;
@@ -34,6 +32,7 @@ class TrackViewModelItem {
         public song: ISpotifySong,
         private index: number,
         private data = inject(DataService),
+        private mediaPlayerViewModel = inject(MediaPlayerViewModel),
         private remotePlayback = inject(RemotePlaybackService),
         private app = inject(AppService)
     ) {
