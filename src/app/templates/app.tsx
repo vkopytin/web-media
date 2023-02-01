@@ -41,7 +41,7 @@ export const template = (view: AppView) => <main>
                     return <li key={index} className="table-view-cell"
                         onClick={() => error.error(e => console.log(e))}
                     >
-                        {'' + error.match(() => '', e => e.message)}
+                        {'' + error.match(() => '', e => e?.message)}
                     </li>
                 })}
             </ul>
