@@ -17,7 +17,7 @@ type PanelType = 'home' | 'playlists' | 'profile' | 'releases' | 'search' | 'tra
 
 class AppViewModel {
     @State errors: Result[] = [];
-    @State openLogin = false;
+    @State openLogin = true;
     @State currentPanel: PanelType = 'home';
     @State devices: DeviceViewModelItem[] = [];
     @State profile: IUserInfo = {};
@@ -52,9 +52,10 @@ class AppViewModel {
 
     async init(): Promise<void> {
         this.attachToWindowMessageEvent();
-        await this.startSync();
         await this.connect();
         await this.fetchData();
+        this.openLogin = false;
+        await this.startSync();
     }
 
     attachToWindowMessageEvent(): void {
@@ -67,7 +68,7 @@ class AppViewModel {
                 case 'accessToken':
                     this.autoRefreshUrl = '';
                     await this.app.refreshToken(value);
-                    this.openLogin = false;
+                    this.openLogin = !value;
                 default:
                     break;
             }
@@ -91,10 +92,11 @@ class AppViewModel {
 
     async connect(): Promise<void> {
         const isLoggedInResult = await this.app.isLoggedIn();
-        this.openLogin = isLoggedInResult.match(
-            r => !r,
+        const isLoggedIn = isLoggedInResult.match(
+            r => r,
             e => (this.errors = [Result.error(e)], false)
         );
+        this.openLogin = !isLoggedIn;
 
         this.playback.on('ready', this.updateDevicesHandler);
         this.playback.on('authenticationError', (error: { message?: string; }) => {

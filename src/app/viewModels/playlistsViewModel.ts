@@ -8,7 +8,6 @@ import { TrackViewModelItem } from './trackViewModelItem';
 class PlaylistsViewModel {
     @State errors: Result[] = [];
     @State isLoading = false;
-    @State newPlaylistName = '';
     @State selectedItem: TrackViewModelItem | null = null;
     @State trackLyrics: { trackId: string; lyrics: string } | null = null;
     @State bannedTrackIds: string[] = [];
@@ -27,6 +26,8 @@ class PlaylistsViewModel {
     @State bannTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.bannTrack(track));
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
 
+    @Binding((vm: PlaylistsViewModel) => vm.playlistsService, 'newPlaylistName')
+    newPlaylistName = '';
     @Binding((vm: PlaylistsViewModel) => vm.playlistsService, 'playlists')
     playlists: PlaylistsViewModelItem[] = [];
     @Binding((vm: PlaylistsViewModel) => vm.playlistTracksService, 'currentPlaylistId')
@@ -76,21 +77,8 @@ class PlaylistsViewModel {
         if (!this.newPlaylistName) {
             return;
         }
-        const meResult = await this.media.profile();
-        const meId = meResult.cata(me => {
-            if (me.id) {
-                return Result.of(me.id);
-            }
-            return Result.error<Error, string>(new Error('My profile Id is empty'));
-        });
-        const createResult = await meId.cata(id => this.app.createNewPlaylist(
-            id,
-            this.newPlaylistName,
-            '',
-            isPublic
-        ));
-        const fetchDataResult = await createResult.map(() => this.fetchData()).await();
-        fetchDataResult.error(e => this.errors = [Result.error(e)]);
+        await this.playlistsService.createNewPlaylist(isPublic);
+        this.newPlaylistName = '';
     }
 
     async likeTrack(track: TrackViewModelItem): Promise<void> {

@@ -1,9 +1,8 @@
-import * as _ from 'underscore';
 import { PlaylistsView } from '../views/playlistsView';
 import { TracksView } from '../views/tracksView';
 
 export const template = (view: PlaylistsView) => <>
-    <form>
+    <form onSubmit={e => e.preventDefault()}>
         <input
             type="text"
             placeholder="Enter new playlist name..."
@@ -20,7 +19,7 @@ export const template = (view: PlaylistsView) => <>
         >Create private</a>
     </div>
     <ul className="table-view">
-        {_.map(view.playlists, (item: PlaylistsView['playlists'][0]) => {
+        {view.playlists.map((item: PlaylistsView['playlists'][0]) => {
             return <li key={item.id()}>
                 <div className="table-view-cell media">
                     <a className="navigate-right"
