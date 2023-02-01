@@ -1,3 +1,4 @@
+import { UnauthenticatedError } from 'app/service/errors/unauthenticatedError';
 import React from 'react';
 import * as _ from 'underscore';
 import { NoActiveDeviceError } from '../service/errors/noActiveDeviceError';
@@ -148,6 +149,7 @@ class AppView extends React.Component {
         }
         const tokenExpired = _.filter(errors, err => err.is(TokenExpiredError));
         const activeDevice = _.filter(errors, err => err.is(NoActiveDeviceError));
+        const unauthenticated = _.filter(errors, err => err.is(UnauthenticatedError));
 
         if (!_.isEmpty(tokenExpired)) {
             this.errors = _.filter(errors, err => !err.is(TokenExpiredError));
@@ -160,6 +162,13 @@ class AppView extends React.Component {
         if (!_.isEmpty(activeDevice)) {
             this.errors = _.filter(errors, err => !err.is(NoActiveDeviceError));
             setTimeout(() => this.toggleSelectDevices('hide'));
+
+            return;
+        }
+
+        if (!_.isEmpty(unauthenticated)) {
+            this.errors = _.filter(errors, err => !err.is(UnauthenticatedError));
+            this.openLogin = true;
 
             return;
         }

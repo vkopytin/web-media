@@ -77,14 +77,6 @@ export class AppService {
         return result;
     }
 
-    async createNewPlaylist(userId: string, name: string, description = '', isPublic = false) {
-        await this.mediaService.createNewPlaylist(userId, name, description, isPublic);
-
-        const syncPlaylistsResult = await this.dataSyncService.syncMyPlaylists();
-
-        return syncPlaylistsResult;
-    }
-
     async addTrackToPlaylist(tracks: ITrack | ITrack[], playlist: IUserPlaylist) {
         tracks = ([] as ITrack[]).concat(tracks);
         const result = await this.mediaService.addTrackToPlaylist(_.map(([] as ITrack[]).concat(tracks), t => t.uri), playlist.id);
