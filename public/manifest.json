@@ -1,6 +1,6 @@
 {
-    "name": "Dev Player for Spotify",
-    "short_name": "ExApp",
+    "name": "Player for Spotify",
+    "short_name": "spPlayer",
     "theme_color": "#2196f3",
     "background_color": "#2196f3",
     "display": "standalone",

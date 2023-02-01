@@ -10,7 +10,7 @@
     "jsx": "preserve",
     "allowJs": true,
     "allowUnreachableCode": true,
-    "baseUrl": "static/js",
+    "baseUrl": "src",
     "importHelpers": true,
     "strict": true,
     "lib": [
@@ -25,10 +25,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true
   },
-  //    "include": [ "**/*.ts" ],
   "exclude": [
     "**/node_modules/*",
-    "**/server/*",
+    "**/public/*",
     "**/bundle/*"
   ],
   "filesGlob": [
