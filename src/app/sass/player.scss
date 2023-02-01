@@ -536,6 +536,11 @@ footer:before {
   height: 16px;
 }
 
+.list-item {
+  float: left;
+  width: 100%;
+}
+
 .table-view-cell {
   >.list-item:not(.btn) {
     position: relative;
