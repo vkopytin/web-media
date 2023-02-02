@@ -37,7 +37,7 @@ export class Option<T> extends Monad<T> {
 
     // flatMap :: # Option a -> (a -> Option b) -> Option b
     flatMap = <R>(f: (a: T) => Option<R>): Option<R> =>
-        this.constructor.name === 'None' ? none as Option<R>
+        this.constructor === None ? none as Option<R>
             : f(this.value)
 
     // equals :: # M a -> M a -> boolean
@@ -83,7 +83,7 @@ export class None<T, E = Error> extends Option<T> {
     }
 
     constructor(public error: E) {
-        super()
+        super();
     }
 
     toString() {
