@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { AppService } from '../service';
+import { AppService, LogService } from '../service';
 import { LoginService } from '../service/loginService';
 import { SettingsService } from '../service/settings';
 import { MediaService } from '../service/mediaService';
@@ -28,10 +28,11 @@ class UserProfileViewModel {
         this.saveApiseedsKey(val);
     });
 
-    @Binding(() => inject(AppViewModel), 'currentTrackId')
+    @Binding((v: UserProfileViewModel) => v.appViewModel, 'currentTrackId')
     currentTrackId!: string;
 
     constructor(
+        private logService: LogService,
         private appViewModel: AppViewModel,
         private login: LoginService,
         private settingsService: SettingsService,

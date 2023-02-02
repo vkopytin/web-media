@@ -2,6 +2,7 @@ export { AppService } from './appService';
 export { DataService } from './dataService';
 export { DataSyncService } from './dataSyncService';
 export { LoginService } from './loginService';
+export { LogService } from './logService';
 export { LyricsService } from './lyricsService';
 export { MediaService } from './mediaService';
 export { PlaybackService } from './playbackService';

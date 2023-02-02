@@ -8,6 +8,7 @@ import { PlaybackService } from '../../service/playbackService';
 import { Result } from '../../utils/result';
 import { HomeViewModel } from '../homeViewModel';
 import { TrackViewModelItem } from '../trackViewModelItem';
+import { LogService } from '../../service/logService';
 
 jest.mock('../../service');
 jest.mock('../../service/dataSyncService');
@@ -27,16 +28,17 @@ describe('Home View Model', () => {
     let media: MediaService;
     let playback: PlaybackService;
     let data: DataService;
-    let login: LoginService;
+    let logService: LogService;
     let suggestions: SuggestionsService;
 
     beforeAll(() => {
         data = new DataService();
         media = new MediaService({} as any);
         playback = new PlaybackService({} as any, {} as any);
-        login = new LoginService({} as any);
+        logService = new LogService();
         suggestions = new SuggestionsService({} as any);
-        homeVm = new HomeViewModel(data, media, playback, {} as any, suggestions);
+        homeVm = new HomeViewModel(logService, data, media, playback, {} as any, suggestions);
+        homeVm.tracks = [];
     });
 
     afterAll(() => {

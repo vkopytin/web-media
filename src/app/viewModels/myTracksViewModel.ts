@@ -1,3 +1,4 @@
+import { LogService } from 'app/service';
 import * as _ from 'underscore';
 import { LyricsService } from '../service/lyricsService';
 import { MediaService } from '../service/mediaService';
@@ -24,6 +25,7 @@ class MyTracksViewModel {
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
 
     constructor(
+        private logService: LogService,
         private media: MediaService,
         private lyrics: LyricsService,
     ) {

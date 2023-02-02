@@ -1,4 +1,4 @@
-import { SPOTIFY_ACCESS_TOKEN_KEY } from 'consts';
+import { SPOTIFY_ACCESS_TOKEN_KEY } from '../app/consts';
 import type { AppProps } from 'next/app'
 
 import '../global.scss';

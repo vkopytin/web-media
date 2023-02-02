@@ -8,7 +8,8 @@ import { AlbumViewModelItem } from './albumViewModelItem';
 import { ArtistViewModelItem } from './artistViewModelItem';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
-import { ISearchType, ISpotifySong } from '../ports/iMediaProt';
+import { ISearchType } from '../ports/iMediaProt';
+import { LogService } from 'app/service';
 
 
 const searchQueue = asyncQueue();
@@ -60,7 +61,7 @@ class SearchViewModel {
         });
     }, 300);
 
-    constructor(private media: MediaService, private settingsService: SettingsService) {
+    constructor(private logService: LogService, private media: MediaService, private settingsService: SettingsService) {
 
     }
 

@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import { AppService } from '../../service';
+import { AppService, LogService } from '../../service';
 import { DataSyncService } from '../../service/dataSyncService';
 import { LoginService } from '../../service/loginService';
 import { MediaService } from '../../service/mediaService';
@@ -27,6 +27,7 @@ jest.mock('../../utils/inject', () => {
 });
 
 describe('App View Model', () => {
+    let logService: LogService;
     let appVm: AppViewModel;
     let app: AppService;
     let spotifySync: DataSyncService;
@@ -36,13 +37,14 @@ describe('App View Model', () => {
     let login: LoginService;
 
     beforeEach(async () => {
+        logService = new LogService();
         login = new LoginService({} as any);
         spotifySync = new DataSyncService({} as any, {} as any);
         media = new MediaService({} as any);
         playback = new PlaybackService({} as any, {} as any);
         remotePlayback = new RemotePlaybackService({} as any);
         app = new AppService({} as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any);
-        appVm = new AppViewModel(login, spotifySync, media, playback, remotePlayback, app);
+        appVm = new AppViewModel(logService, app, login, spotifySync, media, playback, remotePlayback);
     });
 
     it('Should be created', () => {

@@ -1,4 +1,4 @@
-import { AppService, DataService, LyricsService, MediaService, PlaylistsService, PlaylistTracksService } from '../service';
+import { AppService, DataService, LogService, LyricsService, MediaService, PlaylistsService, PlaylistTracksService } from '../service';
 import { Binding, isLoading, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
@@ -38,10 +38,9 @@ class PlaylistsViewModel {
     likedTracks!: TrackViewModelItem[];
 
     constructor(
+        private logService: LogService,
         private data: DataService,
-        private media: MediaService,
         private lyrics: LyricsService,
-        private app: AppService,
         private playlistsService: PlaylistsService,
         private playlistTracksService: PlaylistTracksService,
     ) {

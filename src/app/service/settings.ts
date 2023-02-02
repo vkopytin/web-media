@@ -1,4 +1,4 @@
-import { SPOTIFY_ACCESS_TOKEN_KEY } from 'consts';
+import { SPOTIFY_ACCESS_TOKEN_KEY } from '../consts';
 import { Result } from '../utils/result';
 
 export interface ISettings {

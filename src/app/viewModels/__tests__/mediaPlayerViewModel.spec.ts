@@ -2,7 +2,7 @@
 
 import { SpotifyMediaAdapter, SpotifyPlaybackAdapter, SpotifyRemotePlaybackAdapter } from '../../adapter';
 import { DataStorage } from '../../data/dataStorage';
-import { AppService } from '../../service';
+import { AppService, LogService } from '../../service';
 import { DataService } from '../../service/dataService';
 import { DataSyncService } from '../../service/dataSyncService';
 import { LoginService } from '../../service/loginService';
@@ -71,6 +71,8 @@ xdescribe('Media Player View Model', () => {
     let dataService: DataService;
     let appViewModel: AppViewModel;
     let login: LoginService;
+    let logService: LogService;
+    let appService: AppService;
 
     beforeAll(async () => {
         spotifyMediaAdapter = new SpotifyMediaAdapter('key');
@@ -83,14 +85,14 @@ xdescribe('Media Player View Model', () => {
         remotePlayback = new RemotePlaybackService(spotifyRemotePlaybackAdapter);
         dataService = new DataService();
         dataSync = new DataSyncService(dataService, media);
-        service = new AppService(settings, login, dataService, media, dataSync, playback, remotePlayback);
-        appViewModel = new AppViewModel(login, dataSync, media, playback, remotePlayback, service);
+        service = new AppService(logService, settings, login, dataService, media, playback, remotePlayback);
+        appViewModel = new AppViewModel(logService, appService, login, dataSync, media, playback, remotePlayback);
 
         mockedInit = jest.spyOn(MediaPlayerViewModel.prototype, 'init').mockImplementation(() => Promise.resolve());
         Object.defineProperty(MediaPlayerViewModel.prototype, 'currentTrackId', { get() { return 'test'; }, set(v) { } });
         Object.defineProperty(MediaPlayerViewModel.prototype, 'currentTrack', { get() { return { id: 'test' }; }, set(v) { } });
 
-        vm = new MediaPlayerViewModel(appViewModel, media, settings, playback, remotePlayback, service);
+        vm = new MediaPlayerViewModel(logService, appViewModel, media, settings, playback, remotePlayback, service);
     });
 
     afterAll(() => {

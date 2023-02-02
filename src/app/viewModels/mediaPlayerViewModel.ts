@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { AppService } from '../service';
+import { AppService, LogService } from '../service';
 import { SettingsService } from '../service/settings';
 import { MediaService } from '../service/mediaService';
 import { PlaybackService } from '../service/playbackService';
@@ -50,6 +50,7 @@ class MediaPlayerViewModel {
     autoSeek = asyncDebounce(() => this.autoSeekInternal(), 500);
 
     constructor(
+        private logService: LogService,
         private appViewModel: AppViewModel,
         private media: MediaService,
         private settingsSerivce: SettingsService,

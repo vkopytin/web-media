@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { AppService } from '../service';
+import { AppService, LogService } from '../service';
 import { LoginService } from '../service/loginService';
 import { MediaService } from '../service/mediaService';
 import { PlaybackService } from '../service/playbackService';
@@ -40,12 +40,13 @@ class AppViewModel {
     };
 
     constructor(
+        private logService: LogService,
+        private app: AppService,
         private login: LoginService,
         private dataSync: DataSyncService,
         private media: MediaService,
         private playback: PlaybackService,
         private remotePlayback: RemotePlaybackService,
-        private app: AppService,
     ) {
 
     }

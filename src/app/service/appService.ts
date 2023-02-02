@@ -5,17 +5,17 @@ import { LoginService } from './loginService';
 import { SettingsService } from './settings';
 import { MediaService } from './mediaService';
 import { PlaybackService } from './playbackService';
-import { DataSyncService } from './dataSyncService';
 import { ITrack, IUserPlaylist } from '../ports/iMediaProt';
 import { RemotePlaybackService } from './remotePlaybackService';
+import { LogService } from './logService';
 
 export class AppService {
     constructor(
+        private logService: LogService,
         private settingsService: SettingsService,
         private loginService: LoginService,
         private dataService: DataService,
         private mediaService: MediaService,
-        private dataSyncService: DataSyncService,
         private playbackService: PlaybackService,
         private remotePlaybackService: RemotePlaybackService,
     ) {

@@ -1,4 +1,4 @@
-import { SuggestionsService } from '../service';
+import { LogService, SuggestionsService } from '../service';
 import { DataService } from '../service/dataService';
 import { LyricsService } from '../service/lyricsService';
 import { MediaService } from '../service/mediaService';
@@ -34,6 +34,7 @@ class HomeViewModel {
     likedTracks!: TrackViewModelItem[];
 
     constructor(
+        private logService: LogService,
         private data: DataService,
         private media: MediaService,
         private playback: PlaybackService,
