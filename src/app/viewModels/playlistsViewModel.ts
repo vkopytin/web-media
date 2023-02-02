@@ -27,15 +27,15 @@ class PlaylistsViewModel {
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
 
     @Binding((vm: PlaylistsViewModel) => vm.playlistsService, 'newPlaylistName')
-    newPlaylistName = '';
+    newPlaylistName!: string;
     @Binding((vm: PlaylistsViewModel) => vm.playlistsService, 'playlists')
-    playlists: PlaylistsViewModelItem[] = [];
+    playlists!: PlaylistsViewModelItem[];
     @Binding((vm: PlaylistsViewModel) => vm.playlistTracksService, 'currentPlaylistId')
-    currentPlaylistId: string | null = null;
+    currentPlaylistId!: string | null;
     @Binding((vm: PlaylistsViewModel) => vm.playlistTracksService, 'tracks')
-    tracks: TrackViewModelItem[] = [];
+    tracks!: TrackViewModelItem[];
     @Binding((vm: PlaylistsViewModel) => vm.playlistTracksService, 'likedTracks')
-    likedTracks: TrackViewModelItem[] = [];
+    likedTracks!: TrackViewModelItem[];
 
     constructor(
         private data: DataService,

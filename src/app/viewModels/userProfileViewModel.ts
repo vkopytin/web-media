@@ -28,7 +28,8 @@ class UserProfileViewModel {
         this.saveApiseedsKey(val);
     });
 
-    @Binding(() => inject(AppViewModel), 'currentTrackId') currentTrackId = '';
+    @Binding(() => inject(AppViewModel), 'currentTrackId')
+    currentTrackId!: string;
 
     constructor(
         private appViewModel: AppViewModel,

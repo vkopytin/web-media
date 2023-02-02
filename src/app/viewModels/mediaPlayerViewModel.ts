@@ -44,7 +44,7 @@ class MediaPlayerViewModel {
     @State seekPlaybackCommand = Scheduler.Command((percent: number) => this.manualSeek(percent));
 
     @Binding((vm: MediaPlayerViewModel) => vm.appViewModel, 'currentTrackId')
-    currentTrackId = '';
+    currentTrackId!: string;
 
     monitorPlyback = asyncDebounce(() => this.monitorPlybackInternal(), 5 * 1000);
     autoSeek = asyncDebounce(() => this.autoSeekInternal(), 500);

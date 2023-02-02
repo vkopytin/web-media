@@ -201,6 +201,9 @@ export function Binding<T, R>(path: (a: T) => R, bindableProperty: keyof R, opti
         function initBinding(this: T, v?: DynamicProperty<unknown>) {
             const obj = path(this);
             const propInfo: IPropertyInfo<unknown> = Notifications.GetTraits(obj as {});
+            if (!propInfo[`${String(bindableProperty)}`]) {
+                Notifications.initBindingMetadata(obj as {});
+            }
             const state = propInfo[`${String(bindableProperty)}`];
 
             const traits: IPropertyInfo<unknown> = Notifications.hasTraits(this) ? Notifications.GetTraits(this as {})

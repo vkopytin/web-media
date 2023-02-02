@@ -27,11 +27,11 @@ class HomeViewModel {
     @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem | null) => this.selectPlaylist(playlist));
 
     @Binding((vm: HomeViewModel) => vm.suggestions, 'tracks')
-    tracks: TrackViewModelItem[] = [];
+    tracks!: TrackViewModelItem[];
     @Binding((vm: HomeViewModel) => vm.suggestions, 'selectedPlaylist')
-    selectedPlaylist: PlaylistsViewModelItem | null = null;
+    selectedPlaylist!: PlaylistsViewModelItem | null;
     @Binding((vm: HomeViewModel) => vm.suggestions, 'likedTracks')
-    likedTracks: TrackViewModelItem[] = [];
+    likedTracks!: TrackViewModelItem[];
 
     constructor(
         private data: DataService,
