@@ -24,6 +24,7 @@ describe('Playlist Tracks Service', () => {
 
     it('should list tracks', async () => {
         jest.spyOn(TrackViewModelItem.prototype, 'fetchData').mockImplementation(() => Promise.resolve());
+        jest.spyOn(TrackViewModelItem, 'fromSong').mockImplementation(() => ({ id: jest.fn().mockImplementation(() => ''), isLiked: false } as any));
         jest.spyOn(media, 'listPlaylistTracks').mockImplementation((id, o, l) => Promise.resolve(makePlaylistTracksResult(o, l, 15)));
         jest.spyOn(media, 'hasTracks').mockImplementation(() => Promise.resolve([]));
 

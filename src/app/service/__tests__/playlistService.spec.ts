@@ -2,44 +2,50 @@
 
 import { SpotifyMediaAdapter } from '../../adapter';
 import { IMediaPort, IUserPlaylist, IUserPlaylistsResult } from '../../ports/iMediaProt';
+import { DataSyncService } from '../dataSyncService';
 import { PlaylistsService } from '../playlistsService';
+
+jest.mock('../../adapter');
+jest.mock('../dataSyncService');
 
 describe('Playlists Service', () => {
     let media: IMediaPort;
-    let playlistsService: PlaylistsService;
+    let playlists: PlaylistsService;
+    let dataSync: DataSyncService;
 
     beforeEach(() => {
         media = new SpotifyMediaAdapter('test');
-        playlistsService = new PlaylistsService(media);
+        dataSync = new DataSyncService({} as any, {} as any);
+        playlists = new PlaylistsService(media, dataSync);
     });
 
     it('should list playlists', async () => {
         jest.spyOn(media, 'myPlaylists').mockImplementation((o, l) => Promise.resolve(makePlaylistsResult(o, l, 15)));
 
-        await playlistsService.listPlaylists();
+        await playlists.listPlaylists();
 
-        expect(playlistsService.playlists.length).toEqual(15);
-        expect(playlistsService.offset).toEqual(15);
+        expect(playlists.playlists.length).toEqual(15);
+        expect(playlists.offset).toEqual(15);
     });
 
     it('should load more playlists', async () => {
-        playlistsService.limit = 5;
+        playlists.limit = 5;
         jest.spyOn(media, 'myPlaylists').mockImplementation((o, l) => Promise.resolve(makePlaylistsResult(o, l, 12)));
 
-        await playlistsService.listPlaylists();
+        await playlists.listPlaylists();
 
-        expect(playlistsService.playlists.length).toEqual(5);
-        expect(playlistsService.offset).toEqual(5);
+        expect(playlists.playlists.length).toEqual(5);
+        expect(playlists.offset).toEqual(5);
 
-        await playlistsService.loadMorePlaylists();
+        await playlists.loadMorePlaylists();
 
-        expect(playlistsService.playlists.length).toEqual(10);
-        expect(playlistsService.offset).toEqual(10);
+        expect(playlists.playlists.length).toEqual(10);
+        expect(playlists.offset).toEqual(10);
 
-        await playlistsService.loadMorePlaylists();
+        await playlists.loadMorePlaylists();
 
-        expect(playlistsService.playlists.length).toEqual(12);
-        expect(playlistsService.offset).toEqual(12);
+        expect(playlists.playlists.length).toEqual(12);
+        expect(playlists.offset).toEqual(12);
     });
 });
 

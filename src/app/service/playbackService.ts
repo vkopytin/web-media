@@ -43,6 +43,12 @@ export class PlaybackService extends Events {
     }
 
     async init(): Promise<void> {
+        await this.createPlayer();
+
+        await this.connect();
+    }
+
+    async createPlayer() {
         const getOAuthToken = (cb: (t: string) => void) => {
             this.settingsService.get('spotify').map(spotifySettings => {
                 console.log('[Spotify SDK] *** Requesting OAuth Token ***');
@@ -52,8 +58,6 @@ export class PlaybackService extends Events {
         };
 
         this.player = await this.spotifyPlaybackAdapter.createPlayer(getOAuthToken);
-
-        await this.connect();
     }
 
     async connect(): Promise<Option<Error>> {
@@ -113,13 +117,7 @@ export class PlaybackService extends Events {
     }
 
     async refreshToken(): Promise<Option<Error>> {
-        if (!this.player) {
-            return Option.some(new Error('[Spotify SDK] Player is not initialized'));
-        }
-        const isDisconnected = await this.disconnect();
-        const res = await isDisconnected.orElse(() => this.connect()).await();
-
-        return res;
+        return Option.none();
     }
 
     async resume(): Promise<Option<Error>> {

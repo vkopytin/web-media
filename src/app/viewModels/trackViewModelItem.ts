@@ -1,5 +1,5 @@
 import * as _ from 'underscore';
-import { IResponseResult, ISpotifySong } from '../ports/iMediaProt';
+import { IResponseResult, ISpotifySong, ITrack } from '../ports/iMediaProt';
 import { AppService } from '../service';
 import { DataService } from '../service/dataService';
 import { RemotePlaybackService } from '../service/remotePlaybackService';
@@ -11,6 +11,18 @@ import { MediaPlayerViewModel } from './mediaPlayerViewModel';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 class TrackViewModelItem {
+    static fromTrack(track: ITrack, index: number): TrackViewModelItem {
+        const inst = new TrackViewModelItem({ track, added_at: '' }, index);
+        inst.fetchData();
+
+        return inst;
+    }
+    static fromSong(song: ISpotifySong, index: number): TrackViewModelItem {
+        const inst = new TrackViewModelItem(song, index);
+        inst.fetchData();
+
+        return inst;
+    }
     @State errors: Result[] = [];
     @State isLoading = false;
     @State isLiked = false;
@@ -22,11 +34,6 @@ class TrackViewModelItem {
     @State removeFromPlaylistCommand = Scheduler.Command((track: TrackViewModelItem, playlist: PlaylistsViewModelItem) => this.removeFromPlaylist(track, playlist));
     @State playTracksCommand = Scheduler.Command((tracks: TrackViewModelItem[]) => this.playTracks(tracks));
     @State updateIsCachedCommand = Scheduler.Command((playlists: PlaylistsViewModelItem[]) => this.updateIsCached(playlists));
-
-    isInit = new Promise<boolean>(resolve => _.delay(async () => {
-        await this.fetchData();
-        resolve(true);
-    }));
 
     constructor(
         public song: ISpotifySong,

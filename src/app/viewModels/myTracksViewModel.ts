@@ -52,7 +52,7 @@ class MyTracksViewModel {
         res.map(tracks => {
             this.settings.total = this.settings.offset + Math.min(this.settings.limit + 1, tracks.items.length);
             this.settings.offset = this.settings.offset + Math.min(this.settings.limit, tracks.items.length);
-            this.tracks = _.map(tracks.items.slice(0, this.settings.limit), (song, index) => new TrackViewModelItem(song, index));
+            this.tracks = _.map(tracks.items.slice(0, this.settings.limit), (song, index) => TrackViewModelItem.fromSong(song, index));
             this.checkTracks(this.tracks);
         }).error(e => this.errors = [Result.error(e)]);
 
@@ -69,7 +69,7 @@ class MyTracksViewModel {
         res.map(tracks => {
             this.settings.total = this.settings.offset + Math.min(this.settings.limit + 1, tracks.items.length);
             this.settings.offset = this.settings.offset + Math.min(this.settings.limit, tracks.items.length);
-            const tracksItems = _.map(tracks.items.slice(0, this.settings.limit), (song, index) => new TrackViewModelItem(song, index));
+            const tracksItems = _.map(tracks.items.slice(0, this.settings.limit), (song, index) => TrackViewModelItem.fromSong(song, this.settings.offset + index));
             this.tracks = [...this.tracks, ...tracksItems];
             this.checkTracks(tracksItems);
         }).error(e => this.errors = [Result.error(e)]);

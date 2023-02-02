@@ -44,8 +44,12 @@ class HomeViewModel {
     }
 
     async init(): Promise<void> {
-        await this.connect();
-        await this.fetchData();
+        try {
+            await this.connect();
+            await this.fetchData();
+        } catch (ex) {
+            this.errors = [Result.error(ex as Error)];
+        }
     }
 
     connect(): void {

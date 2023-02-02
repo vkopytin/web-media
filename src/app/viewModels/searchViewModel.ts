@@ -114,7 +114,7 @@ class SearchViewModel {
                 this.settings.total = search.tracks.total || 0;
                 this.settings.offset = search.tracks.offset + Math.min(this.settings.limit, search.tracks.items.length);
 
-                this.tracks = _.map(search.tracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
+                this.tracks = _.map(search.tracks.items, (track, index) => TrackViewModelItem.fromTrack(track, index));
             } else if ('artists' in search && search.artists) {
                 this.settings.total = search.artists.total;
                 this.settings.offset = search.artists.offset + Math.min(this.settings.limit, search.artists.items.length);
@@ -143,7 +143,7 @@ class SearchViewModel {
         const res = await this.media.search(this.searchType, this.term, this.settings.offset, this.settings.limit);
         res.map(search => {
             if (search?.tracks) {
-                this.tracksAddRange(_.map(search.tracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, (search.tracks?.offset || 0) + index)));
+                this.tracksAddRange(_.map(search.tracks.items, (track, index) => TrackViewModelItem.fromTrack(track, (search.tracks?.offset || 0) + index)));
 
                 this.settings.total = search.tracks.total;
                 this.settings.offset = search.tracks.offset + Math.min(this.settings.limit, search.tracks.items.length);
@@ -174,7 +174,7 @@ class SearchViewModel {
             const albumTrackssResult = await this.media.listAlbumTracks(this.currentAlbum.id());
 
             albumTrackssResult
-                .map(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem({ track: item } as ISpotifySong, index)))
+                .map(tr => this.currentTracks = _.map(tr.items, (item, index) => TrackViewModelItem.fromTrack(item, index)))
                 .error(e => this.errors = [Result.error(e)]);
         }
 
@@ -182,7 +182,7 @@ class SearchViewModel {
             const playlistTracksResult = await this.media.fetchPlaylistTracks(this.currentPlaylist.id());
 
             playlistTracksResult
-                .map(tr => this.currentTracks = _.map(tr.items, (item, index) => new TrackViewModelItem(item, index)))
+                .map(tr => this.currentTracks = _.map(tr.items, (item, index) => TrackViewModelItem.fromSong(item, index)))
                 .error(e => this.errors = [Result.error(e)]);
         }
 
@@ -190,7 +190,7 @@ class SearchViewModel {
             const artistTracksResult = await this.media.fetchArtistTopTracks(this.currentArtist.id(), 'US');
 
             artistTracksResult
-                .map(tr => this.currentTracks = _.map(tr.tracks, (item, index) => new TrackViewModelItem({ track: item } as ISpotifySong, index)))
+                .map(tr => this.currentTracks = _.map(tr.tracks, (item, index) => TrackViewModelItem.fromTrack(item, index)))
                 .error(e => this.errors = [Result.error(e)]);
         }
     }

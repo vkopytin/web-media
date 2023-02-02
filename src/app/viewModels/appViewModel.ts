@@ -114,7 +114,7 @@ class AppViewModel {
 
         const topTracksResult = await this.media.listTopTracks();
         this.topTracks = topTracksResult.match(
-            topTracks => _.map(topTracks.items, (track: ITrack, index) => new TrackViewModelItem({ track } as ISpotifySong, index)),
+            topTracks => _.map(topTracks.items, (track: ITrack, index) => TrackViewModelItem.fromTrack(track, index)),
             e => (this.errors = [Result.error(e)], [])
         );
     }

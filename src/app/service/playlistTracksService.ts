@@ -29,7 +29,7 @@ export class PlaylistTracksService {
         const result = await this.media.listPlaylistTracks(this.currentPlaylistId, this.offset, this.limit + 1);
         this.total = this.offset + Math.min(this.limit + 1, result.items.length);
         this.offset = this.offset + Math.min(this.limit, result.items.length);
-        this.tracks = result.items.slice(0, this.limit).map((item, index) => new TrackViewModelItem(item, index));
+        this.tracks = result.items.slice(0, this.limit).map((item, index) => TrackViewModelItem.fromSong(item, index));
         await this.checkTracks(this.tracks);
     }
 
@@ -38,7 +38,7 @@ export class PlaylistTracksService {
             return;
         }
         const result = await this.media.listPlaylistTracks(this.currentPlaylistId, this.offset, this.limit + 1);
-        const tracks = result.items.slice(0, this.limit).map((item, index) => new TrackViewModelItem(item, this.offset + index));
+        const tracks = result.items.slice(0, this.limit).map((item, index) => TrackViewModelItem.fromSong(item, this.offset + index));
         this.total = this.offset + Math.min(this.limit + 1, result.items.length);
         this.offset = this.offset + Math.min(this.limit, result.items.length);
 
