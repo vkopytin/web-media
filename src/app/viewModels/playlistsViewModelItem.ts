@@ -15,6 +15,10 @@ function unsafeHtml(html: string) {
 }
 
 class PlaylistsViewModelItem {
+    static fromPlaylist(playlist: IUserPlaylist): PlaylistsViewModelItem {
+        const inst = new PlaylistsViewModelItem(playlist);
+        return inst;
+    }
     constructor(public playlist: IUserPlaylist) {
     }
 

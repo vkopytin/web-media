@@ -122,7 +122,7 @@ class TrackViewModelItem {
         const res = await this.data.listPlaylistsByTrack(this.song.track);
 
         return res
-            .map(playlists => playlists.map(playlist => new PlaylistsViewModelItem(playlist)))
+            .map(playlists => playlists.map(playlist => PlaylistsViewModelItem.fromPlaylist(playlist)))
             .error(e => this.errors = [Result.error(e)]);
     }
 

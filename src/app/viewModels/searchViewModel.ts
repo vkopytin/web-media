@@ -119,17 +119,17 @@ class SearchViewModel {
                 this.settings.total = search.artists.total;
                 this.settings.offset = search.artists.offset + Math.min(this.settings.limit, search.artists.items.length);
 
-                this.artists = _.map(search.artists.items, (artist, index) => new ArtistViewModelItem(artist, index));
+                this.artists = _.map(search.artists.items, (artist, index) => ArtistViewModelItem.fromArtist(artist, index));
             } else if ('albums' in search && search.albums) {
                 this.settings.total = search.albums.total;
                 this.settings.offset = search.albums.offset + Math.min(this.settings.limit, search.albums.items.length);
 
-                this.albums = _.map(search.albums.items, (album) => new AlbumViewModelItem(album));
+                this.albums = _.map(search.albums.items, (album) => AlbumViewModelItem.fromAlbum(album));
             } else if ('playlists' in search && search.playlists) {
                 this.settings.total = search.playlists.total;
                 this.settings.offset = search.playlists.offset + Math.min(this.settings.limit, search.playlists.items.length);
 
-                this.playlists = _.map(search.playlists.items, (playlist) => new PlaylistsViewModelItem(playlist));
+                this.playlists = _.map(search.playlists.items, (playlist) => PlaylistsViewModelItem.fromPlaylist(playlist));
             }
         }).error(e => this.errors = [Result.error(e)]);
         this.isLoading = false;
@@ -148,17 +148,17 @@ class SearchViewModel {
                 this.settings.total = search.tracks.total;
                 this.settings.offset = search.tracks.offset + Math.min(this.settings.limit, search.tracks.items.length);
             } else if (search?.artists) {
-                this.artistsAddRange(_.map(search.artists.items, (artist, index) => new ArtistViewModelItem(artist, (search.artists?.offset || 0) + index)));
+                this.artistsAddRange(_.map(search.artists.items, (artist, index) => ArtistViewModelItem.fromArtist(artist, (search.artists?.offset || 0) + index)));
 
                 this.settings.total = search.artists.total;
                 this.settings.offset = search.artists.offset + Math.min(this.settings.limit, search.artists.items.length);
             } else if (search?.albums) {
-                this.albumsAddRange(_.map(search.albums.items, (album) => new AlbumViewModelItem(album)));
+                this.albumsAddRange(_.map(search.albums.items, (album) => AlbumViewModelItem.fromAlbum(album)));
 
                 this.settings.total = search.albums.total;
                 this.settings.offset = search.albums.offset + Math.min(this.settings.limit, search.albums.items.length);
             } else if (search?.playlists) {
-                this.playlistsAddRange(_.map(search.playlists.items, (artist) => new PlaylistsViewModelItem(artist)));
+                this.playlistsAddRange(_.map(search.playlists.items, (playlist) => PlaylistsViewModelItem.fromPlaylist(playlist)));
 
                 this.settings.total = search.playlists.total;
                 this.settings.offset = search.playlists.offset + Math.min(this.settings.limit, search.playlists.items.length);

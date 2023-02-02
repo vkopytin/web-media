@@ -1,4 +1,4 @@
-import { IMediaPort, ISpotifySong, ITrack } from '../ports/iMediaProt';
+import { IMediaPort, ITrack } from '../ports/iMediaProt';
 import { State } from '../utils';
 import { PlaylistsViewModelItem } from '../viewModels/playlistsViewModelItem';
 import { TrackViewModelItem } from '../viewModels/trackViewModelItem';

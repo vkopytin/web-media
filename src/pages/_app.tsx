@@ -1,3 +1,4 @@
+import { SPOTIFY_ACCESS_TOKEN_KEY } from 'consts';
 import type { AppProps } from 'next/app'
 
 import '../global.scss';
@@ -23,7 +24,7 @@ if (typeof window !== 'undefined') {
 
   if ('access_token' in authInfo && authInfo.access_token) {
     console.log('finishing authentication...');
-    document.cookie = 'access_token=' + btoa(authInfo.access_token);
+    document.cookie = [SPOTIFY_ACCESS_TOKEN_KEY, btoa(authInfo.access_token)].join('=');
     if (window.parent !== window) {
       authenticating = true;
       window.parent.postMessage(['accessToken', authInfo.access_token], '*');

@@ -4,6 +4,11 @@ import { State } from '../utils';
 import { Result } from '../utils/result';
 
 class AlbumViewModelItem {
+    static fromAlbum(album: IAlbum): AlbumViewModelItem {
+        const inst = new AlbumViewModelItem(album);
+
+        return inst;
+    }
     @State errors: Result[] = [];
     @State isLiked = false;
 

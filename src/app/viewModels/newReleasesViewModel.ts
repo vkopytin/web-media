@@ -49,11 +49,11 @@ class NewReleasesViewModel {
     async fetchData(): Promise<void> {
         const res = await this.media.newReleases();
         const res2 = await res.map(releases => {
-            this.newReleases = _.map(releases.albums?.items || [], album => new AlbumViewModelItem(album));
+            this.newReleases = _.map(releases.albums?.items || [], album => AlbumViewModelItem.fromAlbum(album));
             this.checkAlbums();
         }).cata(() => this.media.featuredPlaylists());
         const res3 = res2.map(featuredPlaylists => {
-            this.featuredPlaylists = _.map(featuredPlaylists.playlists?.items || [], playlist => new PlaylistsViewModelItem(playlist));
+            this.featuredPlaylists = _.map(featuredPlaylists.playlists?.items || [], playlist => PlaylistsViewModelItem.fromPlaylist(playlist));
         });
         res3.error(e => this.errors = [Result.error(e)]);
     }
