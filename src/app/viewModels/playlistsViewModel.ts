@@ -49,7 +49,11 @@ class PlaylistsViewModel {
     }
 
     async init() {
-        await this.fetchData();
+        try {
+            await this.fetchData();
+        } catch (ex) {
+            this.errors = [Result.error(ex as Error)];
+        }
     }
 
     async fetchData(): Promise<void> {

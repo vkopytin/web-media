@@ -1,6 +1,10 @@
 import { IDevice } from '../ports/iRemotePlaybackPort';
 
 class DeviceViewModelItem {
+    static fromDevice(device: IDevice): DeviceViewModelItem {
+        const inst = new DeviceViewModelItem(device);
+        return inst;
+    }
     constructor(public device: IDevice) {
 
     }

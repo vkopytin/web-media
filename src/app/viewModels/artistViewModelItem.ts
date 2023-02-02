@@ -9,6 +9,10 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 
 
 class ArtistViewModelItem {
+    static fromArtist(artist: IArtist, index: number): ArtistViewModelItem {
+        const inst = new ArtistViewModelItem(artist, index);
+        return inst;
+    }
     @State errors: Result[] = [];
     @State playlists: PlaylistsViewModelItem[] = [];
     @State isLiked = false;

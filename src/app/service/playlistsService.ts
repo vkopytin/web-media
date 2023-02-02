@@ -24,14 +24,14 @@ export class PlaylistsService {
         const result = await this.media.myPlaylists(this.offset, this.limit + 1);
         this.total = this.offset + Math.min(this.limit + 1, result.items.length);
         this.offset = this.offset + Math.min(this.limit, result.items.length);
-        this.playlists = result.items.slice(0, this.limit).map(item => new PlaylistsViewModelItem(item));
+        this.playlists = result.items.slice(0, this.limit).map(item => PlaylistsViewModelItem.fromPlaylist(item));
     }
 
     async loadMorePlaylists() {
         const result = await this.media.myPlaylists(this.offset, this.limit + 1);
         this.total = this.offset + Math.min(this.limit + 1, result.items.length);
         this.offset = this.offset + Math.min(this.limit, result.items.length);
-        const playlists = result.items.slice(0, this.limit).map(item => new PlaylistsViewModelItem(item));
+        const playlists = result.items.slice(0, this.limit).map(item => PlaylistsViewModelItem.fromPlaylist(item));
 
         this.playlistsAddRange(playlists);
     }

@@ -1,3 +1,4 @@
+import { SPOTIFY_ACCESS_TOKEN_KEY } from 'consts';
 import { Result } from '../utils/result';
 
 export interface ISettings {
@@ -65,7 +66,7 @@ class SettingsService {
                 }
             };
         }
-        const sToken = getCookie('spat');
+        const sToken = getCookie(SPOTIFY_ACCESS_TOKEN_KEY);
         const gToken = getCookie('gsat');
         const gCode = getCookie('gcode');
         const lastSearch = getCookie('lastSearch', '');
@@ -92,7 +93,7 @@ class SettingsService {
         };
 
         if ('access_token' in authInfo && /onSpotify-1/.test(authInfo.state)) {
-            document.cookie = 'spat=' + btoa(authInfo.access_token);
+            document.cookie = [SPOTIFY_ACCESS_TOKEN_KEY, btoa(authInfo.access_token)].join('=');
             defaultSettings.spotify.accessToken = authInfo.access_token;
 
             window.location.replace(window.location.pathname);
@@ -146,7 +147,7 @@ class SettingsService {
                 ...val
             };
             if (propName === 'spotify' && 'accessToken' in val) {
-                document.cookie = 'spat=' + btoa((val as { accessToken: string }).accessToken);
+                document.cookie = [SPOTIFY_ACCESS_TOKEN_KEY, btoa((val as { accessToken: string }).accessToken)].join('=');
             }
             if (propName === 'lastSearch') {
                 document.cookie = 'lastSearch=' + btoa(((val as { val: string }).val));

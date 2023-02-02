@@ -122,7 +122,7 @@ class AppViewModel {
     async updateDevices(): Promise<void> {
         const devicesResult = await this.remotePlayback.listDevices();
         devicesResult
-            .map(devices => this.devices = _.map(devices, item => new DeviceViewModelItem(item)))
+            .map(devices => this.devices = _.map(devices, item => DeviceViewModelItem.fromDevice(item)))
             .error(e => this.errors = [Result.error(e)]);
 
         const currentDevice = _.find(this.devices, d => d.isActive()) || null;
