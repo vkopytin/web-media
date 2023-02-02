@@ -22,6 +22,7 @@ if (typeof window !== 'undefined') {
   };
 
   if ('access_token' in authInfo && authInfo.access_token) {
+    console.log('finishing authentication...');
     document.cookie = 'access_token=' + btoa(authInfo.access_token);
     if (window.parent !== window) {
       authenticating = true;

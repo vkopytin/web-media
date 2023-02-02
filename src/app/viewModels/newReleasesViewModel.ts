@@ -63,18 +63,15 @@ class NewReleasesViewModel {
         if (currentAlbum) {
             const result = await this.media.listAlbumTracks(currentAlbum.id());
             result.map(tracks => {
-                this.tracks = _.map(tracks.items, (item, index) => new TrackViewModelItem({
-                    track: {
-                        ...item,
-                        album: item.album || currentAlbum.album
-                    },
-                    added_at: ''
+                this.tracks = _.map(tracks.items, (item, index) => TrackViewModelItem.fromTrack({
+                    ...item,
+                    album: item.album || currentAlbum.album
                 }, index));
             }).error(e => this.errors = [Result.error(e)]);
         } else if (this.currentPlaylist) {
             const playlistTracksResult = await this.media.fetchPlaylistTracks(this.currentPlaylist.id(), 0, 100);
             playlistTracksResult.map(tracksResult => {
-                const tracksModels = _.map(tracksResult.items, (item, index) => new TrackViewModelItem(item, index));
+                const tracksModels = tracksResult.items.map((item, index) => TrackViewModelItem.fromSong(item, index));
                 this.currentTracks = tracksModels;
             }).error(e => this.errors = [Result.error(e)]);
         } else {

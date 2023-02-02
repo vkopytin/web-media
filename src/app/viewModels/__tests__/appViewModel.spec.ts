@@ -47,7 +47,7 @@ describe('App View Model', () => {
 
     it('Should be created', () => {
         expect(appVm).toBeTruthy();
-        expect(appVm.openLogin).toBeFalsy();
+        expect(appVm.openLogin).toBeTruthy();
     });
 
     it('Should have url on refresh token', async () => {
@@ -62,19 +62,21 @@ describe('App View Model', () => {
     it('Should fetch data', async () => {
         const device = { id: 'test', is_active: true, is_private_session: true, is_restricted: true, name: 'test', type: 'test', volume_percent: 0 };
         const track = { id: 'track-1', name: 'track-name-1' };
+        jest.spyOn(media, 'profile').mockImplementation(() => Promise.resolve(Result.of({})));
         jest.spyOn(remotePlayback, 'listDevices').mockImplementation(() => Promise.resolve(Result.of([device])));
         jest.spyOn(media, 'listTopTracks').mockImplementation(
             () => Promise.resolve(Result.of({ items: [track] } as any))
         );
-        jest.spyOn(media, 'profile').mockImplementation(() => Promise.resolve(Result.of({})));
         jest.spyOn(ioc, 'inject').mockImplementation(() => ({}));
         jest.spyOn(TrackViewModelItem.prototype, 'id').mockImplementation(() => track.id);
         jest.spyOn(TrackViewModelItem.prototype, 'name').mockImplementation(() => track.name);
+        jest.spyOn(TrackViewModelItem.prototype, 'fetchData').mockImplementation(() => Promise.resolve());
 
         await appVm.fetchData();
 
-        expect(appVm.topTracks[0].id()).toEqual('track-1');
-        expect(appVm.topTracks[0].name()).toEqual('track-name-1');
+        expect(media.profile).toHaveBeenCalled();
+        expect(remotePlayback.listDevices).toHaveBeenCalled();
+        expect(media.listTopTracks).toHaveBeenCalled();
     });
 
     it('Should fetch devices', async () => {

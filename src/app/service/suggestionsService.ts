@@ -37,7 +37,7 @@ export class SuggestionsService {
 
         const recomendationsResult = await this.media.recommendations('US', artistIds, trackIds);
 
-        const newTracks = recomendationsResult.tracks.map((track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
+        const newTracks = recomendationsResult.tracks.map(TrackViewModelItem.fromTrack);
         this.tracks = newTracks;
 
         await this.checkTracks(newTracks);

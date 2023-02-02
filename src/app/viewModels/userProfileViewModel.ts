@@ -69,7 +69,7 @@ class UserProfileViewModel {
 
         const topTracksResult = await this.media.listTopTracks();
         topTracksResult.map(topTracks => {
-            this.topTracks = _.map(topTracks.items, (track, index) => new TrackViewModelItem({ track } as ISpotifySong, index));
+            this.topTracks = _.map(topTracks.items, (track, index) => TrackViewModelItem.fromTrack(track, index));
         }).error(e => this.errors = [Result.error(e)]);
     }
 
