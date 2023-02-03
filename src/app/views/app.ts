@@ -1,8 +1,8 @@
-import { UnauthenticatedError } from 'app/service/errors/unauthenticatedError';
 import React from 'react';
 import * as _ from 'underscore';
 import { NoActiveDeviceError } from '../service/errors/noActiveDeviceError';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
+import { UnauthenticatedError } from '../service/errors/unauthenticatedError';
 import { template } from '../templates/app';
 import { asyncDebounce, Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';

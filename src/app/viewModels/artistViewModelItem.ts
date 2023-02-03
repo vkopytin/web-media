@@ -1,3 +1,4 @@
+import { LogService } from '../service';
 import * as _ from 'underscore';
 import { IArtist } from '../ports/iMediaProt';
 import { RemotePlaybackService } from '../service/remotePlaybackService';
@@ -22,6 +23,7 @@ class ArtistViewModelItem {
     });
 
     constructor(public artist: IArtist, private index: number,
+        private logService = inject(LogService),
         private appViewModel = inject(AppViewModel),
         private remotePlayback = inject(RemotePlaybackService),
     ) {
@@ -55,13 +57,13 @@ class ArtistViewModelItem {
         const device = this.appViewModel.currentDevice;
 
         const res = await this.remotePlayback.play(device?.id(), this.uri());
-        res.error(e => this.errors = [Result.error(e)]);
+        res.error(this.logService.logError);
     }
 
     async playTracks(): Promise<void> {
         const device = this.appViewModel.currentDevice;
         const playResult = await this.remotePlayback.play(device?.id(), this.uri());
-        playResult.error(e => this.errors = [Result.error(e)]);
+        playResult.error(this.logService.logError);
     }
 }
 

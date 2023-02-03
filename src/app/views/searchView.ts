@@ -19,9 +19,7 @@ class SearchView extends React.Component<ISearchViewProps> {
     didRefresh: SearchView['refresh'] = this.refresh.bind(this);
     vm = inject(SearchViewModel);
 
-    @Binding((a: SearchView) => a.vm, 'errors', {
-        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
-    })
+    @Binding((a: SearchView) => a.vm, 'errors')
     errors!: Result[];
 
     @Binding((a: SearchView) => a.vm, 'term')

@@ -51,7 +51,7 @@ export class Core {
     homeViewModel = inject(HomeViewModel, this.logService, this.dataService, this.mediaService, this.playbackService, this.lyricsService, this.suggestionsService);
     mediaPlayerViewModel = inject(MediaPlayerViewModel, this.logService, this.appViewModel, this.mediaService, this.settingsService, this.playbackService, this.remotePlaybackService, this.appService);
     myTracksViewModel = inject(MyTracksViewModel, this.logService, this.mediaService, this.lyricsService);
-    newReleasesViewModel = inject(NewReleasesViewModel, this.mediaService);
+    newReleasesViewModel = inject(NewReleasesViewModel, this.logService, this.mediaService);
     playlistsViewModel = inject(PlaylistsViewModel, this.logService, this.dataService, this.lyricsService, this.playlistsService, this.playlistTracksService);
     searchViewModel = inject(SearchViewModel, this.logService, this.mediaService, this.settingsService);
     userProfileViewModel = inject(UserProfileViewModel, this.logService, this.appViewModel, this.loginService, this.settingsService, this.mediaService, this.appService);

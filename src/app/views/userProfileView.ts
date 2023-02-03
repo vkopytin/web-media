@@ -17,9 +17,7 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
     didRefresh: UserProfileView['refresh'] = this.refresh.bind(this);
     vm = inject(UserProfileViewModel);
 
-    @Binding((a: UserProfileView) => a.vm, 'errors', {
-        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
-    })
+    @Binding((a: UserProfileView) => a.vm, 'errors')
     errors!: Result[];
 
     @Binding(() => inject(AppViewModel), 'openLogin')

@@ -11,9 +11,7 @@ export const template = (view: AppView) => <main>
             className={cn("modal ?active", view.openLogin)}
         />
         {view.state.showSelectDevices === 'show' ? <div className='backdrop' onClick={() => view.openDevices(false)}></div>
-            : (() => {
-                return view.errors.length;
-            })() ? <div className='backdrop' onClick={evnt => view.clearErrors(evnt)}></div>
+            : view.errors.length ? <div className='backdrop' onClick={evnt => view.clearErrors(evnt)}></div>
                 : <div></div>
         }
         <div className={cn("popover ?visible", view.state.showSelectDevices === 'show')} style={{
@@ -37,11 +35,11 @@ export const template = (view: AppView) => <main>
                 <h1 className="title">Errors</h1>
             </header>
             <ul className="table-view">
-                {_.map(view.errors, (error: Result, index) => {
+                {view.errors.map((error: Result, index) => {
                     return <li key={index} className="table-view-cell"
                         onClick={() => error.error(e => console.log(e))}
                     >
-                        {'' + error.match(() => '', e => e?.message)}
+                        {error.match(() => '', e => e?.message || '')}
                     </li>
                 })}
             </ul>

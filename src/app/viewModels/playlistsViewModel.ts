@@ -6,7 +6,6 @@ import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 
 class PlaylistsViewModel {
-    @State errors: Result[] = [];
     @State isLoading = false;
     @State selectedItem: TrackViewModelItem | null = null;
     @State trackLyrics: { trackId: string; lyrics: string } | null = null;
@@ -26,6 +25,8 @@ class PlaylistsViewModel {
     @State bannTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.bannTrack(track));
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
 
+    @Binding((v: PlaylistsViewModel) => v.logService, 'errors')
+    errors!: Result[];
     @Binding((vm: PlaylistsViewModel) => vm.playlistsService, 'newPlaylistName')
     newPlaylistName!: string;
     @Binding((vm: PlaylistsViewModel) => vm.playlistsService, 'playlists')
@@ -51,7 +52,7 @@ class PlaylistsViewModel {
         try {
             await this.fetchData();
         } catch (ex) {
-            this.errors = [Result.error(ex as Error)];
+            this.logService.logError(ex as Error);
         }
     }
 
@@ -67,13 +68,13 @@ class PlaylistsViewModel {
     async fetchTracks(): Promise<void> {
         await this.playlistTracksService.listPlaylistTracks();
         const res = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
-        res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
+        res.map(r => this.bannedTrackIds = r).error(this.logService.logError);
     }
 
     async loadMoreTracks(): Promise<void> {
         await this.playlistTracksService.loadMoreTracks();
         const res = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
-        res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
+        res.map(r => this.bannedTrackIds = r).error(this.logService.logError);
     }
 
     async createNewPlaylist(isPublic: boolean): Promise<void> {
@@ -119,7 +120,7 @@ class PlaylistsViewModel {
         await track.bannTrack();
         const res = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
 
-        res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
+        res.map(r => this.bannedTrackIds = r).error(this.logService.logError);
     }
 
     @isLoading
@@ -127,7 +128,7 @@ class PlaylistsViewModel {
         await track.removeBannFromTrack();
         const res = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
 
-        res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
+        res.map(r => this.bannedTrackIds = r).error(this.logService.logError);
     }
 }
 

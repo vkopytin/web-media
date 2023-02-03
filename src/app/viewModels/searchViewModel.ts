@@ -1,7 +1,7 @@
 import * as _ from 'underscore';
 import { SettingsService } from '../service/settings';
 import { MediaService } from '../service/mediaService';
-import { asyncDebounce, asyncQueue, State } from '../utils';
+import { asyncDebounce, asyncQueue, Binding, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { AlbumViewModelItem } from './albumViewModelItem';
@@ -9,7 +9,7 @@ import { ArtistViewModelItem } from './artistViewModelItem';
 import { PlaylistsViewModelItem } from './playlistsViewModelItem';
 import { TrackViewModelItem } from './trackViewModelItem';
 import { ISearchType } from '../ports/iMediaProt';
-import { LogService } from 'app/service';
+import { LogService } from '../service';
 
 
 const searchQueue = asyncQueue();
@@ -22,7 +22,6 @@ class SearchViewModel {
         currentMediaUri: null as string | null,
     };
 
-    @State errors: Result[] = [];
     @State term = '';
     @State isLoading = false;
     @State tracks: TrackViewModelItem[] = [];
@@ -44,6 +43,9 @@ class SearchViewModel {
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
     @State likeTrackCommand = Scheduler.Command<TrackViewModelItem>(() => { throw new Error('not implemented') });
     @State unlikeTrackCommand = Scheduler.Command<TrackViewModelItem>(() => { throw new Error('not implemented') });
+
+    @Binding((v: SearchViewModel) => v.logService, 'errors')
+    errors!: Result[];
 
     onChangeTerm = asyncDebounce((term: string) => {
         searchQueue.push(async (next) => {
@@ -132,7 +134,7 @@ class SearchViewModel {
 
                 this.playlists = _.map(search.playlists.items, (playlist) => PlaylistsViewModelItem.fromPlaylist(playlist));
             }
-        }).error(e => this.errors = [Result.error(e)]);
+        }).error(this.logService.logError);
         this.isLoading = false;
     }
 
@@ -176,7 +178,7 @@ class SearchViewModel {
 
             albumTrackssResult
                 .map(tr => this.currentTracks = _.map(tr.items, (item, index) => TrackViewModelItem.fromTrack(item, index)))
-                .error(e => this.errors = [Result.error(e)]);
+                .error(this.logService.logError);
         }
 
         if (this.searchType === 'playlist' && this.currentPlaylist) {
@@ -184,7 +186,7 @@ class SearchViewModel {
 
             playlistTracksResult
                 .map(tr => this.currentTracks = _.map(tr.items, (item, index) => TrackViewModelItem.fromSong(item, index)))
-                .error(e => this.errors = [Result.error(e)]);
+                .error(this.logService.logError);
         }
 
         if (this.searchType === 'artist' && this.currentArtist) {
@@ -192,7 +194,7 @@ class SearchViewModel {
 
             artistTracksResult
                 .map(tr => this.currentTracks = _.map(tr.tracks, (item, index) => TrackViewModelItem.fromTrack(item, index)))
-                .error(e => this.errors = [Result.error(e)]);
+                .error(this.logService.logError);
         }
     }
 

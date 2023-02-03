@@ -15,9 +15,7 @@ class HomeView extends React.Component<IHomeViewProps> {
     didRefresh: HomeView['refresh'] = this.refresh.bind(this);
     vm = inject(HomeViewModel);
 
-    @Binding((a: HomeView) => a.vm, 'errors', {
-        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
-    })
+    @Binding((a: HomeView) => a.vm, 'errors')
     errors!: Result[];
 
     @Binding((a: HomeView) => a.vm, 'tracks')

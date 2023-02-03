@@ -18,9 +18,7 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
     homeVm = inject(HomeViewModel);
     playlistsService = inject(PlaylistsService);
 
-    @Binding((a: PickPlaylistsView) => a.vm, 'errors', {
-        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
-    })
+    @Binding((a: PickPlaylistsView) => a.vm, 'errors')
     errors!: Result[];
 
     @Binding((a: PickPlaylistsView) => a.homeVm, 'selectedPlaylist')

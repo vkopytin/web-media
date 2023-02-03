@@ -14,9 +14,7 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
     didRefresh: MediaPlayerView['refresh'] = this.refresh.bind(this);
     vm = inject(MediaPlayerViewModel);
 
-    @Binding((a: MediaPlayerView) => a.vm, 'errors', {
-        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
-    })
+    @Binding((a: MediaPlayerView) => a.vm, 'errors')
     errors!: Result[];
 
     @Binding(() => inject(AppViewModel), 'currentTrackId')

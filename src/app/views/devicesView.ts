@@ -15,9 +15,7 @@ class DevicesView extends React.Component<IDevicesViewProps> {
     didRefresh: DevicesView['refresh'] = this.refresh.bind(this);
     vm = inject(AppViewModel);
 
-    @Binding((a: DevicesView) => a.vm, 'errors', {
-        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
-    })
+    @Binding((a: DevicesView) => a.vm, 'errors')
     errors!: DevicesView['vm']['errors'];
 
     @Binding((a: DevicesView) => a.vm, 'devices')

@@ -17,9 +17,7 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
     didRefresh: PlaylistsView['refresh'] = this.refresh.bind(this);
     vm = inject(PlaylistsViewModel);
 
-    @Binding((a: PlaylistsView) => a.vm, 'errors', {
-        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
-    })
+    @Binding((a: PlaylistsView) => a.vm, 'errors')
     errors!: Result[];
 
     @Binding((a: PlaylistsView) => a.vm, 'newPlaylistName')

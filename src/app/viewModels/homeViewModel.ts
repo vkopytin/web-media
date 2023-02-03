@@ -11,7 +11,6 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class HomeViewModel {
-    @State errors: Result[] = [];
     @State isLoading = false;
     @State selectedTrack: TrackViewModelItem | null = null;
     @State trackLyrics: { trackId: string; lyrics: string } | null = null;
@@ -26,6 +25,8 @@ class HomeViewModel {
     @State removeBannFromTrackCommand = Scheduler.Command((track: TrackViewModelItem) => this.removeBannFromTrack(track));
     @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem | null) => this.selectPlaylist(playlist));
 
+    @Binding((v: HomeViewModel) => v.logService, 'errors')
+    errors!: Result[];
     @Binding((vm: HomeViewModel) => vm.suggestions, 'tracks')
     tracks!: TrackViewModelItem[];
     @Binding((vm: HomeViewModel) => vm.suggestions, 'selectedPlaylist')
@@ -49,7 +50,7 @@ class HomeViewModel {
             await this.connect();
             await this.fetchData();
         } catch (ex) {
-            this.errors = [Result.error(ex as Error)];
+            this.logService.logError(ex as Error);
         }
     }
 
@@ -73,7 +74,7 @@ class HomeViewModel {
     async checkBannedTracks(): Promise<void> {
         const bannedTrackIdsResult = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
         const res2 = bannedTrackIdsResult.map(r => this.bannedTrackIds = r);
-        res2.error(() => this.errors = [res2]);
+        res2.error(this.logService.logError);
     }
 
     async playInTracks(item: TrackViewModelItem): Promise<void> {
@@ -94,7 +95,7 @@ class HomeViewModel {
         await res.map(async () => {
             this.suggestions.checkTracks([track]);
             await this.checkBannedTracks();
-        }).error((e) => this.errors = [Result.error(e)]).await();
+        }).error(this.logService.logError).await();
     }
 
     async unlikeTrack(track: TrackViewModelItem): Promise<void> {
@@ -102,7 +103,7 @@ class HomeViewModel {
         await res.map(async () => {
             await this.suggestions.checkTracks([track]);
             await this.checkBannedTracks();
-        }).error(e => this.errors = [Result.error(e)]).await();
+        }).error(this.logService.logError).await();
     }
 
     async findTrackLyrics(track: TrackViewModelItem): Promise<void> {
@@ -133,14 +134,14 @@ class HomeViewModel {
         await track.bannTrack();
         const res = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
 
-        res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
+        res.map(r => this.bannedTrackIds = r).error(this.logService.logError);
     }
 
     async removeBannFromTrack(track: TrackViewModelItem): Promise<void> {
         await track.removeBannFromTrack();
         const res = await this.data.listBannedTracks(this.tracks.map(track => track.id()));
 
-        res.map(r => this.bannedTrackIds = r).error(e => this.errors = [Result.error(e)]);
+        res.map(r => this.bannedTrackIds = r).error(this.logService.logError);
     }
 }
 

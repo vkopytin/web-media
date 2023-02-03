@@ -16,9 +16,7 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
     didRefresh: MyTracksView['refresh'] = this.refresh.bind(this);
     vm = inject(MyTracksViewModel);
 
-    @Binding((a: MyTracksView) => a.vm, 'errors', {
-        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
-    })
+    @Binding((a: MyTracksView) => a.vm, 'errors')
     errors!: Result[];
 
     @Binding((a: MyTracksView) => a.vm, 'isLoading')

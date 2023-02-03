@@ -1,6 +1,7 @@
+import { LogService } from '../service';
 import * as _ from 'underscore';
 import { MediaService } from '../service/mediaService';
-import { State } from '../utils';
+import { Binding, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { AlbumViewModelItem } from './albumViewModelItem';
@@ -9,7 +10,6 @@ import { TrackViewModelItem } from './trackViewModelItem';
 
 
 class NewReleasesViewModel {
-    @State errors: Result[] = [];
     @State newReleases: AlbumViewModelItem[] = [];
     @State featuredPlaylists: PlaylistsViewModelItem[] = [];
     @State currentAlbum: AlbumViewModelItem | null = null;
@@ -31,7 +31,11 @@ class NewReleasesViewModel {
     @State likeAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.likeAlbum(album));
     @State unlikeAlbumCommand = Scheduler.Command((album: AlbumViewModelItem) => this.unlikeAlbum(album));
 
+    @Binding((v: NewReleasesViewModel) => v.logService, 'errors')
+    errors!: Result[];
+
     constructor(
+        private logService: LogService,
         private media: MediaService,
     ) {
 
@@ -55,7 +59,7 @@ class NewReleasesViewModel {
         const res3 = res2.map(featuredPlaylists => {
             this.featuredPlaylists = _.map(featuredPlaylists.playlists?.items || [], playlist => PlaylistsViewModelItem.fromPlaylist(playlist));
         });
-        res3.error(e => this.errors = [Result.error(e)]);
+        res3.error(this.logService.logError);
     }
 
     async loadTracks(): Promise<void> {
@@ -67,13 +71,13 @@ class NewReleasesViewModel {
                     ...item,
                     album: item.album || currentAlbum.album
                 }, index));
-            }).error(e => this.errors = [Result.error(e)]);
+            }).error(this.logService.logError);
         } else if (this.currentPlaylist) {
             const playlistTracksResult = await this.media.fetchPlaylistTracks(this.currentPlaylist.id(), 0, 100);
             playlistTracksResult.map(tracksResult => {
                 const tracksModels = tracksResult.items.map((item, index) => TrackViewModelItem.fromSong(item, index));
                 this.currentTracks = tracksModels;
-            }).error(e => this.errors = [Result.error(e)]);
+            }).error(this.logService.logError);
         } else {
             this.tracks = [];
         }
@@ -94,17 +98,17 @@ class NewReleasesViewModel {
                 liked && likedAlbums.push(albums[index]);
             });
             this.likedAlbums = likedAlbums;
-        }).error(e => this.errors = [Result.error(e)]);
+        }).error(this.logService.logError);
     }
 
     async likeAlbum(album: AlbumViewModelItem): Promise<void> {
         const likedResult = await this.media.addAlbums(album.id());
-        likedResult.error(() => this.errors = [likedResult]);
+        likedResult.error(this.logService.logError);
     }
 
     async unlikeAlbum(album: AlbumViewModelItem): Promise<void> {
         const likedResult = await this.media.removeAlbums(album.id());
-        likedResult.error(() => this.errors = [likedResult]);
+        likedResult.error(this.logService.logError);
     }
 }
 

@@ -34,9 +34,7 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
         dragIndex: 0
     };
 
-    @Binding((a: TracksView) => a.vm, 'errors', {
-        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
-    })
+    @Binding((a: TracksView) => a.vm, 'errors')
     errors!: Result[];
 
     @Binding((a: TracksView) => a.vm, 'tracks')

@@ -1,8 +1,8 @@
-import { LogService } from 'app/service';
+import { LogService } from '../service';
 import * as _ from 'underscore';
 import { LyricsService } from '../service/lyricsService';
 import { MediaService } from '../service/mediaService';
-import { State } from '../utils';
+import { Binding, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { TrackViewModelItem } from './trackViewModelItem';
@@ -14,7 +14,6 @@ class MyTracksViewModel {
         offset: 0
     };
 
-    @State errors: Result[] = [];
     @State tracks: TrackViewModelItem[] = [];
     @State likedTracks: TrackViewModelItem[] = [];
     @State isLoading = false;
@@ -23,6 +22,9 @@ class MyTracksViewModel {
 
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
     @State findTrackLyricsCommand = Scheduler.Command((track: TrackViewModelItem) => this.findTrackLyrics(track));
+
+    @Binding((v: MyTracksViewModel) => v.logService, 'errors')
+    errors!: Result[];
 
     constructor(
         private logService: LogService,
@@ -56,7 +58,7 @@ class MyTracksViewModel {
             this.settings.offset = this.settings.offset + Math.min(this.settings.limit, tracks.items.length);
             this.tracks = _.map(tracks.items.slice(0, this.settings.limit), (song, index) => TrackViewModelItem.fromSong(song, index));
             this.checkTracks(this.tracks);
-        }).error(e => this.errors = [Result.error(e)]);
+        }).error(this.logService.logError);
 
         this.isLoading = false;
     }
@@ -74,7 +76,7 @@ class MyTracksViewModel {
             const tracksItems = _.map(tracks.items.slice(0, this.settings.limit), (song, index) => TrackViewModelItem.fromSong(song, this.settings.offset + index));
             this.tracks = [...this.tracks, ...tracksItems];
             this.checkTracks(tracksItems);
-        }).error(e => this.errors = [Result.error(e)]);
+        }).error(this.logService.logError);
 
         this.isLoading = false;
     }
@@ -97,7 +99,7 @@ class MyTracksViewModel {
                 tracksToCheck[index].isLiked = liked;
             });
             this.likedTracks = _.filter(this.tracks, track => track.isLiked);
-        }).error(e => this.errors = [Result.error(e)]);
+        }).error(this.logService.logError);
     }
 
     tracksAddRange(value: TrackViewModelItem[]): void {

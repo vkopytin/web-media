@@ -16,7 +16,6 @@ import { Option, Some } from '../utils/option';
 const lockSection = asyncQueue();
 
 class MediaPlayerViewModel {
-    @State errors: Result[] = [];
     @State queue: TrackViewModelItem[] = [];
     @State timePlayed = 1;
     @State duration = 3.14 * 60 * 1000;
@@ -43,6 +42,8 @@ class MediaPlayerViewModel {
     @State unlikeSongCommand = Scheduler.Command(() => this.unlikeTrack());
     @State seekPlaybackCommand = Scheduler.Command((percent: number) => this.manualSeek(percent));
 
+    @Binding((v: MediaPlayerViewModel) => v.logService, 'errors')
+    errors!: Result[];
     @Binding((vm: MediaPlayerViewModel) => vm.appViewModel, 'currentTrackId')
     currentTrackId!: string;
 
@@ -66,7 +67,7 @@ class MediaPlayerViewModel {
             await this.connect();
             await this.fetchData();
         } catch (ex) {
-            this.errors = [Result.error(ex as Error)];
+            this.logService.logError(ex as Error);
         }
     }
 
@@ -104,13 +105,13 @@ class MediaPlayerViewModel {
         await settingsResult.map(settings => settings?.volume || this.volume)
             .match(async volume => {
                 const res = await this.playback.setVolume(volume);
-                res.map(e => this.errors = [Result.error(e)]);
+                res.map(this.logService.logError);
 
                 return this.volume = volume;
             }, async () => {
                 const volume = await this.playback.getVolume();
                 volume.map(v => this.volume = v)
-                    .error(e => (this.errors = [Result.error(e)], 0));
+                    .error(e => (this.logService.logError(e), 0));
 
                 return this.volume;
             });
@@ -150,7 +151,7 @@ class MediaPlayerViewModel {
 
             return Option.none<Error>();
         }, e => {
-            this.errors = [Result.error(e)];
+            this.logService.logError(e);
 
             return Some.some(e);
         });
@@ -162,7 +163,7 @@ class MediaPlayerViewModel {
         }
         const trackExistsResult = await this.media.hasTracks(this.currentTrackId);
         trackExistsResult.map(r => this.isLiked = _.first(r) || false)
-            .error(e => this.errors = [Result.error(e)]);
+            .error(this.logService.logError);
     }
 
     monitorPlybackInternal(): void {
@@ -193,7 +194,7 @@ class MediaPlayerViewModel {
             this.lastTime = newTime;
             this.autoSeek();
         } catch (ex) {
-            this.errors = [Result.error(ex as Error)];
+            this.logService.logError(ex as Error);
         }
     }
 
@@ -206,9 +207,9 @@ class MediaPlayerViewModel {
                 try {
                     this.timePlayed = timePlayed;
                     const res = await this.remotePlaybackService.seek(timePlayed);
-                    res.error(() => this.errors = [res]);
+                    res.error(this.logService.logError);
                 } catch (ex) {
-                    this.errors = [Result.error(ex as Error)];
+                    this.logService.logError(ex as Error);
                 }
                 next();
                 resolve();
@@ -225,17 +226,17 @@ class MediaPlayerViewModel {
                         if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             this.volume = percent;
                             const res = await this.remotePlaybackService.volume(percent);
-                            res.error(e => this.errors = [Result.error(e)]);
+                            res.error(this.logService.logError);
                         } else {
                             this.volume = percent;
                             const res = await this.playback.setVolume(percent);
-                            res.map(e => this.errors = [Result.error(e)]);
+                            res.map(this.logService.logError);
                         }
 
                         this.settingsSerivce.volume(this.volume = percent);
                     }).await();
                 } catch (ex) {
-                    this.errors = [Result.error(ex as Error)];
+                    this.logService.logError(ex as Error);
                 }
                 next();
                 resolve();
@@ -252,15 +253,15 @@ class MediaPlayerViewModel {
                         if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             const res = await this.remotePlaybackService.play();
                             res.map(() => this.isPlaying = true)
-                                .error(e => this.errors = [Result.error(e)]);
+                                .error(this.logService.logError);
                         } else {
                             const res = await this.playback.resume();
-                            res.map(e => this.errors = [Result.error(e)]);
+                            res.map(this.logService.logError);
                             this.isPlaying = true;
                         }
                     }).await();
                 } catch (ex) {
-                    this.errors = [Result.error(ex as Error)];
+                    this.logService.logError(ex as Error);
                 }
                 next();
                 resolve();
@@ -277,15 +278,15 @@ class MediaPlayerViewModel {
                         if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             const res = await this.remotePlaybackService.pause();
                             res.map(() => this.isPlaying = false)
-                                .error(e => this.errors = [Result.error(e)]);
+                                .error(this.logService.logError);
                         } else {
                             const res = await this.playback.pause();
-                            res.map(e => this.errors = [Result.error(e)]);
+                            res.map(this.logService.logError);
                             this.isPlaying = false;
                         }
                     }).await();
                 } catch (ex) {
-                    this.errors = [Result.error(ex as Error)];
+                    this.logService.logError(ex as Error);
                 }
                 next();
                 resolve();
@@ -301,14 +302,14 @@ class MediaPlayerViewModel {
                     await state.map(async state => {
                         if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             const res = await this.remotePlaybackService.previous();
-                            res.error(() => this.errors = [res]);
+                            res.error(this.logService.logError);
                         } else {
                             const res = await this.playback.previouseTrack();
-                            res.map(e => this.errors = [Result.error(e)])
+                            res.map(this.logService.logError);
                         }
                     }).await();
                 } catch (ex) {
-                    this.errors = [Result.error(ex as Error)];
+                    this.logService.logError(ex as Error);
                 }
                 next();
                 resolve();
@@ -324,14 +325,14 @@ class MediaPlayerViewModel {
                     await state.map(async state => {
                         if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             const res = await this.remotePlaybackService.next();
-                            res.error(() => this.errors = [res]);
+                            res.error(this.logService.logError);
                         } else {
                             const res = await this.playback.nextTrack();
-                            res.map(e => this.errors = [Result.error(e)]);
+                            res.map(this.logService.logError);
                         }
                     }).await();
                 } catch (ex) {
-                    this.errors = [Result.error(ex as Error)];
+                    this.logService.logError(ex as Error);
                 }
                 next();
                 resolve();
@@ -348,15 +349,15 @@ class MediaPlayerViewModel {
                         if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             const volume = this.volume;
                             const res = await this.remotePlaybackService.volume(volume * 1.1);
-                            res.error(() => this.errors = [res]);
+                            res.error(this.logService.logError);
                         } else {
                             const volume = await this.playback.getVolume();
                             volume.map(v => this.volume = v * 1.1)
-                                .error(e => this.errors = [Result.error(e)]);
+                                .error(this.logService.logError);
                         }
                     }).await();
                 } catch (ex) {
-                    this.errors = [Result.error(ex as Error)];
+                    this.logService.logError(ex as Error);
                 }
                 next();
                 resolve();
@@ -373,15 +374,15 @@ class MediaPlayerViewModel {
                         if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
                             const volume = this.volume;
                             const res = await this.remotePlaybackService.volume(volume * 0.9);
-                            res.error(e => this.errors = [Result.error(e)]);
+                            res.error(this.logService.logError);
                         } else {
                             const volume = await this.playback.getVolume();
                             volume.map(v => this.volume = v * 0.9)
-                                .error(e => this.errors = [Result.error(e)]);
+                                .error(this.logService.logError);
                         }
                     }).await();
                 } catch (ex) {
-                    this.errors = [Result.error(ex as Error)];
+                    this.logService.logError(ex as Error);
                 }
                 next();
                 resolve();
@@ -397,9 +398,9 @@ class MediaPlayerViewModel {
                     return;
                 }
                 const stateResult = await this.app.addTracks(this.currentTrack);
-                stateResult.error(() => this.errors = [stateResult]);
+                stateResult.error(this.logService.logError);
             } catch (ex) {
-                this.errors = [Result.error(ex as Error)];
+                this.logService.logError(ex as Error);
             }
             next();
         });
@@ -413,9 +414,9 @@ class MediaPlayerViewModel {
             }
             try {
                 const stateResult = await this.app.removeTracks(this.currentTrack);
-                stateResult.error(e => this.errors = [Result.error(e)]);
+                stateResult.error(this.logService.logError);
             } catch (ex) {
-                this.errors = [Result.error(ex as Error)];
+                this.logService.logError(ex as Error);
             }
             next();
         });
@@ -427,7 +428,7 @@ class MediaPlayerViewModel {
 
     async resume(): Promise<void> {
         const res = await this.playback.resume();
-        res.map(e => this.errors = [Result.error(e)]);
+        res.map(this.logService.logError);
     }
 }
 

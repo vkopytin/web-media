@@ -1,6 +1,6 @@
 import * as _ from 'underscore';
 import { IResponseResult, ISpotifySong, ITrack } from '../ports/iMediaProt';
-import { AppService } from '../service';
+import { AppService, LogService } from '../service';
 import { DataService } from '../service/dataService';
 import { RemotePlaybackService } from '../service/remotePlaybackService';
 import { formatTime, isLoading, State } from '../utils';
@@ -38,6 +38,7 @@ class TrackViewModelItem {
     constructor(
         public song: ISpotifySong,
         private index: number,
+        private logService = inject(LogService),
         private data = inject(DataService),
         private mediaPlayerViewModel = inject(MediaPlayerViewModel),
         private remotePlayback = inject(RemotePlaybackService),
@@ -115,28 +116,28 @@ class TrackViewModelItem {
         this.trackPlaylists = playlists.valueOrDefault([]);
 
         const res = await this.data.isBannedTrack(this.song.track.id);
-        res.map(r => this.isBanned = r).error(e => this.errors = [Result.error(e)]);
+        res.map(r => this.isBanned = r).error(this.logService.logError);
     }
 
-    async listPlaylists(): Promise<Result<Result<Error, unknown>[], PlaylistsViewModelItem[]>> {
+    async listPlaylists(): Promise<Result<Error, PlaylistsViewModelItem[]>> {
         const res = await this.data.listPlaylistsByTrack(this.song.track);
 
         return res
             .map(playlists => playlists.map(playlist => PlaylistsViewModelItem.fromPlaylist(playlist)))
-            .error(e => this.errors = [Result.error(e)]);
+            .error(this.logService.logError);
     }
 
     async play(playlistUri: string): Promise<void> {
         const playResult = await this.remotePlayback.play('', playlistUri, this.uri());
         playResult.map(() => this.mediaPlayerViewModel.fetchData())
-            .error(e => this.errors = [Result.error(e)]);
+            .error(this.logService.logError);
     }
 
     async playTracks(tracks: TrackViewModelItem[]): Promise<void> {
         const allowedTracks = _.filter(tracks, track => !track.isBanned);
         const playResult = await this.remotePlayback.play('', _.map(allowedTracks, item => item.uri()), this.uri());
         playResult.map(() => this.mediaPlayerViewModel.fetchData())
-            .error(e => this.errors = [Result.error(e)]);
+            .error(this.logService.logError);
     }
 
     @isLoading
@@ -144,25 +145,25 @@ class TrackViewModelItem {
         const result = await this.app.addTrackToPlaylist(track.song.track, playlist.playlist);
         result.map(() => setTimeout(() => {
             this.fetchData();
-        }, 2000)).error(e => this.errors = [Result.error(e)]);
+        }, 2000)).error(this.logService.logError);
     }
 
     @isLoading
     async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem): Promise<void> {
         const result = await this.app.removeTrackFromPlaylist(track.song.track, playlist.id());
-        await result.map(() => this.fetchData()).error(e => this.errors = [Result.error(e)]);
+        await result.map(() => this.fetchData()).error(this.logService.logError);
     }
 
     async likeTrack(): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
         const result = await this.app.addTracks(this.song.track);
-        result.error(e => this.errors = [Result.error(e)]);
+        result.error(this.logService.logError);
 
         return result;
     }
 
     async unlikeTrack(): Promise<Result<Error, IResponseResult<ISpotifySong>>> {
         const result = await this.app.removeTracks(this.song.track);
-        result.error(e => this.errors = [Result.error(e)]);
+        result.error(this.logService.logError);
 
         return result;
     }
@@ -173,12 +174,12 @@ class TrackViewModelItem {
 
     async bannTrack(): Promise<void> {
         const res = await this.data.bannTrack(this.id());
-        res.map(r => this.isBanned = r).error(e => this.errors = [Result.error(e)]);
+        res.map(r => this.isBanned = r).error(this.logService.logError);
     }
 
     async removeBannFromTrack(): Promise<void> {
         const res = await this.data.removeBannFromTrack(this.id());
-        res.map(r => this.isBanned = !r).error(e => this.errors = [Result.error(e)]);
+        res.map(r => this.isBanned = !r).error(this.logService.logError);
     }
 
 }

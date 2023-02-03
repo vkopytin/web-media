@@ -17,9 +17,7 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
     didRefresh: NewReleasesView['refresh'] = this.refresh.bind(this);
     vm = inject(NewReleasesViewModel);
 
-    @Binding((a: NewReleasesView) => a.vm, 'errors', {
-        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
-    })
+    @Binding((a: NewReleasesView) => a.vm, 'errors')
     errors!: Result[];
 
     @Binding((a: NewReleasesView) => a.vm, 'newReleases')

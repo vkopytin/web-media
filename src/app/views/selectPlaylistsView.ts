@@ -20,9 +20,7 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
     playlistsViewModel = inject(PlaylistsViewModel);
     vm = this.props.track;
 
-    @Binding((a: SelectPlaylistsView) => a.vm, 'errors', {
-        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
-    })
+    @Binding((a: SelectPlaylistsView) => a.vm, 'errors')
     errors!: Result[];
 
     @Binding((a: SelectPlaylistsView) => a.playlistsViewModel, 'isLoading')
