@@ -19,8 +19,8 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
     @Binding((a: UserProfileView) => a.vm, 'errors')
     errors!: Result[];
 
-    @Binding(() => inject(AppViewModel), 'openLogin')
-    openLogin!: boolean;
+    @Binding(() => inject(AppViewModel), 'isLoginVisible')
+    isLoginVisible!: boolean;
 
     @Binding((a: UserProfileView) => a.vm, 'isLoggedin')
     isLoggedin!: boolean;

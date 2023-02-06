@@ -16,7 +16,7 @@ import { ITrack, IUserInfo } from '../ports/iMediaProt';
 type PanelType = 'home' | 'playlists' | 'profile' | 'releases' | 'search' | 'tracks';
 
 class AppViewModel {
-    @State openLogin = true;
+    @State isLoginVisible = true;
     @State currentPanel: PanelType = 'home';
     @State devices: DeviceViewModelItem[] = [];
     @State profile: IUserInfo = {};
@@ -57,7 +57,7 @@ class AppViewModel {
         this.attachToWindowMessageEvent();
         await this.connect();
         await this.fetchData();
-        this.openLogin = false;
+        this.isLoginVisible = false;
         await this.startSync();
     }
 
@@ -71,7 +71,7 @@ class AppViewModel {
                 case 'accessToken':
                     this.autoRefreshUrl = '';
                     await this.app.refreshToken(value);
-                    this.openLogin = !value;
+                    this.isLoginVisible = !value;
                 default:
                     break;
             }
@@ -99,7 +99,7 @@ class AppViewModel {
             r => r,
             e => (this.logService.logError(e), false)
         );
-        this.openLogin = !isLoggedIn;
+        this.isLoginVisible = !isLoggedIn;
 
         this.playback.on('ready', this.updateDevicesHandler);
         this.playback.on('authenticationError', (error: { message?: string; }) => {

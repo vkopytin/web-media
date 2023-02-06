@@ -67,7 +67,7 @@ const AppView = ({ appViewModel = inject(AppViewModel) }) => {
 
         if (!_.isEmpty(tokenExpired)) {
             appViewModel.errors = _.filter(errors, err => !err.is(TokenExpiredError));
-            appViewModel.openLogin = true;
+            appViewModel.isLoginVisible = true;
             setTimeout(() => appViewModel.refreshTokenCommand.exec());
 
             return;
@@ -83,7 +83,7 @@ const AppView = ({ appViewModel = inject(AppViewModel) }) => {
 
         if (!_.isEmpty(unauthenticated)) {
             appViewModel.errors = _.filter(errors, err => !err.is(UnauthenticatedError));
-            appViewModel.openLogin = true;
+            appViewModel.isLoginVisible = true;
 
             return;
         }
@@ -160,7 +160,7 @@ const AppView = ({ appViewModel = inject(AppViewModel) }) => {
                     })}
                 </ul>
             </div>
-            <UserProfileView className={cn("modal ?active", appViewModel.openLogin)} />
+            <UserProfileView className={cn("modal ?active", appViewModel.isLoginVisible)} />
             <header className="bar bar-nav">
                 {appViewModel.isSyncing === 0 ? false
                     : <div className="meter animate">
@@ -172,7 +172,7 @@ const AppView = ({ appViewModel = inject(AppViewModel) }) => {
                 >
                 </a>
                 <a className="icon icon-person pull-right"
-                    onClick={() => appViewModel.openLogin = true}
+                    onClick={() => appViewModel.isLoginVisible = true}
                 ></a>
                 <h1 className="title">
                     <img className="spotify-logo" src={imgSrc.src} height="32"

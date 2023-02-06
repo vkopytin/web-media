@@ -6,7 +6,7 @@ import imgSrc from '../../images/Spotify_Logo_RGB_Green.png';
 export const template = (view: UserProfileView) => <div className={cn(`${view.props.className}`)}>
     <header className="bar bar-nav">
         <a className="icon icon-close pull-right" href="#"
-            onClick={() => view.openLogin = false}
+            onClick={() => view.isLoginVisible = false}
         ></a>
         <h1 className="title">
             <img className="spotify-logo" alt="spotify-logo" src={imgSrc.src} height="32" />

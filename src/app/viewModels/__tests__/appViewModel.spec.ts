@@ -49,7 +49,7 @@ describe('App View Model', () => {
 
     it('Should be created', () => {
         expect(appVm).toBeTruthy();
-        expect(appVm.openLogin).toBeTruthy();
+        expect(appVm.isLoginVisible).toBeTruthy();
     });
 
     it('Should have url on refresh token', async () => {
