@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import * as _ from 'underscore';
 import { NoActiveDeviceError } from '../service/errors/noActiveDeviceError';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
@@ -55,7 +55,7 @@ const AppView = ({ appViewModel = inject(AppViewModel) }) => {
         appViewModel.errors = [];
     }
 
-    useCallback(() => {
+    useMemo(() => {
         const errors = appViewModel.errors;
         if (_.isEmpty(errors)) {
 
