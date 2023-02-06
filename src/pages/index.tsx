@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { inject } from '../app/utils/inject';
 import { Core } from '../app/core';
-import { AppView } from '../app/views/app';
+import { AppView } from '../app/views';
 
 const core = inject(Core);
 

@@ -1,17 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import * as _ from 'underscore';
+import imgSrc from '../../images/Spotify_Logo_RGB_Green.png';
 import { NoActiveDeviceError } from '../service/errors/noActiveDeviceError';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
 import { UnauthenticatedError } from '../service/errors/unauthenticatedError';
-import { asyncDebounce, Notifications } from '../utils';
+import { asyncDebounce, className as cn, Notifications } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { AppViewModel } from '../viewModels';
-import { className as cn } from '../utils';
 import { DevicesView, HomeView, MediaPlayerView, MyTracksView, NewReleasesView, PlaylistsView, SearchView, SwitchView, UserProfileView } from '../views';
-import imgSrc from '../../images/Spotify_Logo_RGB_Green.png';
 
-const AppView = ({ appViewModel = inject(AppViewModel) }) => {
+export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
     const [, doRefresh] = useReducer(() => ({}), {});
     let elScroller = null as HTMLElement | null;
     const currentTrackId = appViewModel.currentTrackId;
@@ -23,7 +21,7 @@ const AppView = ({ appViewModel = inject(AppViewModel) }) => {
         return () => {
             Notifications.stopObserving(appViewModel, doRefresh);
         };
-    }, []);
+    }, [appViewModel]);
 
     const toggleSelectDevices = (fromState?: 'show' | 'hide'): void => {
         const lastValue = fromState || showSelectDevices;
@@ -35,9 +33,9 @@ const AppView = ({ appViewModel = inject(AppViewModel) }) => {
         if (lastValue === 'show') {
             setShowSelectDevices('');
 
-            _.delay(() => {
+            setTimeout(() => {
                 setShowSelectDevices('hide');
-            }, 300);
+            }, 100);
         } else {
             setShowSelectDevices('show');
         }
@@ -57,38 +55,38 @@ const AppView = ({ appViewModel = inject(AppViewModel) }) => {
 
     useMemo(() => {
         const errors = appViewModel.errors;
-        if (_.isEmpty(errors)) {
-
+        if (!errors?.length) {
             return;
         }
-        const tokenExpired = _.filter(errors, err => err.is(TokenExpiredError));
-        const activeDevice = _.filter(errors, err => err.is(NoActiveDeviceError));
-        const unauthenticated = _.filter(errors, err => err.is(UnauthenticatedError));
 
-        if (!_.isEmpty(tokenExpired)) {
-            appViewModel.errors = _.filter(errors, err => !err.is(TokenExpiredError));
+        const tokenExpired = errors.filter(err => err.is(TokenExpiredError));
+        const activeDevice = errors.filter(err => err.is(NoActiveDeviceError));
+        const unauthenticated = errors.filter(err => err.is(UnauthenticatedError));
+
+        if (tokenExpired.length) {
+            appViewModel.errors = errors.filter(err => !err.is(TokenExpiredError));
             appViewModel.isLoginVisible = true;
             setTimeout(() => appViewModel.refreshTokenCommand.exec());
 
             return;
         }
 
-        if (!_.isEmpty(activeDevice)) {
-            appViewModel.errors = _.filter(errors, err => !err.is(NoActiveDeviceError));
+        if (activeDevice.length) {
+            appViewModel.errors = errors.filter(err => !err.is(NoActiveDeviceError));
             appViewModel.currentDevice && appViewModel.switchDevice(appViewModel.currentDevice);
             setTimeout(() => toggleSelectDevices('hide'));
 
             return;
         }
 
-        if (!_.isEmpty(unauthenticated)) {
-            appViewModel.errors = _.filter(errors, err => !err.is(UnauthenticatedError));
+        if (unauthenticated.length) {
+            appViewModel.errors = errors.filter(err => !err.is(UnauthenticatedError));
             appViewModel.isLoginVisible = true;
 
             return;
         }
         appViewModel.errors = errors;
-    }, [appViewModel.errors]);
+    }, [appViewModel.errors?.length]);
 
     const onPageScroll = useCallback(asyncDebounce(() => {
 
@@ -97,7 +95,7 @@ const AppView = ({ appViewModel = inject(AppViewModel) }) => {
                 distance = getBottomDistance();
             if (distance <= scrollThreshold) {
                 scrolledToBottom || setScrolledToBottom(true);
-                _.delay(() => {
+                setTimeout(() => {
                     setScrolledToBottom(false);
                 }, 0);
             }
@@ -261,5 +259,3 @@ const AppView = ({ appViewModel = inject(AppViewModel) }) => {
         ></iframe>}
     </main>;
 };
-
-export { AppView };

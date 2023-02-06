@@ -1,5 +1,5 @@
 export { AlbumsView } from './albumsView';
-export { AppView } from './app';
+export { AppView } from './appView';
 export { DevicesView } from './devicesView';
 export { HomeView } from './homeView';
 export { MediaPlayerView } from './mediaPlayerView';
@@ -12,4 +12,3 @@ export { SelectPlaylistsView } from './selectPlaylistsView';
 export { SwitchView } from './switchView';
 export { TracksView } from './tracksView';
 export { UserProfileView } from './userProfileView';
-

@@ -1,9 +1,9 @@
-import * as _ from 'underscore';
+import { TrackViewModelItem } from 'app/viewModels';
 import { AlbumsView, SelectPlaylistsView } from '../views';
 
 export const template = (view: AlbumsView) => <>
     <ul className="table-view albums-view">
-        {_.map(view.tracks, (item: AlbumsView['tracks'][0]) => {
+        {view.tracks.map((item: TrackViewModelItem) => {
             return <li key={item.id()} className="table-view-cell media">
                 <span className="media-object pull-left player-left--32"
                     onClick={() => view.uri() ? item.play(view.uri()) : item.playTracks(view.tracks)}

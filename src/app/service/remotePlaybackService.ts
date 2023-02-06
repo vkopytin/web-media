@@ -8,6 +8,7 @@ import { NoActiveDeviceError } from './errors/noActiveDeviceError';
 import { RemotePlaybackServiceError } from './errors/remotePlaybackServiceError';
 import { RemotePlaybackServiceUnexpectedError } from './errors/remotePlaybackServiceUnexpectedError';
 import { TokenExpiredError } from './errors/tokenExpiredError';
+import { UnauthenticatedError } from './errors/unauthenticatedError';
 
 
 function returnErrorResult<T>(message: string, err: Error): Result<Error, T> {
@@ -16,6 +17,8 @@ function returnErrorResult<T>(message: string, err: Error): Result<Error, T> {
             return TokenExpiredError.of(err.message, err);
         } else if (err.status === 404 && /active device/i.test(err.message)) {
             return NoActiveDeviceError.of(err.message, err);
+        } if (err.status === 400 && /bearer authentication/i.test(err.message)) {
+            return UnauthenticatedError.of(err.message, err);
         }
 
         return RemotePlaybackServiceError.of<T>(err.message, err);
