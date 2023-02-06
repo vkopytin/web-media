@@ -85,6 +85,10 @@ class UserProfileViewModel {
             this.isLoggedin = false;
         }).error(this.logService.logError);
     }
+
+    isPlaying(track: TrackViewModelItem): boolean {
+        return this.currentTrackId === track.id();
+    }
 }
 
 export { UserProfileViewModel };

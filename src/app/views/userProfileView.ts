@@ -69,7 +69,7 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
     }
 
     isPlaying(track: TrackViewModelItem): boolean {
-        return this.currentTrackId === track.id();
+        return this.vm.isPlaying(track);
     }
 
     render() {
