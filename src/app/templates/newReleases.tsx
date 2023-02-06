@@ -38,7 +38,6 @@ export const template = (view: NewReleasesView) => <>
         })}
     </ul>
     {view.currentAlbum && <AlbumsView
-        showErrors={e => view.showErrors(e)}
         currentTrackId={view.props.currentTrackId}
         uri={view.currentAlbum?.uri()}
         tracks={view.tracks}
@@ -77,7 +76,6 @@ export const template = (view: NewReleasesView) => <>
         })}
     </ul>
     {view.currentPlaylist && <AlbumsView
-        showErrors={e => view.showErrors(e)}
         currentTrackId={view.props.currentTrackId}
         uri={view.currentPlaylist?.uri()}
         tracks={view.currentTracks}

@@ -10,7 +10,6 @@ import { ArtistViewModelItem } from '../viewModels/artistViewModelItem';
 
 
 export interface ISearchViewProps {
-    showErrors<T>(errors: Result<Error, T>[]): void;
     loadMore?: boolean;
     currentTrackId: string;
 }
@@ -105,10 +104,6 @@ class SearchView extends React.Component<ISearchViewProps> {
 
     isPlaying(track: TrackViewModelItem): boolean {
         return track.id() === this.props.currentTrackId;
-    }
-
-    showErrors(errors: Result[]): void {
-        this.props.showErrors(errors);
     }
 
     render() {

@@ -2,13 +2,11 @@ import React from 'react';
 import { template } from '../templates/devices';
 import { Binding, Notifications } from '../utils';
 import { inject } from '../utils/inject';
-import { Result } from '../utils/result';
 import { ICommand } from '../utils/scheduler';
 import { AppViewModel, DeviceViewModelItem } from '../viewModels';
 
 export interface IDevicesViewProps {
-    showErrors<T>(errors: Result<Error, T>[]): void;
-    openShowDevices(showHide: boolean): void;
+    onSwitchDevice(): void;
 }
 
 class DevicesView extends React.Component<IDevicesViewProps> {
@@ -46,11 +44,7 @@ class DevicesView extends React.Component<IDevicesViewProps> {
 
     async switchDevice(device: DeviceViewModelItem): Promise<void> {
         await this.switchDeviceCommand.exec(device);
-        this.props.openShowDevices(false);
-    }
-
-    showErrors(errors: Result<Error>[]): void {
-        this.props.showErrors(errors);
+        this.props.onSwitchDevice();
     }
 
     render() {

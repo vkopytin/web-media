@@ -23,7 +23,6 @@ export const template = (view: AlbumsView) => <>
                     <p>{item.album()}</p>
                 </div>
                 {view.selectedItem === item && <SelectPlaylistsView
-                    showErrors={e => view.showErrors(e)}
                     className="chips-list"
                     track={item} />}
                 {item.isLiked && <span className="badge badge-positive">{item.duration()}</span>}

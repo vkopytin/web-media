@@ -9,7 +9,6 @@ import { AlbumViewModelItem, NewReleasesViewModel, PlaylistsViewModelItem, Track
 
 
 export interface INewReleasesViewProps {
-    showErrors<T>(errors: Result<Error, T>[]): void;
     currentTrackId: string;
 }
 
@@ -69,10 +68,6 @@ class NewReleasesView extends React.Component<INewReleasesViewProps> {
 
     isLiked(album: AlbumViewModelItem): boolean {
         return !!_.find(this.likedAlbums, (item: AlbumViewModelItem) => item.id() === album.id());
-    }
-
-    showErrors(errors: Result<Error>[]): void {
-        this.props.showErrors(errors);
     }
 
     render() {

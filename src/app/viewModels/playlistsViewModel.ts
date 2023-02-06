@@ -1,4 +1,4 @@
-import { AppService, DataService, LogService, LyricsService, MediaService, PlaylistsService, PlaylistTracksService } from '../service';
+import { DataService, LogService, LyricsService, PlaylistsService, PlaylistTracksService } from '../service';
 import { Binding, isLoading, State } from '../utils';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';

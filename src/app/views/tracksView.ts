@@ -11,7 +11,6 @@ export interface ITracksViewProps {
     className?: string;
     playlist: PlaylistsViewModelItem;
     currentTrackId: string;
-    showErrors<T>(errors: Result<Error, T>[]): void;
 }
 
 function elementIndex(el: HTMLElement) {
@@ -98,10 +97,6 @@ class TracksView extends React.Component<ITracksViewProps, ITracksViewState> {
 
     isPlaying(track: TrackViewModelItem): boolean {
         return track.id() === this.props.currentTrackId;
-    }
-
-    showErrors(errors: Result[]): void {
-        this.props.showErrors(errors);
     }
 
     onMouseDown(e: React.MouseEvent<HTMLElement, MouseEvent> | React.TouchEvent<HTMLElement>): void {

@@ -6,11 +6,7 @@ import { Result } from '../utils/result';
 import { ICommand } from '../utils/scheduler';
 import { AppViewModel, MediaPlayerViewModel, TrackViewModelItem } from '../viewModels';
 
-export interface IMediaPlayerViewProps {
-    showErrors<T>(errors: Result<Error, T>[]): void;
-}
-
-class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
+class MediaPlayerView extends React.Component {
     didRefresh: MediaPlayerView['refresh'] = this.refresh.bind(this);
     vm = inject(MediaPlayerViewModel);
 
@@ -125,10 +121,6 @@ class MediaPlayerView extends React.Component<IMediaPlayerViewProps> {
 
     titleLeft(): string {
         return formatTime(this.duration - this.timePlayed);
-    }
-
-    showErrors(errors: Result<Error>[]): void {
-        this.props.showErrors(errors);
     }
 
     logslider(position: number): number {

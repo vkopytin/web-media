@@ -10,7 +10,6 @@ import { AppViewModel, TrackViewModelItem, UserProfileViewModel } from '../viewM
 
 export interface IUserProfileViewProps {
     className?: string;
-    showErrors(errors: Result[]): void;
 }
 
 class UserProfileView extends React.Component<IUserProfileViewProps> {
@@ -71,10 +70,6 @@ class UserProfileView extends React.Component<IUserProfileViewProps> {
 
     isPlaying(track: TrackViewModelItem): boolean {
         return this.currentTrackId === track.id();
-    }
-
-    showErrors(errors: Result[]): void {
-        this.props.showErrors(errors);
     }
 
     render() {

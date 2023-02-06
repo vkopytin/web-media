@@ -16,7 +16,7 @@ export const template = (view: HomeView) => <>
                 Current Song
             </span>
         </div>
-        <PickPlaylistsView showErrors={e => view.showErrors(e)} />
+        <PickPlaylistsView />
     </div>
     <ul className="table-view">
         {_.map(view.tracks, (item: HomeView['tracks'][0]) =>
@@ -52,7 +52,6 @@ export const template = (view: HomeView) => <>
                             <div className="album-title">
                                 <span>{item.album()}</span>
                                 {view.selectedTrack !== item && <SelectPlaylistsView
-                                    showErrors={e => view.showErrors(e)}
                                     className="chips-list"
                                     track={item}
                                     active={true} />}
@@ -75,7 +74,6 @@ export const template = (view: HomeView) => <>
                     >{item.duration()}</span>}
                 </div>
                 {!view.isBanned(item) && view.selectedTrack === item && <SelectPlaylistsView
-                    showErrors={e => view.showErrors(e)}
                     className="chips-list"
                     track={item} />}
                 {(view.trackLyrics && view.trackLyrics.trackId === item.id())

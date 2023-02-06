@@ -50,12 +50,10 @@ export const template = (view: SearchView) => <>
                     <div className="album-title">{item.album()}</div>
                     {view.selectedItem !== item && <SelectPlaylistsView
                         className="select-playlist"
-                        showErrors={e => view.showErrors(e)}
                         track={item} active={true} />}
                 </div>
                 {view.selectedItem === item && <SelectPlaylistsView
                     className="select-playlist"
-                    showErrors={e => view.showErrors(e)}
                     track={item} />}
                 {item.isLiked && <span className="badge badge-positive"
                     onClick={() => view.unlikeTrackCommand.exec(item)}
@@ -85,7 +83,6 @@ export const template = (view: SearchView) => <>
                 </div>
                 {view.currentArtist === item && <div className="card" key={item.id() + '-3'}>
                     <AlbumsView
-                        showErrors={e => view.showErrors(e)}
                         currentTrackId={view.props.currentTrackId}
                         uri={''}
                         tracks={view.currentTracks}
@@ -114,7 +111,6 @@ export const template = (view: SearchView) => <>
                 </div>
                 {view.currentAlbum === item && <div className="card" key={item.id() + '-1'}>
                     <AlbumsView
-                        showErrors={e => view.showErrors(e)}
                         currentTrackId={view.props.currentTrackId}
                         uri={view.currentAlbum?.uri()}
                         tracks={view.currentTracks}
@@ -144,7 +140,6 @@ export const template = (view: SearchView) => <>
                 </div>
                 {view.currentPlaylist === item && <div className="card" key={item.id() + '-2'}>
                     <AlbumsView
-                        showErrors={e => view.showErrors(e)}
                         currentTrackId={view.props.currentTrackId}
                         uri={view.currentPlaylist?.uri()}
                         tracks={view.currentTracks}

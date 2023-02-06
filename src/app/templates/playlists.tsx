@@ -36,8 +36,7 @@ export const template = (view: PlaylistsView) => <>
                 {item.id() === view.currentPlaylistId && <div className="card">
                     <TracksView
                         className="tracks-list"
-                        showErrors={e => view.props.showErrors(e)}
-                        key={1}
+                        key={view.props.currentTrackId}
                         playlist={item}
                         currentTrackId={view.props.currentTrackId}
                     />

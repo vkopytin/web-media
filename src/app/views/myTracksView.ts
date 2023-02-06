@@ -7,7 +7,6 @@ import { ICommand } from '../utils/scheduler';
 import { MyTracksViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IMyTracksViewProps {
-    showErrors<T>(errors: Result<Error, T>[]): void;
     loadMore?: boolean;
     currentTrackId: string;
 }
@@ -62,10 +61,6 @@ class MyTracksView extends React.Component<IMyTracksViewProps> {
 
     isPlaying(track: TrackViewModelItem): boolean {
         return this.props.currentTrackId === track.id();
-    }
-
-    showErrors(errors: Result<Error>[]): void {
-        this.props.showErrors(errors);
     }
 
     render() {

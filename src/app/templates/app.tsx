@@ -6,10 +6,7 @@ import imgSrc from '../../images/Spotify_Logo_RGB_Green.png';
 
 export const template = (view: AppView) => <main>
     <section className="device-content">
-        <UserProfileView
-            showErrors={errors => view.showErrors(errors)}
-            className={cn("modal ?active", view.openLogin)}
-        />
+        <UserProfileView className={cn("modal ?active", view.openLogin)} />
         {view.state.showSelectDevices === 'show' ? <div className='backdrop' onClick={() => view.openDevices(false)}></div>
             : view.errors.length ? <div className='backdrop' onClick={evnt => view.clearErrors(evnt)}></div>
                 : <div></div>
@@ -20,10 +17,7 @@ export const template = (view: AppView) => <main>
             <header className="bar bar-nav">
                 <h1 className="title">Devices</h1>
             </header>
-            <DevicesView
-                showErrors={errors => view.showErrors(errors)}
-                openShowDevices={showHide => view.openDevices(showHide)}
-            />
+            <DevicesView onSwitchDevice={() => view.openDevices(false)} />
         </div>
         <div className={cn("popover ?visible", view.errors.length)} style={{
             display: view.errors.length ? 'block' : 'none'
@@ -63,9 +57,7 @@ export const template = (view: AppView) => <main>
         </header>
         <div className="bar bar-standard bar-header-secondary bar-header-playback" style={{ height: '92px' }}>
             <div className="region">
-                <MediaPlayerView
-                    showErrors={errors => view.showErrors(errors)}
-                />
+                <MediaPlayerView />
             </div>
         </div>
         <nav className="footer bar bar-tab bar-footer">
@@ -105,17 +97,13 @@ export const template = (view: AppView) => <main>
                 ref={el => el && (view.elScroller = el)}
                 onScroll={() => view.onPageScroll()}
             >
-                <HomeView
-                    showErrors={errors => view.showErrors(errors)}
-                    currentTrackId={view.currentTrackId}
-                />
+                <HomeView currentTrackId={view.currentTrackId} />
             </section>
             <section key="playlists" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
                 ref={el => el && (view.elScroller = el)}
                 onScroll={() => view.onPageScroll()}
             >
                 <PlaylistsView
-                    showErrors={errors => view.showErrors(errors)}
                     loadMore={view.state.scrolledToBottom}
                     currentTrackId={view.currentTrackId}
                 />
@@ -124,7 +112,6 @@ export const template = (view: AppView) => <main>
                 ref={el => el && (view.elScroller = el)} onScroll={() => view.onPageScroll()}
             >
                 <MyTracksView
-                    showErrors={errors => view.showErrors(errors)}
                     loadMore={view.state.scrolledToBottom}
                     currentTrackId={view.currentTrackId}
                 />
@@ -133,17 +120,13 @@ export const template = (view: AppView) => <main>
                 ref={el => el && (view.elScroller = el)} onScroll={() => view.onPageScroll()}
             >
                 <SearchView
-                    showErrors={errors => view.showErrors(errors)}
                     loadMore={view.state.scrolledToBottom}
                     currentTrackId={view.currentTrackId}
                 />
             </section>
             <section key="releases" className={cn("content ?shadow", view.state.showSelectDevices === 'show')}
                 ref={el => el && (view.elScroller = el)} onScroll={() => view.onPageScroll()}>
-                <NewReleasesView
-                    showErrors={errors => view.showErrors(errors)}
-                    currentTrackId={view.currentTrackId}
-                />
+                <NewReleasesView currentTrackId={view.currentTrackId} />
             </section>
         </SwitchView>
     </section>

@@ -6,7 +6,6 @@ import { Result } from '../utils/result';
 import { AlbumsViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IAlbumsViewProps {
-    showErrors<T>(errors: Result<Error, T>[]): void;
     uri: string;
     currentTrackId: string;
     tracks: TrackViewModelItem[];
@@ -16,9 +15,7 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
     didRefresh: AlbumsView['refresh'] = this.refresh.bind(this);
     vm = inject(AlbumsViewModel);
 
-    @Binding((a: AlbumsView) => a.vm, 'errors', {
-        didSet: (view, errors) => view.showErrors(errors as Result<Error>[])
-    })
+    @Binding((a: AlbumsView) => a.vm, 'errors')
     errors!: Result;
 
     @Binding((a: AlbumsView) => a.vm, 'tracks')
@@ -51,10 +48,6 @@ class AlbumsView extends React.Component<IAlbumsViewProps> {
 
     isPlaying(track: TrackViewModelItem): boolean {
         return this.props.currentTrackId === track.id();
-    }
-
-    showErrors(errors: Result<Error>[]): void {
-        this.props.showErrors(errors);
     }
 
     render() {

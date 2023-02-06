@@ -7,12 +7,7 @@ import { Result } from '../utils/result';
 import { ICommand } from '../utils/scheduler';
 import { HomeViewModel, PlaylistsViewModel, PlaylistsViewModelItem } from '../viewModels';
 
-
-export interface IPickPlaylistsViewProps {
-    showErrors<T>(errors: Result<Error, T>[]): void;
-}
-
-class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
+class PickPlaylistsView extends React.Component {
     didRefresh: PickPlaylistsView['refresh'] = this.refresh.bind(this);
     vm = inject(PlaylistsViewModel);
     homeVm = inject(HomeViewModel);
@@ -42,10 +37,6 @@ class PickPlaylistsView extends React.Component<IPickPlaylistsViewProps> {
         this.setState({
             ...this.state,
         });
-    }
-
-    showErrors(errors: Result<Error>[]): void {
-        this.props.showErrors(errors);
     }
 
     render() {

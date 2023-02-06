@@ -8,7 +8,6 @@ import { HomeViewModel, TrackViewModelItem } from '../viewModels';
 
 export interface IHomeViewProps {
     currentTrackId: string;
-    showErrors<T>(errors: Result<Error, T>[]): void;
 }
 
 class HomeView extends React.Component<IHomeViewProps> {
@@ -79,10 +78,6 @@ class HomeView extends React.Component<IHomeViewProps> {
         const res = this.bannedTrackIds.find(trackId => trackId === track.id());
 
         return !!res;
-    }
-
-    showErrors(errors: Result<Error>[]): void {
-        this.props.showErrors(errors);
     }
 
     render() {

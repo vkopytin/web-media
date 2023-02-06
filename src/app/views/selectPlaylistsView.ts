@@ -9,7 +9,6 @@ import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '
 
 
 export interface ISelectPlaylistsViewProps {
-    showErrors<T>(errors: Result<Error, T>[]): void;
     className?: string;
     track: TrackViewModelItem;
     active?: boolean;
@@ -68,10 +67,6 @@ class SelectPlaylistsView extends React.Component<ISelectPlaylistsViewProps> {
     isPlaylistInTracksPlaylist(playlist: PlaylistsViewModelItem): boolean {
         const res = _.find(this.trackPlaylists, (p: PlaylistsViewModelItem) => p.id() === playlist.id());
         return !!res;
-    }
-
-    showErrors(errors: Result[]): void {
-        this.props.showErrors(errors);
     }
 
     render() {

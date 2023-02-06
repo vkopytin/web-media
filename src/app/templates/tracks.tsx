@@ -38,11 +38,9 @@ export const template = (view: TracksView) => <>
                         <span className="author-title">{item.artist()}</span>
                     </div>
                     <div className="album-title"><span>{item.album()}</span>{view.selectedItem !== item && <SelectPlaylistsView
-                        showErrors={e => view.showErrors(e)}
                         className="chips-list" track={item} active={true} />}</div>
                 </div>
                 {!view.isBanned(item) && view.selectedItem === item && <SelectPlaylistsView
-                    showErrors={e => view.showErrors(e)}
                     className="chips-list" track={item} />}
                 <span className="badge-region">
                     {view.isBanned(item) ? <button className="badge badge-negative badge-outlined material-icons"

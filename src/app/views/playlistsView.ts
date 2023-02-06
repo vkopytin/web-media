@@ -10,7 +10,6 @@ import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '
 export interface IPlaylistsViewProps {
     currentTrackId: string;
     loadMore?: boolean;
-    showErrors<T>(errors: Result<Error, T>[]): void;
 }
 
 class PlaylistsView extends React.Component<IPlaylistsViewProps> {
@@ -68,10 +67,6 @@ class PlaylistsView extends React.Component<IPlaylistsViewProps> {
         this.setState({
             ...this.state,
         });
-    }
-
-    showErrors(errors: Result<Error>[]): void {
-        this.props.showErrors(errors);
     }
 
     render() {

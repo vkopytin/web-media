@@ -4,7 +4,6 @@ import { LoginService } from '../service/loginService';
 import { SettingsService } from '../service/settings';
 import { MediaService } from '../service/mediaService';
 import { Binding, State } from '../utils';
-import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { Scheduler } from '../utils/scheduler';
 import { AppViewModel } from './appViewModel';
