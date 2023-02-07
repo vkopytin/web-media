@@ -6,6 +6,7 @@ import { AppViewModel, DeviceViewModelItem } from '../viewModels';
 
 export interface IDevicesViewProps {
     onSwitchDevice(): void;
+    appViewModel?: AppViewModel;
 }
 
 const ListDevices = ({ devices, switchDevice }: { devices: DeviceViewModelItem[]; switchDevice(device: DeviceViewModelItem): void; }) => <>
@@ -28,9 +29,8 @@ const EmptyDevices = ({ refreshDevicesCommand }: { refreshDevicesCommand: IComma
     </li>
 </>;
 
-export const DevicesView = ({ onSwitchDevice }: IDevicesViewProps) => {
+export const DevicesView = ({ onSwitchDevice, appViewModel = inject(AppViewModel) }: IDevicesViewProps) => {
     const [, doRefresh] = useReducer(() => ({}), {});
-    const appViewModel = inject(AppViewModel);
 
     useEffect(() => {
         Notifications.observe(appViewModel, doRefresh);

@@ -68,26 +68,23 @@ export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
             return;
         }
 
-        const unauthenticated = errors.filter(err => err.is(UnauthenticatedError));
-        if (unauthenticated.length) {
-            appViewModel.errors = unauthenticated;
+        if (errors.some(err => err.is(UnauthenticatedError))) {
+            appViewModel.errors = errors.filter(err => !err.is(UnauthenticatedError));
             appViewModel.isLoginVisible = true;
 
             return;
         }
 
-        const tokenExpired = errors.filter(err => err.is(TokenExpiredError));
-        if (tokenExpired.length) {
-            appViewModel.errors = tokenExpired;
+        if (errors.some(err => err.is(TokenExpiredError))) {
+            appViewModel.errors = errors.filter(err => !err.is(TokenExpiredError));
             appViewModel.isLoginVisible = true;
             setTimeout(() => appViewModel.refreshTokenCommand.exec());
 
             return;
         }
 
-        const activeDevice = errors.filter(err => err.is(NoActiveDeviceError));
-        if (activeDevice.length) {
-            appViewModel.errors = activeDevice;
+        if (errors.some(err => err.is(NoActiveDeviceError))) {
+            appViewModel.errors = errors.filter(err => !err.is(NoActiveDeviceError));
             appViewModel.currentDevice && appViewModel.switchDevice(appViewModel.currentDevice);
             setTimeout(() => toggleSelectDevices('hide'));
 
