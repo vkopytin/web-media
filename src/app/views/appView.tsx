@@ -8,6 +8,7 @@ import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { AppViewModel } from '../viewModels';
 import { DevicesView, HomeView, MediaPlayerView, MyTracksView, NewReleasesView, PlaylistsView, SearchView, SwitchView, UserProfileView } from '../views';
+import { When } from './controls';
 
 const scrollThreshold = 15;
 
@@ -108,10 +109,12 @@ export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
 
     return <main>
         <section className="device-content">
-            {showSelectDevices === 'show' ? <div className='backdrop' onClick={() => openDevices(false)}></div>
-                : appViewModel.errors.length ? <div className='backdrop' onClick={evnt => clearErrors(evnt)}></div>
-                    : <div></div>
-            }
+            <When itIs={showSelectDevices === 'show'}>
+                <div className='backdrop' onClick={() => openDevices(false)}></div>
+            </When>
+            <When itIs={appViewModel.errors.length}>
+                <div className='backdrop' onClick={evnt => clearErrors(evnt)}></div>
+            </When>
             <div className={cn("popover ?visible", showSelectDevices === 'show')} style={{
                 display: showSelectDevices !== 'hide' ? 'block' : 'none'
             }}>
@@ -130,22 +133,21 @@ export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
                     <h1 className="title">Errors</h1>
                 </header>
                 <ul className="table-view">
-                    {appViewModel.errors.map((error: Result, index) => {
-                        return <li key={index} className="table-view-cell"
-                            onClick={() => error.error(e => console.log(e))}
-                        >
-                            {error.match(() => '', e => e?.message || '')}
-                        </li>
-                    })}
+                    {appViewModel.errors.map((error: Result, index) => <li
+                        key={index} className="table-view-cell"
+                        onClick={() => error.error(e => console.log(e))}
+                    >
+                        {error.match(() => '', e => e?.message || '')}
+                    </li>)}
                 </ul>
             </div>
             <UserProfileView className={cn("modal ?active", appViewModel.isLoginVisible)} />
             <header className="bar bar-nav">
-                {appViewModel.isSyncing === 0 ? false
-                    : <div className="meter animate">
+                <When itIs={appViewModel.isSyncing}>
+                    <div className="meter animate">
                         <span style={{ width: `${appViewModel.isSyncing}%` }}></span>
                     </div>
-                }
+                </When>
                 <a className="icon icon-info pull-left"
                     onClick={() => openDevices('show')}
                 >
