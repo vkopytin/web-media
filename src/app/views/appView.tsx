@@ -94,7 +94,7 @@ export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
             return;
         }
         appViewModel.errors = errors;
-    }, [appViewModel.errors?.length]);
+    }, [appViewModel.errors.length]);
 
     const onPageScroll = useCallback(asyncDebounce(() => {
         if (!elScroller) {

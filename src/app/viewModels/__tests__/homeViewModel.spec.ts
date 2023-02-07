@@ -1,14 +1,14 @@
 /* eslint-disable */
 
-import { SuggestionsService } from '../../service/suggestionsService';
 import { DataService } from '../../service/dataService';
-import { LoginService } from '../../service/loginService';
+import { LogService } from '../../service/logService';
 import { MediaService } from '../../service/mediaService';
 import { PlaybackService } from '../../service/playbackService';
+import { SuggestionsService } from '../../service/suggestionsService';
+import { Option } from '../../utils/option';
 import { Result } from '../../utils/result';
 import { HomeViewModel } from '../homeViewModel';
 import { TrackViewModelItem } from '../trackViewModelItem';
-import { LogService } from '../../service/logService';
 
 jest.mock('../../service');
 jest.mock('../../service/dataSyncService');
@@ -41,41 +41,46 @@ describe('Home View Model', () => {
         homeVm.tracks = [];
     });
 
-    afterAll(() => {
+    it('Should fetch data', async () => {
+        const track = new TrackViewModelItem({} as any, 0);
+        jest.spyOn(suggestions, 'fetchData').mockImplementation(() => Promise.resolve());
+        jest.spyOn(track, 'id').mockImplementation(() => 'test-id-123');
+        jest.spyOn(data, 'listBannedTracks').mockImplementation(() => Promise.resolve(Result.of([])));
+        homeVm.tracks = [track];
 
-    });
-
-    xit('Should be created', () => {
-        expect(homeVm).toBeTruthy();
-    });
-
-    xit('Should fetch data', async () => {
         await homeVm.fetchData();
 
-        expect(homeVm.tracks.length).toEqual(1);
-        expect(homeVm.tracks[0].id()).toEqual('recommendation-01');
+        expect(suggestions.fetchData).toHaveBeenCalled();
+        expect(data.listBannedTracks).toHaveBeenCalledWith(['test-id-123']);
     });
 
-    xit('Should check tracks', async () => {
+    it('Should check tracks', async () => {
+        const track = new TrackViewModelItem({} as any, 0);
+        homeVm.tracks = [track];
+        jest.spyOn(track, 'id').mockImplementation(() => 'test-id-123');
+        jest.spyOn(data, 'listBannedTracks').mockImplementation(() => Promise.resolve(Result.of([])));
+
         await homeVm.checkBannedTracks();
 
-        expect(homeVm.likedTracks.length).toEqual(1);
+        expect(data.listBannedTracks).toHaveBeenCalledWith(['test-id-123']);
     });
 
-    xit('Should play track', async () => {
+    it('Should play track', async () => {
         const track = new TrackViewModelItem({} as any, 0);
         jest.spyOn(track, 'playTracks').mockImplementation(() => Promise.resolve());
+        homeVm.tracks = [track];
+
         await homeVm.playInTracks(track);
 
         expect(track.playTracks).toHaveBeenCalledWith([track]);
     });
 
-    xit('Should resume playback', async () => {
-        jest.spyOn(playback.player!, 'resume').mockImplementation(() => Promise.resolve());
+    it('Should resume playback', async () => {
+        jest.spyOn(playback, 'resume').mockImplementation(() => Promise.resolve(Option.none()));
 
         await homeVm.resume();
 
-        expect(playback.player!.resume).toHaveBeenCalledWith();
+        expect(playback.resume).toHaveBeenCalledWith();
     });
 
     it('Should like track', async () => {

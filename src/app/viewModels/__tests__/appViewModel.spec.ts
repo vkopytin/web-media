@@ -92,11 +92,12 @@ describe('App View Model', () => {
     });
 
     it('Should catch error when fetch devices', async () => {
+        logService.logError = jest.fn();
         jest.spyOn(remotePlayback, 'listDevices').mockImplementation(() => Promise.resolve(Result.error(new Error('error'))));
 
         await appVm.updateDevices();
 
-        expect(appVm.errors.length).toEqual(1);
+        expect(logService.logError).toHaveBeenCalled();
     });
 
     it('Should switch device', async () => {

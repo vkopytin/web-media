@@ -66,9 +66,9 @@ class Result<E = Error, R = unknown> {
         );
     }
 
-    error<T>(f: (v: E) => T): Result<T, R> {
+    error<T>(fn: (v: E) => T): Result<T, R> {
         return this.left.match(
-            err => Result.error(f(err))
+            err => Result.error(fn(err))
             ,
             () => Result.of(this.right)
         );
