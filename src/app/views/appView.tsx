@@ -9,6 +9,15 @@ import { Result } from '../utils/result';
 import { AppViewModel } from '../viewModels';
 import { DevicesView, HomeView, MediaPlayerView, MyTracksView, NewReleasesView, PlaylistsView, SearchView, SwitchView, UserProfileView } from '../views';
 
+const scrollThreshold = 15;
+
+const getElementBottomDistance = (el: HTMLElement): number => {
+    const bottom = el.scrollHeight;
+    const scrollY = el.scrollTop + el.clientHeight;
+
+    return bottom - scrollY;
+}
+
 export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
     const [, doRefresh] = useReducer(() => ({}), {});
     let elScroller = null as HTMLElement | null;
@@ -59,29 +68,28 @@ export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
             return;
         }
 
-        const tokenExpired = errors.filter(err => err.is(TokenExpiredError));
-        const activeDevice = errors.filter(err => err.is(NoActiveDeviceError));
         const unauthenticated = errors.filter(err => err.is(UnauthenticatedError));
+        if (unauthenticated.length) {
+            appViewModel.errors = unauthenticated;
+            appViewModel.isLoginVisible = true;
 
+            return;
+        }
+
+        const tokenExpired = errors.filter(err => err.is(TokenExpiredError));
         if (tokenExpired.length) {
-            appViewModel.errors = errors.filter(err => !err.is(TokenExpiredError));
+            appViewModel.errors = tokenExpired;
             appViewModel.isLoginVisible = true;
             setTimeout(() => appViewModel.refreshTokenCommand.exec());
 
             return;
         }
 
+        const activeDevice = errors.filter(err => err.is(NoActiveDeviceError));
         if (activeDevice.length) {
-            appViewModel.errors = errors.filter(err => !err.is(NoActiveDeviceError));
+            appViewModel.errors = activeDevice;
             appViewModel.currentDevice && appViewModel.switchDevice(appViewModel.currentDevice);
             setTimeout(() => toggleSelectDevices('hide'));
-
-            return;
-        }
-
-        if (unauthenticated.length) {
-            appViewModel.errors = errors.filter(err => !err.is(UnauthenticatedError));
-            appViewModel.isLoginVisible = true;
 
             return;
         }
@@ -89,41 +97,17 @@ export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
     }, [appViewModel.errors?.length]);
 
     const onPageScroll = useCallback(asyncDebounce(() => {
-
-        const onPageScrollInternal = (): void => {
-            const scrollThreshold = 15,
-                distance = getBottomDistance();
-            if (distance <= scrollThreshold) {
-                scrolledToBottom || setScrolledToBottom(true);
-                setTimeout(() => {
-                    setScrolledToBottom(false);
-                }, 0);
-            }
+        if (!elScroller) {
+            return;
         }
-
-        const getBottomDistance = (): number => {
-            const elementScroll = elScroller;
-            if (elementScroll) {
-                return getElementBottomDistance();
-            }
-
-            return 0;
+        const distance = getElementBottomDistance(elScroller);
+        if (distance <= scrollThreshold) {
+            scrolledToBottom || setScrolledToBottom(true);
+            setTimeout(() => {
+                setScrolledToBottom(false);
+            }, 0);
         }
-
-        const getElementBottomDistance = (): number => {
-            if (!elScroller) {
-
-                return 0;
-            }
-            const scroller = elScroller,
-                bottom = scroller?.scrollHeight,
-                scrollY = scroller.scrollTop + scroller.clientHeight;
-
-            return bottom - scrollY;
-        }
-
-        onPageScrollInternal();
-    }, 500), [elScroller, scrolledToBottom]);
+    }, 300), [appViewModel.currentPanel, scrolledToBottom]);
 
     return <main>
         <section className="device-content">
