@@ -83,6 +83,6 @@ export const template = (view: NewReleasesView) => <>
     <footer className="info content-padded">
         <p>Media Player</p>
         <p>Written by <a href="https://github.com/vkopytin">Volodymyr Kopytin</a></p>
-        <p>Powered by <a href="https://www.npmjs.com/package/databindjs">DataBind JS</a></p>
+        <p>Powered by <a href="https://github.com/vkopytin/web-media/blob/main/src/app/utils/databinding.ts#:~:text=Binding%3CT">DataBind JS</a></p>
     </footer>
 </>;
