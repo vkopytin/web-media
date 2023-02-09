@@ -133,8 +133,8 @@ export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
                     <h1 className="title">Errors</h1>
                 </header>
                 <ul className="table-view">
-                    {appViewModel.errors.map((error: Result, index) => <li
-                        key={index} className="table-view-cell"
+                    {appViewModel.errors.map((error: Result) => <li
+                        key={error.match(() => '', e => e?.message)} className="table-view-cell"
                         onClick={() => error.error(e => console.log(e))}
                     >
                         {error.match(() => '', e => e?.message || '')}
