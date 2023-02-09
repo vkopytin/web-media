@@ -21,8 +21,6 @@ const getElementBottomDistance = (el: HTMLElement): number => {
 
 export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
     const [, doRefresh] = useReducer(() => ({}), {});
-    let elScroller = null as HTMLElement | null;
-    const currentTrackId = appViewModel.currentTrackId;
     const [showSelectDevices, setShowSelectDevices] = useState<'' | 'show' | 'hide'>('hide');
     const [scrolledToBottom, setScrolledToBottom] = useState(false);
 
@@ -32,6 +30,9 @@ export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
             Notifications.stopObserving(appViewModel, doRefresh);
         };
     }, [appViewModel]);
+
+    let elScroller = null as HTMLElement | null;
+    const { currentTrackId } = appViewModel;
 
     const toggleSelectDevices = (fromState?: 'show' | 'hide'): void => {
         const lastValue = fromState || showSelectDevices;

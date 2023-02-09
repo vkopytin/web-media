@@ -13,17 +13,17 @@ export interface IHomeViewProps {
 export const HomeView = ({ currentTrackId, homeVm = inject(HomeViewModel) }: IHomeViewProps) => {
     const [, doRefresh] = useReducer(() => ({}), {});
 
-    const { isLoading, tracks, trackLyrics,
-        refreshCommand, findTrackLyricsCommand, removeBannFromTrackCommand,
-        bannTrackCommand, unlikeTrackCommand, likeTrackCommand
-    } = homeVm;
-
     useEffect(() => {
         Notifications.observe(homeVm, doRefresh);
         return () => {
             Notifications.stopObserving(homeVm, doRefresh);
         };
     }, [homeVm]);
+
+    const { isLoading, tracks, trackLyrics,
+        refreshCommand, findTrackLyricsCommand, removeBannFromTrackCommand,
+        bannTrackCommand, unlikeTrackCommand, likeTrackCommand
+    } = homeVm;
 
     const isPlaying = (track: TrackViewModelItem): boolean => {
         return currentTrackId === track.id();

@@ -36,6 +36,13 @@ const logPosition = (value: number): number => {
 export const MediaPlayerView = ({ mediaPlayerVm = inject(MediaPlayerViewModel) }) => {
     const [, doRefresh] = useReducer(() => ({}), {});
 
+    useEffect(() => {
+        Notifications.observe(mediaPlayerVm, doRefresh);
+        return () => {
+            Notifications.stopObserving(mediaPlayerVm, doRefresh);
+        };
+    }, [mediaPlayerVm]);
+
     const {
         isPlaying, isLiked, volume, timePlayed, thumbnailUrl,
         duration, artistName, trackName, albumName,
@@ -43,13 +50,6 @@ export const MediaPlayerView = ({ mediaPlayerVm = inject(MediaPlayerViewModel) }
         volumeCommand, volumeDownCommand, volumeUpCommand,
         unlikeSongCommand, likeSongCommand, refreshPlaybackCommand,
     } = mediaPlayerVm;
-
-    useEffect(() => {
-        Notifications.observe(mediaPlayerVm, doRefresh);
-        return () => {
-            Notifications.stopObserving(mediaPlayerVm, doRefresh);
-        };
-    }, [mediaPlayerVm]);
 
     const getVolume = (): number => {
         return logPosition(volume);
