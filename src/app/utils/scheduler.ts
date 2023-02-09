@@ -1,13 +1,15 @@
 export interface ITask {
     isRunning: boolean;
     fails: number;
-    exec(...args: unknown[]): void;
+    exec(...args: unknown[]): Promise<unknown> | void;
 }
 
 export interface ICommand<A = never, B = never> {
     isRunning: boolean;
     exec(a: A, b: B): void;
+    exec(a: A): Promise<unknown>;
     exec(a: A): void;
+    exec(): Promise<unknown>;
     exec(): void;
 }
 
@@ -29,7 +31,7 @@ export class Scheduler {
     static Command<A>(fn: (a: A) => void): ICommand<A, never>;
     // eslint-disable-next-line @typescript-eslint/ban-types
     static Command<A, B>(fn: (a: A, b: B) => void): ICommand<A, B>;
-    static Command(fn: (...args: unknown[]) => void): ICommand<never, never> {
+    static Command(fn: (...args: unknown[]) => void | Promise<unknown>): ICommand<never, never> {
         const current = Scheduler.getCurrent();
 
         return {
@@ -90,7 +92,7 @@ export class Scheduler {
     }
 
     async exec(task: ITask) {
-        const res = await this.running < this.concurrency ? this.run(task) : this.enqueue(task);
+        const res = this.running < this.concurrency ? await this.run(task) : await this.enqueue(task);
         return res;
     }
 }

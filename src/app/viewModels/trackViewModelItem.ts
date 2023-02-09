@@ -151,7 +151,7 @@ class TrackViewModelItem {
     @isLoading
     async removeFromPlaylist(track: TrackViewModelItem, playlist: PlaylistsViewModelItem): Promise<void> {
         const result = await this.app.removeTrackFromPlaylist(track.song.track, playlist.id());
-        await result.map(() => this.fetchData()).error(this.logService.logError);
+        await result.map(() => this.fetchData()).error(this.logService.logError).await();
     }
 
     async likeTrack(): Promise<Result<Error, IResponseResult<ISpotifySong>>> {

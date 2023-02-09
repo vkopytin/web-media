@@ -67,13 +67,10 @@ class AppViewModel {
                 return;
             }
             const [eventName, value] = evnt.data;
-            switch (eventName) {
-                case 'accessToken':
-                    this.autoRefreshUrl = '';
-                    await this.app.refreshToken(value);
-                    this.isLoginVisible = !value;
-                default:
-                    break;
+            if (eventName === 'accessToken') {
+                this.autoRefreshUrl = '';
+                await this.app.refreshToken(value);
+                this.isLoginVisible = !value;
             }
         });
     }

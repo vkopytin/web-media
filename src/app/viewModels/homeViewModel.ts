@@ -1,3 +1,4 @@
+import { returnErrorResult } from 'app/service/errors/returnErrorResult';
 import { LogService, SuggestionsService } from '../service';
 import { DataService } from '../service/dataService';
 import { LyricsService } from '../service/lyricsService';
@@ -47,7 +48,7 @@ class HomeViewModel {
 
     async init(): Promise<void> {
         try {
-            await this.connect();
+            this.connect();
             await this.fetchData();
         } catch (ex) {
             this.logService.logError(ex as Error);
@@ -60,9 +61,14 @@ class HomeViewModel {
 
     @isLoading
     async fetchData(trackId?: string): Promise<void> {
-        await this.suggestions.fetchData(trackId);
+        try {
+            await this.suggestions.fetchData(trackId);
 
-        this.checkBannedTracks();
+            this.checkBannedTracks();
+        } catch (ex) {
+            const err = returnErrorResult((ex as Error).message, ex as Error);
+            err.error(e => this.logService.logError(e));
+        }
     }
 
     async loadData(...args: unknown[]): Promise<void> {

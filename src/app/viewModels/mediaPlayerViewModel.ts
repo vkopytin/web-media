@@ -101,13 +101,14 @@ class MediaPlayerViewModel {
         this.artistName = artist?.name || '';
         this.autoSeek();
 
-        const settingsResult = await this.settingsSerivce.get('spotify');
+        const settingsResult = this.settingsSerivce.get('spotify');
         await settingsResult.map(settings => settings?.volume || this.volume)
             .match(async volume => {
                 const res = await this.playback.setVolume(volume);
                 res.map(this.logService.logError);
 
-                return this.volume = volume;
+                this.volume = volume;
+                return volume;
             }, async () => {
                 const volume = await this.playback.getVolume();
                 volume.map(v => this.volume = v)
@@ -232,8 +233,8 @@ class MediaPlayerViewModel {
                             const res = await this.playback.setVolume(percent);
                             res.map(this.logService.logError);
                         }
-
-                        this.settingsSerivce.volume(this.volume = percent);
+                        this.volume = percent;
+                        this.settingsSerivce.volume(percent);
                     }).await();
                 } catch (ex) {
                     this.logService.logError(ex as Error);

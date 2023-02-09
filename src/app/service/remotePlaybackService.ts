@@ -1,31 +1,9 @@
-import { ErrorWithStatus } from '../adapter/errors/errorWithStatus';
 import { Events } from '../events';
 import { IResponseResult, ISpotifySong } from '../ports/iMediaProt';
 import { ICurrentlyPlayingResult, IDevice, IPlayerResult, IRemotePlaybackPort } from '../ports/iRemotePlaybackPort';
 import { asyncDebounce } from '../utils';
 import { Result } from '../utils/result';
-import { NoActiveDeviceError } from './errors/noActiveDeviceError';
-import { RemotePlaybackServiceError } from './errors/remotePlaybackServiceError';
-import { RemotePlaybackServiceUnexpectedError } from './errors/remotePlaybackServiceUnexpectedError';
-import { TokenExpiredError } from './errors/tokenExpiredError';
-import { UnauthenticatedError } from './errors/unauthenticatedError';
-
-
-function returnErrorResult<T>(message: string, err: Error): Result<Error, T> {
-    if (err instanceof ErrorWithStatus) {
-        if (err.status === 401 && /expired/i.test(err.message)) {
-            return TokenExpiredError.of(err.message, err);
-        } else if (err.status === 404 && /active device/i.test(err.message)) {
-            return NoActiveDeviceError.of(err.message, err);
-        } if (err.status === 400 && /bearer authentication/i.test(err.message)) {
-            return UnauthenticatedError.of(err.message, err);
-        }
-
-        return RemotePlaybackServiceError.of<T>(err.message, err);
-    }
-
-    return RemotePlaybackServiceUnexpectedError.of<T>(message, err);
-}
+import { returnErrorResult } from './errors/returnErrorResult';
 
 export class RemotePlaybackService extends Events {
     onStateChanged = asyncDebounce((...args: Array<unknown>) => this.onStateChangedInternal(...args), 500);

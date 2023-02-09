@@ -17,16 +17,13 @@ export class SuggestionsService {
         let trackIds = trackId ? [trackId] : [];
 
         if (!trackIds.length) {
-            let tracks: ITrack[];
             if (this.selectedPlaylist) {
                 const result = await this.media.listPlaylistTracks(this.selectedPlaylist.id(), 0, 5);
-                tracks = result.items.map(i => i.track);
+                trackIds = result.items.map(({ track }) => track.id);
             } else {
                 const result = await this.media.tracks(0, 5);
-                tracks = result.items.map(i => i.track);
+                trackIds = result.items.map(({ track }) => track.id);
             }
-
-            trackIds = tracks.map((track) => track.id);
         }
 
         if (!trackIds.length) {
