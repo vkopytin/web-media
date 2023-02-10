@@ -6,7 +6,7 @@ import { SelectPlaylistsView } from '../views';
 import { When } from './controls';
 
 export interface IAlbumsViewProps {
-    uri: string;
+    uri?: string;
     currentTrackId: string;
     tracks: TrackViewModelItem[];
     albumsVm?: AlbumsViewModel;

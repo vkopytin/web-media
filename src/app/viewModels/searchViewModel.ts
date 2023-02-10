@@ -36,7 +36,7 @@ class SearchViewModel {
     @State selectedItem: TrackViewModelItem | null = null;
 
     @State searchCommand = Scheduler.Command((term: string) => this.onChangeTerm(term));
-    @State chageSearchTypeCommand = Scheduler.Command((searchType: ISearchType) => this.changeSearchType(searchType));
+    @State changeSearchTypeCommand = Scheduler.Command((searchType: ISearchType) => this.changeSearchType(searchType));
     @State selectAlbumCommand = Scheduler.Command((album: AlbumViewModelItem | null) => this.selectAlbum(album));
     @State selectPlaylistCommand = Scheduler.Command((playlist: PlaylistsViewModelItem | null) => this.selectPlaylist(playlist));
     @State selectArtistCommand = Scheduler.Command((artist: ArtistViewModelItem | null) => this.selectArtist(artist));
