@@ -1,3 +1,4 @@
+import { useServiceMonitor } from 'app/hooks';
 import React, { useEffect, useReducer } from 'react';
 import { formatTime, Notifications } from '../utils';
 import { inject } from '../utils/inject';
@@ -34,14 +35,7 @@ const logPosition = (value: number): number => {
 }
 
 export const MediaPlayerView = ({ mediaPlayerVm = inject(MediaPlayerViewModel) }) => {
-    const [, doRefresh] = useReducer(() => ({}), {});
-
-    useEffect(() => {
-        Notifications.observe(mediaPlayerVm, doRefresh);
-        return () => {
-            Notifications.stopObserving(mediaPlayerVm, doRefresh);
-        };
-    }, [mediaPlayerVm]);
+    useServiceMonitor(mediaPlayerVm);
 
     const {
         isPlaying, isLiked, volume, timePlayed, thumbnailUrl,

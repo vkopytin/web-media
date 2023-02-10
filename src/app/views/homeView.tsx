@@ -1,5 +1,4 @@
-import { useEffect, useReducer } from 'react';
-import { Notifications } from '../utils';
+import { useServiceMonitor } from 'app/hooks';
 import { inject } from '../utils/inject';
 import { HomeViewModel, TrackViewModelItem } from '../viewModels';
 import { PickPlaylistsView, SelectPlaylistsView } from '../views';
@@ -11,14 +10,7 @@ export interface IHomeViewProps {
 }
 
 export const HomeView = ({ currentTrackId, homeVm = inject(HomeViewModel) }: IHomeViewProps) => {
-    const [, doRefresh] = useReducer(() => ({}), {});
-
-    useEffect(() => {
-        Notifications.observe(homeVm, doRefresh);
-        return () => {
-            Notifications.stopObserving(homeVm, doRefresh);
-        };
-    }, [homeVm]);
+    useServiceMonitor(homeVm);
 
     const { isLoading, tracks, trackLyrics,
         refreshCommand, findTrackLyricsCommand, removeBannFromTrackCommand,

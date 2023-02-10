@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import { useServiceMonitor } from 'app/hooks';
+import React, { useCallback, useMemo, useState } from 'react';
 import imgSrc from '../../images/Spotify_Logo_RGB_Green.png';
 import { NoActiveDeviceError } from '../service/errors/noActiveDeviceError';
 import { TokenExpiredError } from '../service/errors/tokenExpiredError';
 import { UnauthenticatedError } from '../service/errors/unauthenticatedError';
-import { asyncDebounce, className as cn, Notifications } from '../utils';
+import { asyncDebounce, className as cn } from '../utils';
 import { inject } from '../utils/inject';
 import { Result } from '../utils/result';
 import { AppViewModel } from '../viewModels';
@@ -20,16 +21,9 @@ const getElementBottomDistance = (el: HTMLElement): number => {
 }
 
 export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
-    const [, doRefresh] = useReducer(() => ({}), {});
+    useServiceMonitor(appViewModel);
     const [showSelectDevices, setShowSelectDevices] = useState<'' | 'show' | 'hide'>('hide');
     const [scrolledToBottom, setScrolledToBottom] = useState(false);
-
-    useEffect(() => {
-        Notifications.observe(appViewModel, doRefresh);
-        return () => {
-            Notifications.stopObserving(appViewModel, doRefresh);
-        };
-    }, [appViewModel]);
 
     let elScroller = null as HTMLElement | null;
     const { currentTrackId } = appViewModel;

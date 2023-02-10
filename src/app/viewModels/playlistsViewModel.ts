@@ -14,7 +14,7 @@ class PlaylistsViewModel {
     @State loadMoreCommand = Scheduler.Command(() => this.loadMore());
     @State createPlaylistCommand = Scheduler.Command((isPublic: boolean) => this.createNewPlaylist(isPublic));
     @State selectPlaylistCommand = Scheduler.Command((playlistId: string | null) => {
-        this.currentPlaylistId = playlistId;
+        this.playlistTracksService.currentPlaylistId = playlistId;
         this.fetchTracks();
     });
     @State loadMoreTracksCommand = Scheduler.Command(() => this.loadMoreTracks());

@@ -1,9 +1,6 @@
-import React, { useEffect, useReducer } from 'react';
-import * as _ from 'underscore';
-import { Binding, Notifications } from '../utils';
+import { useServiceMonitor } from 'app/hooks';
+import { useMemo } from 'react';
 import { inject } from '../utils/inject';
-import { Result } from '../utils/result';
-import { ICommand } from '../utils/scheduler';
 import { MyTracksViewModel, TrackViewModelItem } from '../viewModels';
 import { SelectPlaylistsView } from '../views';
 
@@ -13,20 +10,19 @@ export interface IMyTracksViewProps {
     myTrackVm?: MyTracksViewModel;
 }
 
-export const MyTracksView = ({ currentTrackId, myTrackVm = inject(MyTracksViewModel) }: IMyTracksViewProps) => {
-    const [, doRefresh] = useReducer(() => ({}), {});
-
-    useEffect(() => {
-        Notifications.observe(myTrackVm, doRefresh);
-        return () => {
-            Notifications.stopObserving(myTrackVm, doRefresh);
-        };
-    }, [myTrackVm]);
+export const MyTracksView = ({ currentTrackId, loadMore, myTrackVm = inject(MyTracksViewModel) }: IMyTracksViewProps) => {
+    useServiceMonitor(myTrackVm);
 
     const {
         isLoading, tracks, trackLyrics,
         findTrackLyricsCommand, loadMoreCommand,
     } = myTrackVm;
+
+    useMemo(() => {
+        if (loadMore) {
+            loadMoreCommand.exec();
+        }
+    }, [loadMore]);
 
     const isPlaying = (track: TrackViewModelItem): boolean => {
         return currentTrackId === track.id();
@@ -71,7 +67,7 @@ export const MyTracksView = ({ currentTrackId, myTrackVm = inject(MyTracksViewMo
                         {item.isLiked || <span className="badge">{item.duration()}</span>}
                     </div>
                     {(trackLyrics && trackLyrics.trackId === item.id())
-                        && <div className="card">{_.map(trackLyrics.lyrics.split('\n'), (line, index) => {
+                        && <div className="card">{trackLyrics.lyrics.split('\n').map((line, index) => {
                             return <div key={index}>{line}</div>;
                         })}</div>}
                 </li>

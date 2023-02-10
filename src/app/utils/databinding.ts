@@ -59,6 +59,9 @@ export const Notifications = (function () {
         },
         initBindingMetadata(dict: { [key: string]: any }) {
             const bindingDeclarations: IBindingMetadataInfo = GetTraits(dict.constructor.prototype);
+            if (!bindingDeclarations) {
+                return;
+            }
             bindingDeclarations.declaredBindings.forEach((p: string) => {
                 dict[p];
             });

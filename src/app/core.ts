@@ -20,6 +20,7 @@ import {
     SuggestionsService
 } from './service';
 import { inject } from './utils/inject';
+import { AlbumsViewModel } from './viewModels';
 import { AppViewModel } from './viewModels/appViewModel';
 import { HomeViewModel } from './viewModels/homeViewModel';
 import { MediaPlayerViewModel } from './viewModels/mediaPlayerViewModel';
@@ -55,6 +56,7 @@ export class Core {
     playlistsViewModel = inject(PlaylistsViewModel, this.logService, this.dataService, this.lyricsService, this.playlistsService, this.playlistTracksService);
     searchViewModel = inject(SearchViewModel, this.logService, this.mediaService, this.settingsService);
     userProfileViewModel = inject(UserProfileViewModel, this.logService, this.appViewModel, this.loginService, this.settingsService, this.mediaService, this.appService);
+    albumsViewModel = inject(AlbumsViewModel, this.logService);
 
     async run(): Promise<void> {
         await Promise.all([

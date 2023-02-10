@@ -1,5 +1,4 @@
-import { useEffect, useReducer } from 'react';
-import { Notifications } from '../utils';
+import { useServiceMonitor } from 'app/hooks';
 import { inject } from '../utils/inject';
 import { ICommand } from '../utils/scheduler';
 import { AppViewModel, DeviceViewModelItem } from '../viewModels';
@@ -30,14 +29,7 @@ const EmptyDevices = ({ refreshDevicesCommand }: { refreshDevicesCommand: IComma
 </>;
 
 export const DevicesView = ({ onSwitchDevice, appViewModel = inject(AppViewModel) }: IDevicesViewProps) => {
-    const [, doRefresh] = useReducer(() => ({}), {});
-
-    useEffect(() => {
-        Notifications.observe(appViewModel, doRefresh);
-        return () => {
-            Notifications.stopObserving(appViewModel, doRefresh);
-        };
-    }, [appViewModel]);
+    useServiceMonitor(appViewModel);
 
     const switchDevice = async (device: DeviceViewModelItem): Promise<void> => {
         await appViewModel.switchDeviceCommand.exec(device);
