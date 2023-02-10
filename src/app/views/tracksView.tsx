@@ -1,11 +1,8 @@
 import { useServiceMonitor } from 'app/hooks';
 import $ from 'jquery';
 import React from 'react';
-import * as _ from 'underscore';
-import { Binding, className as cn, Notifications } from '../utils';
+import { className as cn } from '../utils';
 import { inject } from '../utils/inject';
-import { Result } from '../utils/result';
-import { ICommand } from '../utils/scheduler';
 import { PlaylistsViewModel, PlaylistsViewModelItem, TrackViewModelItem } from '../viewModels';
 import { SelectPlaylistsView } from '../views';
 
@@ -42,7 +39,7 @@ export const TracksView = ({ className, currentTrackId, playlist, playlistsVm = 
     }
 
     const onMouseDown = (e: React.MouseEvent<HTMLElement, MouseEvent> | React.TouchEvent<HTMLElement>): void => {
-        console.log('onMouseDown');
+        //console.log('onMouseDown');
         const target = getTrNode(e.target as HTMLElement);
         if (target) {
             target.setAttribute('draggable', 'true');
@@ -52,10 +49,10 @@ export const TracksView = ({ className, currentTrackId, playlist, playlistsVm = 
     }
 
     const onDragStart = (e: DragEvent): void => {
-        console.log('onDragStart');
+        //console.log('onDragStart');
         const target = getTrNode(e.target as HTMLElement);
         if (target) {
-            //       e.dataTransfer.setData('Text', '');
+            //e.dataTransfer.setData('Text', '');
             if (e.dataTransfer) {
                 e.dataTransfer.effectAllowed = 'move';
             }
@@ -113,8 +110,8 @@ export const TracksView = ({ className, currentTrackId, playlist, playlistsVm = 
     }
 
     const getTrNode = (target: HTMLElement) => {
-        //     console.log('dragContainer:', this.refs.dragContainer)
-        //     return closest(target, 'tr', this.refs.dragContainer.tableNode);
+        //console.log('dragContainer:', this.refs.dragContainer)
+        //return closest(target, 'tr', this.refs.dragContainer.tableNode);
         return $(target).closest('li')[0];
     }
 
@@ -138,7 +135,7 @@ export const TracksView = ({ className, currentTrackId, playlist, playlistsVm = 
     }
 
     return <ul className={cn(`${className} table-view`)}>
-        {_.map(tracks, (item: TrackViewModelItem) => <li key={item.id()}>
+        {tracks.map((item: TrackViewModelItem) => <li key={item.id()}>
             <div className="table-view-cell media"
                 onTouchStart={e => onMouseDown(e)}
             >
@@ -194,7 +191,7 @@ export const TracksView = ({ className, currentTrackId, playlist, playlistsVm = 
                 </span>
             </div>
             {(trackLyrics && trackLyrics.trackId === item.id())
-                && <div className="card">{_.map(trackLyrics.lyrics.split('\n'), (line, index) => {
+                && <div className="card">{trackLyrics.lyrics.split('\n').map((line, index) => {
                     return <div key={index}>{line}</div>;
                 })}</div>}
         </li>
