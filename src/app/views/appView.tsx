@@ -98,7 +98,7 @@ export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
             scrolledToBottom || setScrolledToBottom(true);
             setTimeout(() => {
                 setScrolledToBottom(false);
-            }, 0);
+            }, 100);
         }
     }, 300), [appViewModel.currentPanel, scrolledToBottom]);
 

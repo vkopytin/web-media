@@ -212,8 +212,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.logService.logError(ex as Error);
                 }
-                next();
                 resolve();
+                next();
             });
         });
     }
@@ -239,8 +239,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.logService.logError(ex as Error);
                 }
-                next();
                 resolve();
+                next();
             });
         });
     }
@@ -264,8 +264,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.logService.logError(ex as Error);
                 }
-                next();
                 resolve();
+                next();
             });
         });
     }
@@ -289,8 +289,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.logService.logError(ex as Error);
                 }
-                next();
                 resolve();
+                next();
             });
         });
     }
@@ -312,8 +312,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.logService.logError(ex as Error);
                 }
-                next();
                 resolve();
+                next();
             });
         });
     }
@@ -335,8 +335,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.logService.logError(ex as Error);
                 }
-                next();
                 resolve();
+                next();
             });
         });
     }
@@ -360,8 +360,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.logService.logError(ex as Error);
                 }
-                next();
                 resolve();
+                next();
             });
         });
     }
@@ -385,8 +385,8 @@ class MediaPlayerViewModel {
                 } catch (ex) {
                     this.logService.logError(ex as Error);
                 }
-                next();
                 resolve();
+                next();
             });
         });
     }
