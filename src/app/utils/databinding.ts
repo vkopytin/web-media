@@ -1,7 +1,5 @@
 /* eslint-disable */
 
-import { Subject } from 'rxjs';
-
 const assert = {
     instanceOf(instance: unknown, assetType: Function, message: string) {
         if (instance instanceof assetType) {
@@ -33,7 +31,6 @@ interface IBindingMetadataInfo {
 }
 
 export const Notifications = (function () {
-    const notifications$ = new Subject<INotification>();
     const objectTraits = new WeakMap<object, object>();
     const GetTraits = <T extends {}>(obj: {}, autoCreate?: {}): T => {
         if (autoCreate && !objectTraits.has(obj)) {
@@ -46,7 +43,6 @@ export const Notifications = (function () {
     };
 
     return {
-        notifications$,
         hasTraits(obj: unknown) {
             return objectTraits.has(obj as object);
         },
@@ -201,13 +197,13 @@ export function State<T>(target: T, propName: string, descriptor?: PropertyDescr
 export function Binding<T, R>(path: (a: T) => R, bindableProperty: keyof R, options?: { didSet?: <V>(a: T, v: V) => void }) {
     return function (target: T, propName: string, descriptor?: PropertyDescriptor): any {
         Notifications.declareBindingMetadata(target, propName);
-        function initBinding(this: T, v?: DynamicProperty<unknown>) {
+        function initBinding(this: T, v?: unknown): DynamicProperty<unknown> {
             const obj = path(this);
             const propInfo: IPropertyInfo<unknown> = Notifications.GetTraits(obj as {});
             if (!propInfo[`${String(bindableProperty)}`]) {
                 Notifications.initBindingMetadata(obj as {});
             }
-            const state = propInfo[`${String(bindableProperty)}`];
+            const state = propInfo[String(bindableProperty)];
 
             const traits: IPropertyInfo<unknown> = Notifications.hasTraits(this) ? Notifications.GetTraits(this as {})
                 : Notifications.GetTraits(this as {}, {});
@@ -237,12 +233,12 @@ export function Binding<T, R>(path: (a: T) => R, bindableProperty: keyof R, opti
                 configurable: true
             });
 
-            return state.get();
+            return state;
         }
 
         const storeOpts = {
-            get: initBinding,
-            set: initBinding,
+            get: function (this: T) { return initBinding.call(this).get(); },
+            set: function (this: T, v: unknown) { initBinding.call(this).next(v); },
             enumerable: true,
             configurable: true,
         };
