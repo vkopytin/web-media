@@ -195,13 +195,13 @@ export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
             </nav>
             <SwitchView currentView={appViewModel.currentPanel} onClick={() => toggleSelectDevices('show')}>
                 <section key="home" className={cn("content ?shadow", showSelectDevices === 'show')}
-                    ref={el => el && (elScroller = el)}
+                    ref={el => (el && (elScroller = el)) as unknown as undefined}
                     onScroll={() => onPageScroll()}
                 >
                     <HomeView currentTrackId={currentTrackId} />
                 </section>
                 <section key="playlists" className={cn("content ?shadow", showSelectDevices === 'show')}
-                    ref={el => el && (elScroller = el)}
+                    ref={el => (el && (elScroller = el)) as unknown as undefined}
                     onScroll={() => onPageScroll()}
                 >
                     <PlaylistsView
@@ -210,7 +210,7 @@ export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
                     />
                 </section>
                 <section key="tracks" className={cn("content ?shadow", showSelectDevices === 'show')}
-                    ref={el => el && (elScroller = el)} onScroll={() => onPageScroll()}
+                    ref={el => (el && (elScroller = el)) as unknown as undefined} onScroll={() => onPageScroll()}
                 >
                     <MyTracksView
                         loadMore={scrolledToBottom}
@@ -218,7 +218,7 @@ export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
                     />
                 </section>
                 <section key="search" className={cn("content ?shadow", showSelectDevices === 'show')}
-                    ref={el => el && (elScroller = el)} onScroll={() => onPageScroll()}
+                    ref={el => (el && (elScroller = el)) as unknown as undefined} onScroll={() => onPageScroll()}
                 >
                     <SearchView
                         loadMore={scrolledToBottom}
@@ -226,7 +226,7 @@ export const AppView = ({ appViewModel = inject(AppViewModel) }) => {
                     />
                 </section>
                 <section key="releases" className={cn("content ?shadow", showSelectDevices === 'show')}
-                    ref={el => el && (elScroller = el)} onScroll={() => onPageScroll()}>
+                    ref={el => (el && (elScroller = el)) as unknown as undefined} onScroll={() => onPageScroll()}>
                     <NewReleasesView currentTrackId={currentTrackId} />
                 </section>
             </SwitchView>
