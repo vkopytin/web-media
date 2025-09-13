@@ -27,7 +27,6 @@ jobs:
         run: |
           npm install
           npm run build --if-present
-          npm install --omit=dev
 
       - name: Zip artifact for deployment
         run: |
