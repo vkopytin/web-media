@@ -1,4 +1,4 @@
-import { returnErrorResult } from 'app/service/errors/returnErrorResult';
+import { returnErrorResult } from '../service/errors/returnErrorResult';
 import { LogService, SuggestionsService } from '../service';
 import { DataService } from '../service/dataService';
 import { LyricsService } from '../service/lyricsService';

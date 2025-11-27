@@ -55,6 +55,7 @@ describe('App View Model', () => {
     it('Should have url on refresh token', async () => {
         const url = 'test';
         jest.spyOn(login, 'getSpotifyAuthUrl').mockImplementation(() => Promise.resolve(Result.of(url)));
+        jest.spyOn(console, 'log').mockImplementation(() => { });
 
         await appVm.refreshToken();
 
