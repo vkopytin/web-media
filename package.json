@@ -4,7 +4,7 @@
   "description": "Web Media Player",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --experimental-https",
     "build": "next build",
     "start": "next start",
     "test": "jest",
