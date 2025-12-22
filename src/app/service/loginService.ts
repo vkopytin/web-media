@@ -31,7 +31,6 @@ class LoginService extends Events {
         const clientId = '963f916fa62c4186a4b8370e16eef658';
         const codeVerifier = generateRandomString(64);
         window.localStorage.setItem('client_id', clientId);
-        window.localStorage.setItem('code_verifier', codeVerifier);
         const hashed = await sha256(codeVerifier)
         const codeChallenge = base64encode(hashed);
         const redirectUri = `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
@@ -70,7 +69,7 @@ class LoginService extends Events {
                 code_challenge_method: 'S256',
                 code_challenge: codeChallenge,
                 response_type: 'code',
-                state: 'onSpotify-1'
+                state: 'onSpotify-' + codeVerifier
             });
 
         return Result.of(authUrl);

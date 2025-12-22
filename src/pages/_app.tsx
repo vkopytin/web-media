@@ -19,8 +19,9 @@ if (typeof window !== 'undefined') {
   const authData = window.location.search.replace(/^\?/, '');
   const authInfo = fromEntries(authData) as {
     code: string;
+    state: string;
   };
-  const codeVerifier = localStorage.getItem('code_verifier');
+  const codeVerifier = authInfo.state?.replace('onSpotify-', '');
   const clientId = localStorage.getItem('client_id');
   fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
