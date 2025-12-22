@@ -3,6 +3,24 @@ import { Events } from '../events';
 import { Result } from '../utils/result';
 import { SettingsService } from './settings';
 
+const generateRandomString = (length) => {
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const values = crypto.getRandomValues(new Uint8Array(length));
+  return values.reduce((acc, x) => acc + possible[x % possible.length], "");
+}
+
+const sha256 = async (plain: string) => {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(plain)
+  return window.crypto.subtle.digest('SHA-256', data)
+}
+
+const base64encode = (input: ArrayBuffer) => {
+  return btoa(String.fromCharCode(...new Uint8Array(input)))
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
 
 class LoginService extends Events {
     constructor(public settings: SettingsService) {
@@ -11,6 +29,11 @@ class LoginService extends Events {
 
     async getSpotifyAuthUrl(): Promise<Result<Error, string>> {
         const clientId = '963f916fa62c4186a4b8370e16eef658';
+        const codeVerifier = generateRandomString(64);
+        window.localStorage.setItem('client_id', clientId);
+        window.localStorage.setItem('code_verifier', codeVerifier);
+        const hashed = await sha256(codeVerifier)
+        const codeChallenge = base64encode(hashed);
         const redirectUri = `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
             authUrl = 'https://accounts.spotify.com/authorize?' + $.param({
                 client_id: clientId,
@@ -44,7 +67,9 @@ class LoginService extends Events {
                     'playlist-read-private',
                     'playlist-modify-public'
                 ].join(' '),
-                response_type: 'token',
+                code_challenge_method: 'S256',
+                code_challenge: codeChallenge,
+                response_type: 'code',
                 state: 'onSpotify-1'
             });
 

@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 import { SpotifyMediaAdapter } from '../../adapter';
-import { IMediaPort, IResponseResult, ISpotifySong } from '../../ports/iMediaProt';
+import { IMediaPort, IResponseResult, ISpotifySong, ITrack } from '../../ports/iMediaProt';
 import { TrackViewModelItem } from '../../viewModels';
 import { SuggestionsService } from '../suggestionsService';
 
@@ -24,14 +24,16 @@ describe('Suggestions service', () => {
     it('should fetch suggestions from my tracks', async () => {
         const returnTrack = makePlaylistRowItem('22').track;
         jest.spyOn(media, 'tracks').mockImplementation((o, l) => Promise.resolve(makePlaylistTracksResult(o, l)));
-        jest.spyOn(media, 'recommendations').mockImplementation(() => Promise.resolve({ seeds: [], tracks: [returnTrack] }));
+        jest.spyOn(media, 'search').mockImplementation(() => Promise.resolve({
+            tracks: { items: [returnTrack] } as IResponseResult<ITrack>,
+        }));
         jest.spyOn(media, 'hasTracks').mockImplementation(() => Promise.resolve([true]));
         jest.spyOn(TrackViewModelItem, 'fromTrack').mockImplementation(() => ({ id: jest.fn().mockImplementation(() => 'id-123'), isLiked: false } as any));
         jest.spyOn(TrackViewModelItem.prototype, 'id').mockImplementation(() => 'id-123');
 
         await suggestions.fetchData();
 
-        expect(media.recommendations).toHaveBeenCalledWith('US', [], ['id-00', 'id-01', 'id-02', 'id-03', 'id-04']);
+        expect(media.search).toHaveBeenCalledWith('track', expect.stringContaining('track name 00'));
         expect(media.hasTracks).toHaveBeenCalledWith(['id-123']);
     });
 });
@@ -57,8 +59,8 @@ function makePlaylistRowItem(id = '01'): ISpotifySong {
     return {
         track: {
             id: 'id-' + id,
-            name: ['playlist name', id].join(' '),
-            uri: ['playlist:uri', id].join(':'),
+            name: ['track name', id].join(' '),
+            uri: ['track:uri', id].join(':'),
             duration_ms: 123,
             track_number: +id,
             album: {

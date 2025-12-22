@@ -13,16 +13,18 @@ export class SuggestionsService {
     }
 
     async fetchData(trackId?: string): Promise<void> {
-        const artistIds = [] as string[];
         let trackIds = trackId ? [trackId] : [];
+        let tracks = '';
 
         if (!trackIds.length) {
             if (this.selectedPlaylist) {
                 const result = await this.media.listPlaylistTracks(this.selectedPlaylist.id(), 0, 5);
                 trackIds = result.items.map(({ track }) => track.id);
+                tracks = result.items.map(({ track }) => track.name).join(', ');
             } else {
                 const result = await this.media.tracks(0, 5);
                 trackIds = result.items.map(({ track }) => track.id);
+                tracks = result.items.map(({ track }) => track.name).join(', ');
             }
         }
 
@@ -30,11 +32,16 @@ export class SuggestionsService {
             const topTracks = await this.media.myTopTracks();
 
             trackIds = topTracks.items.map((track) => track.id);
+            tracks = topTracks.items.map((track) => track.name).join(', ');
         }
 
-        const recomendationsResult = await this.media.recommendations('US', artistIds, trackIds);
+        const recomendationsResult = await this.media.search('track', tracks);
 
-        const newTracks = recomendationsResult.tracks.map(TrackViewModelItem.fromTrack);
+        const newTracks = recomendationsResult.tracks?.items.map(TrackViewModelItem.fromTrack);
+        if (!newTracks) {
+            this.tracks = [];
+            return;
+        }
         this.tracks = newTracks;
 
         await this.checkTracks(newTracks);

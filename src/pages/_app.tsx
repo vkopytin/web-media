@@ -16,21 +16,37 @@ const fromEntries = (str: string) => {
 };
 
 if (typeof window !== 'undefined') {
-  const authData = window.location.hash.replace(/^#/, '');
+  const authData = window.location.search.replace(/^\?/, '');
   const authInfo = fromEntries(authData) as {
-    access_token: string;
-    redirect_uri: string;
+    code: string;
   };
-
-  if ('access_token' in authInfo && authInfo.access_token) {
-    console.log('finishing authentication...');
-    document.cookie = [SPOTIFY_ACCESS_TOKEN_KEY, btoa(authInfo.access_token)].join('=');
-    if (window.parent !== window) {
-      authenticating = true;
-      window.parent.postMessage(['accessToken', authInfo.access_token], '*');
-    }
-    window.location.replace(window.location.pathname);
-  }
+  const codeVerifier = localStorage.getItem('code_verifier');
+  const clientId = localStorage.getItem('client_id');
+  fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: clientId || '',
+        grant_type: 'authorization_code',
+        code: authInfo.code,
+        redirect_uri: `${window.location.protocol}//${window.location.host}/`,
+        code_verifier: codeVerifier || '',
+      })
+    })
+    .then(res => res.json())
+    .then((authInfo: { access_token: string }) => {
+      if ('access_token' in authInfo && authInfo.access_token) {
+        console.log('finishing authentication...');
+        document.cookie = [SPOTIFY_ACCESS_TOKEN_KEY, btoa(authInfo.access_token)].join('=');
+        if (window.parent !== window) {
+          authenticating = true;
+          window.parent.postMessage(['accessToken', authInfo.access_token], '*');
+        }
+        window.location.replace(window.location.pathname);
+      }
+    });
 }
 
 export default function MyApp({ Component, pageProps }: AppProps) {
