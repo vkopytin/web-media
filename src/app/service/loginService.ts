@@ -16,7 +16,6 @@ const sha256 = async (plain: string) => {
 }
 
 const base64encode = (input: ArrayBuffer) => {
-  // @ts-ignore
   return btoa(String.fromCharCode(...new Uint8Array(input)))
     .replace(/=/g, '')
     .replace(/\+/g, '-')
