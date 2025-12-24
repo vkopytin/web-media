@@ -172,9 +172,4 @@ export interface IMediaPort {
     createNewPlaylist(userId: string, name: string, description?: string, isPublic?: boolean): Promise<unknown>;
     addTrackToPlaylist(trackUris: string | string[], playlistId: string): Promise<ISpotifySong>;
     removeTrackFromPlaylist(trackUris: string | string[], playlistId: string): Promise<IResponseResult<ISpotifySong>>;
-    recommendations(
-        market: string,
-        seedArtists: string | string[], seedTracks: string | string[],
-        minEnergy?: number, minPopularity?: number, limit?: number
-    ): Promise<IRecommendationsResult>
 }

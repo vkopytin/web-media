@@ -61,29 +61,6 @@ export class SpotifyMediaAdapter implements IMediaPort {
         return result;
     }
 
-    async recommendations(
-        market: string,
-        seedArtists: string | string[], seedTracks: string | string[],
-        minEnergy = 0.4, minPopularity = 50, limit = 20
-    ): Promise<IRecommendationsResult> {
-        const seedArtistsArg = ([] as string[]).concat(seedArtists || []).join(',');
-        const seedTracksArg = ([] as string[]).concat(seedTracks || []).join(',');
-        const response = await this.fetch(`${baseUrl}/v1/recommendations?` + toUrlQueryParams({
-            market,
-            ...seedArtistsArg.length ? { seed_artists: seedArtistsArg } : {},
-            ...seedTracksArg ? { seed_tracks: seedTracksArg } : {},
-            min_energy: minEnergy,
-            min_popularity: minPopularity,
-            limit
-        }), {
-            headers: {
-                'Authorization': 'Bearer ' + this.token
-            }
-        });
-
-        return await resultOrError<IRecommendationsResult>(response);
-    }
-
     async userPlaylists(userId: string): Promise<IUserPlaylistsResult> {
         const response = await this.fetch(`${baseUrl}/v1/users/${userId}/playlists`, {
             headers: {

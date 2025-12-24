@@ -99,24 +99,6 @@ describe('Spotify Media Adapter', () => {
         });
     });
 
-    each([
-        ['seed_artists=test-123', 'test-123', undefined],
-        ['seed_tracks=test-123', undefined, 'test-123'],
-        ['seed_artists=test-123&seed_tracks=test-456', 'test-123', 'test-456'],
-    ]).it('should request recommendations', (expected, seedArtists, seedTracks) => {
-
-        jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({
-            status: 200,
-            text: jest.fn().mockImplementation(() => Promise.resolve('{}')),
-        } as any));
-
-        spotifyMediaAdapter.recommendations('test', seedArtists, seedTracks);
-
-        expect(spotifyMediaAdapter.fetch).toHaveBeenCalledWith(`${urlDomain}/v1/recommendations?market=test&${expected}&min_energy=0.4&min_popularity=50&limit=20`, {
-            headers
-        });
-    });
-
     it('should request user playlists', () => {
         const userId = 'user-id-123';
         jest.spyOn(spotifyMediaAdapter, 'fetch').mockImplementation((a, b) => Promise.resolve({

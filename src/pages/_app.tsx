@@ -37,7 +37,7 @@ if (typeof window !== 'undefined') {
       })
     })
     .then(res => res.json())
-    .then((authInfo: { access_token: string }) => {
+    .then((authInfo: { access_token?: string }) => {
       if ('access_token' in authInfo && authInfo.access_token) {
         console.log('finishing authentication...');
         document.cookie = [SPOTIFY_ACCESS_TOKEN_KEY, btoa(authInfo.access_token)].join('=');
