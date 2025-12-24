@@ -47,23 +47,6 @@ export class MediaService extends Events {
         return Result.of(true);
     }
 
-    async fetchRecommendations(market: string, seedArtists: string | string[], seedTracks: string | string[], minEnergy = 0.4, minPopularity = 50, limit = 20): Promise<Result<Error, IRecommendationsResult>> {
-        try {
-            const res = await this.mediaPort.recommendations(
-                market,
-                seedArtists,
-                seedTracks,
-                minEnergy,
-                minPopularity,
-                limit
-            );
-
-            return Result.of(res);
-        } catch (ex) {
-            return returnErrorResult('Unexpected error on requesting spotify fetch recommendations', ex as Error);
-        }
-    }
-
     async userPlaylists(user: IUserInfo): Promise<Result<Error, IUserPlaylistsResult>> {
         if (!user.id) {
             return Result.error(new Error('Can\'t fetch playlist. Empty id'));
