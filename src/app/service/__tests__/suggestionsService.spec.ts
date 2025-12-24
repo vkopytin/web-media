@@ -1,5 +1,5 @@
 /* eslint-disable */
-
+import { expect } from "@jest/globals";
 import { SpotifyMediaAdapter } from '../../adapter';
 import { IMediaPort, IResponseResult, ISpotifySong, ITrack } from '../../ports/iMediaProt';
 import { TrackViewModelItem } from '../../viewModels';
