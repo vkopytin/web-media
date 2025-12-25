@@ -59,7 +59,7 @@ export class AppService {
         return await playerResult.cata(async player => {
             await player.refreshToken();
 
-            return Result.of(true);
+            return Result.of<Error, boolean>(true);
         });
     }
 

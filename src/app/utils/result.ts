@@ -59,11 +59,15 @@ class Result<E = Error, R = unknown> {
     }
 
     map<T>(f: (v: R) => T): Result<E, T> {
-        return this.left.match(
-            e => Result.error(e)
-            ,
-            () => Result.of(f(this.right))
-        );
+        try {
+            return this.left.match(
+                e => Result.error(e)
+                ,
+                () => Result.of(f(this.right))
+            );
+        } catch (e) {
+            return Result.error(e as E);
+        }
     }
 
     error<T>(fn: (v: E) => T): Result<T, R> {
@@ -83,11 +87,15 @@ class Result<E = Error, R = unknown> {
     }
 
     match<T>(success: (v: R) => T, error: (e: E) => T): T {
-        return this.left.match(
-            err => error(err)
-            ,
-            () => success(this.right)
-        );
+        try {
+            return this.left.match(
+                err => error(err)
+                ,
+                () => success(this.right)
+            );
+        } catch (e) {
+            return error(e as E);
+        }
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-types

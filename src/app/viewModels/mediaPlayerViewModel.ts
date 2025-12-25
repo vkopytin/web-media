@@ -224,12 +224,10 @@ class MediaPlayerViewModel {
                 try {
                     const state = await this.playback.getCurrentState();
                     await state.map(async state => {
-                        if (_.isEmpty(state) || _.isEmpty(state?.playback_id)) {
-                            this.volume = percent;
+                        if (_.isEmpty(state) || _.isEmpty(state.playback_id)) {
                             const res = await this.remotePlaybackService.volume(percent);
                             res.error(this.logService.logError);
                         } else {
-                            this.volume = percent;
                             const res = await this.playback.setVolume(percent);
                             res.map(this.logService.logError);
                         }

@@ -112,6 +112,7 @@ export const HomeView = ({ currentTrackId, homeVm = inject(HomeViewModel) }: IHo
                         </span>
                         <When itIs={item.isLiked}>
                             <span className="badge badge-positive"
+                                title="Is Liked, tab to unlike"
                                 onClick={() => unlikeTrackCommand.exec(item)}
                             >{item.duration()}</span>
                         </When>

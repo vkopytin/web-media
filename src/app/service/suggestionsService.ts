@@ -1,4 +1,4 @@
-import { IMediaPort, ITrack } from '../ports/iMediaProt';
+import { IMediaPort } from '../ports/iMediaProt';
 import { State } from '../utils';
 import { PlaylistsViewModelItem } from '../viewModels/playlistsViewModelItem';
 import { TrackViewModelItem } from '../viewModels/trackViewModelItem';
@@ -29,7 +29,7 @@ export class SuggestionsService {
         }
 
         if (!trackIds.length) {
-            const topTracks = await this.media.myTopTracks();
+            const topTracks = await this.media.myTopTracks(0, 5);
 
             trackIds = topTracks.items.map((track) => track.id);
             tracks = topTracks.items.map((track) => track.name).join(', ');
