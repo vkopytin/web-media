@@ -2,6 +2,7 @@ import $ from 'jquery';
 import { Events } from '../events';
 import { Result } from '../utils/result';
 import { SettingsService } from './settings';
+import { SPOTIFY_ACCESS_TOKEN_KEY } from '../consts';
 
 const generateRandomString = (length: number) => {
   const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -100,6 +101,32 @@ class LoginService extends Events {
             });
 
         return Result.of(authUrl);
+    }
+
+    async refreshToken(): Promise<Result<Error, boolean>> {
+      const refreshToken = localStorage.getItem('refresh_token') || '';
+      const clientId = localStorage.getItem('client_id') || '';
+      const res = await fetch('https://accounts.spotify.com/api/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            client_id: clientId,
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken,
+          })
+        })
+        .then(res => res.json());
+
+      if (!('access_token' in res) || !res.access_token) {
+        return Result.error(new Error('Failed to refresh token'));
+      }
+
+      document.cookie = [SPOTIFY_ACCESS_TOKEN_KEY, btoa(res.access_token)].join('=');
+      window.postMessage(['accessToken', res.access_token], '*');
+
+      return Result.of(true);
     }
 }
 

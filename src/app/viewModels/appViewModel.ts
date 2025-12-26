@@ -83,11 +83,8 @@ class AppViewModel {
     }
 
     async refreshToken(): Promise<void> {
-        const tokenUrlResult = await this.login.getSpotifyAuthUrl();
-        console.log('updating token...');
-
-        tokenUrlResult.map(spotifyAuthUrl => this.autoRefreshUrl = spotifyAuthUrl + '23')
-            .error(this.logService.logError);
+        const result = await this.login.refreshToken();
+        result.error(this.logService.logError);
     }
 
     async connect(): Promise<void> {

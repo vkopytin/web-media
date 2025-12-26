@@ -37,7 +37,7 @@ if (typeof window !== 'undefined') {
       })
     })
     .then(res => res.json())
-    .then((authInfo: { access_token?: string }) => {
+    .then((authInfo: { access_token?: string; refresh_token?: string; }) => {
       if ('access_token' in authInfo && authInfo.access_token) {
         console.log('finishing authentication...');
         document.cookie = [SPOTIFY_ACCESS_TOKEN_KEY, btoa(authInfo.access_token)].join('=');
@@ -46,6 +46,9 @@ if (typeof window !== 'undefined') {
           window.parent.postMessage(['accessToken', authInfo.access_token], '*');
         }
         window.location.replace(window.location.pathname);
+      }
+      if ('refresh_token' in authInfo && authInfo.refresh_token) {
+        localStorage.setItem('refresh_token', authInfo.refresh_token);
       }
     });
 }
