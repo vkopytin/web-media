@@ -16,14 +16,14 @@ export class DataSyncService extends Events {
         try {
             await this.syncMyTracks();
             const playlistsResult = await this.syncMyPlaylists();
-            return await playlistsResult.cata(async playlists => {
+            return await playlistsResult.map(async playlists => {
                 for (const playlist of playlists) {
                     await this.syncTracksByPlaylist(playlist);
                 }
                 this.cleanUpData();
 
-                return Result.of(true);
-            });
+                return true;
+            }).await();
         } catch (ex) {
             return Result.error(ex as Error);
         }

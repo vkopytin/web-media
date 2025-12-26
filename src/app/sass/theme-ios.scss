@@ -4,7 +4,10 @@
 //
 // --------------------------------------------------
 
-@import "mixins.scss";
+@use "sass:color";
+@use "mixins.scss";
+@use "variables";
+
 
 // Variables
 // --------------------------------------------------
@@ -12,31 +15,31 @@
 // Colors
 //
 // Main theme colors
-$primary-color: #007aff !global;
-$chrome-color: rgba(247, 247, 247, 0.98) !global;
+variables.$primary-color: #007aff;
+variables.$chrome-color: rgba(247, 247, 247, 0.98);
 
 // Action colors
-$default-color: #929292 !global;
-$positive-color: #4cd964 !global;
-$negative-color: #dd524d !global;
-$text-color: #777;
+variables.$default-color: #929292;
+variables.$positive-color: #4cd964;
+variables.$negative-color: #dd524d;
+variables.$text-color: #777;
 
 // Bars
-$bar-base-height: 44px !global;
-$bar-tab-height: 50px !global;
+variables.$bar-base-height: 44px;
+variables.$bar-tab-height: 50px;
 
 // iOS style transitions
-$timing-fuction: cubic-bezier(0.1, 0.5, 0.1, 1) !global; // Inspired by @c2prods
+variables.$timing-fuction: cubic-bezier(0.1, 0.5, 0.1, 1); // Inspired by @c2prods
 
 // Base
 // --------------------------------------------------
 
 // Universal link styling
 a {
-  color: $primary-color;
+  color: variables.$primary-color;
 
   &:active {
-    color: darken($primary-color, 10%);
+    color: color.adjust(variables.$primary-color, $lightness: -10%);
   }
 }
 
@@ -66,18 +69,18 @@ h6 {
 // --------------------------------------------------
 
 .btn {
-  color: $default-color;
-  background-color: $chrome-color;
-  border: 1px solid $default-color;
-  @include transition(all);
-  @include transition-duration(0.2s);
-  @include transition-timing-function(linear);
+  color: variables.$default-color;
+  background-color: variables.$chrome-color;
+  border: 1px solid variables.$default-color;
+  @include mixins.transition(all);
+  @include mixins.transition-duration(0.2s);
+  @include mixins.transition-timing-function(linear);
 
   // Active & filled button styles
   &:active,
   &.active {
     color: #fff;
-    background-color: $default-color;
+    background-color: variables.$default-color;
   }
 }
 
@@ -87,39 +90,39 @@ h6 {
 // Primary button (Default color is blue)
 .btn-primary {
   color: #fff;
-  background-color: $primary-color;
-  border: 1px solid $primary-color;
+  background-color: variables.$primary-color;
+  border: 1px solid variables.$primary-color;
 
   &:active,
   &.active {
-    background-color: darken($primary-color, 10%);
-    border: 1px solid darken($primary-color, 10%);
+    background-color: color.adjust(variables.$primary-color, $lightness: -10%);
+    border: 1px solid color.adjust(variables.$primary-color, $lightness: -10%);
   }
 }
 
 // Positive button (Default color is green)
 .btn-positive {
   color: #fff;
-  background-color: $positive-color;
-  border: 1px solid $positive-color;
+  background-color: variables.$positive-color;
+  border: 1px solid variables.$positive-color;
 
   &:active,
   &.active {
-    background-color: darken($positive-color, 10%);
-    border: 1px solid darken($positive-color, 10%);
+    background-color: color.adjust(variables.$positive-color, $lightness: -10%);
+    border: 1px solid color.adjust(variables.$positive-color, $lightness: -10%);
   }
 }
 
 // Negative button (Default color is red)
 .btn-negative {
   color: #fff;
-  background-color: $negative-color;
-  border: 1px solid $negative-color;
+  background-color: variables.$negative-color;
+  border: 1px solid variables.$negative-color;
 
   &:active,
   &.active {
-    background-color: darken($negative-color, 10%);
-    border: 1px solid darken($negative-color, 10%);
+    background-color: color.adjust(variables.$negative-color, $lightness: -10%);
+    border: 1px solid color.adjust(variables.$negative-color, $lightness: -10%);
   }
 }
 
@@ -128,13 +131,13 @@ h6 {
   background-color: transparent;
 
   &.btn-primary {
-    color: $primary-color;
+    color: variables.$primary-color;
   }
   &.btn-positive {
-    color: $positive-color;
+    color: variables.$positive-color;
   }
   &.btn-negative {
-    color: $negative-color;
+    color: variables.$negative-color;
   }
   // Active states
   &.btn-primary:active,
@@ -146,13 +149,13 @@ h6 {
 
 // Link button (Buttons that look like links)
 .btn-link {
-  color: $primary-color;
+  color: variables.$primary-color;
   background-color: transparent;
   border: none;
 
   &:active,
   &.active {
-    color: darken($primary-color, 10%);
+    color: color.adjust(variables.$primary-color, $lightness: -10%);
     background-color: transparent;
   }
 }
@@ -179,21 +182,21 @@ h6 {
 // Default bar
 .bar {
   border-bottom: 0;
-  @include box-shadow(0 0 1px rgba(0, 0, 0, 0.85));
+  @include mixins.box-shadow(0 0 1px rgba(0, 0, 0, 0.85));
 
   // Modifier class to dock any bar below .bar-nav
   &.bar-header-secondary {
-    top: $bar-base-height;
+    top: variables.$bar-base-height;
   }
 
   // Modifier class to dock any bar above a standard bar
   &.bar-footer-secondary {
-    bottom: $bar-base-height;
+    bottom: variables.$bar-base-height;
   }
 
   // Modifier class to dock any bar above a .bar-tab
   &.bar-footer-secondary-tab {
-    bottom: $bar-tab-height;
+    bottom: variables.$bar-tab-height;
   }
   // Give the footers the correct border
   &.bar-footer,
@@ -213,7 +216,7 @@ h6 {
   // Active states for the tab bar
   &.active,
   &:active {
-    color: $primary-color;
+    color: variables.$primary-color;
   }
 }
 
@@ -221,10 +224,10 @@ h6 {
 .bar-nav {
   // Link buttons in nav bars
   .btn-link {
-    color: $primary-color;
+    color: variables.$primary-color;
 
     &:active {
-      color: $primary-color;
+      color: variables.$primary-color;
       opacity: 0.6;
     }
   }
@@ -235,7 +238,7 @@ h6 {
 
 .badge {
   &.badge-inverted {
-    color: $default-color;
+    color: variables.$default-color;
     background-color: transparent;
   }
 }
@@ -245,32 +248,32 @@ h6 {
 // Main badge
 .badge-primary {
   color: #fff;
-  background-color: $primary-color;
+  background-color: variables.$primary-color;
 
   &.badge-inverted {
-    color: $primary-color;
+    color: variables.$primary-color;
     background-color: transparent;
   }
 }
 
 // Positive badge
 .badge-positive {
-  color: $text-color;
-  background-color: $positive-color;
+  color: variables.$text-color;
+  background-color: variables.$positive-color;
 
   &.badge-inverted {
-    color: $positive-color;
+    color: variables.$positive-color;
     background-color: transparent;
   }
 }
 
 // Negative badge
 .badge-negative {
-  color: $text-color;
-  background-color: $negative-color;
+  color: variables.$text-color;
+  background-color: variables.$negative-color;
 
   &.badge-inverted {
-    color: $negative-color;
+    color: variables.$negative-color;
     background-color: transparent;
   }
 }
@@ -292,11 +295,11 @@ h6 {
 .table-view {
   border-top: 0;
   border-bottom: 0;
-  @include hairline(double, #c8c7cc, 0); // Double grey border.
+  @include mixins.hairline(double, #c8c7cc, 0); // Double grey border.
 
   .table-view-cell {
     border-bottom: 0;
-    @include hairline(
+    @include mixins.hairline(
       single,
       #c8c7cc,
       15px
@@ -307,7 +310,7 @@ h6 {
       background-image: none;
     }
     > a:not(.btn):active {
-      color: $text-color;
+      color: variables.$text-color;
     }
   }
 
@@ -315,7 +318,7 @@ h6 {
   .table-view-divider {
     border-top: 0;
     border-bottom: 0;
-    @include hairline(
+    @include mixins.hairline(
       double,
       #c8c7cc,
       0
@@ -370,11 +373,11 @@ textarea,
 .input-group {
   padding: 0;
   border: 0;
-  @include hairline(double, #c8c7cc, 0); // Double grey border.
+  @include mixins.hairline(double, #c8c7cc, 0); // Double grey border.
 }
 .input-group input {
   border: 0;
-  @include hairline(single, #c8c7cc, 15px);
+  @include mixins.hairline(single, #c8c7cc, 15px);
 }
 // Remove bottom border on last input to avoid double bottom border
 .input-group input:last-child {
@@ -387,7 +390,7 @@ textarea,
 // To use labels with input groups, wrap a label and an input in an .input-row
 .input-row {
   border-bottom: 0;
-  @include hairline(
+  @include mixins.hairline(
     single,
     #c8c7cc,
     15px
@@ -404,19 +407,19 @@ textarea,
 
 .segmented-control {
   background-color: transparent;
-  border: 1px solid $default-color;
+  border: 1px solid variables.$default-color;
 
   .control-item {
-    color: $default-color;
-    border-color: $default-color;
-    @include transition(background-color 0.1s linear);
+    color: variables.$default-color;
+    border-color: variables.$default-color;
+    @include mixins.transition(background-color 0.1s linear);
 
     &:active {
-      background-color: lighten($default-color, 35%);
+      background-color: color.adjust(variables.$default-color, $lightness: 35%);
     }
     &.active {
-      color: $text-color;
-      background-color: $default-color;
+      color: variables.$text-color;
+      background-color: variables.$default-color;
     }
   }
 }
@@ -425,54 +428,54 @@ textarea,
 //
 // Primary
 .segmented-control-primary {
-  border: 1px solid $primary-color;
+  border: 1px solid variables.$primary-color;
 
   .control-item {
-    color: $primary-color;
+    color: variables.$primary-color;
     border-color: inherit;
 
     &:active {
-      background-color: lighten($primary-color, 35%);
+      background-color: color.adjust(variables.$primary-color, $lightness: 35%);
     }
     &.active {
       color: #fff;
-      background-color: $primary-color;
+      background-color: variables.$primary-color;
     }
   }
 }
 
 // Positive
 .segmented-control-positive {
-  border: 1px solid $positive-color;
+  border: 1px solid variables.$positive-color;
 
   .control-item {
-    color: $positive-color;
+    color: variables.$positive-color;
     border-color: inherit;
 
     &:active {
-      background-color: lighten($positive-color, 35%);
+      background-color: color.adjust(variables.$positive-color, $lightness: 35%);
     }
     &.active {
       color: #fff;
-      background-color: $positive-color;
+      background-color: variables.$positive-color;
     }
   }
 }
 
 // Negative
 .segmented-control-negative {
-  border: 1px solid $negative-color;
+  border: 1px solid variables.$negative-color;
 
   .control-item {
-    color: $negative-color;
+    color: variables.$negative-color;
     border-color: inherit;
 
     &:active {
-      background-color: lighten($negative-color, 35%);
+      background-color: color.adjust(variables.$negative-color, $lightness: 35%);
     }
     &.active {
       color: #fff;
-      background-color: $negative-color;
+      background-color: variables.$negative-color;
     }
   }
 }
@@ -482,19 +485,19 @@ textarea,
 
 .popover {
   border-radius: 12px;
-  @include transition(
+  @include mixins.transition(
     -webkit-transform 0.2s ease-in-out,
     opacity 0.2s ease-in-out
   );
 
   &:before {
-    border-bottom: 15px solid $chrome-color;
+    border-bottom: 15px solid variables.$chrome-color;
   }
 }
 
 // Popovers with `bar`
 .popover .bar {
-  @include box-shadow(none);
+  @include mixins.box-shadow(none);
 }
 
 // Popovers with `bar-nav`
@@ -512,11 +515,11 @@ textarea,
 // --------------------------------------------------
 
 .modal {
-  @include transition-timing-function($timing-fuction);
+  @include mixins.transition-timing-function(variables.$timing-fuction);
 
   // Active modal
   &.active {
-    @include transition-timing-function($timing-fuction);
+    @include mixins.transition-timing-function(variables.$timing-fuction);
   }
 }
 
@@ -525,9 +528,9 @@ textarea,
 .toggle {
   width: 47px;
   border: 2px solid #e6e6e6;
-  @include box-shadow(inset 0 0 0 0 #e1e1e1);
-  @include transition-property(box-shadow, border);
-  @include transition-duration(0.2s);
+  @include mixins.box-shadow(inset 0 0 0 0 #e1e1e1);
+  @include mixins.transition-property(box-shadow, border);
+  @include mixins.transition-duration(0.2s);
 
   // Sliding handle
   .toggle-handle {
@@ -535,7 +538,7 @@ textarea,
     -webkit-transition-property: -webkit-transform, border, width;
     -moz-transition-property: -moz-transform, border, width;
     transition-property: transform, border, width;
-    @include box-shadow(0 3px 3px rgba(0, 0, 0, 0.08));
+    @include mixins.box-shadow(0 3px 3px rgba(0, 0, 0, 0.08));
   }
   &:before {
     display: none;
@@ -543,15 +546,15 @@ textarea,
   // Active state for toggle
   &.active {
     background-color: transparent;
-    border: 2px solid $positive-color;
-    @include box-shadow(inset 0 0 0 13px $positive-color);
+    border: 2px solid variables.$positive-color;
+    @include mixins.box-shadow(inset 0 0 0 13px variables.$positive-color);
 
     .toggle-handle {
-      @include transform(translate3d(17px, 0, 0));
+      @include mixins.transform(translate3d(17px, 0, 0));
     }
 
     .toggle-handle {
-      border-color: $positive-color;
+      border-color: variables.$positive-color;
     }
   }
 }
@@ -561,25 +564,25 @@ textarea,
 .content {
   // Fade animation
   &.fade {
-    @include transition(opacity 0.2s ease-in-out);
+    @include mixins.transition(opacity 0.2s ease-in-out);
   }
   // Slide animation
   &.sliding {
-    @include transition-timing-function($timing-fuction);
+    @include mixins.transition-timing-function(variables.$timing-fuction);
 
     // Adding the overlay
     &.sliding-in,
     &.right:not([class*="sliding-in"]) {
-      @include animation-name(fadeOverlay);
-      @include animation-duration(0.4s);
+      @include mixins.animation-name(fadeOverlay);
+      @include mixins.animation-duration(0.4s);
     }
 
     &.right:not([class*="sliding-in"]) {
-      @include animation-direction(reverse);
+      @include mixins.animation-direction(reverse);
     }
 
     &.left {
-      @include transform(
+      @include mixins.transform(
         translate3d(-20%, 0, 0)
       ); // Creates the parallax effect
     }
@@ -652,13 +655,13 @@ textarea,
 @at-root {
   @-webkit-keyframes fadeOverlay {
     from {
-      @include box-shadow(
+      @include mixins.box-shadow(
         0 0 10px rgba(0, 0, 0, 0),
         -320px 0 0 rgba(0, 0, 0, 0)
       );
     }
     to {
-      @include box-shadow(
+      @include mixins.box-shadow(
         0 0 10px rgba(0, 0, 0, 0.3),
         -320px 0 0 rgba(0, 0, 0, 0.1)
       );
