@@ -1,3 +1,6 @@
+@use "sass:color";
+@use "variables";
+
 //
 // Badges
 // --------------------------------------------------
@@ -7,8 +10,8 @@
   padding: 4px 9px 3px;
   font-size: 12px;
   line-height: 1;
-  color: lighten($text-color, 20%);
-  background-color: darken($text-color, 20%);
+  color: color.adjust(variables.$text-color, $lightness: 20%);
+  background-color: color.adjust(variables.$text-color, $lightness: -20%);
   border-radius: 100px;
   cursor: pointer;
 
@@ -23,7 +26,7 @@
   display: inline-block;
   font-size: 12px;
   line-height: 1;
-  color: lighten($text-color, 20%);
+  color: color.adjust(variables.$text-color, $lightness: 20%);
   padding: 0 5px 0 0;
   background-color: transparent;
 
@@ -51,30 +54,30 @@
 
 // Main badge
 .badge-primary {
-  color: $text-color;
-  background-color: $primary-color;
+  color: variables.$text-color;
+  background-color: variables.$primary-color;
 
   &.badge-inverted {
-    color: $primary-color;
+    color: variables.$primary-color;
   }
 }
 
 // Positive badge
 .badge-positive {
-  color: $text-color;
-  background-color: $positive-color;
+  color: variables.$text-color;
+  background-color: variables.$positive-color;
 
   &.badge-inverted {
-    color: $positive-color;
+    color: variables.$positive-color;
   }
 }
 
 // Negative badge
 .badge-negative {
   color: #fff;
-  background-color: $negative-color;
+  background-color: variables.$negative-color;
 
   &.badge-inverted {
-    color: $negative-color;
+    color: variables.$negative-color;
   }
 }

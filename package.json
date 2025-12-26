@@ -4,8 +4,8 @@
   "description": "Web Media Player",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev --experimental-https",
-    "build": "next build",
+    "dev": "next dev --experimental-https --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "test": "jest",
     "test:watch": "jest --watch --detectOpenHandles",
@@ -29,8 +29,8 @@
     "jquery": "^3.6.3",
     "lodash": "^4.17.21",
     "material-icons": "^1.13.1",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "rxjs": "^7.8.0"
   },
   "devDependencies": {
@@ -46,12 +46,12 @@
     "jasmine": "^4.5.0",
     "jest": "^29.3.1",
     "jest-each": "^29.4.1",
-    "next": "^15.5.9",
+    "next": "^16.1.1",
     "next-pwa": "^5.6.0",
     "sass": "^1.53.0",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.4",
+    "typescript": "^5.9.3",
     "underscore": "^1.13.6"
   }
 }

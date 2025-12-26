@@ -1,3 +1,6 @@
+@use "sass:color";
+@use "variables";
+
 //
 // Buttons
 // --------------------------------------------------
@@ -7,26 +10,26 @@
   display: inline-block;
   padding: 6px 8px 7px;
   margin-bottom: 0; // For input.btn
-  font-size: $button-font-size;
-  font-weight: $font-weight-light;
+  font-size: variables.$button-font-size;
+  font-weight: variables.$font-weight-light;
   line-height: 1;
-  color: $text-color;
+  color: variables.$text-color;
   text-align: center;
   white-space: nowrap;
   vertical-align: top;
   cursor: pointer;
-  background-color: lighten($chrome-color, 20%);
+  background-color: color.adjust(variables.$chrome-color, $lightness: 20%);
   border: 1px solid #ccc;
   border-radius: 3px;
 
   // Active & filled button styles
   &:active,
   &.active {
-    color: lighten(
-      $text-color,
-      10%
+    color: color.adjust(
+      variables.$text-color,
+      $lightness: 10%
     ); // Overriding the global style for all anchors.
-    background-color: lighten($default-color, 10%);
+    background-color: color.adjust(variables.$default-color, $lightness: 10%);
   }
 
   // Disabled styles & filled button active styles
@@ -37,7 +40,7 @@
 
   &.small {
     padding: 3px 4px 4px;
-    font-size: $button-font-size-small;
+    font-size: variables.$button-font-size-small;
   }
 }
 
@@ -47,42 +50,42 @@
 // Primary button (Default color is blue)
 .btn-primary {
   color: #fff;
-  background-color: $primary-color;
-  border: 1px solid $primary-color;
+  background-color: variables.$primary-color;
+  border: 1px solid variables.$primary-color;
 
   &:active,
   &.active {
     color: #fff;
-    background-color: darken($primary-color, 10%);
-    border: 1px solid darken($primary-color, 10%);
+    background-color: color.adjust(variables.$primary-color, $lightness: -10%);
+    border: 1px solid color.adjust(variables.$primary-color, $lightness: -10%);
   }
 }
 
 // Positive button (Default color is green)
 .btn-positive {
   color: #fff;
-  background-color: $positive-color;
-  border: 1px solid $positive-color;
+  background-color: variables.$positive-color;
+  border: 1px solid variables.$positive-color;
 
   &:active,
   &.active {
     color: #fff;
-    background-color: darken($positive-color, 10%);
-    border: 1px solid darken($positive-color, 10%);
+    background-color: color.adjust(variables.$positive-color, $lightness: -10%);
+    border: 1px solid color.adjust(variables.$positive-color, $lightness: -10%);
   }
 }
 
 // Negative button (Default color is red)
 .btn-negative {
-  color: $text-color;
-  background-color: $negative-color;
-  border: 1px solid $negative-color;
+  color: variables.$text-color;
+  background-color: variables.$negative-color;
+  border: 1px solid variables.$negative-color;
 
   &:active,
   &.active {
-    color: $text-color;
-    background-color: darken($negative-color, 10%);
-    border: 1px solid darken($negative-color, 10%);
+    color: variables.$text-color;
+    background-color: color.adjust(variables.$negative-color, $lightness: -10%);
+    border: 1px solid color.adjust(variables.$negative-color, $lightness: -10%);
   }
 }
 
@@ -91,19 +94,19 @@
   background-color: #333a;
 
   &.btn-primary {
-    color: $primary-color;
+    color: variables.$primary-color;
   }
   &.btn-positive {
-    color: $positive-color;
+    color: variables.$positive-color;
   }
   &.btn-negative {
-    color: $negative-color;
+    color: variables.$negative-color;
   }
   // Active states
   &.btn-primary:active,
   &.btn-positive:active,
   &.btn-negative:active {
-    color: lighten($default-color, 10%);
+    color: color.adjust(variables.$default-color, $lightness: 10%);
   }
 }
 
@@ -111,13 +114,13 @@
 .btn-link {
   padding-top: 6px;
   padding-bottom: 6px;
-  color: $primary-color;
+  color: variables.$primary-color;
   background-color: transparent;
   border: 0;
 
   &:active,
   &.active {
-    color: darken($primary-color, 10%);
+    color: color.adjust(variables.$primary-color, $lightness: -10%);
     background-color: transparent;
   }
 }

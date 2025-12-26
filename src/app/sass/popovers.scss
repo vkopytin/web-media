@@ -1,3 +1,6 @@
+@use "mixins";
+@use "variables";
+
 //
 // Popovers (to be used with popovers.js)
 // --------------------------------------------------
@@ -10,12 +13,12 @@
   display: none;
   width: 280px;
   margin-left: -140px;
-  background-color: $chrome-color;
-  border-radius: $border-radius;
+  background-color: variables.$chrome-color;
+  border-radius: variables.$border-radius;
   opacity: 0;
-  @include box-shadow(0 0 15px rgba(0, 0, 0, .1));
-  @include transform(translate3d(0, -15px, 0));
-  @include transition(all .25s linear);
+  @include mixins.box-shadow(0 0 15px rgba(0, 0, 0, .1));
+  @include mixins.transform(translate3d(0, -15px, 0));
+  @include mixins.transition(all .25s linear);
 
   // Caret on top of popover using CSS triangles (thanks to @chriscoyier for solution)
   &:before {
@@ -27,7 +30,7 @@
     margin-left: -15px;
     content: '';
     border-right: 15px solid transparent;
-    border-bottom: 15px solid $chrome-color;
+    border-bottom: 15px solid variables.$chrome-color;
     border-left: 15px solid transparent;
   }
 
@@ -36,12 +39,12 @@
 
   &.visible {
     opacity: 1;
-    @include transform(translate3d(0, 0, 0));
+    @include mixins.transform(translate3d(0, 0, 0));
   }
 
   // Give correct spacing to the content if there is a bar inside the popover.
   .bar ~ .table-view {
-    padding-top: $bar-base-height;
+    padding-top: variables.$bar-base-height;
   }
 }
 
@@ -75,10 +78,10 @@
 // --------------------------------------------------
 
 .popover .bar-nav {
-  border-bottom: $border-default;
+  border-bottom: variables.$border-default;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
-  @include box-shadow(none);
+  @include mixins.box-shadow(none);
 }
 
 
@@ -90,8 +93,8 @@
   margin-bottom: 0;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  background-color: $default-color;
+  background-color: variables.$default-color;
   border-top: 0;
   border-bottom: 0;
-  border-radius: $border-radius;
+  border-radius: variables.$border-radius;
 }

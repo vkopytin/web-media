@@ -1,3 +1,6 @@
+@use "sass:color";
+@use "variables";
+
 //
 // Chips
 // --------------------------------------------------
@@ -11,8 +14,8 @@
   padding: 2px 12px 2px 12px;
   margin: 2px;
   font-size: 12px;
-  color: lighten($text-color, 20%);
-  background-color: darken($text-color, 30%);
+  color: color.adjust(variables.$text-color, $lightness: 20%);
+  background-color: color.adjust(variables.$text-color, $lightness: -30%);
   cursor: pointer;
   border-radius: 100px;
 
@@ -34,30 +37,30 @@
 
 // Main chips
 .chips-primary {
-  color: $text-color;
-  background-color: $primary-color;
+  color: variables.$text-color;
+  background-color: variables.$primary-color;
 
   &.chips-inverted {
-    color: $primary-color;
+    color: variables.$primary-color;
   }
 }
 
 // Positive chips
 .chips-positive {
-  color: $text-color;
-  background-color: $positive-color;
+  color: variables.$text-color;
+  background-color: variables.$positive-color;
 
   &.chips-inverted {
-    color: $positive-color;
+    color: variables.$positive-color;
   }
 }
 
 // Negative chips
 .chips-negative {
-  color: $text-color;
-  background-color: $negative-color;
+  color: variables.$text-color;
+  background-color: variables.$negative-color;
 
   &.chips-inverted {
-    color: $negative-color;
+    color: variables.$negative-color;
   }
 }

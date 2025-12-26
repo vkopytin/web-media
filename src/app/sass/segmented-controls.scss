@@ -1,3 +1,6 @@
+@use "sass:color";
+@use "variables";
+
 //
 // Segmented controllers
 // --------------------------------------------------
@@ -7,8 +10,8 @@
   display: table;
   overflow: hidden;
   font-size: 12px;
-  font-weight: $font-weight-light;
-  background-color: $chrome-color;
+  font-weight: variables.$font-weight-light;
+  background-color: variables.$chrome-color;
   border: 1px solid #ccc;
   border-radius: 3px;
 
@@ -20,7 +23,7 @@
     padding-bottom: 7px;
     overflow: hidden;
     line-height: 1;
-    color: $text-color;
+    color: variables.$text-color;
     text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -33,14 +36,14 @@
 
     // Tap state of segmented controller
     &:active {
-      color: lighten($text-color, 20%);
-      background-color: lighten($default-color, 5%)
+      color: color.adjust(variables.$text-color, $lightness: 20%);
+      background-color: color.adjust(variables.$default-color, $lightness: 5%)
     }
 
     // Selected state of segmented controller
     &.active {
-      color: lighten($text-color, 10%);
-      background-color: lighten($default-color, 15%)
+      color: color.adjust(variables.$text-color, $lightness: 10%);
+      background-color: color.adjust(variables.$default-color, $lightness: 15%)
     }
   }
 }
@@ -50,54 +53,54 @@
 
 // Primary
 .segmented-control-primary {
-  border-color: $primary-color;
+  border-color: variables.$primary-color;
 
   .control-item {
-    color: $primary-color;
+    color: variables.$primary-color;
     border-color: inherit;
 
     &:active {
-      background-color: lighten($primary-color, 35%);
+      background-color: color.adjust(variables.$primary-color, $lightness: 35%);
     }
     &.active {
-      color: $default-color;
-      background-color: $primary-color;
+      color: variables.$default-color;
+      background-color: variables.$primary-color;
     }
   }
 }
 
 // Positive
 .segmented-control-positive {
-  border-color: $positive-color;
+  border-color: variables.$positive-color;
 
   .control-item {
-    color: $positive-color;
+    color: variables.$positive-color;
     border-color: inherit;
 
     &:active {
-      background-color: lighten($positive-color, 35%);
+      background-color: color.adjust(variables.$positive-color, $lightness: 35%);
     }
     &.active {
-      color: $default-color;
-      background-color: $positive-color;
+      color: variables.$default-color;
+      background-color: variables.$positive-color;
     }
   }
 }
 
 // Negative
 .segmented-control-negative {
-  border-color: $negative-color;
+  border-color: variables.$negative-color;
 
   .control-item {
-    color: $negative-color;
+    color: variables.$negative-color;
     border-color: inherit;
 
     &:active {
-      background-color: lighten($negative-color, 35%);
+      background-color: color.adjust(variables.$negative-color, $lightness: 35%);
     }
     &.active {
-      color: $default-color;
-      background-color: $negative-color;
+      color: variables.$default-color;
+      background-color: variables.$negative-color;
     }
   }
 }

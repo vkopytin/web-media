@@ -1,3 +1,6 @@
+@use "mixins";
+@use "variables";
+
 //
 // Modals
 // --------------------------------------------------
@@ -9,13 +12,13 @@
   width: 100%;
   min-height: 100%;
   overflow: hidden;
-  background-color: $chrome-color;
+  background-color: variables.$chrome-color;
   background-image: linear-gradient( rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7) ), url("../../images/fabric-plaid.png");
   background-attachment: local;
   -webkit-transition: -webkit-transform .25s, opacity 1ms .25s;
      -moz-transition: -moz-transform .25s, opacity 1ms .25s;
           transition: transform .25s, opacity 1ms .25s;
-  @include transform(translate3d(0, 100%, 0));
+  @include mixins.transform(translate3d(0, 100%, 0));
 
   // Active modal
   &.active {
@@ -24,7 +27,7 @@
     -webkit-transition: -webkit-transform .25s;
        -moz-transition: -moz-transform .25s;
             transition: transform .25s;
-    @include transform(translate3d(0, 0, 0));
+    @include mixins.transform(translate3d(0, 0, 0));
   }
   .content {
     background: inherit;

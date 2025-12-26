@@ -1,3 +1,5 @@
+@use "mixins";
+
 //
 // Slider styles (to be used with sliders.js)
 // --------------------------------------------------
@@ -17,7 +19,7 @@
     position: relative;
     font-size: 0; // Remove spaces from inline-block children
     white-space: nowrap;
-    @include transition(all 0s linear);
+    @include mixins.transition(all 0s linear);
 
     // Individual slide
     .slide {

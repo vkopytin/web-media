@@ -3,36 +3,36 @@
 */
 
 /* Variables */
-@import "variables.scss";
+@use "variables.scss";
 
 /* Mixins */
-@import "mixins.scss";
+@use "mixins.scss";
 
 /* Normalize & Base CSS */
-@import "normalize.scss";
-@import "base.scss";
-@import "type.scss";
+@use "normalize.scss";
+@use "base.scss";
+@use "type.scss";
 
 /* Components */
-@import "buttons.scss";
-@import "bars.scss";
-@import "chips.scss";
-@import "info-list.scss";
-@import "badges.scss";
-@import "cards.scss";
-@import "table-views.scss";
-@import "forms.scss";
-@import "segmented-controls.scss";
-@import "popovers.scss";
+@use "buttons.scss";
+@use "bars.scss";
+@use "chips.scss";
+@use "info-list.scss";
+@use "badges.scss";
+@use "cards.scss";
+@use "table-views.scss";
+@use "forms.scss";
+@use "segmented-controls.scss";
+@use "popovers.scss";
 
 /* Javascript components */
-@import "modals.scss";
-@import "sliders.scss";
-@import "toggles.scss";
-@import "push.scss";
+@use "modals.scss";
+@use "sliders.scss";
+@use "toggles.scss";
+@use "push.scss";
 
 /* Ratchicons */
-@import "ratchicons.scss";
+@use "ratchicons.scss";
 
-@import "theme-ios.scss";
-@import "player.scss";
+@use "theme-ios.scss";
+@use "player.scss";
