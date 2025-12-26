@@ -183,9 +183,11 @@ export const TracksView = ({ className, currentTrackId, playlist, playlistsVm = 
                             onClick={() => bannTrackCommand.exec(item)}
                         >done</button>}
                     {item.isLiked && <span className="badge badge-positive"
+                        title="Is Liked, tap to unlike"
                         onClick={() => unlikeTrackCommand.exec(item)}
                     >{item.duration()}</span>}
                     {item.isLiked || <span className="badge"
+                        title="Is not Liked, tap to like"
                         onClick={() => likeTrackCommand.exec(item)}
                     >{item.duration()}</span>}
                 </span>
