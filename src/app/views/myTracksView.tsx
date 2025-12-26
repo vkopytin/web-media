@@ -63,8 +63,12 @@ export const MyTracksView = ({ currentTrackId, loadMore, myTrackVm = inject(MyTr
                             {myTrackVm.selectedItem !== item && <SelectPlaylistsView track={item} active={true} />}
                         </div>
                         {myTrackVm.selectedItem === item && <SelectPlaylistsView track={item} />}
-                        {item.isLiked && <span className="badge badge-positive">{item.duration()}</span>}
-                        {item.isLiked || <span className="badge">{item.duration()}</span>}
+                        {item.isLiked && <span className="badge badge-positive"
+                            title="Is Liked, tap to unlike"
+                        >{item.duration()}</span>}
+                        {item.isLiked || <span className="badge"
+                            title="Is not Liked, tap to like"
+                        >{item.duration()}</span>}
                     </div>
                     {(trackLyrics && trackLyrics.trackId === item.id())
                         && <div className="card">{trackLyrics.lyrics.split('\n').map((line, index) => {
