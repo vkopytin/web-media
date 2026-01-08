@@ -9,7 +9,7 @@ export const useServiceMonitor = <T,>(service: T): T => {
         return () => {
             Notifications.stopObserving(service, doRefresh);
         };
-    }, [service, doRefresh]);
+    }, [service]);
 
     return service;
 };
