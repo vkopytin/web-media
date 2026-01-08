@@ -90,7 +90,7 @@ export const Notifications = (function () {
         next(value: INotification) {
             const trait = GetTraits<IBindingInfo>(value.state);
             trait.callbacks.forEach(([o, cb]) => {
-                trait.observers.forEach(obj => obj === o && cb.call(obj, value.value));
+                trait.observers.forEach(obj => cb.call(obj, value.value));
             });
         },
         declare<T>(state: DynamicProperty<T>, propName: string) {
@@ -120,11 +120,11 @@ export const Notifications = (function () {
         subscribe(state: {}, view: unknown, callback: Function) {
             assert.instanceOf(state, DynamicProperty, `Wrong parameter ${state}. Should be of ${DynamicProperty.name}`);
             const { callbacks } = GetTraits<IBindingInfo>(state);
-            callbacks.push([view, callback]);
+            callbacks.push([null, callback]);
         },
         unsubscribe(state: {}, view: unknown, callback: Function) {
             assert.instanceOf(state, DynamicProperty, `Wrong parameter ${state}. Should be of ${DynamicProperty.name}`);
-            const callbacks = GetTraits<IBindingInfo>(state).callbacks.filter(([a, b]) => a !== view && callback !== b);
+            const callbacks = GetTraits<IBindingInfo>(state).callbacks.filter(([a, b]) => callback !== b);
             GetTraits<IBindingInfo>(state, false).callbacks = callbacks;
         },
     };
@@ -216,6 +216,7 @@ export function Binding<T, R>(path: (a: T) => R, bindableProperty: keyof R, opti
                 options?.didSet?.call(this, this, value);
             });
             didSetCb && Notifications.subscribe(state, this, didSetCb);
+            Notifications.attach(state, obj);
 
             Object.defineProperty(this, propName, {
                 get() {

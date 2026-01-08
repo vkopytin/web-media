@@ -1,7 +1,6 @@
 import { useServiceMonitor } from 'app/hooks';
 import { PlaylistsService } from 'app/service';
-import { useEffect, useMemo, useReducer } from 'react';
-import { Notifications } from '../utils';
+import { useMemo } from 'react';
 import { inject } from '../utils/inject';
 import { PlaylistsViewModel, PlaylistsViewModelItem } from '../viewModels';
 import { TracksView } from '../views/tracksView';
