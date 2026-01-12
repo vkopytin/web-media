@@ -187,7 +187,7 @@ export function Binding<T, R>(path: (a: T) => R, bindableProperty: keyof R, opti
         function initBinding(this: T, v?: unknown): DynamicProperty<unknown> {
             const obj = path(this);
             const propInfo: IPropertyInfo<unknown> = Notifications.GetTraits(obj as {});
-            if (!propInfo[`${String(bindableProperty)}`]) {
+            if (!propInfo[String(bindableProperty)]) {
                 Notifications.initBindingMetadata(obj as {});
             }
             const state = propInfo[String(bindableProperty)];
@@ -195,7 +195,7 @@ export function Binding<T, R>(path: (a: T) => R, bindableProperty: keyof R, opti
             const traits: IPropertyInfo<unknown> = Notifications.hasTraits(this) ? Notifications.GetTraits(this as {})
                 : Notifications.GetTraits(this as {}, {});
             if (traits[propName] && traits[propName] !== state) {
-                throw new Error(`The binding is alreayd defined on the object with property ${propName}`);
+                throw new Error(`The binding is already defined on the object with property ${propName}`);
             }
             traits[propName] = state;
 
