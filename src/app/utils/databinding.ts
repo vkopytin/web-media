@@ -100,12 +100,6 @@ export const Notifications = (function () {
                 observers: [],
                 propName
             });
-            state.subscribe(value => {
-                Notifications.next({
-                    state,
-                    value,
-                });
-            });
         },
         attach(state: {}, obj: unknown) {
             assert.instanceOf(state, DynamicProperty, `Wrong parameter ${state}. Should be of ${DynamicProperty.name}`);
@@ -131,28 +125,21 @@ export const Notifications = (function () {
 })();
 
 class DynamicProperty<T> {
-    private subscribers: Array<(v: T) => void> = [];
-
-    constructor(public value: T, public get = () => this.value, public set = (val: T) => this.value = val) {
-
-    }
+    constructor(
+        public value: T,
+        public get = () => this.value,
+        public set = (val: T) => this.value = val
+    ) { }
 
     getValue() {
         return this.get();
     }
 
-    subscribe(a: (v: unknown) => void) {
-        this.subscribers.push(a);
-    }
-
     next(v: T) {
         this.set(v);
-        this.subscribers.forEach(s => {
-            try {
-                s(v);
-            } catch (ex) {
-                console.error('Unexpected error', ex);
-            }
+        Notifications.next({
+            state: this,
+            value: v,
         });
     }
 }
@@ -185,8 +172,8 @@ export function State<T>(target: T, propName: string, descriptor?: PropertyDescr
     }
 
     const opts = {
-        get: initState,
-        set: initState,
+        get: function (this: T) { return initState.call(this).get(); },
+        set: function (this: T, v: unknown) { initState.call(this).next(v); },
         enumerable: true,
         configurable: true
     };
