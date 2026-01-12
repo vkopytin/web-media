@@ -5,9 +5,10 @@ export const useServiceMonitor = <T,>(service: T): T => {
     const [, doRefresh] = useReducer(() => ({}), {});
 
     useEffect(() => {
-        Notifications.observe(service, doRefresh);
+        const doRefreshCallback = () => doRefresh();
+        Notifications.observe(service, doRefreshCallback);
         return () => {
-            Notifications.stopObserving(service, doRefresh);
+            Notifications.stopObserving(service, doRefreshCallback);
         };
     }, [service]);
 

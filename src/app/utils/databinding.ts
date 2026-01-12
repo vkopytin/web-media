@@ -18,7 +18,7 @@ interface INotification {
 
 interface IBindingInfo {
     propName: string;
-    callbacks: Array<[unknown, Function]>;
+    callbacks: Array<Function>;
     observers: Array<unknown>;
 }
 
@@ -72,7 +72,7 @@ export const Notifications = (function () {
                     return;
                 }
                 Notifications.attach(objTraits[key], obj);
-                Notifications.subscribe(objTraits[key], obj, callback);
+                Notifications.subscribe(objTraits[key], callback);
             });
         },
         stopObserving(obj: unknown, callback: Function) {
@@ -84,12 +84,12 @@ export const Notifications = (function () {
                     return;
                 }
                 Notifications.detach(objTraits[key], obj);
-                Notifications.unsubscribe(objTraits[key], obj, callback);
+                Notifications.unsubscribe(objTraits[key], callback);
             });
         },
         next(value: INotification) {
             const trait = GetTraits<IBindingInfo>(value.state);
-            trait.callbacks.forEach(([o, cb]) => {
+            trait.callbacks.forEach(cb => {
                 trait.observers.forEach(obj => cb.call(obj, value.value));
             });
         },
@@ -111,14 +111,14 @@ export const Notifications = (function () {
             const observers = GetTraits<IBindingInfo>(state).observers.filter(o => o !== obj);
             GetTraits<IBindingInfo>(state).observers = observers;
         },
-        subscribe(state: {}, view: unknown, callback: Function) {
+        subscribe(state: {}, callback: Function) {
             assert.instanceOf(state, DynamicProperty, `Wrong parameter ${state}. Should be of ${DynamicProperty.name}`);
             const { callbacks } = GetTraits<IBindingInfo>(state);
-            callbacks.push([null, callback]);
+            callbacks.push(callback);
         },
-        unsubscribe(state: {}, view: unknown, callback: Function) {
+        unsubscribe(state: {}, callback: Function) {
             assert.instanceOf(state, DynamicProperty, `Wrong parameter ${state}. Should be of ${DynamicProperty.name}`);
-            const callbacks = GetTraits<IBindingInfo>(state).callbacks.filter(([a, b]) => callback !== b);
+            const callbacks = GetTraits<IBindingInfo>(state).callbacks.filter(cb => callback !== cb);
             GetTraits<IBindingInfo>(state, false).callbacks = callbacks;
         },
     };
@@ -202,7 +202,7 @@ export function Binding<T, R>(path: (a: T) => R, bindableProperty: keyof R, opti
             const didSetCb = options?.didSet && ((value: T[keyof T]) => {
                 options?.didSet?.call(this, this, value);
             });
-            didSetCb && Notifications.subscribe(state, this, didSetCb);
+            didSetCb && Notifications.subscribe(state, didSetCb);
             Notifications.attach(state, obj);
 
             Object.defineProperty(this, propName, {
@@ -302,7 +302,7 @@ export function BindingV2<T>({ didSet }: { didSet?: (this: T, view: T, val: any)
             const didSetCb = didSet && ((value: T[keyof T]) => {
                 didSet.call(this, this, value);
             });
-            didSetCb && Notifications.subscribe(state, this, didSetCb);
+            didSetCb && Notifications.subscribe(state, didSetCb);
             Object.defineProperty(this, `${propName}$`, {
                 get() {
                     return state;
@@ -312,9 +312,9 @@ export function BindingV2<T>({ didSet }: { didSet?: (this: T, view: T, val: any)
                         throw new Error('Please, provide BehaviorSubject');
                     }
                     if (v$ !== state) {
-                        didSetCb && Notifications.unsubscribe(state, this, didSetCb);
+                        didSetCb && Notifications.unsubscribe(state, didSetCb);
                         state = v$;
-                        didSetCb && Notifications.subscribe(state, this, didSetCb);
+                        didSetCb && Notifications.subscribe(state, didSetCb);
                     }
                 },
                 enumerable: true,
