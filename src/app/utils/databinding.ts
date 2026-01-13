@@ -90,7 +90,11 @@ export const Notifications = (function () {
         next(value: INotification) {
             const trait = GetTraits<IBindingInfo>(value.state);
             trait.callbacks.forEach(cb => {
-                trait.observers.forEach(obj => cb.call(obj, value.value));
+                trait.observers.forEach((obj, index) => {
+                    if (index === trait.callbacks.indexOf(cb)) {
+                        cb.call(obj, value.value);
+                    }
+                });
             });
         },
         declare<T>(state: DynamicProperty<T>, propName: string) {
@@ -109,7 +113,10 @@ export const Notifications = (function () {
         detach(state: {}, obj: unknown) {
             assert.instanceOf(state, DynamicProperty, `Wrong parameter ${state}. Should be of ${DynamicProperty.name}`);
             const observers = GetTraits<IBindingInfo>(state).observers.filter(o => o !== obj);
-            GetTraits<IBindingInfo>(state).observers = observers;
+            const index = observers.indexOf(obj);
+            if (index >= 0) {
+                observers.splice(index, 1);
+            }
         },
         subscribe(state: {}, callback: Function) {
             assert.instanceOf(state, DynamicProperty, `Wrong parameter ${state}. Should be of ${DynamicProperty.name}`);
@@ -119,7 +126,10 @@ export const Notifications = (function () {
         unsubscribe(state: {}, callback: Function) {
             assert.instanceOf(state, DynamicProperty, `Wrong parameter ${state}. Should be of ${DynamicProperty.name}`);
             const callbacks = GetTraits<IBindingInfo>(state).callbacks.filter(cb => callback !== cb);
-            GetTraits<IBindingInfo>(state, false).callbacks = callbacks;
+            const index = callbacks.indexOf(callback);
+            if (index >= 0) {
+                callbacks.splice(index, 1);
+            }
         },
     };
 })();
@@ -203,7 +213,6 @@ export function Binding<T, R>(path: (a: T) => R, bindableProperty: keyof R, opti
                 options?.didSet?.call(this, this, value);
             });
             didSetCb && Notifications.subscribe(state, didSetCb);
-            Notifications.attach(state, obj);
 
             Object.defineProperty(this, propName, {
                 get() {
