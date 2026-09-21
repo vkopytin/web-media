@@ -18,7 +18,7 @@ Most state management tools fail by creating deep, fragile object hierarchies lo
 ## 2. THE THREE-STEP ARCHITECTURAL CHECKLIST
 Every feature or tool generated under this specification must explicitly complete these three phases in strict order:
 
-* **[Phase 1] Coordinate Taxonomy Definition:** Map the absolute paths first. Never create nested JSON structures inside local contexts.
+* **[Phase 1] Coordinate Taxonomy Definition:** Map the absolute paths first. Never create nested JSON schemas inside local contexts.
 * **[Phase 2] Property Interception Attachment:** Bind the local context field names directly to those absolute global paths via explicit property descriptors.
 * **[Phase 3] Agnostic Redraw Binding:** Bind the view's rendering lifecycle directly to the object container using a detached global monitor method. The view must only catch the refresh execution circle.
 
@@ -135,7 +135,77 @@ export function monitorViewModel(viewModel: any, onRedraw: RedrawCallback): Unsu
 
 ---
 
-## 4. DESIGN RULES & WRONG MOVES TO AVOID (STRICT CONSTRAINTS)
+## 4. COMPLETE REFERENCE USAGE EXAMPLE
+This example demonstrates a complete Model, View Model, and View implementation using pure object configurations. It showcases separate code paths updating a unified coordinate space and triggering clean UI render cycles.
+
+```typescript
+// ==========================================
+// 1. VIEW MODEL DEFINITION (Plain Object Container)
+// ==========================================
+class UserProfileViewModel {
+    public userName!: string;
+    public isOnline!: boolean;
+
+    constructor() {
+        // Wire fields dynamically to coordinates inside the constructor
+        // format: attachProperty(instance, fieldName, absoluteCoordinate, fallbackValue)
+        attachProperty(this, 'userName', 'user.session.name', 'Guest');
+        attachProperty(this, 'isOnline', 'user.session.status', false);
+    }
+}
+
+// ==========================================
+// 2. VIEW COMPONENT DEFINITION (Pure Redraw Loop)
+// ==========================================
+class HeaderComponentView {
+    private vm = new UserProfileViewModel();
+    private stopMonitoring: UnsubscribeFunction | null = null;
+
+    public init() {
+        // Use the separate standalone method to hook the entire model to the view
+        this.stopMonitoring = monitorViewModel(this.vm, () => this.redraw());
+        
+        // Execute initial render immediately
+        this.redraw(); 
+    }
+
+    private redraw() {
+        // Logic-free painting block. The view only catches the event and reflects the data.
+        console.log(`[UI REDRAW LOOP] User -> "${this.vm.userName}" | Online -> ${this.vm.isOnline}`);
+    }
+
+    public destroy() {
+        // Critical clean-up token removes memory leaks from the global pool when view unmounts
+        if (this.stopMonitoring) {
+            this.stopMonitoring();
+        }
+    }
+}
+
+// ==========================================
+// 3. RUNTIME VERIFICATION EXECUTION
+// ==========================================
+
+// Spin up a view instance and initialize it
+const headerView = new HeaderComponentView();
+headerView.init(); // Output: [UI REDRAW LOOP] User -> "Guest" | Online -> false
+
+// Spin up a completely separate controller instance targeting the identical View Model
+const controllerVM = new UserProfileViewModel();
+
+console.log("\n--- Triggering Native Property Assignment Mutations ---");
+
+// Mutating a field triggers an interception execution straight to the central coordinate pool
+controllerVM.userName = "Alex Smith"; // Output: [UI REDRAW LOOP] User -> "Alex Smith" | Online -> false
+controllerVM.isOnline = true;         // Output: [UI REDRAW LOOP] User -> "Alex Smith" | Online -> true
+
+console.log("\n--- Unmounting and Disconnecting View ---");
+headerView.destroy();
+```
+
+---
+
+## 5. DESIGN RULES & WRONG MOVES TO AVOID (STRICT CONSTRAINTS)
 * **CRITICAL ERROR - NO DEEP DATA TREES:** Do not create nested JSON schemas or tree traversals. If an object is passed, it should be treated as an immutable value block located at a unique coordinate string.
 * **CRITICAL ERROR - NO LOGIC LEAKS IN VIEWS:** The callback function provided to `monitorViewModel` must execute a redraw, paint, or render command only. Transforming raw data or sorting structures within the view subscription is completely forbidden.
 * **CRITICAL ERROR - NO INHERITANCE LOCK-IN:** Do not extend base classes or use decorators that hide compilation parameters. View Models must be simple plain objects or cleanly constructed classes that use `attachProperty`.
@@ -143,7 +213,7 @@ export function monitorViewModel(viewModel: any, onRedraw: RedrawCallback): Unsu
 
 ---
 
-## 5. PROMPT TEMPLATE FOR AI DEVELOPMENT (CURSOR / CODEX)
+## 6. PROMPT TEMPLATE FOR AI DEVELOPMENT (CURSOR / CODEX)
 When using an AI assistant to build out features using this architecture, copy and paste the following prompt verbatim:
 
 ```text
