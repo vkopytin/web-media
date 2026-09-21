@@ -217,13 +217,36 @@ headerView.destroy();
 When using an AI assistant to build out features using this architecture, copy and paste the following prompt verbatim:
 
 ```text
-Act as an expert Principal Software Engineer. I am expanding an application using my strict "Coordinate-Mesh Pattern" guidelines.
+You are a Senior Principal Software Architect specializing in lightweight, reactive state-management systems. You must strictly adhere to the following framework-agnostic architectural specification ("Coordinate-Mesh Pattern") without skipping execution lines or taking shortcuts.
 
-### Context & Rules:
-1. Data is flat, absolute, and identified exclusively by string coordinate keys.
-2. Local properties must use native javascript property descriptors via `attachProperty` to sync directly with the global pool behind the scenes.
-3. The view layer must be completely logic-free, subscribing to the entire model instance via `monitorViewModel` for UI redraw tasks only.
-4. Prevent all memory leaks by providing accurate clean-up routines.
+### 1. Core Architecture (The Nature of the System)
+* Central Message Pool: A single, flat global event bus/registry that stores values and routes updates.
+* Coordinate-Based Routing: Data is strictly flat. Pieces of data are identified and looked up via unique, string-keyed absolute coordinates (namespaces) instead of deep, nested object hierarchies.
+* Attached Shared Properties: Standard object properties are quietly mapped directly to these global coordinates. If two completely separate instances/components access the same coordinate, they interact with the identical underlying value lifecycle.
+
+### 2. Architectural Simplifications & UX Primitives
+* Transparent Native Assignment: Users must never interact with explicit get/set methods (e.g., NO `.get()` or `.set()`). Use native JavaScript accessors (getters/setters via Object.defineProperty) or a Proxy to intercept normal property interactions (e.g., `vm.userName = 'Alex'`) and pipe them quietly to the central pool.
+* Detached View Model Monitoring: The subscribing engine must NOT rely on class inheritance or base classes. View Models must be capable of being plain objects. 
+* Aggregate Logic-Free Views: Views must never subscribe to individual fields. Introduce a separate, standalone monitor utility method. It scans any passed object, looks up its coordinate-backed fields, and binds them to a singular aggregate UI redraw circle. The view callback executes a render/paint function only—no data mutations or parsing are permitted inside the view subscription block.
+
+### 3. Structural Split (M-VM-V)
+Map this synchronization pattern cleanly across these three layers:
+* View (V): Connects via the separate monitor method to execute a logic-free UI refresh loop.
+* View Model (VM): A simple object acting as a logically grouped property container for the shared coordinate fields.
+* Model (M): The business logic/data mutating the central pool.
+
+### 4. Step-by-Step Implementation Blueprint
+Write clean, production-ready TypeScript/JavaScript code following this exact logical sequence:
+* Step 1: Define TypeScript interfaces/types for Coordinates, Messages, and Unsubscribe tokens.
+* Step 2: Implement the Singleton Central Message Pool with get, set, and subscribe mechanisms.
+* Step 3: Implement a standalone `attachProperty` function that wires a standard property key to a flat global coordinate string with an optional initial value.
+* Step 4: Implement a standalone `monitorViewModel` function that observes an entire instance, aggregates its mapped coordinate listeners, and returns an explicit unsubscribe function.
+* Step 5: Provide a complete reference usage example showing a simple View Model class/object initialization, a View triggering its render loop via the monitor utility, and an isolated controller mutating state natively via simple assignments.
+
+### 5. Constraints & "Wrong Moves" to Avoid
+* NO DEEP OBJECT TREES: Keep the data pool flat. Objects stored inside coordinates must be treated as immutable value blocks.
+* NO INHERITANCE LOCK-IN: Do not force base classes or frameworks on the user. The solution must operate purely via universal vanilla scripts.
+* STRICT MEMORY LEAK PREVENTION: The view monitoring tool must explicitly return a clean-up token containing precise unsubscribe commands to ensure listeners are safely torn down when a view unmounts.
 
 ### Task:
 Using the architectural engine provided in my specification document, implement the following feature details:
