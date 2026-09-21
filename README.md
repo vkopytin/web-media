@@ -64,6 +64,8 @@ Let's set the following agreement. Just two rules.
 Single source of truth would help to prevent a desynchronised state.
 The UI update notification would force UI to redraw. Which is just to read all data from provided properties.
 
+Here is the refined concept for to add as a skill for AI in the form of specification [Coordinate Mesh Spec](coordinate-mesh-specification.md)
+
 ## Data selectors and commands
 There is another smaller but yet important separation. Such an approach helps to comprehend data synchronisation issues.
 Similar to data binding there is agreement to split state synchronisation on two big tasks: read and write. Reading state
